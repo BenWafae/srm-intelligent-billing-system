@@ -1,6 +1,6 @@
 import streamlit as st
-from pdf_reader import extraire_texte
-from llm import poser_question
+from src.pdf_reader import extraire_texte  # <-- modification ici
+from src.llm import poser_question         # <-- modification ici
 
 st.title("Chatbot SRM — Analyse de Factures")
 st.write("Uploadez votre facture PDF et posez vos questions.")
