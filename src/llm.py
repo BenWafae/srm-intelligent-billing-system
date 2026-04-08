@@ -1,25 +1,30 @@
-import google.generativeai as genai
-import os
-from dotenv import load_dotenv
-#  lit le fichier .env et charge ta clé Gemini
-load_dotenv() 
+import requests
 
-# connecte le script à l'API Gemini avec la clé
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-#  choisit le modèle Gemini gratuit et rapide
-model = genai.GenerativeModel("gemini-2.0-flash")
-# construit le prompt avec le texte de la facture 
-# + la question, envoie à Gemini, et retourne la réponse
-def poser_question(texte_facture, question):
-    prompt = f"""
-Tu es un assistant intelligent qui analyse des factures d'eau et d'électricité de la SRM Souss-Massa.
+def poser_question(texte_facture: str, question: str) -> str:
+    prompt = f"""Tu es un assistant intelligent spécialisé dans l'analyse de factures SRM (eau et électricité).
 
-Voici le contenu de la facture :
+Voici le contenu d'une facture :
 {texte_facture}
 
 Question du client : {question}
 
-Réponds de manière claire et précise en te basant uniquement sur la facture.
+Réponds de façon claire et précise en français, en te basant uniquement sur les informations de la facture.
 """
-    reponse = model.generate_content(prompt)
-    return reponse.text
+
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "mistral",
+            "prompt": prompt,
+            "stream": False
+        }
+    )
+
+    return response.json()["response"]
+
+
+# -------- TEST --------
+if __name__ == "__main__":
+    texte_test = "Client : Ahmed Alami | Consommation : 901 kWh | Montant TTC : 30 627,46 Dhs"
+    question_test = "Quel est le montant à payer ?"
+    print(poser_question(texte_test, question_test))
