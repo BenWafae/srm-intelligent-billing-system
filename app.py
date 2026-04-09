@@ -1,28 +1,20 @@
-# pipline de mon app:
-# Usert=>Upload pdf => exttraction text=> extraction ds infos importants=>sauvgard db=> chatbot llm=>Response
-
-
-
+# pipeline de mon app:
+# User => Upload pdf => extraction text => extraction infos importants => sauvegard db => chatbot llm => Response
 
 import streamlit as st
-# sys & os pour gerer ls chemuns des fichiers
 import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
-# pdfreader lire le fihcierr et extraire son contenue 
+
 from src.pdf_reader import extraire_texte
-# llm chatbot llm dans notre cas c ollama
 from src.llm import poser_question
-# extractor trouve les infos importante dans le pdf
 from src.extractor import extraire_infos_facture
-# databaase souvegard dans db
 from src.database import init_db, enregistrer_facture
 
 # Initialiser la base de données
 init_db()
 
-# sst.session-state jai lajouter caar streamlite recharge la page a toute action donc session state pour  memorise ls donnees
 # Initialiser session state
 if "texte_facture" not in st.session_state:
     st.session_state.texte_facture = None
@@ -32,6 +24,8 @@ if "message_sauvegarde" not in st.session_state:
     st.session_state.message_sauvegarde = ""
 if "fichier_nom" not in st.session_state:
     st.session_state.fichier_nom = None
+if "historique" not in st.session_state:
+    st.session_state.historique = []
 
 st.title("🤖 Chatbot SRM — Analyse de Factures")
 st.write("Uploadez votre facture PDF et posez vos questions.")
@@ -43,6 +37,7 @@ if fichier:
     if fichier.name != st.session_state.fichier_nom:
         st.session_state.fichier_nom = fichier.name
         st.session_state.facture_sauvegardee = False
+        st.session_state.historique = []  # Reset historique pour nouvelle facture
 
         with open("facture_temp.pdf", "wb") as f:
             f.write(fichier.read())
@@ -69,14 +64,30 @@ if fichier:
         else:
             st.warning(st.session_state.message_sauvegarde)
 
-    # Partie question-réponse
+    # Partie question-réponse avec historique
     st.markdown("---")
     st.markdown("### 💬 Posez vos questions sur la facture")
-    question = st.text_input("Votre question :")
+
+    # Afficher historique conversation
+    for msg in st.session_state.historique:
+        if msg["role"] == "user":
+            st.chat_message("user").write(msg["content"])
+        else:
+            st.chat_message("assistant").write(msg["content"])
+
+    # Input question
+    question = st.chat_input("Votre question sur la facture...")
 
     if question and st.session_state.texte_facture:
+        st.session_state.historique.append({"role": "user", "content": question})
+        st.chat_message("user").write(question)
+
         with st.spinner("⏳ Analyse en cours..."):
-            reponse = poser_question(st.session_state.texte_facture, question)
-        st.markdown("**Réponse :**")
-        st.write(reponse)
-     
+            reponse = poser_question(
+                st.session_state.texte_facture,
+                question,
+                st.session_state.historique
+            )
+
+        st.session_state.historique.append({"role": "assistant", "content": reponse})
+        st.chat_message("assistant").write(reponse)

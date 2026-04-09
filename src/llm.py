@@ -1,14 +1,24 @@
 import requests
 
-def poser_question(texte_facture: str, question: str) -> str:
+def poser_question(texte_facture: str, question: str, historique: list = []) -> str:
+    
+    # Construire l'historique en texte
+    historique_texte = ""
+    for msg in historique[:-1]:  # Exclure la dernière question déjà dans le prompt
+        role = "Client" if msg["role"] == "user" else "Assistant"
+        historique_texte += f"{role}: {msg['content']}\n"
+
     prompt = f"""Tu es un assistant intelligent spécialisé dans l'analyse de factures SRM (eau et électricité).
 
-Voici le contenu d'une facture :
+Voici le contenu de la facture :
 {texte_facture}
 
-Question du client : {question}
+Historique de la conversation :
+{historique_texte}
 
-Réponds de façon claire et précise en français, en te basant uniquement sur les informations de la facture.
+Nouvelle question du client : {question}
+
+Réponds de façon claire et précise en français, en tenant compte du contexte de la conversation.
 """
 
     response = requests.post(
