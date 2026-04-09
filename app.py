@@ -26,6 +26,8 @@ if "fichier_nom" not in st.session_state:
     st.session_state.fichier_nom = None
 if "historique" not in st.session_state:
     st.session_state.historique = []
+if "infos_facture" not in st.session_state:
+    st.session_state.infos_facture = None
 
 st.title("🤖 Chatbot SRM — Analyse de Factures")
 st.write("Uploadez votre facture PDF et posez vos questions.")
@@ -37,7 +39,8 @@ if fichier:
     if fichier.name != st.session_state.fichier_nom:
         st.session_state.fichier_nom = fichier.name
         st.session_state.facture_sauvegardee = False
-        st.session_state.historique = []  # Reset historique pour nouvelle facture
+        st.session_state.historique = []
+        st.session_state.infos_facture = None
 
         with open("facture_temp.pdf", "wb") as f:
             f.write(fichier.read())
@@ -48,6 +51,7 @@ if fichier:
         with st.spinner("📊 Extraction et sauvegarde des données..."):
             infos = extraire_infos_facture(st.session_state.texte_facture)
             if infos:
+                st.session_state.infos_facture = infos
                 saved = enregistrer_facture(infos)
                 if saved:
                     st.session_state.message_sauvegarde = f"💾 Nouvelle facture sauvegardée — Client : {infos.get('nom_client', 'Inconnu')} | Montant : {infos.get('montant_total_ttc')} Dhs"
@@ -63,6 +67,23 @@ if fichier:
             st.info(st.session_state.message_sauvegarde)
         else:
             st.warning(st.session_state.message_sauvegarde)
+
+    # Résumé automatique visuel
+    if st.session_state.infos_facture:
+        infos = st.session_state.infos_facture
+        st.markdown("---")
+        st.markdown("### 📋 Résumé de votre facture")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("👤 Client", infos.get("nom_client") or "—")
+            st.metric("🔌 Service", infos.get("type_service") or "—")
+        with col2:
+            unite = "kWh" if infos.get("type_service") == "electricite" else "m³"
+            st.metric("⚡ Consommation", f"{infos.get('consommation') or '—'} {unite}")
+            st.metric("📅 Période", f"{infos.get('periode_debut')} → {infos.get('periode_fin')}")
+        with col3:
+            st.metric("💰 Montant TTC", f"{infos.get('montant_total_ttc')} Dhs")
+            st.metric("⏰ Date limite", infos.get("date_limite_paiement") or "—")
 
     # Partie question-réponse avec historique
     st.markdown("---")
