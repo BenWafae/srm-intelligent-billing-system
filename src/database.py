@@ -30,6 +30,23 @@ def init_db():
 def enregistrer_facture(donnees: dict):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+    
+    # Vérifier si la facture existe déjà
+    cursor.execute("""
+        SELECT id FROM factures 
+        WHERE numero_client = ? AND periode_debut = ? AND periode_fin = ?
+    """, (
+        donnees.get("numero_client"),
+        donnees.get("periode_debut"),
+        donnees.get("periode_fin")
+    ))
+    
+    existant = cursor.fetchone()
+    
+    if existant:
+        conn.close()
+        return False  # Facture déjà enregistrée
+    
     cursor.execute("""
         INSERT INTO factures (
             numero_client, numero_contrat, nom_client, adresse,
@@ -52,6 +69,7 @@ def enregistrer_facture(donnees: dict):
     ))
     conn.commit()
     conn.close()
+    return True  # Nouvelle facture enregistrée
 
 def get_all_factures():
     conn = sqlite3.connect(DB_PATH)
