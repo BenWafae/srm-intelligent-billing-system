@@ -1,5 +1,6 @@
-# pipeline de mon app:
-# User => Upload pdf => extraction text => extraction infos importants => sauvegard db => chatbot llm => Response
+# pipeline complet :
+# Mode PDF  : User => Upload PDF => extraction texte => extraction infos => sauvegarde BD => chatbot LLM => Réponse
+# Mode Excel: User => Upload Excel => lecture pandas => sauvegarde BD => RAG (détection client + recherche BD) => LLM => Réponse
 
 import streamlit as st
 import sys
@@ -8,14 +9,17 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 
 from src.pdf_reader import extraire_texte
-from src.llm import poser_question
+from src.llm import poser_question, poser_question_excel
 from src.extractor import extraire_infos_facture
-from src.database import init_db, enregistrer_facture
+from src.database import init_db, enregistrer_facture, importer_excel_en_db, get_resume_excel
+from src.excel_reader import lire_excel
 
 # Initialiser la base de données
 init_db()
 
-# Initialiser session state
+# ─────────────────────────────────────────────────────────
+#  SESSION STATE — PDF (existant, inchangé)
+# ─────────────────────────────────────────────────────────
 if "texte_facture" not in st.session_state:
     st.session_state.texte_facture = None
 if "facture_sauvegardee" not in st.session_state:
@@ -29,86 +33,173 @@ if "historique" not in st.session_state:
 if "infos_facture" not in st.session_state:
     st.session_state.infos_facture = None
 
-st.title("🤖 Chatbot SRM — Analyse de Factures")
-st.write("Uploadez votre facture PDF et posez vos questions.")
+# ─────────────────────────────────────────────────────────
+#  SESSION STATE — Excel (nouveau)
+# ─────────────────────────────────────────────────────────
+if "historique_excel" not in st.session_state:
+    st.session_state.historique_excel = []
 
-fichier = st.file_uploader("Choisir une facture PDF", type="pdf")
+# ─────────────────────────────────────────────────────────
+#  TITRE + ONGLETS
+# ─────────────────────────────────────────────────────────
+st.title("🤖 Assistant SRM — Gestion Intelligente des Factures")
 
-if fichier:
-    # Traiter uniquement si c'est un nouveau fichier
-    if fichier.name != st.session_state.fichier_nom:
-        st.session_state.fichier_nom = fichier.name
-        st.session_state.facture_sauvegardee = False
-        st.session_state.historique = []
-        st.session_state.infos_facture = None
+onglet_pdf, onglet_excel = st.tabs(["📄 Analyse de facture PDF", "📊 Base clients Excel"])
 
-        with open("facture_temp.pdf", "wb") as f:
-            f.write(fichier.read())
+# ═════════════════════════════════════════════════════════
+#  ONGLET 1 — PDF (code existant, inchangé)
+# ═════════════════════════════════════════════════════════
+with onglet_pdf:
 
-        st.session_state.texte_facture = extraire_texte("facture_temp.pdf")
+    st.write("Uploadez votre facture PDF et posez vos questions.")
+    fichier = st.file_uploader("Choisir une facture PDF", type="pdf")
 
-        # Extraction et sauvegarde une seule fois
-        with st.spinner("📊 Extraction et sauvegarde des données..."):
-            infos = extraire_infos_facture(st.session_state.texte_facture)
-            if infos:
-                st.session_state.infos_facture = infos
-                saved = enregistrer_facture(infos)
-                if saved:
-                    st.session_state.message_sauvegarde = f"💾 Nouvelle facture sauvegardée — Client : {infos.get('nom_client', 'Inconnu')} | Montant : {infos.get('montant_total_ttc')} Dhs"
-                else:
-                    st.session_state.message_sauvegarde = "⚠️ Cette facture est déjà enregistrée dans la base de données."
-                st.session_state.facture_sauvegardee = True
+    if fichier:
+        if fichier.name != st.session_state.fichier_nom:
+            st.session_state.fichier_nom = fichier.name
+            st.session_state.facture_sauvegardee = False
+            st.session_state.historique = []
+            st.session_state.infos_facture = None
 
-    st.success("✅ Facture chargée avec succès !")
+            with open("facture_temp.pdf", "wb") as f:
+                f.write(fichier.read())
 
-    # Afficher message sauvegarde
-    if st.session_state.message_sauvegarde:
-        if "Nouvelle" in st.session_state.message_sauvegarde:
-            st.info(st.session_state.message_sauvegarde)
-        else:
-            st.warning(st.session_state.message_sauvegarde)
+            st.session_state.texte_facture = extraire_texte("facture_temp.pdf")
 
-    # Résumé automatique visuel
-    if st.session_state.infos_facture:
-        infos = st.session_state.infos_facture
+            with st.spinner("📊 Extraction et sauvegarde des données..."):
+                infos = extraire_infos_facture(st.session_state.texte_facture)
+                if infos:
+                    st.session_state.infos_facture = infos
+                    saved = enregistrer_facture(infos)
+                    if saved:
+                        st.session_state.message_sauvegarde = f"💾 Nouvelle facture sauvegardée — Client : {infos.get('nom_client', 'Inconnu')} | Montant : {infos.get('montant_total_ttc')} Dhs"
+                    else:
+                        st.session_state.message_sauvegarde = "⚠️ Cette facture est déjà enregistrée dans la base de données."
+                    st.session_state.facture_sauvegardee = True
+
+        st.success("✅ Facture chargée avec succès !")
+
+        if st.session_state.message_sauvegarde:
+            if "Nouvelle" in st.session_state.message_sauvegarde:
+                st.info(st.session_state.message_sauvegarde)
+            else:
+                st.warning(st.session_state.message_sauvegarde)
+
+        if st.session_state.infos_facture:
+            infos = st.session_state.infos_facture
+            st.markdown("---")
+            st.markdown("### 📋 Résumé de votre facture")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("👤 Client", infos.get("nom_client") or "—")
+                st.metric("🔌 Service", infos.get("type_service") or "—")
+            with col2:
+                unite = "kWh" if infos.get("type_service") == "electricite" else "m³"
+                st.metric("⚡ Consommation", f"{infos.get('consommation') or '—'} {unite}")
+                st.metric("📅 Période", f"{infos.get('periode_debut')} → {infos.get('periode_fin')}")
+            with col3:
+                st.metric("💰 Montant TTC", f"{infos.get('montant_total_ttc')} Dhs")
+                st.metric("⏰ Date limite", infos.get("date_limite_paiement") or "—")
+
         st.markdown("---")
-        st.markdown("### 📋 Résumé de votre facture")
-        col1, col2, col3 = st.columns(3)
+        st.markdown("### 💬 Posez vos questions sur la facture")
+
+        for msg in st.session_state.historique:
+            if msg["role"] == "user":
+                st.chat_message("user").write(msg["content"])
+            else:
+                st.chat_message("assistant").write(msg["content"])
+
+        question = st.chat_input("Votre question sur la facture...")
+
+        if question and st.session_state.texte_facture:
+            st.session_state.historique.append({"role": "user", "content": question})
+            st.chat_message("user").write(question)
+
+            with st.spinner("⏳ Analyse en cours..."):
+                reponse = poser_question(
+                    st.session_state.texte_facture,
+                    question,
+                    st.session_state.historique
+                )
+
+            st.session_state.historique.append({"role": "assistant", "content": reponse})
+            st.chat_message("assistant").write(reponse)
+
+
+# ═════════════════════════════════════════════════════════
+#  ONGLET 2 — Excel (nouveau)
+# ═════════════════════════════════════════════════════════
+with onglet_excel:
+
+    # --- Résumé de ce qui est déjà en BD ---
+    resume = get_resume_excel()
+
+    if resume["total"] > 0:
+        st.success(f"✅ Base active — {resume['total']} factures | {len(resume['clients'])} clients | {len(resume['periodes'])} périodes")
+
+        col1, col2 = st.columns(2)
         with col1:
-            st.metric("👤 Client", infos.get("nom_client") or "—")
-            st.metric("🔌 Service", infos.get("type_service") or "—")
+            with st.expander("👥 Clients disponibles"):
+                for client in resume["clients"]:
+                    st.write(f"• {client}")
         with col2:
-            unite = "kWh" if infos.get("type_service") == "electricite" else "m³"
-            st.metric("⚡ Consommation", f"{infos.get('consommation') or '—'} {unite}")
-            st.metric("📅 Période", f"{infos.get('periode_debut')} → {infos.get('periode_fin')}")
-        with col3:
-            st.metric("💰 Montant TTC", f"{infos.get('montant_total_ttc')} Dhs")
-            st.metric("⏰ Date limite", infos.get("date_limite_paiement") or "—")
+            with st.expander("📅 Périodes couvertes"):
+                for periode in resume["periodes"]:
+                    st.write(f"• {periode}")
+    else:
+        st.info("ℹ️ Aucune donnée en base. Importez un fichier Excel pour commencer.")
 
-    # Partie question-réponse avec historique
+    # --- Zone import Excel ---
+    st.markdown("### 📥 Importer un fichier Excel")
+    fichier_excel = st.file_uploader("Choisir un fichier Excel (.xlsx)", type=["xlsx"])
+
+    if fichier_excel:
+        chemin_temp = "excel_temp.xlsx"
+        with open(chemin_temp, "wb") as f:
+            f.write(fichier_excel.read())
+
+        try:
+            with st.spinner("📊 Lecture et import en base de données..."):
+                lignes = lire_excel(chemin_temp)
+                resultat = importer_excel_en_db(lignes)
+
+            if resultat["nouvelles"] > 0:
+                st.success(f"✅ Import terminé — {resultat['nouvelles']} nouvelles factures ajoutées, {resultat['doublons']} doublons ignorés.")
+            else:
+                st.warning(f"⚠️ Toutes les données existent déjà en base ({resultat['doublons']} doublons). Aucun ajout effectué.")
+
+            st.rerun()
+
+        except ValueError as e:
+            st.error(f"❌ Erreur de format : {e}")
+
+    # --- Chatbot RAG multi-clients ---
     st.markdown("---")
-    st.markdown("### 💬 Posez vos questions sur la facture")
+    st.markdown("### 💬 Interrogez la base clients")
 
-    # Afficher historique conversation
-    for msg in st.session_state.historique:
-        if msg["role"] == "user":
-            st.chat_message("user").write(msg["content"])
-        else:
-            st.chat_message("assistant").write(msg["content"])
+    if resume["total"] == 0:
+        st.warning("⚠️ Importez d'abord un fichier Excel pour utiliser le chatbot.")
+    else:
+        st.caption("Exemples : 'Quel est le montant de Fatima ?' | 'Quels clients ont des alertes ?' | 'Liste tous les clients'")
 
-    # Input question
-    question = st.chat_input("Votre question sur la facture...")
+        for msg in st.session_state.historique_excel:
+            if msg["role"] == "user":
+                st.chat_message("user").write(msg["content"])
+            else:
+                st.chat_message("assistant").write(msg["content"])
 
-    if question and st.session_state.texte_facture:
-        st.session_state.historique.append({"role": "user", "content": question})
-        st.chat_message("user").write(question)
+        question_excel = st.chat_input("Votre question sur la base clients...")
 
-        with st.spinner("⏳ Analyse en cours..."):
-            reponse = poser_question(
-                st.session_state.texte_facture,
-                question,
-                st.session_state.historique
-            )
+        if question_excel:
+            st.session_state.historique_excel.append({"role": "user", "content": question_excel})
+            st.chat_message("user").write(question_excel)
 
-        st.session_state.historique.append({"role": "assistant", "content": reponse})
-        st.chat_message("assistant").write(reponse)
+            with st.spinner("⏳ Recherche en cours..."):
+                reponse = poser_question_excel(
+                    question_excel,
+                    st.session_state.historique_excel
+                )
+
+            st.session_state.historique_excel.append({"role": "assistant", "content": reponse})
+            st.chat_message("assistant").write(reponse)
