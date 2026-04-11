@@ -52,43 +52,69 @@ def detecter_client(question: str, liste_clients: list) -> str | None:
 def poser_question_excel(question: str, historique: list = []) -> str:
     """
     Mode Excel — vrai RAG :
-    R : détecter le client et récupérer ses données depuis la BD
-    A : construire un contexte ciblé et précis
+    R : détecter le client dans la question OU dans l'historique
+    A : construire un contexte ciblé et complet avec toutes les colonnes
     G : envoyer à Mistral et retourner la réponse
     """
 
-    # Récupérer le résumé global pour savoir ce qu'on a en BD
     resume = get_resume_excel()
 
     if resume["total"] == 0:
         return "Aucune donnée disponible. Veuillez d'abord importer un fichier Excel."
 
     # --- R : RETRIEVAL ---
-    # Détecter si un client est mentionné dans la question
+
+    # Étape 1 — chercher le client dans la question actuelle
     client_trouve = detecter_client(question, resume["clients"])
 
+    # Étape 2 — si pas trouvé, chercher dans l'historique
+    # (cas où l'utilisateur dit "et son adresse ?" sans répéter le nom)
+    if not client_trouve:
+        for msg in reversed(historique):
+            client_dans_historique = detecter_client(msg["content"], resume["clients"])
+            if client_dans_historique:
+                client_trouve = client_dans_historique
+                break  # On prend le plus récent et on s'arrête
+
     if client_trouve:
-        # Client détecté → récupérer UNIQUEMENT ses factures
+        # Client trouvé → récupérer TOUTES ses données depuis la BD
         factures_client = rechercher_client_excel(client_trouve)
 
-        # Construire le contexte ciblé
-        contexte = f"Données du client '{client_trouve}' ({len(factures_client)} factures) :\n\n"
-        for f in factures_client:
-            alerte = f"| ⚠️ {f['alerte']}" if f['alerte'] else ""
-            contexte += (
-                f"  Période : {f['mois_source']}"
-                f" | Consommation : {f['consommation']} {f['unite']}"
-                f" | Montant : {f['montant_ttc']} Dhs"
-                f" | Échéance : {f['date_limite_paiement']}"
-                f" {alerte}\n"
-            )
-    else:
-        # Pas de client détecté → contexte général
+        # Infos fixes — identiques sur tous les mois
+        premier = factures_client[0]
         contexte = (
-            f"Base de données SRM Souss-Massa :\n"
-            f"  Total factures : {resume['total']}\n"
-            f"  Clients disponibles : {', '.join(resume['clients'])}\n"
-            f"  Périodes couvertes : {', '.join(resume['periodes'])}\n"
+            f"=== Informations du client ===\n"
+            f"  Nom          : {premier['nom_client']}\n"
+            f"  N° Client    : {premier['numero_client']}\n"
+            f"  N° Contrat   : {premier['numero_contrat']}\n"
+            f"  N° Compteur  : {premier['numero_compteur']}\n"
+            f"  Adresse      : {premier['adresse']}\n"
+            f"  Agence       : {premier['agence']}\n"
+            f"  Usage        : {premier['usage']}\n"
+            f"  Type service : {premier['type_service']}\n\n"
+            f"=== Historique des factures ({len(factures_client)} mois) ===\n"
+        )
+
+        # Détails par mois — données qui changent chaque mois
+        for f in factures_client:
+            alerte = f"⚠️ {f['alerte']}" if f['alerte'] else "Aucune"
+            contexte += (
+                f"\n  Mois             : {f['mois_source']}\n"
+                f"  Période          : {f['periode_debut']} → {f['periode_fin']}\n"
+                f"  Date édition     : {f['date_edition']}\n"
+                f"  Consommation     : {f['consommation']} {f['unite']}\n"
+                f"  Montant TTC      : {f['montant_ttc']} Dhs\n"
+                f"  Date limite pmt  : {f['date_limite_paiement']}\n"
+                f"  Alerte           : {alerte}\n"
+            )
+
+    else:
+        # Aucun client détecté → contexte général
+        contexte = (
+            f"=== Base de données SRM Souss-Massa ===\n"
+            f"  Total factures   : {resume['total']}\n"
+            f"  Clients          : {', '.join(resume['clients'])}\n"
+            f"  Périodes         : {', '.join(resume['periodes'])}\n"
         )
 
     # --- A : AUGMENTATION ---
@@ -137,3 +163,7 @@ if __name__ == "__main__":
     print("\nTest 3 — RAG question générale :")
     print("-" * 50)
     print(poser_question_excel("Quels clients avez-vous dans la base ?"))
+
+    print("\nTest 4 — Adresse et usage :")
+    print("-" * 50)
+    print(poser_question_excel("Quelle est l'adresse de Omar et son usage ?"))
