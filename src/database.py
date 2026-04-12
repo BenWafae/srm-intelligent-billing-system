@@ -3,11 +3,11 @@ import os
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "srm.db")
 
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # --- Table existante PDF ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS factures (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,7 +27,6 @@ def init_db():
         )
     """)
 
-    # --- Nouvelle table Excel ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS factures_excel (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,21 +55,14 @@ def init_db():
     conn.close()
 
 
-# --- Fonctions existantes —concern le pdf ---
-
 def enregistrer_facture(donnees: dict):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id FROM factures 
+        SELECT id FROM factures
         WHERE numero_client = ? AND periode_debut = ? AND periode_fin = ?
-    """, (
-        donnees.get("numero_client"),
-        donnees.get("periode_debut"),
-        donnees.get("periode_fin")
-    ))
-    existant = cursor.fetchone()
-    if existant:
+    """, (donnees.get("numero_client"), donnees.get("periode_debut"), donnees.get("periode_fin")))
+    if cursor.fetchone():
         conn.close()
         return False
     cursor.execute("""
@@ -80,22 +72,17 @@ def enregistrer_facture(donnees: dict):
             date_limite_paiement, consommation, type_service, montant_total_ttc
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        donnees.get("numero_client"),
-        donnees.get("numero_contrat"),
-        donnees.get("nom_client"),
-        donnees.get("adresse"),
-        donnees.get("usage"),
-        donnees.get("periode_debut"),
-        donnees.get("periode_fin"),
-        donnees.get("date_facture"),
-        donnees.get("date_limite_paiement"),
-        donnees.get("consommation"),
-        donnees.get("type_service"),
-        donnees.get("montant_total_ttc")
+        donnees.get("numero_client"), donnees.get("numero_contrat"),
+        donnees.get("nom_client"), donnees.get("adresse"),
+        donnees.get("usage"), donnees.get("periode_debut"),
+        donnees.get("periode_fin"), donnees.get("date_facture"),
+        donnees.get("date_limite_paiement"), donnees.get("consommation"),
+        donnees.get("type_service"), donnees.get("montant_total_ttc")
     ))
     conn.commit()
     conn.close()
     return True
+
 
 def get_all_factures():
     conn = sqlite3.connect(DB_PATH)
@@ -106,23 +93,13 @@ def get_all_factures():
     return rows
 
 
-# --- Nouvelles fonctions Excel ---
-
 def importer_excel_en_db(lignes: list[dict]) -> dict:
-    """
-    Reçoit la liste de dictionnaires de excel_reader.py
-    Insère chaque ligne en BD en évitant les doublons
-    Retourne un résumé de l'opération
-    """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     nouvelles = 0
     doublons = 0
 
     for ligne in lignes:
-
-        # Vérifier si cette facture existe déjà
-        # Un client ne peut pas avoir deux factures pour la même période
         cursor.execute("""
             SELECT id FROM factures_excel
             WHERE numero_client = ? AND periode_debut = ? AND periode_fin = ?
@@ -134,7 +111,7 @@ def importer_excel_en_db(lignes: list[dict]) -> dict:
 
         if cursor.fetchone():
             doublons += 1
-            continue  # On passe à la ligne suivante sans insérer
+            continue
 
         cursor.execute("""
             INSERT INTO factures_excel (
@@ -167,77 +144,53 @@ def importer_excel_en_db(lignes: list[dict]) -> dict:
     conn.commit()
     conn.close()
     return {"nouvelles": nouvelles, "doublons": doublons}
-# alors ici par exemple quand user pose un question on envoie le resumeer au llm comme contexte 
+
 
 def get_resume_excel() -> dict:
-    """
-    Retourne un résumé global de la BD Excel.
-    Utilisé par le RAG comme contexte de base quand
-    aucun client spécifique n'est mentionné.
-    """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-
     cursor.execute("SELECT COUNT(*) FROM factures_excel")
     total = cursor.fetchone()[0]
-
     cursor.execute("SELECT DISTINCT nom_client FROM factures_excel ORDER BY nom_client")
     clients = [r[0] for r in cursor.fetchall()]
-
     cursor.execute("SELECT DISTINCT mois_source FROM factures_excel")
     periodes = [r[0] for r in cursor.fetchall()]
-
     conn.close()
     return {"total": total, "clients": clients, "periodes": periodes}
 
 
 def rechercher_client_excel(nom_ou_numero: str) -> list[dict]:
-    """
-    Cœur du RAG — recherche les factures d'un client spécifique.
-    Utilisé quand l'utilisateur mentionne un nom ou numéro client.
-    Retourne uniquement les données pertinentes, pas les 72 lignes.
-    """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-
     terme = f"%{nom_ou_numero}%"
     cursor.execute("""
         SELECT * FROM factures_excel
         WHERE nom_client LIKE ? OR numero_client LIKE ?
         ORDER BY periode_debut
     """, (terme, terme))
-
     colonnes = [description[0] for description in cursor.description]
     rows = [dict(zip(colonnes, row)) for row in cursor.fetchall()]
-
     conn.close()
     return rows
 
 
-# -------- TEST --------
-if __name__ == "__main__":
-    import sys
-    sys.path.append(".")
-    from src.excel_reader import lire_excel
-
-    # Initialiser la BD
-    init_db()
-    print("✅ Base de données initialisée.")
-
-    # Importer le fichier Excel
-    lignes = lire_excel("data/factures_srm.xlsx")
-    resultat = importer_excel_en_db(lignes)
-    print(f"✅ Import terminé : {resultat['nouvelles']} nouvelles, {resultat['doublons']} doublons.")
-
-    # Tester le résumé
-    resume = get_resume_excel()
-    print(f"\n📊 Résumé BD : {resume['total']} factures")
-    print(f"👥 Clients : {resume['clients']}")
-    print(f"📅 Périodes : {resume['periodes']}")
-
-    # Tester la recherche d'un client
-    print("\n🔍 Recherche 'Fatima'...")
-    resultats = rechercher_client_excel("Fatima")
-    print(f"  {len(resultats)} factures trouvées.")
-    for r in resultats:
-        print(f"  - {r['mois_source']} : {r['montant_ttc']} Dhs | Alerte: '{r['alerte']}'")
+def get_toutes_factures_excel() -> list[dict]:
+    """
+    Retourne toutes les factures pour les questions générales.
+    Utilisé quand la question ne concerne pas un client spécifique.
+    Ex: 'quel usage est majoritaire ?', 'quelle agence a le plus de clients ?'
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT nom_client, agence, usage, type_service,
+               mois_source, consommation, unite, montant_ttc,
+               periode_debut, periode_fin, date_limite_paiement,
+               adresse, numero_client, numero_contrat, numero_compteur
+        FROM factures_excel
+        ORDER BY nom_client, mois_source
+    """)
+    colonnes = [d[0] for d in cursor.description]
+    rows = [dict(zip(colonnes, r)) for r in cursor.fetchall()]
+    conn.close()
+    return rows

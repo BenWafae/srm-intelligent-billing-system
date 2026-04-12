@@ -1,11 +1,10 @@
 import requests
 from src.database import get_resume_excel, rechercher_client_excel
+from src.text_to_sql import repondre_question_generale
 
-
-# --- Fonction existante — Mode PDF inchangée ---
 
 def poser_question(texte_facture: str, question: str, historique: list = []) -> str:
-    """Mode PDF — analyse d'une seule facture"""
+    """Mode PDF — analyse d'une seule facture — inchangé"""
 
     historique_texte = ""
     for msg in historique[:-1]:
@@ -24,7 +23,6 @@ Nouvelle question du client : {question}
 
 Réponds de façon claire et précise en français, en tenant compte du contexte de la conversation.
 """
-
     response = requests.post(
         "http://localhost:11434/api/generate",
         json={"model": "mistral", "prompt": prompt, "stream": False}
@@ -32,14 +30,8 @@ Réponds de façon claire et précise en français, en tenant compte du contexte
     return response.json()["response"]
 
 
-# --- Nouvelles fonctions — Mode Excel avec vrai RAG ---
-
 def detecter_client(question: str, liste_clients: list) -> str | None:
-    """
-    R du RAG — détecter si un client est mentionné dans la question.
-    Compare chaque mot de la question avec la liste des clients en BD.
-    Retourne le nom du client trouvé, ou None si aucun.
-    """
+    """Détecte si un client est mentionné dans la question — inchangé"""
     question_lower = question.lower()
     for client in liste_clients:
         mots_client = client.lower().split()
@@ -49,12 +41,31 @@ def detecter_client(question: str, liste_clients: list) -> str | None:
     return None
 
 
+def question_fait_reference(question: str) -> bool:
+    """
+    Détecte si la question fait référence à quelqu'un
+    mentionné avant dans la conversation.
+    Ex: "quelle est SON adresse ?" → True
+    Ex: "quels clients existent ?" → False
+    """
+    mots_reference = ["son ", "sa ", "ses ", " il ", " elle ", "lui", "leur"]
+    question_lower = question.lower()
+    return any(mot in question_lower for mot in mots_reference)
+
+
 def poser_question_excel(question: str, historique: list = []) -> str:
     """
-    Mode Excel — vrai RAG :
-    R : détecter le client dans la question OU dans l'historique
-    A : construire un contexte ciblé et complet avec toutes les colonnes
-    G : envoyer à Mistral et retourner la réponse
+    Mode Excel — RAG complet :
+
+    Questions sur client spécifique :
+    R : detecter_client() dans question ou historique
+    A : contexte ciblé avec toutes les colonnes du client
+    G : Mistral répond
+
+    Questions générales :
+    R : Text-to-SQL — Mistral génère SQL → Python exécute → résultat exact
+    A : résultat SQL compact envoyé à Mistral
+    G : Mistral répond en français
     """
 
     resume = get_resume_excel()
@@ -64,23 +75,24 @@ def poser_question_excel(question: str, historique: list = []) -> str:
 
     # --- R : RETRIEVAL ---
 
-    # Étape 1 — chercher le client dans la question actuelle
+    # Étape 1 — client mentionné dans la question actuelle ?
     client_trouve = detecter_client(question, resume["clients"])
 
-    # Étape 2 — si pas trouvé, chercher dans l'historique
-    # (cas où l'utilisateur dit "et son adresse ?" sans répéter le nom)
-    if not client_trouve:
+    # Étape 2 — pas de client mais référence à quelqu'un (son/sa/ses/il/elle)
+    # → chercher le dernier client mentionné dans l'historique
+    if not client_trouve and question_fait_reference(question):
         for msg in reversed(historique):
             client_dans_historique = detecter_client(msg["content"], resume["clients"])
             if client_dans_historique:
                 client_trouve = client_dans_historique
-                break  # On prend le plus récent et on s'arrête
+                break
+
+    # --- A : AUGMENTATION + G : GENERATION ---
 
     if client_trouve:
-        # Client trouvé → récupérer TOUTES ses données depuis la BD
+        # ── CAS 1 : Question sur un client spécifique ──
+        # Contexte ciblé — toutes les données du client
         factures_client = rechercher_client_excel(client_trouve)
-
-        # Infos fixes — identiques sur tous les mois
         premier = factures_client[0]
         contexte = (
             f"=== Informations du client ===\n"
@@ -94,10 +106,7 @@ def poser_question_excel(question: str, historique: list = []) -> str:
             f"  Type service : {premier['type_service']}\n\n"
             f"=== Historique des factures ({len(factures_client)} mois) ===\n"
         )
-
-        # Détails par mois — données qui changent chaque mois
         for f in factures_client:
-            alerte = f"⚠️ {f['alerte']}" if f['alerte'] else "Aucune"
             contexte += (
                 f"\n  Mois             : {f['mois_source']}\n"
                 f"  Période          : {f['periode_debut']} → {f['periode_fin']}\n"
@@ -105,25 +114,15 @@ def poser_question_excel(question: str, historique: list = []) -> str:
                 f"  Consommation     : {f['consommation']} {f['unite']}\n"
                 f"  Montant TTC      : {f['montant_ttc']} Dhs\n"
                 f"  Date limite pmt  : {f['date_limite_paiement']}\n"
-                f"  Alerte           : {alerte}\n"
             )
 
-    else:
-        # Aucun client détecté → contexte général
-        contexte = (
-            f"=== Base de données SRM Souss-Massa ===\n"
-            f"  Total factures   : {resume['total']}\n"
-            f"  Clients          : {', '.join(resume['clients'])}\n"
-            f"  Périodes         : {', '.join(resume['periodes'])}\n"
-        )
+        # Historique conversation
+        historique_texte = ""
+        for msg in historique[:-1]:
+            role = "Client" if msg["role"] == "user" else "Assistant"
+            historique_texte += f"{role}: {msg['content']}\n"
 
-    # --- A : AUGMENTATION ---
-    historique_texte = ""
-    for msg in historique[:-1]:
-        role = "Client" if msg["role"] == "user" else "Assistant"
-        historique_texte += f"{role}: {msg['content']}\n"
-
-    prompt = f"""Tu es un assistant intelligent de la SRM Souss-Massa, spécialisé dans l'analyse des données de facturation.
+        prompt = f"""Tu es un assistant intelligent de la SRM Souss-Massa, spécialisé dans l'analyse des données de facturation.
 
 Voici les données disponibles :
 {contexte}
@@ -137,33 +136,49 @@ Historique de la conversation :
 Question : {question}
 
 Réponds de façon claire et précise en français.
-Si des alertes de consommation élevée sont présentes, mentionne-les.
 """
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={"model": "mistral", "prompt": prompt, "stream": False}
+        )
+        return response.json()["response"]
 
-    # --- G : GENERATION ---
-    response = requests.post(
-        "http://localhost:11434/api/generate",
-        json={"model": "mistral", "prompt": prompt, "stream": False}
-    )
-    return response.json()["response"]
+    else:
+        # ── CAS 2 : Question générale → Text-to-SQL ──
+        # Pas de 72 lignes envoyées — Mistral génère le SQL
+        # Python exécute → résultat exact → Mistral répond
+        historique_texte = ""
+        for msg in historique[:-1]:
+            role = "Client" if msg["role"] == "user" else "Assistant"
+            historique_texte += f"{role}: {msg['content']}\n"
+
+        return repondre_question_generale(question, historique_texte)
 
 
 # -------- TEST --------
 if __name__ == "__main__":
 
-    print("Test 1 — Mode PDF (inchangé) :")
+    print("Test 1 — Mode PDF :")
     print("-" * 50)
     texte_test = "Client : Ahmed Alami | Consommation : 901 kWh | Montant TTC : 30 627,46 Dhs"
     print(poser_question(texte_test, "Quel est le montant à payer ?"))
 
-    print("\nTest 2 — RAG avec client mentionné :")
+    print("\nTest 2 — RAG client spécifique :")
     print("-" * 50)
-    print(poser_question_excel("Quel est le montant total de Fatima sur toutes les périodes ?"))
+    print(poser_question_excel("Quel est le montant total de Fatima ?"))
 
-    print("\nTest 3 — RAG question générale :")
+    print("\nTest 3 — Question générale → Text-to-SQL :")
     print("-" * 50)
-    print(poser_question_excel("Quels clients avez-vous dans la base ?"))
+    print(poser_question_excel("Quels clients existent dans la base ?"))
 
-    print("\nTest 4 — Adresse et usage :")
+    print("\nTest 4 — Question analytique → Text-to-SQL :")
     print("-" * 50)
-    print(poser_question_excel("Quelle est l'adresse de Omar et son usage ?"))
+    print(poser_question_excel("Quel est l'usage majoritaire parmi tous les clients ?"))
+
+    print("\nTest 5 — Référence historique :")
+    print("-" * 50)
+    historique_test = [
+        {"role": "user", "content": "montant de Omar"},
+        {"role": "assistant", "content": "Le montant total d'Omar est 2471.52 Dhs"}
+    ]
+    print(poser_question_excel("quelle est son adresse ?", historique_test))
