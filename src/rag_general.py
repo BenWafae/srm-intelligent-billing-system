@@ -165,7 +165,19 @@ def fetch_top_consommateurs(mois: str = None) -> str:
             WHERE mois_source LIKE ?
             ORDER BY consommation DESC
         """, (f"%{mois}%",))
-        titre = f"Classement par consommation — **{mois}** :\n"
+        rows = cursor.fetchall()
+        conn.close()
+        if not rows:
+            return f"Aucune donnée trouvée pour le mois {mois}."
+        max_val = rows[0][1]
+        tops = [r for r in rows if r[1] == max_val]
+        lignes = [f"Client(s) avec la consommation la plus élevée en **{mois}** :\n"]
+        for r in tops:
+            lignes.append(f"🏆 **{r[0]}** — {r[1]:,} {r[2]}")
+        if len(rows) > len(tops):
+            lignes.append(f"\nClassement complet ({mois}) :")
+            for i, r in enumerate(rows, 1):
+                lignes.append(f"  {i}. {r[0]} — {r[1]:,} {r[2]}")
     else:
         cursor.execute("""
             SELECT nom_client, ROUND(SUM(consommation), 2) as total_conso, unite
@@ -173,12 +185,19 @@ def fetch_top_consommateurs(mois: str = None) -> str:
             GROUP BY nom_client
             ORDER BY total_conso DESC
         """)
-        titre = "Classement par consommation totale (tous mois) :\n"
-    rows = cursor.fetchall()
-    conn.close()
-    lignes = [titre]
-    for i, r in enumerate(rows, 1):
-        lignes.append(f"{i}. **{r[0]}** — {r[1]:,} {r[2]}")
+        rows = cursor.fetchall()
+        conn.close()
+        if not rows:
+            return "Aucune donnée trouvée."
+        max_val = rows[0][1]
+        tops = [r for r in rows if r[1] == max_val]
+        lignes = ["Client(s) avec la consommation totale la plus élevée :\n"]
+        for r in tops:
+            lignes.append(f"🏆 **{r[0]}** — {r[1]:,} {r[2]}")
+        if len(rows) > len(tops):
+            lignes.append(f"\nClassement complet :")
+            for i, r in enumerate(rows, 1):
+                lignes.append(f"  {i}. {r[0]} — {r[1]:,} {r[2]}")
     return "\n".join(lignes)
 
 
@@ -192,7 +211,19 @@ def fetch_top_montants(mois: str = None) -> str:
             WHERE mois_source LIKE ?
             ORDER BY montant_ttc DESC
         """, (f"%{mois}%",))
-        titre = f"Classement par montant — **{mois}** :\n"
+        rows = cursor.fetchall()
+        conn.close()
+        if not rows:
+            return f"Aucune donnée trouvée pour le mois {mois}."
+        max_val = rows[0][1]
+        tops = [r for r in rows if r[1] == max_val]
+        lignes = [f"Client(s) avec le montant le plus élevé en **{mois}** :\n"]
+        for r in tops:
+            lignes.append(f"🏆 **{r[0]}** — {r[1]:,.2f} Dhs")
+        if len(rows) > len(tops):
+            lignes.append(f"\nClassement complet ({mois}) :")
+            for i, r in enumerate(rows, 1):
+                lignes.append(f"  {i}. {r[0]} — {r[1]:,.2f} Dhs")
     else:
         cursor.execute("""
             SELECT nom_client, ROUND(SUM(montant_ttc), 2) as total
@@ -200,12 +231,19 @@ def fetch_top_montants(mois: str = None) -> str:
             GROUP BY nom_client
             ORDER BY total DESC
         """)
-        titre = "Classement par montant total (tous mois) :\n"
-    rows = cursor.fetchall()
-    conn.close()
-    lignes = [titre]
-    for i, r in enumerate(rows, 1):
-        lignes.append(f"{i}. **{r[0]}** — {r[1]:,.2f} Dhs")
+        rows = cursor.fetchall()
+        conn.close()
+        if not rows:
+            return "Aucune donnée trouvée."
+        max_val = rows[0][1]
+        tops = [r for r in rows if r[1] == max_val]
+        lignes = ["Client(s) avec le montant total le plus élevé :\n"]
+        for r in tops:
+            lignes.append(f"🏆 **{r[0]}** — {r[1]:,.2f} Dhs")
+        if len(rows) > len(tops):
+            lignes.append(f"\nClassement complet :")
+            for i, r in enumerate(rows, 1):
+                lignes.append(f"  {i}. {r[0]} — {r[1]:,.2f} Dhs")
     return "\n".join(lignes)
 
 
@@ -269,9 +307,19 @@ def fetch_par_agence(agence: str = None) -> str:
         """)
         rows = cursor.fetchall()
         conn.close()
-        lignes = ["Répartition des clients par agence :\n"]
-        for r in rows:
+        if not rows:
+            return "Aucune agence trouvée."
+        # Trouver le maximum et afficher seulement les agences ex æquo au top
+        max_clients = rows[0][1]
+        top_agences = [r for r in rows if r[1] == max_clients]
+        autres = [r for r in rows if r[1] < max_clients]
+        lignes = [f"Agences avec le plus de clients (**{max_clients} clients** chacune) :\n"]
+        for r in top_agences:
             lignes.append(f"- **{r[0]}** : {r[1]} clients | Total : {r[2]:,.2f} Dhs")
+        if autres:
+            lignes.append(f"\nAutres agences ({len(autres)}) :")
+            for r in autres:
+                lignes.append(f"- {r[0]} : {r[1]} client | Total : {r[2]:,.2f} Dhs")
     return "\n".join(lignes)
 
 
@@ -791,6 +839,26 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     Le LLM est utilisé UNIQUEMENT pour classifier l'intent.
     La réponse finale vient directement des fetchers Python.
     """
+    # ── PRÉ-DÉTECTION PYTHON (avant LLM) ──────────────────────────────
+    # Pour les cas ambigus que Mistral rate souvent, on détecte
+    # directement par mots-clés — plus fiable que la classification LLM.
+    q = question.lower()
+    demande_eau  = any(m in q for m in ["eau", "water"])
+    demande_elec = any(m in q for m in ["elec", "électr"])
+
+    if demande_eau and demande_elec:
+        print(f"  [PRÉ-DÉTECTION] Les deux services → fetch_par_service(None)")
+        return fetch_par_service(service=None)
+
+    if demande_eau and not demande_elec and any(m in q for m in ["combien", "liste", "quels", "client"]):
+        print(f"  [PRÉ-DÉTECTION] Service eau")
+        return fetch_par_service(service="eau")
+
+    if demande_elec and not demande_eau and any(m in q for m in ["combien", "liste", "quels", "client"]):
+        print(f"  [PRÉ-DÉTECTION] Service electricite")
+        return fetch_par_service(service="electricite")
+
+    # ── DÉTECTION LLM (pour tout le reste) ────────────────────────────
     print(f"  [RAG] Détection intent...")
     resultat = detecter_intent(question)
     intent = resultat.get("intent", "QUESTION_LIBRE")
