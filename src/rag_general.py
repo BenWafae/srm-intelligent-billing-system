@@ -843,18 +843,29 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # Pour les cas ambigus que Mistral rate souvent, on détecte
     # directement par mots-clés — plus fiable que la classification LLM.
     q = question.lower()
-    demande_eau  = any(m in q for m in ["eau", "water"])
-    demande_elec = any(m in q for m in ["elec", "électr"])
 
-    if demande_eau and demande_elec:
-        print(f"  [PRÉ-DÉTECTION] Les deux services → fetch_par_service(None)")
+    # Tolérant aux fautes de frappe : "eauu", "leauu", "electricitee"...
+    demande_eau  = any(m in q for m in ["eau", "eauu", "eeau"])
+    demande_elec = any(m in q for m in ["elec", "electricit", "électr"])
+    demande_service = any(m in q for m in ["service", "type de service", "types de service"])
+
+    # Cas : "combien de types de service existe" -> vue comparative sans service précis
+    if demande_service and not demande_eau and not demande_elec:
+        print(f"  [PRÉ-DÉTECTION] Question types de service -> fetch_par_service(None)")
         return fetch_par_service(service=None)
 
-    if demande_eau and not demande_elec and any(m in q for m in ["combien", "liste", "quels", "client"]):
+    # Cas : "eau ET electricite" dans la même question -> afficher les deux
+    if demande_eau and demande_elec:
+        print(f"  [PRÉ-DÉTECTION] Les deux services -> fetch_par_service(None)")
+        return fetch_par_service(service=None)
+
+    # Cas : seulement eau
+    if demande_eau and not demande_elec and any(m in q for m in ["combien", "liste", "quels", "client", "utilis"]):
         print(f"  [PRÉ-DÉTECTION] Service eau")
         return fetch_par_service(service="eau")
 
-    if demande_elec and not demande_eau and any(m in q for m in ["combien", "liste", "quels", "client"]):
+    # Cas : seulement electricite
+    if demande_elec and not demande_eau and any(m in q for m in ["combien", "liste", "quels", "client", "utilis"]):
         print(f"  [PRÉ-DÉTECTION] Service electricite")
         return fetch_par_service(service="electricite")
 
