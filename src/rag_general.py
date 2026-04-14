@@ -159,6 +159,7 @@ def fetch_top_consommateurs(mois: str = None) -> str:
     conn = _connexion()
     cursor = conn.cursor()
     if mois:
+        mois = normaliser_mois(mois)
         cursor.execute("""
             SELECT nom_client, consommation, unite, mois_source
             FROM factures_excel
@@ -205,6 +206,7 @@ def fetch_top_montants(mois: str = None) -> str:
     conn = _connexion()
     cursor = conn.cursor()
     if mois:
+        mois = normaliser_mois(mois)
         cursor.execute("""
             SELECT nom_client, montant_ttc, mois_source
             FROM factures_excel
@@ -766,33 +768,63 @@ def fetch_client_infos(nom_client: str) -> str:
 - Type service : {r[7]}"""
 
 
+MOIS_MAP = {
+    "janvier": "Janvier", "fevrier": "Février", "février": "Février",
+    "mars": "Mars", "avril": "Avril", "mai": "Mai", "juin": "Juin",
+    "juillet": "Juillet", "aout": "Août", "août": "Août",
+    "septembre": "Septembre", "octobre": "Octobre",
+    "novembre": "Novembre", "decembre": "Décembre", "décembre": "Décembre",
+}
+
+def normaliser_mois(mois: str) -> str:
+    """
+    Convertit n'importe quelle écriture de mois vers la forme correcte avec accents.
+    "decembre" → "Décembre" | "fevrier 2026" → "Février" | "MARS" → "Mars"
+    """
+    if not mois:
+        return mois
+    mois_lower = mois.lower().strip()
+    mois_court = mois_lower.split()[0]  # "decembre 2025" → "decembre"
+    return MOIS_MAP.get(mois_court, mois.strip())
+
+
+def _normaliser_mois(mois: str) -> list:
+    """Retourne plusieurs variantes du mois pour la recherche LIKE — gère les accents et fautes."""
+    remplacements = {
+        "decembre": "Décembre", "décembre": "Décembre",
+        "fevrier": "Février",   "février": "Février",
+        "mars": "Mars", "avril": "Avril", "mai": "Mai", "juin": "Juin",
+        "juillet": "Juillet", "aout": "Août", "août": "Août",
+        "septembre": "Septembre", "octobre": "Octobre",
+        "novembre": "Novembre", "janvier": "Janvier",
+    }
+    mois_lower = mois.lower().strip()
+    variantes = [mois]
+    for k, v in remplacements.items():
+        if k in mois_lower:
+            variantes.append(v)
+            variantes.append(mois_lower.replace(k, v))
+    return list(set(variantes))
+
+
 def fetch_client_mois_specifique(nom_client: str, mois: str) -> str:
+    # Normaliser le mois (gère accents et fautes de frappe)
+    mois_normalise = normaliser_mois(mois)
+
     conn = _connexion()
     cursor = conn.cursor()
+
     cursor.execute("""
         SELECT mois_source, periode_debut, periode_fin,
                consommation, unite, montant_ttc, date_limite_paiement
         FROM factures_excel
         WHERE nom_client LIKE ? AND mois_source LIKE ?
-    """, (f"%{nom_client}%", f"%{mois}%"))
+    """, (f"%{nom_client}%", f"%{mois_normalise}%"))
     rows = cursor.fetchall()
     conn.close()
 
     if not rows:
-        mois_court = mois.split()[0] if mois else mois
-        conn2 = _connexion()
-        cursor2 = conn2.cursor()
-        cursor2.execute("""
-            SELECT mois_source, periode_debut, periode_fin,
-                   consommation, unite, montant_ttc, date_limite_paiement
-            FROM factures_excel
-            WHERE nom_client LIKE ? AND mois_source LIKE ?
-        """, (f"%{nom_client}%", f"%{mois_court}%"))
-        rows = cursor2.fetchall()
-        conn2.close()
-
-    if not rows:
-        return f"Aucune facture trouvée pour **{nom_client}** en {mois}."
+        return f"Aucune facture trouvée pour **{nom_client}** en {mois_normalise}."
     r = rows[0]
     return f"""🧾 Facture de **{nom_client}** — {r[0]} :
 
@@ -847,7 +879,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # Tolérant aux fautes de frappe : "eauu", "leauu", "electricitee"...
     demande_eau  = any(m in q for m in ["eau", "eauu", "eeau"])
     demande_elec = any(m in q for m in ["elec", "electricit", "électr"])
-    demande_service = any(m in q for m in ["service", "type de service", "types de service"])
+    demande_service = any(m in q for m in ["service", "services", "type de service", "types de service", "type service", "types service"])
 
     # Cas : "combien de types de service existe" -> vue comparative sans service précis
     if demande_service and not demande_eau and not demande_elec:
