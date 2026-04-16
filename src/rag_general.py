@@ -294,6 +294,54 @@ def fetch_min_consommateurs(mois: str = None) -> str:
 
         lignes.append("\n⚠️ Les unités eau (m³) et électricité (kWh) sont incompatibles — classements séparés.")
         return "\n".join(lignes)
+    
+def fetch_min_consommateurs_par_service(service: str, mois: str = None) -> str:
+    """
+    Retourne les clients avec la plus faible consommation,
+    filtrés par type de service (eau ou electricite).
+    """
+    conn = _connexion()
+    cursor = conn.cursor()
+
+    # Normaliser le service
+    service_norm = service.lower().strip()
+    if any(k in service_norm for k in ["elec", "électr"]):
+        service_filtre = "electricite"
+        service_label = "Électricité"
+    else:
+        service_filtre = "eau"
+        service_label = "Eau"
+
+    if mois:
+        mois = normaliser_mois(mois)
+        cursor.execute("""
+            SELECT nom_client, consommation, unite, mois_source
+            FROM factures_excel
+            WHERE LOWER(type_service) = ? AND mois_source LIKE ?
+            ORDER BY consommation ASC
+        """, (service_filtre, f"%{mois}%"))
+    else:
+        cursor.execute("""
+            SELECT nom_client, ROUND(SUM(consommation), 2) as total_conso, unite
+            FROM factures_excel
+            WHERE LOWER(type_service) = ?
+            GROUP BY nom_client
+            ORDER BY total_conso ASC
+        """, (service_filtre,))
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        return f"Aucune donnée trouvée pour le service {service_label}."
+
+    min_val = rows[0][1]
+    lignes = [f"Clients **{service_label}** classés par consommation (faible → élevée) :\n"]
+    for i, r in enumerate(rows, 1):
+        prefix = "🔻" if r[1] == min_val else f"  {i}."
+        lignes.append(f"{prefix} **{r[0]}** — {r[1]:,} {r[2]}")
+
+    return "\n".join(lignes)
 
 def fetch_top_montants(mois: str = None) -> str:
     conn = _connexion()
@@ -926,14 +974,22 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     La réponse finale vient directement des fetchers Python.
     """
     # ── PRÉ-DÉTECTION PYTHON (avant LLM) ──────────────────────────────
-    # Pour les cas ambigus que Mistral rate souvent, on détecte
-    # directement par mots-clés — plus fiable que la classification LLM.
     q = question.lower()
 
     # Tolérant aux fautes de frappe : "eauu", "leauu", "electricitee"...
-    demande_eau  = any(m in q for m in ["eau", "eauu", "eeau"])
-    demande_elec = any(m in q for m in ["elec", "electricit", "électr"])
+    demande_eau     = any(m in q for m in ["eau", "eauu", "eeau"])
+    demande_elec    = any(m in q for m in ["elec", "electricit", "électr"])
     demande_service = any(m in q for m in ["service", "services", "type de service", "types de service", "type service", "types service"])
+    demande_faible  = any(m in q for m in ["faible", "moins", "minimum", "faib", "minimale", "plus faible"])
+
+    # Cas : faible consommation + service précis ← EN PREMIER
+    if demande_faible and demande_eau and not demande_elec:
+        print(f"  [PRÉ-DÉTECTION] Faible conso service eau")
+        return fetch_min_consommateurs_par_service(service="eau")
+
+    if demande_faible and demande_elec and not demande_eau:
+        print(f"  [PRÉ-DÉTECTION] Faible conso service electricite")
+        return fetch_min_consommateurs_par_service(service="electricite")
 
     # Cas : "combien de types de service existe" -> vue comparative sans service précis
     if demande_service and not demande_eau and not demande_elec:
@@ -967,8 +1023,9 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     elif intent == "TOP_CONSOMMATEURS":
         return fetch_top_consommateurs(mois=params.get("mois"))
+
     elif intent == "MIN_CONSOMMATEURS":
-        return fetch_min_consommateurs(mois=params.get("mois")) 
+        return fetch_min_consommateurs(mois=params.get("mois"))
 
     elif intent == "TOP_MONTANTS":
         return fetch_top_montants(mois=params.get("mois"))
@@ -995,7 +1052,6 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_evolution_mois()
 
     else:
-        # QUESTION_LIBRE : seul cas où le LLM génère la réponse
         return fetch_question_libre(question, historique_texte)
 
 
