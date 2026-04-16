@@ -342,6 +342,49 @@ def fetch_min_consommateurs_par_service(service: str, mois: str = None) -> str:
         lignes.append(f"{prefix} **{r[0]}** — {r[1]:,} {r[2]}")
 
     return "\n".join(lignes)
+# top consomation par service 
+def fetch_max_consommateurs_par_service(service: str, mois: str = None) -> str:
+    conn = _connexion()
+    cursor = conn.cursor()
+
+    service_norm = service.lower().strip()
+    if any(k in service_norm for k in ["elec", "électr"]):
+        service_filtre = "electricite"
+        service_label = "Électricité"
+    else:
+        service_filtre = "eau"
+        service_label = "Eau"
+
+    if mois:
+        mois = normaliser_mois(mois)
+        cursor.execute("""
+            SELECT nom_client, consommation, unite, mois_source
+            FROM factures_excel
+            WHERE LOWER(type_service) = ? AND mois_source LIKE ?
+            ORDER BY consommation DESC
+        """, (service_filtre, f"%{mois}%"))
+    else:
+        cursor.execute("""
+            SELECT nom_client, ROUND(SUM(consommation), 2) as total_conso, unite
+            FROM factures_excel
+            WHERE LOWER(type_service) = ?
+            GROUP BY nom_client
+            ORDER BY total_conso DESC
+        """, (service_filtre,))
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        return f"Aucune donnée trouvée pour le service {service_label}."
+
+    max_val = rows[0][1]
+    lignes = [f"Clients **{service_label}** classés par consommation (élevée → faible) :\n"]
+    for i, r in enumerate(rows, 1):
+        prefix = "🏆" if r[1] == max_val else f"  {i}."
+        lignes.append(f"{prefix} **{r[0]}** — {r[1]:,} {r[2]}")
+
+    return "\n".join(lignes)
 
 def fetch_top_montants(mois: str = None) -> str:
     conn = _connexion()
@@ -968,21 +1011,14 @@ def fetch_client_toutes_factures(nom_client: str) -> str:
 # ─────────────────────────────────────────────────────────
 
 def repondre_question_generale(question: str, historique_texte: str) -> str:
-    """
-    Pipeline RAG par intent pour les questions générales.
-    Le LLM est utilisé UNIQUEMENT pour classifier l'intent.
-    La réponse finale vient directement des fetchers Python.
-    """
-    # ── PRÉ-DÉTECTION PYTHON (avant LLM) ──────────────────────────────
     q = question.lower()
 
-    # Tolérant aux fautes de frappe : "eauu", "leauu", "electricitee"...
     demande_eau     = any(m in q for m in ["eau", "eauu", "eeau"])
     demande_elec    = any(m in q for m in ["elec", "electricit", "électr"])
     demande_service = any(m in q for m in ["service", "services", "type de service", "types de service", "type service", "types service"])
     demande_faible  = any(m in q for m in ["faible", "moins", "minimum", "faib", "minimale", "plus faible"])
+    demande_elevee  = any(m in q for m in ["élevé", "eleve", "elevé", "élevee", "plus grand", "maximum", "max", "haut", "top"])
 
-    # Cas : faible consommation + service précis ← EN PREMIER
     if demande_faible and demande_eau and not demande_elec:
         print(f"  [PRÉ-DÉTECTION] Faible conso service eau")
         return fetch_min_consommateurs_par_service(service="eau")
@@ -991,27 +1027,30 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         print(f"  [PRÉ-DÉTECTION] Faible conso service electricite")
         return fetch_min_consommateurs_par_service(service="electricite")
 
-    # Cas : "combien de types de service existe" -> vue comparative sans service précis
+    if demande_elevee and demande_eau and not demande_elec:
+        print(f"  [PRÉ-DÉTECTION] Top conso service eau")
+        return fetch_max_consommateurs_par_service(service="eau")
+
+    if demande_elevee and demande_elec and not demande_eau:
+        print(f"  [PRÉ-DÉTECTION] Top conso service electricite")
+        return fetch_max_consommateurs_par_service(service="electricite")
+
     if demande_service and not demande_eau and not demande_elec:
         print(f"  [PRÉ-DÉTECTION] Question types de service -> fetch_par_service(None)")
         return fetch_par_service(service=None)
 
-    # Cas : "eau ET electricite" dans la même question -> afficher les deux
     if demande_eau and demande_elec:
         print(f"  [PRÉ-DÉTECTION] Les deux services -> fetch_par_service(None)")
         return fetch_par_service(service=None)
 
-    # Cas : seulement eau
     if demande_eau and not demande_elec and any(m in q for m in ["combien", "liste", "quels", "client", "utilis"]):
         print(f"  [PRÉ-DÉTECTION] Service eau")
         return fetch_par_service(service="eau")
 
-    # Cas : seulement electricite
     if demande_elec and not demande_eau and any(m in q for m in ["combien", "liste", "quels", "client", "utilis"]):
         print(f"  [PRÉ-DÉTECTION] Service electricite")
         return fetch_par_service(service="electricite")
 
-    # ── DÉTECTION LLM (pour tout le reste) ────────────────────────────
     print(f"  [RAG] Détection intent...")
     resultat = detecter_intent(question)
     intent = resultat.get("intent", "QUESTION_LIBRE")
@@ -1020,47 +1059,31 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     if intent == "LISTE_CLIENTS":
         return fetch_liste_clients()
-
     elif intent == "TOP_CONSOMMATEURS":
         return fetch_top_consommateurs(mois=params.get("mois"))
-
     elif intent == "MIN_CONSOMMATEURS":
         return fetch_min_consommateurs(mois=params.get("mois"))
-
     elif intent == "TOP_MONTANTS":
         return fetch_top_montants(mois=params.get("mois"))
-
     elif intent == "CLASSEMENT_PAR_MOIS":
         return fetch_classement_par_mois()
-
     elif intent == "PAR_AGENCE":
         return fetch_par_agence(agence=params.get("agence"))
-
     elif intent == "PAR_USAGE":
         return fetch_par_usage(usage=params.get("usage"))
-
     elif intent == "PAR_SERVICE":
         return fetch_par_service(service=params.get("service"))
-
     elif intent == "ALERTES":
         return fetch_alertes()
-
     elif intent == "STATS_GENERALES":
         return fetch_stats_generales()
-
     elif intent == "EVOLUTION_MOIS":
         return fetch_evolution_mois()
-
     else:
         return fetch_question_libre(question, historique_texte)
 
 
 def repondre_question_client(question: str, nom_client: str, historique_texte: str) -> str:
-    """
-    Pipeline RAG analytique pour les questions sur un client spécifique.
-    Le LLM est utilisé UNIQUEMENT pour classifier l'intent.
-    La réponse finale vient directement des fetchers Python.
-    """
     print(f"  [RAG CLIENT] Détection intent pour {nom_client}...")
     resultat = detecter_intent_client(question)
     intent = resultat.get("intent", "FACTURES_CLIENT")
@@ -1069,28 +1092,20 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
 
     if intent == "MAX_CONSOMMATION":
         return fetch_client_max_consommation(nom_client)
-
     elif intent == "MIN_CONSOMMATION":
         return fetch_client_min_consommation(nom_client)
-
     elif intent == "MAX_MONTANT":
         return fetch_client_max_montant(nom_client)
-
     elif intent == "MIN_MONTANT":
         return fetch_client_min_montant(nom_client)
-
     elif intent == "EVOLUTION_CLIENT":
         return fetch_client_evolution(nom_client)
-
     elif intent == "MOYENNE_CLIENT":
         return fetch_client_moyenne(nom_client)
-
     elif intent == "INFOS_CLIENT":
         return fetch_client_infos(nom_client)
-
     elif intent == "MOIS_SPECIFIQUE":
         mois = params.get("mois", "")
         return fetch_client_mois_specifique(nom_client, mois)
-
     else:
         return fetch_client_toutes_factures(nom_client)
