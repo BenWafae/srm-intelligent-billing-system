@@ -3,6 +3,7 @@ import sqlite3
 import os
 import re
 import json
+from normalisation import normaliser_mois, normaliser_terme_metier
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "srm.db")
 
@@ -766,45 +767,6 @@ def fetch_client_infos(nom_client: str) -> str:
 - Agence       : {r[5]}
 - Usage        : {r[6]}
 - Type service : {r[7]}"""
-
-
-MOIS_MAP = {
-    "janvier": "Janvier", "fevrier": "Février", "février": "Février",
-    "mars": "Mars", "avril": "Avril", "mai": "Mai", "juin": "Juin",
-    "juillet": "Juillet", "aout": "Août", "août": "Août",
-    "septembre": "Septembre", "octobre": "Octobre",
-    "novembre": "Novembre", "decembre": "Décembre", "décembre": "Décembre",
-}
-
-def normaliser_mois(mois: str) -> str:
-    """
-    Convertit n'importe quelle écriture de mois vers la forme correcte avec accents.
-    "decembre" → "Décembre" | "fevrier 2026" → "Février" | "MARS" → "Mars"
-    """
-    if not mois:
-        return mois
-    mois_lower = mois.lower().strip()
-    mois_court = mois_lower.split()[0]  # "decembre 2025" → "decembre"
-    return MOIS_MAP.get(mois_court, mois.strip())
-
-
-def _normaliser_mois(mois: str) -> list:
-    """Retourne plusieurs variantes du mois pour la recherche LIKE — gère les accents et fautes."""
-    remplacements = {
-        "decembre": "Décembre", "décembre": "Décembre",
-        "fevrier": "Février",   "février": "Février",
-        "mars": "Mars", "avril": "Avril", "mai": "Mai", "juin": "Juin",
-        "juillet": "Juillet", "aout": "Août", "août": "Août",
-        "septembre": "Septembre", "octobre": "Octobre",
-        "novembre": "Novembre", "janvier": "Janvier",
-    }
-    mois_lower = mois.lower().strip()
-    variantes = [mois]
-    for k, v in remplacements.items():
-        if k in mois_lower:
-            variantes.append(v)
-            variantes.append(mois_lower.replace(k, v))
-    return list(set(variantes))
 
 
 def fetch_client_mois_specifique(nom_client: str, mois: str) -> str:
