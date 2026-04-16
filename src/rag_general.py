@@ -28,6 +28,7 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "srm.db")
 INTENTS_DISPONIBLES = """
 LISTE_CLIENTS        : liste des clients, qui existe, combien de clients, tous les clients
 TOP_CONSOMMATEURS    : qui consomme le plus, consommation la plus élevée, classement consommation
+MIN_CONSOMMATEURS    : qui consomme le moins, consommation faible, consommation minimale, plus faible consommation 
 TOP_MONTANTS         : qui paie le plus, montant le plus élevé, facture la plus chère, classement montant
 CLASSEMENT_PAR_MOIS  : classer clients par montant ou consommation pour chaque mois, voir classement mois par mois
 PAR_AGENCE           : clients d'une agence, quelle agence, combien par agence
@@ -171,15 +172,25 @@ def fetch_top_consommateurs(mois: str = None) -> str:
         conn.close()
         if not rows:
             return f"Aucune donnée trouvée pour le mois {mois}."
-        max_val = rows[0][1]
-        tops = [r for r in rows if r[1] == max_val]
+
+        eau  = [r for r in rows if r[2] == "m³"]
+        elec = [r for r in rows if r[2] == "kWh"]
         lignes = [f"Client(s) avec la consommation la plus élevée en **{mois}** :\n"]
-        for r in tops:
-            lignes.append(f"🏆 **{r[0]}** — {r[1]:,} {r[2]}")
-        if len(rows) > len(tops):
-            lignes.append(f"\nClassement complet ({mois}) :")
-            for i, r in enumerate(rows, 1):
-                lignes.append(f"  {i}. {r[0]} — {r[1]:,} {r[2]}")
+
+        if eau:
+            lignes.append(f"💧 **Eau** — max : 🏆 **{eau[0][0]}** : {eau[0][1]:,} m³")
+            for i, r in enumerate(eau, 1):
+                lignes.append(f"  {i}. {r[0]} — {r[1]:,} m³")
+
+        if elec:
+            elec_sorted = sorted(elec, key=lambda r: r[1], reverse=True)
+            lignes.append(f"\n⚡ **Électricité** — max : 🏆 **{elec_sorted[0][0]}** : {elec_sorted[0][1]:,} kWh")
+            for i, r in enumerate(elec_sorted, 1):
+                lignes.append(f"  {i}. {r[0]} — {r[1]:,} kWh")
+
+        lignes.append("\n⚠️ Classements séparés : eau (m³) ≠ électricité (kWh).")
+        return "\n".join(lignes)
+
     else:
         cursor.execute("""
             SELECT nom_client, ROUND(SUM(consommation), 2) as total_conso, unite
@@ -191,17 +202,98 @@ def fetch_top_consommateurs(mois: str = None) -> str:
         conn.close()
         if not rows:
             return "Aucune donnée trouvée."
-        max_val = rows[0][1]
-        tops = [r for r in rows if r[1] == max_val]
-        lignes = ["Client(s) avec la consommation totale la plus élevée :\n"]
-        for r in tops:
-            lignes.append(f"🏆 **{r[0]}** — {r[1]:,} {r[2]}")
-        if len(rows) > len(tops):
-            lignes.append(f"\nClassement complet :")
-            for i, r in enumerate(rows, 1):
-                lignes.append(f"  {i}. {r[0]} — {r[1]:,} {r[2]}")
-    return "\n".join(lignes)
 
+        eau  = sorted([r for r in rows if r[2] == "m³"],  key=lambda r: r[1], reverse=True)
+        elec = sorted([r for r in rows if r[2] == "kWh"], key=lambda r: r[1], reverse=True)
+        lignes = ["Classement des consommations (séparé par unité) :\n"]
+
+        if eau:
+            lignes.append(f"💧 **Eau (m³)** — plus grand consommateur : 🏆 **{eau[0][0]}**")
+            for i, r in enumerate(eau, 1):
+                lignes.append(f"  {i}. {r[0]} — {r[1]:,} m³")
+
+        if elec:
+            lignes.append(f"\n⚡ **Électricité (kWh)** — plus grand consommateur : 🏆 **{elec[0][0]}**")
+            for i, r in enumerate(elec, 1):
+                lignes.append(f"  {i}. {r[0]} — {r[1]:,} kWh")
+
+        lignes.append("\n⚠️ Classements séparés : eau (m³) ≠ électricité (kWh).")
+        return "\n".join(lignes)
+# fetch min consommateurs 
+def fetch_min_consommateurs(mois: str = None) -> str:
+    """
+    Retourne le(s) client(s) avec la consommation minimale.
+    ATTENTION : compare séparément eau (m³) et électricité (kWh)
+    car les unités sont incompatibles.
+    """
+    conn = _connexion()
+    cursor = conn.cursor()
+
+    if mois:
+        mois = normaliser_mois(mois)
+        cursor.execute("""
+            SELECT nom_client, consommation, unite, mois_source
+            FROM factures_excel
+            WHERE mois_source LIKE ?
+            ORDER BY consommation ASC
+        """, (f"%{mois}%",))
+        rows = cursor.fetchall()
+        conn.close()
+        if not rows:
+            return f"Aucune donnée trouvée pour le mois {mois}."
+
+        eau  = [r for r in rows if r[2] == "m³"]
+        elec = [r for r in rows if r[2] == "kWh"]
+
+        lignes = [f"Client(s) avec la consommation la plus faible en **{mois}** :\n"]
+
+        if eau:
+            min_eau = min(eau, key=lambda r: r[1])
+            lignes.append(f"💧 Eau (m³) — minimum : 🔻 **{min_eau[0]}** : {min_eau[1]:,} m³")
+            for r in sorted(eau, key=lambda r: r[1]):
+                lignes.append(f"  - {r[0]} : {r[1]:,} m³")
+
+        if elec:
+            lignes.append("")
+            min_elec = min(elec, key=lambda r: r[1])
+            lignes.append(f"⚡ Électricité (kWh) — minimum : 🔻 **{min_elec[0]}** : {min_elec[1]:,} kWh")
+            for r in sorted(elec, key=lambda r: r[1]):
+                lignes.append(f"  - {r[0]} : {r[1]:,} kWh")
+
+        lignes.append("\n⚠️ Eau (m³) et Électricité (kWh) sont comparés séparément — les unités sont incompatibles.")
+        return "\n".join(lignes)
+
+    else:
+        cursor.execute("""
+            SELECT nom_client, ROUND(SUM(consommation), 2) as total_conso, unite
+            FROM factures_excel
+            GROUP BY nom_client
+            ORDER BY total_conso ASC
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        if not rows:
+            return "Aucune donnée trouvée."
+
+        eau  = [r for r in rows if r[2] == "m³"]
+        elec = [r for r in rows if r[2] == "kWh"]
+
+        lignes = ["Client(s) avec la consommation totale la plus faible :\n"]
+
+        if eau:
+            lignes.append("💧 **Eau (m³)** — classement (moins → plus) :")
+            for i, r in enumerate(sorted(eau, key=lambda r: r[1]), 1):
+                prefix = "🔻" if i == 1 else f"  {i}."
+                lignes.append(f"\n{prefix} **{r[0]}** — {r[1]:,} m³")
+
+        if elec:
+            lignes.append("\n⚡ **Électricité (kWh)** — classement (moins → plus) :")
+            for i, r in enumerate(sorted(elec, key=lambda r: r[1]), 1):
+                prefix = "🔻" if i == 1 else f"  {i}."
+                lignes.append(f"\n{prefix} **{r[0]}** — {r[1]:,} kWh")
+
+        lignes.append("\n⚠️ Les unités eau (m³) et électricité (kWh) sont incompatibles — classements séparés.")
+        return "\n".join(lignes)
 
 def fetch_top_montants(mois: str = None) -> str:
     conn = _connexion()
@@ -222,7 +314,7 @@ def fetch_top_montants(mois: str = None) -> str:
         tops = [r for r in rows if r[1] == max_val]
         lignes = [f"Client(s) avec le montant le plus élevé en **{mois}** :\n"]
         for r in tops:
-            lignes.append(f"🏆 **{r[0]}** — {r[1]:,.2f} Dhs")
+            lignes.append(f" **{r[0]}** — {r[1]:,.2f} Dhs")
         if len(rows) > len(tops):
             lignes.append(f"\nClassement complet ({mois}) :")
             for i, r in enumerate(rows, 1):
@@ -242,7 +334,7 @@ def fetch_top_montants(mois: str = None) -> str:
         tops = [r for r in rows if r[1] == max_val]
         lignes = ["Client(s) avec le montant total le plus élevé :\n"]
         for r in tops:
-            lignes.append(f"🏆 **{r[0]}** — {r[1]:,.2f} Dhs")
+            lignes.append(f" **{r[0]}** — {r[1]:,.2f} Dhs")
         if len(rows) > len(tops):
             lignes.append(f"\nClassement complet :")
             for i, r in enumerate(rows, 1):
@@ -272,7 +364,7 @@ def fetch_classement_par_mois() -> str:
 
     lignes = ["Classement des clients par montant pour chaque mois :\n"]
     for mois, clients in mois_dict.items():
-        lignes.append(f"📅 **{mois}** :")
+        lignes.append(f" **{mois}** :")
         for i, r in enumerate(clients, 1):
             lignes.append(f"  {i}. {r[1]} — {r[2]:,.2f} Dhs | Conso : {r[3]:,} {r[4]}")
         lignes.append("")
@@ -436,7 +528,7 @@ def fetch_par_service(service: str = None) -> str:
                 lignes.append(f"   • {nom.strip()}")
             lignes.append(f"   Consommation totale : {r[3]:,} | Montant total : {r[4]:,.2f} Dhs\n")
 
-        lignes.append("⚠️ Chaque client utilise UN SEUL service. Les totaux ci-dessus sont indépendants.")
+        lignes.append(" Chaque client utilise UN SEUL service. Les totaux ci-dessus sont indépendants.")
         return "\n".join(lignes)
 
 
@@ -497,7 +589,7 @@ def fetch_stats_generales() -> str:
     nb_eau = services.get("eau", 0)
     nb_elec = services.get("electricite", 0)
 
-    return f"""📊 **Statistiques générales de la base SRM :**
+    return f""" **Statistiques générales de la base SRM :**
 
 - Nombre de clients       : **{r[0]}** ({nb_eau} eau · {nb_elec} électricité)
 - Nombre de mois couverts : **{r[1]}**
@@ -875,6 +967,8 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     elif intent == "TOP_CONSOMMATEURS":
         return fetch_top_consommateurs(mois=params.get("mois"))
+    elif intent == "MIN_CONSOMMATEURS":
+        return fetch_min_consommateurs(mois=params.get("mois")) 
 
     elif intent == "TOP_MONTANTS":
         return fetch_top_montants(mois=params.get("mois"))
