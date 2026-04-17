@@ -720,60 +720,20 @@ def fetch_evolution_mois() -> str:
 
 def fetch_question_libre(question: str, historique_texte: str) -> str:
     """
-    Seul cas où le LLM est utilisé pour RÉPONDRE.
-    On lui fournit un résumé complet mais on lui interdit de modifier les chiffres.
+    Pour les questions incompréhensibles ou hors contexte :
+    On demande poliment de reformuler — AUCUN résumé de la DB.
     """
-    conn = _connexion()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT nom_client, agence, usage, type_service,
-               COUNT(*) as nb_mois,
-               ROUND(SUM(consommation), 2) as total_conso,
-               unite,
-               ROUND(SUM(montant_ttc), 2) as total_ttc,
-               ROUND(AVG(montant_ttc), 2) as moy_ttc
-        FROM factures_excel
-        GROUP BY nom_client
-        ORDER BY nom_client
-    """)
-    clients = cursor.fetchall()
-    cursor.execute("""
-        SELECT COUNT(DISTINCT mois_source), ROUND(SUM(montant_ttc), 2)
-        FROM factures_excel
-    """)
-    globales = cursor.fetchone()
-    conn.close()
-
-    contexte_lignes = [
-        f"Base SRM : {len(clients)} clients | {globales[0]} mois | Total : {globales[1]:,.2f} Dhs\n",
-        "Résumé par client :"
-    ]
-    for r in clients:
-        contexte_lignes.append(
-            f"  - {r[0]} | {r[1]} | Usage: {r[2]} | Service: {r[3]} | "
-            f"{r[4]} mois | Conso: {r[5]} {r[6]} | "
-            f"Total: {r[7]} Dhs | Moy/mois: {r[8]} Dhs"
-        )
-    contexte = "\n".join(contexte_lignes)
-
-    prompt = f"""Tu es un assistant de la SRM Souss-Massa.
-
-Données EXACTES extraites de la base :
-{contexte}
-
-RÈGLES STRICTES :
-1. Utilise UNIQUEMENT les données ci-dessus
-2. Ne modifie AUCUN chiffre
-3. Si l'info n'est pas dans les données, dis-le clairement
-
-Historique :
-{historique_texte}
-
-Question : {question}
-
-Réponds clairement en français, en te basant UNIQUEMENT sur les données fournies."""
-
-    return _appeler_llm(prompt)
+    return (
+        "Je ne suis pas sûr de comprendre votre question. "
+        "Pourriez-vous la reformuler ou la préciser ?\n\n"
+        "Par exemple, vous pouvez me demander :\n"
+        "- La liste des clients\n"
+        "- Qui consomme le plus / le moins\n"
+        "- L'évolution des factures mois par mois\n"
+        "- Les clients d'une agence précise\n"
+        "- Les alertes en cours\n"
+        "- Les statistiques générales"
+    )
 
 
 # ─────────────────────────────────────────────────────────
