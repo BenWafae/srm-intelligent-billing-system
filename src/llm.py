@@ -9,22 +9,74 @@ from src.rag_general import repondre_question_generale, repondre_question_client
 # MOTS FONCTIONNELS — ignorés lors de la détection de noms
 # ─────────────────────────────────────────────────────────
 MOTS_FONCTIONNELS = {
+    # verbes courants
     "information", "informations", "consommation", "consomation", "facture",
     "factures", "montant", "montants", "mois", "pour", "avec", "dans", "donne",
     "donner", "liste", "lister", "quel", "quelle", "quels", "quelles", "comment",
-    "combien", "evolution", "historique", "moyenne", "maximum", "minimum", "mars",
-    "avril", "mais", "juin", "juillet", "aout", "septembre", "octobre", "novembre",
-    "decembre", "janvier", "fevrier", "alerte", "alertes", "total", "client",
-    "clients", "agence", "service", "usage", "contrat", "compteur", "adresse",
-    "tous", "toutes", "voir", "afficher", "montrer", "est", "sont", "avoir",
-    "etre", "plus", "moins", "tout", "cette", "chez", "leur", "leurs",
-    "periode", "debut", "limite", "paiement", "date", "type", "quand", "depuis",
-    "dernier", "derniere", "derniers", "aussi", "avez", "avons", "avait", "etait",
-    # Ajouts pour éviter faux positifs
-    "comparer", "compare", "comparaison", "entre", "versus", "levolution",
-    "donner", "donnez", "infos", "info", "voir", "quelle", "quel", "quels",
-    "mai",  # mois court souvent mal filtré
+    "combien", "evolution", "historique", "moyenne", "maximum", "minimum",
+    "alerte", "alertes", "total", "client", "clients", "agence", "service",
+    "usage", "contrat", "compteur", "adresse", "tous", "toutes", "voir",
+    "afficher", "montrer", "est", "sont", "avoir", "etre", "plus", "moins",
+    "tout", "cette", "chez", "leur", "leurs", "periode", "debut", "limite",
+    "paiement", "date", "type", "quand", "depuis", "dernier", "derniere",
+    "derniers", "aussi", "avez", "avons", "avait", "etait", "comparer",
+    "compare", "comparaison", "entre", "versus", "levolution", "donnez",
+    "infos", "info", "quelle", "quel", "quels",
+    # mois
+    "mars", "avril", "mai", "juin", "juillet", "aout", "septembre",
+    "octobre", "novembre", "decembre", "janvier", "fevrier",
+    # ✅ AJOUTS — mots qui causaient de faux positifs
+    "existe", "existent", "existant", "existants", "disponible", "disponibles",
+    "enregistre", "enregistres", "enregistree", "enregistrees",
+    "qui", "que", "quoi", "lequel", "laquelle", "lesquels", "lesquelles",
+    "votre", "notre", "mon", "ton", "son", "mes", "tes", "ses",
+    "nous", "vous", "ils", "elles", "lui", "eux",
+    "base", "donnees", "systeme", "application", "fichier",
+    "nouveau", "nouvelle", "nouveaux", "nouvelles",
+    "nombre", "nbre", "nbr", "fois", "encore", "deja",
+    "avoir", "avons", "avez", "avait", "avaient",
+    "etre", "suis", "sommes", "etes", "etaient",
+    "faire", "fait", "faites", "faisons",
+    "vouloir", "veux", "veut", "voulez",
+    "pouvoir", "peux", "peut", "pouvez",
+    "savoir", "sais", "sait", "savez",
 }
+
+# ─────────────────────────────────────────────────────────
+# QUESTIONS GÉNÉRALES — patterns qui ne concernent JAMAIS
+# un client spécifique, peu importe les mots qu'elles contiennent
+# ─────────────────────────────────────────────────────────
+PATTERNS_QUESTION_GENERALE = [
+    r"\bcombien\b.*(client|facture|enregistrement)",
+    r"\b(liste|lister|afficher|montrer|donner)\b.*(client|tous|toutes)",
+    r"\b(tous|toutes)\b.*(client|facture)",
+    r"\bquels?\b.*(client|facture|enregistrement).*(exist|disponible|base|avoir)",
+    r"\bquels?\b\s+(sont|etaient?)\b.*(client)",
+    r"\bnombre\b.*(client|facture)",
+    r"\bkombien\b",   # faute fréquente
+    r"\btotal\b.*(client|facture|enregistrement)",
+    r"\bstatistique",
+    r"\bresume\b",
+    r"\bbilan\b",
+    r"\bagence",
+    r"\busage",
+    r"\bclassement\b",
+    r"\bevolution\b",
+    r"\balerte",
+    r"\bservice",
+]
+
+
+def est_question_generale(question: str) -> bool:
+    """
+    Retourne True si la question porte clairement sur la base entière
+    et non sur un client spécifique.
+    """
+    q = normaliser(question)
+    for pattern in PATTERNS_QUESTION_GENERALE:
+        if re.search(pattern, q):
+            return True
+    return False
 
 
 def normaliser(texte: str) -> str:
@@ -40,7 +92,7 @@ def extraire_mots_nom(question: str) -> list[str]:
 
 
 # ─────────────────────────────────────────────────────────
-# DÉTECTION CLIENT — simplifié, sans gestion "inconnu"
+# DÉTECTION CLIENT
 # ─────────────────────────────────────────────────────────
 
 def detecter_client(question: str, liste_clients: list) -> tuple[str | list | None, str]:
@@ -52,6 +104,10 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
       "ambigu"  → plusieurs clients possibles
       "aucun"   → aucun client détecté → question générale
     """
+    # ✅ Si c'est clairement une question générale, ne pas chercher de client
+    if est_question_generale(question):
+        return None, "aucun"
+
     q_norm = normaliser(question)
     clients_norm = [(c, normaliser(c)) for c in liste_clients]
 
@@ -73,10 +129,16 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
     if not mots_dans_base:
         return None, "aucun"
 
+    # ✅ Vérification supplémentaire : les mots trouvés ressemblent-ils
+    # vraiment à des prénoms/noms ? (longueur >= 4 et pas trop génériques)
+    mots_plausibles = [m for m in mots_dans_base if len(m) >= 4]
+    if not mots_plausibles:
+        return None, "aucun"
+
     # ── Étape 4 : clients correspondants ──
     clients_correspondants = []
     for client_original, client_norm in clients_norm:
-        if any(m in client_norm for m in mots_dans_base):
+        if any(m in client_norm for m in mots_plausibles):
             clients_correspondants.append((client_original, client_norm))
 
     # ── Étape 5 : résolution finale ──
@@ -89,6 +151,9 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
 
 
 def question_fait_reference(question: str) -> bool:
+    # ✅ Ne pas activer la référence implicite sur des questions générales
+    if est_question_generale(question):
+        return False
     mots_reference = ["son ", "sa ", "ses ", " il ", " elle ", "lui ", "leur "]
     question_lower = question.lower()
     return any(mot in question_lower for mot in mots_reference)
