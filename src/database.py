@@ -93,25 +93,79 @@ def get_all_factures():
     return rows
 
 
-def importer_excel_en_db(lignes: list[dict]) -> dict:
+def importer_excel_en_db(lignes: list[dict], mode: str = "skip") -> dict:
+    """
+    Importe les lignes Excel en base.
+
+    mode:
+      - "skip"   : ignore les doublons (comportement original)
+      - "update" : met à jour les lignes existantes (upsert)
+      - "force"  : supprime les doublons et réinsère (remplace tout)
+
+    Retourne: {
+        "nouvelles": int,
+        "doublons": int,
+        "mises_a_jour": int,
+        "total_traite": int,
+        "mode": str
+    }
+    """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     nouvelles = 0
     doublons = 0
+    mises_a_jour = 0
 
     for ligne in lignes:
+        num_client = str(ligne.get("numero_client", ""))
+        periode_debut = str(ligne.get("periode_debut", ""))
+        periode_fin = str(ligne.get("periode_fin", ""))
+
         cursor.execute("""
             SELECT id FROM factures_excel
             WHERE numero_client = ? AND periode_debut = ? AND periode_fin = ?
-        """, (
-            str(ligne.get("numero_client", "")),
-            str(ligne.get("periode_debut", "")),
-            str(ligne.get("periode_fin", ""))
-        ))
+        """, (num_client, periode_debut, periode_fin))
+        existing = cursor.fetchone()
 
-        if cursor.fetchone():
-            doublons += 1
-            continue
+        if existing:
+            if mode == "skip":
+                doublons += 1
+                continue
+            elif mode == "update":
+                cursor.execute("""
+                    UPDATE factures_excel SET
+                        agence = ?, date_edition = ?, numero_contrat = ?,
+                        numero_compteur = ?, usage = ?, nom_client = ?,
+                        adresse = ?, type_service = ?, consommation = ?,
+                        unite = ?, montant_ttc = ?, date_limite_paiement = ?,
+                        alerte = ?, mois_source = ?
+                    WHERE numero_client = ? AND periode_debut = ? AND periode_fin = ?
+                """, (
+                    str(ligne.get("agence", "")),
+                    str(ligne.get("date_edition", "")),
+                    str(ligne.get("numero_contrat", "")),
+                    str(ligne.get("numero_compteur", "")),
+                    str(ligne.get("usage", "")),
+                    str(ligne.get("nom_client", "")),
+                    str(ligne.get("adresse", "")),
+                    str(ligne.get("type_service", "")),
+                    float(ligne.get("consommation", 0) or 0),
+                    str(ligne.get("unite", "")),
+                    float(ligne.get("montant_ttc", 0) or 0),
+                    str(ligne.get("date_limite_paiement", "")),
+                    str(ligne.get("alerte", "")),
+                    str(ligne.get("mois_source", "")),
+                    num_client, periode_debut, periode_fin
+                ))
+                mises_a_jour += 1
+                continue
+            elif mode == "force":
+                cursor.execute("""
+                    DELETE FROM factures_excel
+                    WHERE numero_client = ? AND periode_debut = ? AND periode_fin = ?
+                """, (num_client, periode_debut, periode_fin))
+                doublons += 1
+                # fall through to insert below
 
         cursor.execute("""
             INSERT INTO factures_excel (
@@ -143,7 +197,13 @@ def importer_excel_en_db(lignes: list[dict]) -> dict:
 
     conn.commit()
     conn.close()
-    return {"nouvelles": nouvelles, "doublons": doublons}
+    return {
+        "nouvelles": nouvelles,
+        "doublons": doublons,
+        "mises_a_jour": mises_a_jour,
+        "total_traite": nouvelles + doublons + mises_a_jour,
+        "mode": mode
+    }
 
 
 def get_resume_excel() -> dict:
@@ -153,7 +213,7 @@ def get_resume_excel() -> dict:
     total = cursor.fetchone()[0]
     cursor.execute("SELECT DISTINCT nom_client FROM factures_excel ORDER BY nom_client")
     clients = [r[0] for r in cursor.fetchall()]
-    cursor.execute("SELECT DISTINCT mois_source FROM factures_excel")
+    cursor.execute("SELECT DISTINCT mois_source FROM factures_excel ORDER BY mois_source")
     periodes = [r[0] for r in cursor.fetchall()]
     conn.close()
     return {"total": total, "clients": clients, "periodes": periodes}
@@ -177,7 +237,6 @@ def rechercher_client_excel(nom_ou_numero: str) -> list[dict]:
 def get_toutes_factures_excel() -> list[dict]:
     """
     Retourne toutes les factures pour les questions générales.
-    Utilisé quand la question ne concerne pas un client spécifique.
     Ex: 'quel usage est majoritaire ?', 'quelle agence a le plus de clients ?'
     """
     conn = sqlite3.connect(DB_PATH)
@@ -186,7 +245,8 @@ def get_toutes_factures_excel() -> list[dict]:
         SELECT nom_client, agence, usage, type_service,
                mois_source, consommation, unite, montant_ttc,
                periode_debut, periode_fin, date_limite_paiement,
-               adresse, numero_client, numero_contrat, numero_compteur
+               adresse, numero_client, numero_contrat, numero_compteur,
+               alerte
         FROM factures_excel
         ORDER BY nom_client, mois_source
     """)
@@ -194,3 +254,74 @@ def get_toutes_factures_excel() -> list[dict]:
     rows = [dict(zip(colonnes, r)) for r in cursor.fetchall()]
     conn.close()
     return rows
+
+
+def verifier_doublons(lignes: list[dict]) -> dict:
+    """
+    Vérifie combien de lignes existent déjà en base SANS les insérer.
+    Utile pour afficher un aperçu avant import.
+
+    Retourne: {
+        "total": int,
+        "existantes": int,
+        "nouvelles": int,
+        "clients_nouveaux": list[str]  -- noms des clients pas encore en base
+    }
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    existantes = 0
+    nouvelles = 0
+    clients_nouveaux = set()
+
+    for ligne in lignes:
+        num_client = str(ligne.get("numero_client", ""))
+        periode_debut = str(ligne.get("periode_debut", ""))
+        periode_fin = str(ligne.get("periode_fin", ""))
+
+        cursor.execute("""
+            SELECT id FROM factures_excel
+            WHERE numero_client = ? AND periode_debut = ? AND periode_fin = ?
+        """, (num_client, periode_debut, periode_fin))
+
+        if cursor.fetchone():
+            existantes += 1
+        else:
+            nouvelles += 1
+            nom = str(ligne.get("nom_client", num_client))
+            clients_nouveaux.add(nom)
+
+    conn.close()
+    return {
+        "total": existantes + nouvelles,
+        "existantes": existantes,
+        "nouvelles": nouvelles,
+        "clients_nouveaux": sorted(list(clients_nouveaux))
+    }
+
+
+def supprimer_factures_client(nom_ou_numero: str) -> int:
+    """Supprime toutes les factures d'un client. Retourne le nombre de lignes supprimées."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    terme = f"%{nom_ou_numero}%"
+    cursor.execute("""
+        DELETE FROM factures_excel
+        WHERE nom_client LIKE ? OR numero_client LIKE ?
+    """, (terme, terme))
+    deleted = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return deleted
+
+
+def reset_base_excel() -> int:
+    """Vide entièrement la table factures_excel. Retourne le nombre de lignes supprimées."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM factures_excel")
+    total = cursor.fetchone()[0]
+    cursor.execute("DELETE FROM factures_excel")
+    conn.commit()
+    conn.close()
+    return total

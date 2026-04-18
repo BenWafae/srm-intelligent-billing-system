@@ -39,6 +39,12 @@ if "infos_facture" not in st.session_state:
 if "historique_excel" not in st.session_state:
     st.session_state.historique_excel = []
 
+# ✅ FIX : mémoriser quel fichier a déjà été importé + son résultat
+if "excel_importe_nom" not in st.session_state:
+    st.session_state.excel_importe_nom = None
+if "excel_resultat_import" not in st.session_state:
+    st.session_state.excel_resultat_import = None
+
 # ─────────────────────────────────────────────────────────
 #  TITRE + ONGLETS
 # ─────────────────────────────────────────────────────────
@@ -155,24 +161,38 @@ with onglet_excel:
     fichier_excel = st.file_uploader("Choisir un fichier Excel (.xlsx)", type=["xlsx"])
 
     if fichier_excel:
-        chemin_temp = "excel_temp.xlsx"
-        with open(chemin_temp, "wb") as f:
-            f.write(fichier_excel.read())
+        # ✅ FIX PRINCIPAL : n'importer que si c'est un nouveau fichier
+        # Streamlit re-exécute tout le script à chaque interaction (rerun),
+        # ce qui causait un double import à chaque fois.
+        if fichier_excel.name != st.session_state.excel_importe_nom:
 
-        try:
-            with st.spinner("📊 Lecture et import en base de données..."):
-                lignes = lire_excel(chemin_temp)
-                resultat = importer_excel_en_db(lignes)
+            chemin_temp = "excel_temp.xlsx"
+            with open(chemin_temp, "wb") as f:
+                f.write(fichier_excel.read())
 
-            if resultat["nouvelles"] > 0:
+            try:
+                with st.spinner("📊 Lecture et import en base de données..."):
+                    lignes = lire_excel(chemin_temp)
+                    resultat = importer_excel_en_db(lignes)
+
+                # Mémoriser le nom du fichier ET le résultat pour l'afficher après rerun
+                st.session_state.excel_importe_nom = fichier_excel.name
+                st.session_state.excel_resultat_import = resultat
+
+                st.rerun()
+
+            except ValueError as e:
+                st.error(f"❌ Erreur de format : {e}")
+
+        # ✅ Afficher le résultat mémorisé (après rerun, le fichier est déjà importé)
+        if st.session_state.excel_resultat_import:
+            resultat = st.session_state.excel_resultat_import
+            if resultat["nouvelles"] > 0 and resultat["doublons"] == 0:
+                st.success(f"✅ Import terminé — {resultat['nouvelles']} nouvelles factures ajoutées.")
+            elif resultat["nouvelles"] > 0 and resultat["doublons"] > 0:
                 st.success(f"✅ Import terminé — {resultat['nouvelles']} nouvelles factures ajoutées, {resultat['doublons']} doublons ignorés.")
             else:
-                st.warning(f"⚠️ Toutes les données existent déjà en base ({resultat['doublons']} doublons). Aucun ajout effectué.")
-
-            st.rerun()
-
-        except ValueError as e:
-            st.error(f"❌ Erreur de format : {e}")
+                st.info(f"ℹ️ Ce fichier est déjà en base ({resultat['doublons']} enregistrements existants). Vous pouvez interroger les données ci-dessous.")
 
     # --- Chatbot RAG multi-clients ---
     st.markdown("---")
