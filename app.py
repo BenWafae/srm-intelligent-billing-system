@@ -16,6 +16,23 @@ from src.excel_reader import lire_excel
 
 # Initialiser la base de données
 init_db()
+ 
+#  SIDEBAR — Bouton vers Agent IA
+# ─────────────────────────────────────────────────────────
+with st.sidebar:
+    st.title("🤖 SRM Assistant")
+    st.markdown("---")
+    st.markdown("### 🚀 Agents IA")
+    st.markdown("Comparaisons, détection de surconsommation et dashboards automatiques.")
+    st.markdown(
+        '<a href="http://localhost:8502" target="_blank">'
+        '<button style="width:100%;padding:8px;background:#1a3c5e;color:white;'
+        'border:none;border-radius:6px;cursor:pointer;font-size:0.9rem;">🔍 Ouvrir les Agents IA</button>'
+        '</a>',
+        unsafe_allow_html=True
+    )
+    st.markdown("---")
+    st.caption("app principale : port 8501\nagent app : port 8502")
 
 # ─────────────────────────────────────────────────────────
 #  SESSION STATE — PDF (existant, inchangé)
