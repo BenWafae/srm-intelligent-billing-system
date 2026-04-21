@@ -3,12 +3,21 @@ import unicodedata
 
 _TOKENS_COUNT = {
     "combien", "nombre", "nbr", "nbre", "nb",
-    "compter", "comptre", "complez", "comptez","calculer"
-    "quantite", "quantite", "qte", "qt",
+    "compter", "comptre", "complez", "comptez", "calculer",  # ✅ virgule ajoutée
+    "quantite", "qte", "qt",                                  # ✅ virgule ajoutée
     "effectif", "effectifs",
-    "quel est le nombre", "quel est le total","nbr de ","calculer le nbr de "
+    "quel est le nombre", "quel est le total",
+    "nbr de", "calculer le nbr de",                           # ✅ virgule ajoutée
     "count", "how many",
-    "nmbr", "nmbre", "nomb","nombre"
+    "nmbr", "nmbre", "nomb",
+    # ✅ Nouveaux patterns courts sans bonne formulation
+    "nbr client", "nbr clients",
+    "nbr service", "nbr services",
+    "nbr usage", "nbr usages",
+    "nbr facture", "nbr factures",
+    "nbr agence", "nbr agences",
+    "nbr alerte", "nbr alertes",
+    "nmb client", "nmb service",
 }
 
 _TOKENS_LIST = {
@@ -27,24 +36,25 @@ _TOKENS_LIST = {
     "toutes les factures",
     "l ensemble", "l'ensemble",
     "list", "show", "display", "get all",
-    "give me " , 
+    "give me",
 }
 
 _TOKENS_DETAIL_FORCE = {
     "moyenne", "moyen", "moy",
-    "max", "maximum", "plus eleve", "plus eleve", "plus haut",
+    "max", "maximum", "plus eleve", "plus haut",
     "min", "minimum", "plus faible", "plus bas",
     "somme", "sum", "total ttc", "montant total",
     "top", "classement", "classer", "rang", "ranking",
-    "evolution", "evolution", "tendance", "progression",
-    "statistique", "stat", "stats", "bilan", "resume", "resume",
-    "detail", "detail", "details", "details",
+    "evolution", "tendance", "progression",
+    "statistique", "stat", "stats", "bilan", "resume",
+    "detail", "details",
     "comparer", "comparaison", "versus", "vs",
     "historique", "historiq",
     "analyse", "analyser",
-    "repartition", "repartition",
-    "qui consomme", "qui paie", "qui paye", "qui consome","qui consomment"
-    "consommation", "consommations","consomaatioon"
+    "repartition",
+    "qui consomme", "qui paie", "qui paye", "qui consome",
+    "qui consomment",                                         # ✅ virgule ajoutée
+    "consommation", "consommations", "consomaatioon",         # ✅ virgule ajoutée
 }
 
 _TOKENS_TOP1 = {
@@ -56,7 +66,8 @@ _TOKENS_TOP1 = {
     "qui a la", "qui a le",
     "qui consomme le plus", "qui consomme le moins",
     "qui paie le plus", "qui paie le moins",
-    "le plus eleve", "le plus elevee", "la plus elevee", "eleve","elevees"
+    "le plus eleve", "le plus elevee", "la plus elevee",
+    "eleve", "elevees",                                       # ✅ virgule ajoutée
     "le plus faible", "la plus faible",
     "le maximum", "le minimum",
 }

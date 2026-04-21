@@ -29,18 +29,38 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     q_norm = _normaliser_q(question)
 
-    _sujet_facture = any(t in q_norm for t in ["facture", "factures", "fact", "enregistrement", "enregistrements", "ligne", "lignes"])
-    _sujet_client  = any(t in q_norm for t in ["client", "clients", "abonne", "abonnes"])
-    _sujet_mois    = any(t in q_norm for t in ["mois", "periode", "periodes"])
-    _sujet_agence  = any(t in q_norm for t in ["agence", "agences"])
-    _sujet_alerte  = any(t in q_norm for t in ["alerte", "alertes"])
-    _sujet_service = any(t in q_norm for t in ["type de service", "types de service", "type service", "types service"])
+    # ── Détection des sujets ──
+    _sujet_facture = any(t in q_norm for t in [
+        "facture", "factures", "fact", "enregistrement", "enregistrements", "ligne", "lignes"
+    ])
+    _sujet_client = any(t in q_norm for t in [
+        "client", "clients", "abonne", "abonnes"
+    ])
+    _sujet_mois = any(t in q_norm for t in [
+        "mois", "periode", "periodes"
+    ])
+    _sujet_agence = any(t in q_norm for t in [
+        "agence", "agences"
+    ])
+    _sujet_alerte = any(t in q_norm for t in [
+        "alerte", "alertes"
+    ])
+    _sujet_service = any(t in q_norm for t in [
+        "type de service", "types de service", "type service", "types service",
+        "service", "services"
+    ])
+    _sujet_usage = any(t in q_norm for t in [
+        "usage", "usages", "type usage", "types usage",
+        "professionnel", "domestique", "agricole",
+        "pro", "dom", "agri"
+    ])
 
     demande_eau    = any(m in q_norm for m in ["eau", "eauu", "eeau"])
     demande_elec   = any(m in q_norm for m in ["elec", "electricit", "electr"])
     demande_faible = any(m in q_norm for m in ["faible", "minimum", "minimale", "plus faible"])
     demande_elevee = any(m in q_norm for m in ["eleve", "plus grand", "maximum", "haut", "top"])
 
+    # ── Détection usage précis ──
     usage_detecte = None
     _mots_usage_contexte = any(t in q_norm for t in [
         "usage", "usages", "type usage",
@@ -57,24 +77,27 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         if usage_detecte is None:
             mots = q_norm.split()
             for i in range(len(mots) - 1):
-                bigramme = mots[i] + " " + mots[i+1]
+                bigramme = mots[i] + " " + mots[i + 1]
                 result = normaliser_usage(bigramme)
                 if result:
                     usage_detecte = result
                     break
 
+    # ── Cas spécial : usage par client ──
     _sujet_usage_par_client = (
         any(t in q_norm for t in ["chaque client", "pour chaque", "par client"]) and
         any(t in q_norm for t in ["usage", "usages", "type", "types"])
     )
-
     if _sujet_usage_par_client:
         return fetch_par_usage(usage=None, mode="detail")
 
+    # ── Cas spécial : usage précis + demande clients ──
     if usage_detecte and any(t in q_norm for t in ["client", "clients", "qui", "liste", "lister", "combien"]):
         return fetch_par_usage(usage=usage_detecte, mode=mode)
 
-    # ── MODE COUNT ──
+    # ════════════════════════════════════════════════════
+    # MODE COUNT — réponses courtes uniquement
+    # ════════════════════════════════════════════════════
     if mode == "count":
         if _sujet_facture and not _sujet_client:
             return fetch_stats_generales(mode="count", question=question)
@@ -86,6 +109,12 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             return fetch_par_agence(agence=None, mode="count")
         if _sujet_alerte:
             return fetch_alertes(mode="count")
+        # ✅ usage sans client précis → count types d'usage
+        if _sujet_usage and not usage_detecte and not _sujet_client:
+            return fetch_par_usage(usage=None, mode="count")
+        # ✅ service sans eau/elec précisé → count général
+        if _sujet_service and not demande_eau and not demande_elec and not _sujet_client:
+            return fetch_par_service(service=None, mode="count")
         if demande_eau and not demande_elec:
             return fetch_par_service(service="eau", mode="count")
         if demande_elec and not demande_eau:
@@ -93,18 +122,31 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         if demande_eau and demande_elec:
             return fetch_par_service(service=None, mode="count")
 
-    # ── MODE LIST ──
+    # ════════════════════════════════════════════════════
+    # MODE LIST — listes simples
+    # ════════════════════════════════════════════════════
     if mode == "list":
+        # ✅ clients en priorité
+        if _sujet_client and not demande_eau and not demande_elec and not _sujet_service:
+            return fetch_liste_clients(mode="list")
         if _sujet_agence and not _sujet_client:
             return fetch_par_agence(agence=None, mode="list")
         if _sujet_alerte:
             return fetch_alertes(mode="list")
+        # ✅ usage sans précision → lister tous les types d'usage
+        if _sujet_usage and not usage_detecte and not _sujet_client:
+            return fetch_par_usage(usage=None, mode="list")
+        # ✅ service sans eau/elec précisé → lister les deux
+        if _sujet_service and not demande_eau and not demande_elec:
+            return fetch_par_service(service=None, mode="list")
         if demande_eau and not demande_elec:
             return fetch_par_service(service="eau", mode="list")
         if demande_elec and not demande_eau:
             return fetch_par_service(service="electricite", mode="list")
 
-    # ── Pré-détection service / conso ──
+    # ════════════════════════════════════════════════════
+    # Pré-détection service / conso (eau ou elec précisé)
+    # ════════════════════════════════════════════════════
     if demande_faible and demande_eau and not demande_elec:
         return fetch_min_consommateurs_par_service(service="eau", mode=mode)
     if demande_faible and demande_elec and not demande_eau:
@@ -123,7 +165,9 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     if demande_elec and not demande_eau and any(m in q_norm for m in ["combien", "liste", "quels", "client", "utilis"]):
         return fetch_par_service(service="electricite", mode=mode)
 
-    # ── LLM pour les cas restants ──
+    # ════════════════════════════════════════════════════
+    # LLM fallback — cas non couverts par les règles
+    # ════════════════════════════════════════════════════
     print(f"  [RAG] Détection intent...")
     resultat = detecter_intent(question)
     intent = resultat.get("intent", "QUESTION_LIBRE")
@@ -183,7 +227,6 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
     elif intent == "MOYENNE_CLIENT":
         return fetch_client_moyenne(nom_client)
     elif intent == "INFOS_CLIENT":
-        # ── Passer le champ précis si détecté ──
         champ = params.get("champ")
         return fetch_client_infos(nom_client, champ=champ)
     elif intent == "MOIS_SPECIFIQUE":
