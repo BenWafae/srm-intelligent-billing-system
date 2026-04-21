@@ -38,6 +38,44 @@ MOIS_SPECIFIQUE      : consommation ou montant d'un mois précis, facture de tel
 FACTURES_CLIENT      : toutes les factures, liste des factures, historique complet, tous les mois
 """
 
+# ── Mapping mois → nom canonique (même format que la base) ──
+_MAP_MOIS = {
+    "jan":       "Janvier",
+    "janv":      "Janvier",
+    "janvier":   "Janvier",
+    "fev":       "Fevrier",
+    "fevr":      "Fevrier",
+    "fevrier":   "Fevrier",
+    "feb":       "Fevrier",
+    "mar":       "Mars",
+    "mars":      "Mars",
+    "avr":       "Avril",
+    "avril":     "Avril",
+    "apr":       "Avril",
+    "mai":       "Mai",
+    "may":       "Mai",
+    "jun":       "Juin",
+    "juin":      "Juin",
+    "jul":       "Juillet",
+    "juil":      "Juillet",
+    "juillet":   "Juillet",
+    "aou":       "Aout",
+    "aout":      "Aout",
+    "aug":       "Aout",
+    "sep":       "Septembre",
+    "sept":      "Septembre",
+    "septembre": "Septembre",
+    "oct":       "Octobre",
+    "octobre":   "Octobre",
+    "nov":       "Novembre",
+    "novembre":  "Novembre",
+    "dec":       "Decembre",
+    "decembre":  "Decembre",
+}
+
+# ── Noms de mois pour détecter présence ──
+_NOMS_MOIS = list(_MAP_MOIS.keys())
+
 # ── Tokens SOMME_CONSO_CLIENT ──
 _TOKENS_SOMME_CLIENT = [
     "somme", "somme de", "somme des",
@@ -91,24 +129,37 @@ _TOKENS_MIN_MONTANT = [
 ]
 
 # ── Tokens champs spécifiques INFOS_CLIENT ──
-_TOKENS_USAGE       = ["usage", "type d usage", "type usage", "quel usage", "quel est l usage", "quel est son usage"]
-_TOKENS_ADRESSE     = ["adresse", "ou habite", "ou se trouve", "quelle adresse"]
-_TOKENS_AGENCE      = ["agence", "quelle agence", "quel agence", "quelle est son agence", "quel est son agence"]
-_TOKENS_SERVICE     = ["type de service", "type service", "quel service", "quel est son service", "quel est le service", "quel type de service"]
-_TOKENS_CONTRAT     = ["contrat", "numero de contrat", "n contrat", "numero contrat"]
-_TOKENS_COMPTEUR    = ["compteur", "numero de compteur", "n compteur", "numero compteur"]
-_TOKENS_NUMERO_CLI  = ["numero client", "n client", "numero de client", "id client"]
-
-# ── Noms de mois ──
-_NOMS_MOIS = [
-    "janvier", "fevrier", "mars", "avril", "mai", "juin",
-    "juillet", "aout", "septembre", "octobre", "novembre", "decembre",
-    "jan", "fev", "mar", "avr", "jul", "aou", "sep", "oct", "nov", "dec",
-]
+_TOKENS_USAGE      = ["usage", "type d usage", "type usage", "quel usage", "quel est l usage", "quel est son usage"]
+_TOKENS_ADRESSE    = ["adresse", "ou habite", "ou se trouve", "quelle adresse"]
+_TOKENS_AGENCE     = ["agence", "quelle agence", "quel agence", "quelle est son agence", "quel est son agence"]
+_TOKENS_SERVICE    = ["type de service", "type service", "quel service", "quel est son service", "quel est le service", "quel type de service"]
+_TOKENS_CONTRAT    = ["contrat", "numero de contrat", "n contrat", "numero contrat"]
+_TOKENS_COMPTEUR   = ["compteur", "numero de compteur", "n compteur", "numero compteur"]
+_TOKENS_NUMERO_CLI = ["numero client", "n client", "numero de client", "id client"]
 
 
 def _contient_mois(q: str) -> bool:
+    """Retourne True si la question contient un nom de mois."""
     return any(m in q for m in _NOMS_MOIS)
+
+
+def _extraire_mois(q: str) -> str:
+    """
+    Extrait et retourne le nom canonique du mois depuis la question normalisée.
+    Priorité aux tokens longs (ex: "janvier" avant "jan").
+    Retourne "" si aucun mois trouvé.
+    """
+    # Trier par longueur décroissante pour matcher d'abord les plus longs
+    tokens_tries = sorted(_MAP_MOIS.keys(), key=len, reverse=True)
+    for token in tokens_tries:
+        # Chercher le token comme mot entier ou sous-chaîne
+        if re.search(r'\b' + re.escape(token) + r'\b', q):
+            return _MAP_MOIS[token]
+    # Fallback : sous-chaîne simple
+    for token in tokens_tries:
+        if token in q:
+            return _MAP_MOIS[token]
+    return ""
 
 
 def _appeler_llm(prompt: str) -> str:
@@ -153,7 +204,7 @@ def detecter_intent_client(question: str) -> dict:
 
     # ════════════════════════════════════════════════════════════
     # ÉTAPE 1 — MOIS_SPECIFIQUE (priorité absolue)
-    # "consommation de Amal en Janvier" → MOIS_SPECIFIQUE
+    # "consommation de Amal en Janvier" → MOIS_SPECIFIQUE + mois extrait
     # ════════════════════════════════════════════════════════════
     _mots_conso_montant = [
         "consommation", "conso", "montant", "facture",
@@ -162,12 +213,13 @@ def detecter_intent_client(question: str) -> dict:
     if _contient_mois(q) and any(t in q for t in _mots_conso_montant):
         _tokens_tous = ["tous les mois", "chaque mois", "sur tous", "l ensemble"]
         if not any(t in q for t in _tokens_tous):
-            return {"intent": "MOIS_SPECIFIQUE", "params": {}}
+            # ✅ FIX CRITIQUE : extraire le mois et le passer dans params
+            mois_extrait = _extraire_mois(q)
+            print(f"  [PRÉ-DÉTECTION CLIENT] MOIS_SPECIFIQUE → mois='{mois_extrait}'")
+            return {"intent": "MOIS_SPECIFIQUE", "params": {"mois": mois_extrait}}
 
     # ════════════════════════════════════════════════════════════
     # ÉTAPE 2 — Champs spécifiques INFOS_CLIENT
-    # Répondre précisément : "quel usage" → juste l'usage
-    # AVANT SOMME pour éviter que "usage" déclenche autre chose
     # ════════════════════════════════════════════════════════════
     if any(t in q for t in _TOKENS_USAGE):
         return {"intent": "INFOS_CLIENT", "params": {"champ": "usage"}}
@@ -254,7 +306,7 @@ Voici les intents disponibles :
 RÈGLES :
 - SOMME ou TOTAL sur tous les mois → SOMME_CONSO_CLIENT
 - "tous les mois", "historique" → FACTURES_CLIENT
-- UN mois précis → MOIS_SPECIFIQUE avec le mois
+- UN mois précis → MOIS_SPECIFIQUE avec le mois dans params
 - mois avec conso MAX → MAX_CONSOMMATION
 - mois avec conso MIN → MIN_CONSOMMATION
 - usage, adresse, agence, service, contrat → INFOS_CLIENT
