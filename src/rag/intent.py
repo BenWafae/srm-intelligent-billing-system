@@ -30,11 +30,11 @@ MAX_CONSOMMATION     : mois où le client a le plus consommé, consommation maxi
 MIN_CONSOMMATION     : mois où le client a le moins consommé, consommation minimale
 MAX_MONTANT          : mois où le client a payé le plus, montant maximum, facture la plus chère
 MIN_MONTANT          : mois où le client a payé le moins, montant minimum, facture la moins chère
-SOMME_CONSO_CLIENT   : somme totale de consommation du client sur tous les mois, total consommé, combien a-t-il consommé en tout, somme de ses consommations
+SOMME_CONSO_CLIENT   : somme totale de consommation du client sur tous les mois, total consommé, combien a-t-il consommé en tout
 EVOLUTION_CLIENT     : évolution, progression, tendance, historique du client
 MOYENNE_CLIENT       : moyenne, consommation moyenne, montant moyen du client
-INFOS_CLIENT         : adresse, numéro client, contrat, compteur, agence, infos générales
-MOIS_SPECIFIQUE      : consommation ou montant d'un mois précis, que s'est-il passé en tel mois, facture de tel mois
+INFOS_CLIENT         : adresse, numéro client, contrat, compteur, agence, infos générales, usage, type service
+MOIS_SPECIFIQUE      : consommation ou montant d'un mois précis, facture de tel mois
 FACTURES_CLIENT      : toutes les factures, liste des factures, historique complet, tous les mois
 """
 
@@ -53,79 +53,53 @@ _TOKENS_SOMME_CLIENT = [
 ]
 
 # ── Tokens MAX_CONSOMMATION ──
-# IMPORTANT : ces tokens NE contiennent PAS de noms de mois
-# pour ne pas entrer en conflit avec MOIS_SPECIFIQUE
 _TOKENS_MAX_CONSO = [
-    "le plus consomme",
-    "le plus consome",
-    "consommation maximale",
-    "consommation la plus elevee",
-    "consomme le plus",
-    "pic de consommation",
-    "mois ou il a le plus consomme",
-    "mois ou elle a le plus consomme",
-    "mois ou le client a le plus",
-    "a le plus consomme",
-    "a le plus consome",
+    "le plus consomme", "le plus consome",
+    "consommation maximale", "consommation la plus elevee",
+    "consomme le plus", "pic de consommation",
+    "mois ou il a le plus consomme", "mois ou elle a le plus consomme",
+    "mois ou le client a le plus", "a le plus consomme",
+    "plus elevee", "plus eleve", "la plus haute", "plus haute",
 ]
 
 # ── Tokens MIN_CONSOMMATION ──
 _TOKENS_MIN_CONSO = [
-    "le moins consomme",
-    "le moins consome",
-    "consommation minimale",
-    "consommation la plus faible",
-    "consomme le moins",
-    "mois ou il a le moins consomme",
-    "mois ou elle a le moins consomme",
-    "mois ou le client a le moins",
-    "a le moins consomme",
-    "a le moins consome",
-    "plus faible consommation",
-    "moins elevee",          # "consommation la moins élevée"
-    "moins eleve",           # variante sans accent
-    "la moins eleve",
-    "la moins elevee",
-    "faible consommation",
-    "consommation faible",
-    "consommation basse",
-    "la plus basse",
-    "plus basse",
+    "le moins consomme", "le moins consome",
+    "consommation minimale", "consommation la plus faible",
+    "consomme le moins", "mois ou il a le moins consomme",
+    "mois ou elle a le moins consomme", "mois ou le client a le moins",
+    "a le moins consomme", "a le moins consome",
+    "plus faible consommation", "moins elevee", "moins eleve",
+    "la moins eleve", "la moins elevee", "faible consommation",
+    "consommation faible", "consommation basse", "la plus basse", "plus basse",
 ]
 
 # ── Tokens MAX_MONTANT ──
 _TOKENS_MAX_MONTANT = [
-    "le plus paye",
-    "le plus cher",
-    "montant le plus eleve",
-    "facture la plus chere",
-    "paie le plus",
-    "paye le plus",
-    "montant maximum",
-    "montant maximal",
-    "a le plus paye",
-    "mois ou il a le plus paye",
-    "mois ou elle a le plus paye",
+    "le plus paye", "le plus cher", "montant le plus eleve",
+    "facture la plus chere", "paie le plus", "paye le plus",
+    "montant maximum", "montant maximal", "a le plus paye",
+    "mois ou il a le plus paye", "mois ou elle a le plus paye",
 ]
 
 # ── Tokens MIN_MONTANT ──
 _TOKENS_MIN_MONTANT = [
-    "le moins paye",
-    "moins cher",
-    "montant le plus faible",
-    "facture la moins chere",
-    "paie le moins",
-    "paye le moins",
-    "montant minimum",
-    "montant minimal",
-    "a le moins paye",
-    "mois ou il a le moins paye",
-    "mois ou elle a le moins paye",
+    "le moins paye", "moins cher", "montant le plus faible",
+    "facture la moins chere", "paie le moins", "paye le moins",
+    "montant minimum", "montant minimal", "a le moins paye",
+    "mois ou il a le moins paye", "mois ou elle a le moins paye",
 ]
 
-# ── Liste des noms de mois pour détecter MOIS_SPECIFIQUE ──
-# Si la question contient un mois précis + "consommation" → MOIS_SPECIFIQUE
-# Cette liste sert à PROTÉGER MOIS_SPECIFIQUE contre les faux positifs MAX/MIN
+# ── Tokens champs spécifiques INFOS_CLIENT ──
+_TOKENS_USAGE       = ["usage", "type d usage", "type usage", "quel usage", "quel est l usage", "quel est son usage"]
+_TOKENS_ADRESSE     = ["adresse", "ou habite", "ou se trouve", "quelle adresse"]
+_TOKENS_AGENCE      = ["agence", "quelle agence", "quel agence", "quelle est son agence", "quel est son agence"]
+_TOKENS_SERVICE     = ["type de service", "type service", "quel service", "quel est son service", "quel est le service", "quel type de service"]
+_TOKENS_CONTRAT     = ["contrat", "numero de contrat", "n contrat", "numero contrat"]
+_TOKENS_COMPTEUR    = ["compteur", "numero de compteur", "n compteur", "numero compteur"]
+_TOKENS_NUMERO_CLI  = ["numero client", "n client", "numero de client", "id client"]
+
+# ── Noms de mois ──
 _NOMS_MOIS = [
     "janvier", "fevrier", "mars", "avril", "mai", "juin",
     "juillet", "aout", "septembre", "octobre", "novembre", "decembre",
@@ -134,7 +108,6 @@ _NOMS_MOIS = [
 
 
 def _contient_mois(q: str) -> bool:
-    """Retourne True si la question contient un nom de mois précis."""
     return any(m in q for m in _NOMS_MOIS)
 
 
@@ -179,80 +152,75 @@ def detecter_intent_client(question: str) -> dict:
     q = _normaliser_q(question)
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 1 — MOIS_SPECIFIQUE en priorité absolue
-    # Si la question contient un mois précis ET un mot de consommation/montant
-    # → c'est forcément MOIS_SPECIFIQUE, pas MAX ni MIN ni SOMME
-    # Exemples protégés :
-    #   "consommation de Amal en Janvier"       → MOIS_SPECIFIQUE ✅
-    #   "facture de Amal en Avril"              → MOIS_SPECIFIQUE ✅
-    #   "que s'est-il passé en Mars"            → MOIS_SPECIFIQUE ✅
+    # ÉTAPE 1 — MOIS_SPECIFIQUE (priorité absolue)
+    # "consommation de Amal en Janvier" → MOIS_SPECIFIQUE
     # ════════════════════════════════════════════════════════════
     _mots_conso_montant = [
         "consommation", "conso", "montant", "facture",
-        "combien", "que s est il passe", "que s'est-il passe",
-        "paye", "consomme",
+        "combien", "paye", "consomme",
     ]
     if _contient_mois(q) and any(t in q for t in _mots_conso_montant):
-        # Vérifier que ce n'est PAS une question sur "tous les mois"
         _tokens_tous = ["tous les mois", "chaque mois", "sur tous", "l ensemble"]
         if not any(t in q for t in _tokens_tous):
-            print(f"  [PRÉ-DÉTECTION CLIENT] MOIS_SPECIFIQUE (mois précis détecté)")
             return {"intent": "MOIS_SPECIFIQUE", "params": {}}
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 2 — SOMME_CONSO_CLIENT
-    # Exemples :
-    #   "quelle est la somme de consommation de Amal"   → SOMME ✅
-    #   "total consommé par Amal"                       → SOMME ✅
-    #   "combien a-t-il consommé en tout"               → SOMME ✅
+    # ÉTAPE 2 — Champs spécifiques INFOS_CLIENT
+    # Répondre précisément : "quel usage" → juste l'usage
+    # AVANT SOMME pour éviter que "usage" déclenche autre chose
+    # ════════════════════════════════════════════════════════════
+    if any(t in q for t in _TOKENS_USAGE):
+        return {"intent": "INFOS_CLIENT", "params": {"champ": "usage"}}
+    if any(t in q for t in _TOKENS_ADRESSE):
+        return {"intent": "INFOS_CLIENT", "params": {"champ": "adresse"}}
+    if any(t in q for t in _TOKENS_AGENCE):
+        return {"intent": "INFOS_CLIENT", "params": {"champ": "agence"}}
+    if any(t in q for t in _TOKENS_SERVICE):
+        return {"intent": "INFOS_CLIENT", "params": {"champ": "service"}}
+    if any(t in q for t in _TOKENS_CONTRAT):
+        return {"intent": "INFOS_CLIENT", "params": {"champ": "contrat"}}
+    if any(t in q for t in _TOKENS_COMPTEUR):
+        return {"intent": "INFOS_CLIENT", "params": {"champ": "compteur"}}
+    if any(t in q for t in _TOKENS_NUMERO_CLI):
+        return {"intent": "INFOS_CLIENT", "params": {"champ": "numero_client"}}
+
+    # ════════════════════════════════════════════════════════════
+    # ÉTAPE 3 — SOMME_CONSO_CLIENT
     # ════════════════════════════════════════════════════════════
     for token in _TOKENS_SOMME_CLIENT:
         if token in q:
-            print(f"  [PRÉ-DÉTECTION CLIENT] SOMME_CONSO_CLIENT via '{token}'")
             return {"intent": "SOMME_CONSO_CLIENT", "params": {}}
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 3 — MAX_CONSOMMATION
-    # Exemples :
-    #   "quel est le mois où Amal a le plus consommé"   → MAX ✅
-    #   "pic de consommation de Kamal"                  → MAX ✅
-    # Note : ces tokens ne contiennent PAS de noms de mois
-    # donc pas de conflit avec MOIS_SPECIFIQUE
+    # ÉTAPE 4 — MAX_CONSOMMATION
     # ════════════════════════════════════════════════════════════
     for token in _TOKENS_MAX_CONSO:
         if token in q:
-            print(f"  [PRÉ-DÉTECTION CLIENT] MAX_CONSOMMATION via '{token}'")
             return {"intent": "MAX_CONSOMMATION", "params": {}}
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 4 — MIN_CONSOMMATION
-    # Exemples :
-    #   "quel est le mois où Amal a le moins consommé"  → MIN ✅
-    #   "consommation minimale de Tariq"                → MIN ✅
+    # ÉTAPE 5 — MIN_CONSOMMATION
     # ════════════════════════════════════════════════════════════
     for token in _TOKENS_MIN_CONSO:
         if token in q:
-            print(f"  [PRÉ-DÉTECTION CLIENT] MIN_CONSOMMATION via '{token}'")
             return {"intent": "MIN_CONSOMMATION", "params": {}}
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 5 — MAX_MONTANT
+    # ÉTAPE 6 — MAX_MONTANT
     # ════════════════════════════════════════════════════════════
     for token in _TOKENS_MAX_MONTANT:
         if token in q:
-            print(f"  [PRÉ-DÉTECTION CLIENT] MAX_MONTANT via '{token}'")
             return {"intent": "MAX_MONTANT", "params": {}}
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 6 — MIN_MONTANT
+    # ÉTAPE 7 — MIN_MONTANT
     # ════════════════════════════════════════════════════════════
     for token in _TOKENS_MIN_MONTANT:
         if token in q:
-            print(f"  [PRÉ-DÉTECTION CLIENT] MIN_MONTANT via '{token}'")
             return {"intent": "MIN_MONTANT", "params": {}}
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 7 — Historique complet / toutes factures
+    # ÉTAPE 8 — Historique complet
     # ════════════════════════════════════════════════════════════
     _tokens_all = [
         "tous les mois", "toutes les factures",
@@ -264,40 +232,39 @@ def detecter_intent_client(question: str) -> dict:
             return {"intent": "FACTURES_CLIENT", "params": {}}
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 8 — Moyenne
+    # ÉTAPE 9 — Moyenne
     # ════════════════════════════════════════════════════════════
     if any(t in q for t in ["moyenne", "moyen", "moy"]):
         return {"intent": "MOYENNE_CLIENT", "params": {}}
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 9 — Infos générales
+    # ÉTAPE 10 — Infos générales complètes
     # ════════════════════════════════════════════════════════════
-    if any(t in q for t in ["adresse", "contrat", "compteur", "numero", "agence", "infos"]):
+    if any(t in q for t in ["infos", "informations", "fiche", "profil", "tout sur"]):
         return {"intent": "INFOS_CLIENT", "params": {}}
 
     # ════════════════════════════════════════════════════════════
-    # ÉTAPE 10 — LLM pour les cas restants
+    # ÉTAPE 11 — LLM fallback
     # ════════════════════════════════════════════════════════════
     prompt = f"""Tu es un classificateur de questions sur un client.
 
 Voici les intents disponibles :
 {INTENTS_CLIENT}
 
-RÈGLES IMPORTANTES :
-- Si la question demande la SOMME ou le TOTAL de consommation sur tous les mois → SOMME_CONSO_CLIENT
-- Si la question demande "tous les mois", "toutes les factures", "historique" → FACTURES_CLIENT
-- Si la question mentionne UN mois précis SANS "tous" → MOIS_SPECIFIQUE avec le mois
-- Si la question demande le mois avec la consommation MAX → MAX_CONSOMMATION
-- Si la question demande le mois avec la consommation MIN → MIN_CONSOMMATION
+RÈGLES :
+- SOMME ou TOTAL sur tous les mois → SOMME_CONSO_CLIENT
+- "tous les mois", "historique" → FACTURES_CLIENT
+- UN mois précis → MOIS_SPECIFIQUE avec le mois
+- mois avec conso MAX → MAX_CONSOMMATION
+- mois avec conso MIN → MIN_CONSOMMATION
+- usage, adresse, agence, service, contrat → INFOS_CLIENT
 
 Question : {question}
 
-Réponds UNIQUEMENT avec un objet JSON valide, rien d'autre, sans explication, sans markdown.
+JSON uniquement :
 {{"intent": "NOM_INTENT", "params": {{}}}}
-
-Si la question mentionne UN mois précis, ajoute : {{"mois": "Mars"}}
-
-JSON :"""
+Si mois précis ajoute : {{"mois": "Mars"}}
+"""
 
     texte = _appeler_llm(prompt)
     match = re.search(r'\{.*\}', texte, re.DOTALL)
@@ -307,9 +274,9 @@ JSON :"""
             intents_valides = [
                 "MAX_CONSOMMATION", "MIN_CONSOMMATION",
                 "MAX_MONTANT", "MIN_MONTANT",
-                "SOMME_CONSO_CLIENT",
-                "EVOLUTION_CLIENT", "MOYENNE_CLIENT",
-                "INFOS_CLIENT", "MOIS_SPECIFIQUE", "FACTURES_CLIENT"
+                "SOMME_CONSO_CLIENT", "EVOLUTION_CLIENT",
+                "MOYENNE_CLIENT", "INFOS_CLIENT",
+                "MOIS_SPECIFIQUE", "FACTURES_CLIENT"
             ]
             if result.get("intent") in intents_valides:
                 return result

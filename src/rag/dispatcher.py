@@ -12,14 +12,14 @@ from rag.fetchers_generaux import (
     fetch_top_montants, fetch_classement_par_mois, fetch_par_agence,
     fetch_par_usage, fetch_par_service, fetch_alertes,
     fetch_stats_generales, fetch_evolution_mois, fetch_question_libre,
-    fetch_somme_conso_mois   # ✅ ajout import manquant
+    fetch_somme_conso_mois
 )
 from rag.fetchers_client import (
     fetch_client_max_consommation, fetch_client_min_consommation,
     fetch_client_max_montant, fetch_client_min_montant,
     fetch_client_evolution, fetch_client_moyenne, fetch_client_infos,
     fetch_client_mois_specifique, fetch_client_toutes_factures,
-    fetch_client_somme_conso   # ✅ ajout import manquant
+    fetch_client_somme_conso
 )
 
 
@@ -154,11 +154,11 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_stats_generales(mode=mode, question=question)
     elif intent == "EVOLUTION_MOIS":
         return fetch_evolution_mois(mode=mode)
-    elif intent == "SOMME_CONSO_MOIS":          # ✅ indentation correcte
-        mois = params.get("mois", "")           # ✅ même niveau que les autres elif
-        if not mois:                             # ✅ if à l'intérieur du elif
+    elif intent == "SOMME_CONSO_MOIS":
+        mois = params.get("mois", "")
+        if not mois:
             return "Veuillez préciser le mois souhaité."
-        return fetch_somme_conso_mois(mois)     # ✅ return au bon niveau
+        return fetch_somme_conso_mois(mois)
     else:
         return fetch_question_libre(question, historique_texte)
 
@@ -183,11 +183,13 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
     elif intent == "MOYENNE_CLIENT":
         return fetch_client_moyenne(nom_client)
     elif intent == "INFOS_CLIENT":
-        return fetch_client_infos(nom_client)
+        # ── Passer le champ précis si détecté ──
+        champ = params.get("champ")
+        return fetch_client_infos(nom_client, champ=champ)
     elif intent == "MOIS_SPECIFIQUE":
         mois = params.get("mois", "")
         return fetch_client_mois_specifique(nom_client, mois)
-    elif intent == "SOMME_CONSO_CLIENT":        # ✅ ajout
+    elif intent == "SOMME_CONSO_CLIENT":
         return fetch_client_somme_conso(nom_client)
     else:
         return fetch_client_toutes_factures(nom_client)

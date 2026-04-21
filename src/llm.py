@@ -25,7 +25,7 @@ MOTS_FONCTIONNELS = {
     # mois
     "mars", "avril", "mai", "juin", "juillet", "aout", "septembre",
     "octobre", "novembre", "decembre", "janvier", "fevrier",
-    # ✅ AJOUTS — mots qui causaient de faux positifs
+    # ajouts
     "existe", "existent", "existant", "existants", "disponible", "disponibles",
     "enregistre", "enregistres", "enregistree", "enregistrees",
     "qui", "que", "quoi", "lequel", "laquelle", "lesquels", "lesquelles",
@@ -40,11 +40,21 @@ MOTS_FONCTIONNELS = {
     "vouloir", "veux", "veut", "voulez",
     "pouvoir", "peux", "peut", "pouvez",
     "savoir", "sais", "sait", "savez",
+    # ── ajouts pour éviter faux positifs sur questions de suivi ──
+    "eleve", "elevee", "elevees", "eleves",
+    "faible", "faibles",
+    "moins", "plus",
+    "mois", "periode",
+    "consomme", "consommee", "consommes",
+    "paye", "payee", "payes",
+    "quel", "quelle", "quels", "quelles",
+    "est", "sont", "etait", "etaient",
+    "meme", "aussi", "encore",
 }
 
 # ─────────────────────────────────────────────────────────
 # QUESTIONS GÉNÉRALES — patterns qui ne concernent JAMAIS
-# un client spécifique, peu importe les mots qu'elles contiennent
+# un client spécifique
 # ─────────────────────────────────────────────────────────
 PATTERNS_QUESTION_GENERALE = [
     r"\bcombien\b.*(client|facture|enregistrement)",
@@ -53,7 +63,7 @@ PATTERNS_QUESTION_GENERALE = [
     r"\bquels?\b.*(client|facture|enregistrement).*(exist|disponible|base|avoir)",
     r"\bquels?\b\s+(sont|etaient?)\b.*(client)",
     r"\bnombre\b.*(client|facture)",
-    r"\bkombien\b",   # faute fréquente
+    r"\bkombien\b",
     r"\btotal\b.*(client|facture|enregistrement)",
     r"\bstatistique",
     r"\bresume\b",
@@ -66,12 +76,24 @@ PATTERNS_QUESTION_GENERALE = [
     r"\bservice",
 ]
 
+# ─────────────────────────────────────────────────────────
+# MOTS DE RÉFÉRENCE IMPLICITE
+# Indiquent que la question parle du même client que before
+# ─────────────────────────────────────────────────────────
+MOTS_REFERENCE_IMPLICITE = [
+    # pronoms
+    "son ", "sa ", "ses ", " il ", " elle ", "lui ", "leur ",
+    # expressions de suivi
+    "ce client", "ce meme client", "le meme", "la meme",
+    "pour lui", "pour elle", "de lui", "d elle",
+    # questions de suivi sans nom
+    "quel est le mois", "quel mois", "quelle est sa",
+    "quel est son", "et sa ", "et son ", "et ses ",
+    "et pour", "maintenant", "aussi", "egalement",
+]
+
 
 def est_question_generale(question: str) -> bool:
-    """
-    Retourne True si la question porte clairement sur la base entière
-    et non sur un client spécifique.
-    """
     q = normaliser(question)
     for pattern in PATTERNS_QUESTION_GENERALE:
         if re.search(pattern, q):
@@ -98,13 +120,8 @@ def extraire_mots_nom(question: str) -> list[str]:
 def detecter_client(question: str, liste_clients: list) -> tuple[str | list | None, str]:
     """
     Retourne (client_trouvé_ou_liste, statut)
-
-    statut :
-      "exact"   → un seul client identifié
-      "ambigu"  → plusieurs clients possibles
-      "aucun"   → aucun client détecté → question générale
+    statut : "exact" | "ambigu" | "aucun"
     """
-    # ✅ Si c'est clairement une question générale, ne pas chercher de client
     if est_question_generale(question):
         return None, "aucun"
 
@@ -118,30 +135,33 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
 
     # ── Étape 2 : extraire les mots-noms ──
     mots_nom_question = extraire_mots_nom(question)
-
     if not mots_nom_question:
         return None, "aucun"
 
     # ── Étape 3 : mots reconnus dans la base ──
     mots_dans_base = [m for m in mots_nom_question
                       if any(m in cn for (_, cn) in clients_norm)]
-
     if not mots_dans_base:
         return None, "aucun"
 
-    # ✅ Vérification supplémentaire : les mots trouvés ressemblent-ils
-    # vraiment à des prénoms/noms ? (longueur >= 4 et pas trop génériques)
+    # ── Étape 4 : filtrer mots plausibles (longueur >= 4) ──
     mots_plausibles = [m for m in mots_dans_base if len(m) >= 4]
     if not mots_plausibles:
         return None, "aucun"
 
-    # ── Étape 4 : clients correspondants ──
+    # ── Étape 5 : clients correspondants ──
+    # FIX BUG AMAL/KAMAL : vérifier que le mot apparaît comme mot ENTIER
+    # "amal" ne doit pas matcher "Kamal" (qui contient "amal" mais pas en début de mot)
     clients_correspondants = []
     for client_original, client_norm in clients_norm:
-        if any(m in client_norm for m in mots_plausibles):
-            clients_correspondants.append((client_original, client_norm))
+        for m in mots_plausibles:
+            # Vérifier correspondance mot entier dans le nom du client
+            parties_client = client_norm.split()
+            if any(partie == m or partie.startswith(m) for partie in parties_client):
+                clients_correspondants.append((client_original, client_norm))
+                break
 
-    # ── Étape 5 : résolution finale ──
+    # ── Étape 6 : résolution finale ──
     if len(clients_correspondants) == 1:
         return clients_correspondants[0][0], "exact"
     elif len(clients_correspondants) > 1:
@@ -151,12 +171,68 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
 
 
 def question_fait_reference(question: str) -> bool:
-    # ✅ Ne pas activer la référence implicite sur des questions générales
+    """
+    Retourne True si la question fait référence implicite
+    à un client mentionné précédemment (sans répéter son nom).
+    """
     if est_question_generale(question):
         return False
-    mots_reference = ["son ", "sa ", "ses ", " il ", " elle ", "lui ", "leur "]
+
     question_lower = question.lower()
-    return any(mot in question_lower for mot in mots_reference)
+
+    # Vérifier pronoms et expressions de suivi
+    for mot in MOTS_REFERENCE_IMPLICITE:
+        if mot in question_lower:
+            return True
+
+    # ── Cas supplémentaire : question courte sans nom de client ──
+    # Si la question est courte (< 10 mots) et ne contient aucun nom
+    # → probablement une question de suivi
+    mots = question_lower.split()
+    if len(mots) <= 8:
+        mots_norm = [normaliser(m) for m in mots]
+        # Si aucun mot n'est potentiellement un nom propre
+        tous_fonctionnels = all(m in MOTS_FONCTIONNELS or len(m) <= 3 for m in mots_norm)
+        if tous_fonctionnels:
+            return True
+
+    return False
+
+
+def _extraire_client_depuis_historique(historique: list, liste_clients: list) -> str | None:
+    """
+    Cherche le dernier client mentionné dans l'historique.
+    Parcourt les messages du plus récent au plus ancien.
+    Cherche dans les questions ET les réponses.
+    """
+    for msg in reversed(historique):
+        contenu = msg.get("content", "")
+
+        # Chercher dans les questions utilisateur (role=user)
+        if msg.get("role") == "user":
+            res, st = detecter_client(contenu, liste_clients)
+            if st == "exact":
+                print(f"  [CONTEXTE] Client trouvé dans historique user : {res}")
+                return res
+
+        # Chercher dans les réponses assistant (role=assistant)
+        # Les réponses contiennent souvent "**Nom Client**"
+        if msg.get("role") == "assistant":
+            # Chercher les noms en gras markdown **Nom**
+            noms_gras = re.findall(r'\*\*([^*]+)\*\*', contenu)
+            for nom in noms_gras:
+                for client in liste_clients:
+                    if normaliser(client) == normaliser(nom):
+                        print(f"  [CONTEXTE] Client trouvé dans réponse assistant : {client}")
+                        return client
+
+            # Chercher aussi directement dans le texte de la réponse
+            res, st = detecter_client(contenu, liste_clients)
+            if st == "exact":
+                print(f"  [CONTEXTE] Client trouvé dans texte assistant : {res}")
+                return res
+
+    return None
 
 
 # ─────────────────────────────────────────────────────────
@@ -194,9 +270,9 @@ Réponds de façon claire et précise en français, en tenant compte du contexte
 
 def poser_question_excel(question: str, historique: list = []) -> str:
     """
-    CAS 1 — Client exact détecté         → fetcher analytique client
+    CAS 1 — Client exact détecté          → fetcher analytique client
     CAS 2 — Ambiguïté (plusieurs clients) → demander précision
-    CAS 3 — Référence implicite (il/elle) → chercher dans l'historique
+    CAS 3 — Référence implicite (il/elle/question courte) → chercher dans historique
     CAS 4 — Question générale             → fetcher général par intent
     """
     resume = get_resume_excel()
@@ -206,7 +282,7 @@ def poser_question_excel(question: str, historique: list = []) -> str:
 
     liste_clients = resume["clients"]
 
-    # ── Détection client ──
+    # ── Détection client dans la question courante ──
     resultat, statut = detecter_client(question, liste_clients)
 
     # ── CAS 2 : Ambiguïté ──
@@ -220,13 +296,12 @@ def poser_question_excel(question: str, historique: list = []) -> str:
 
     client_trouve = resultat if statut == "exact" else None
 
-    # ── CAS 3 : Référence implicite → chercher dans l'historique ──
+    # ── CAS 3 : Pas de client dans la question → chercher dans l'historique ──
+    # Condition élargie : question de suivi OU question courte sans nom
     if not client_trouve and question_fait_reference(question):
-        for msg in reversed(historique):
-            res, st = detecter_client(msg["content"], liste_clients)
-            if st == "exact":
-                client_trouve = res
-                break
+        client_trouve = _extraire_client_depuis_historique(historique, liste_clients)
+        if client_trouve:
+            print(f"  [CONTEXTE] Réutilisation client depuis historique : {client_trouve}")
 
     # ── Historique texte pour le LLM ──
     historique_texte = ""

@@ -148,7 +148,11 @@ def fetch_client_moyenne(nom_client: str) -> str:
 - Montant maximum      : {r[6]:,.2f} Dhs"""
 
 
-def fetch_client_infos(nom_client: str) -> str:
+def fetch_client_infos(nom_client: str, champ: str = None) -> str:
+    """
+    Si champ est précisé → réponse ciblée (usage, adresse, agence, service, contrat, compteur)
+    Si champ est None    → fiche complète
+    """
     conn = _connexion()
     cursor = conn.cursor()
     cursor.execute("""
@@ -162,6 +166,24 @@ def fetch_client_infos(nom_client: str) -> str:
     conn.close()
     if not r:
         return f"Aucune donnée trouvée pour « {nom_client} »."
+
+    # ── Réponses ciblées ──
+    if champ == "usage":
+        return f"Usage de **{r[0]}** : **{r[6]}**"
+    if champ == "adresse":
+        return f"Adresse de **{r[0]}** : **{r[4]}**"
+    if champ == "agence":
+        return f"Agence de **{r[0]}** : **{r[5]}**"
+    if champ == "service":
+        return f"Type de service de **{r[0]}** : **{r[7]}**"
+    if champ == "contrat":
+        return f"N° Contrat de **{r[0]}** : **{r[2]}**"
+    if champ == "compteur":
+        return f"N° Compteur de **{r[0]}** : **{r[3]}**"
+    if champ == "numero_client":
+        return f"N° Client de **{r[0]}** : **{r[1]}**"
+
+    # ── Fiche complète par défaut ──
     return f"""📋 Informations du client **{r[0]}** :
 
 - N° Client    : {r[1]}
@@ -195,12 +217,12 @@ def fetch_client_mois_specifique(nom_client: str, mois: str) -> str:
 - Montant TTC        : **{r[5]:,.2f} Dhs**
 - Date limite pmt    : {r[6]}"""
 
-# somme
+
 def fetch_client_somme_conso(nom_client: str) -> str:
     conn = _connexion()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT 
+        SELECT
             ROUND(SUM(consommation), 2) as total_conso,
             unite,
             ROUND(SUM(montant_ttc), 2) as total_ttc,
@@ -210,14 +232,11 @@ def fetch_client_somme_conso(nom_client: str) -> str:
     """, (f"%{nom_client}%",))
     r = cursor.fetchone()
     conn.close()
-
     if not r or r[0] is None:
         return f"Aucune donnée trouvée pour « {nom_client} »."
-
     return (
-        f" Consommation totale de **{nom_client}** "
-        f"sur {r[3]} mois :\n\n"
-        f"- Consommation totale : **{r[0]:,} {r[1]}**\n"
+        f"Consommation totale de **{nom_client}** sur {r[3]} mois :\n\n"
+        f"- Consommation totale  : **{r[0]:,} {r[1]}**\n"
         f"- Montant total cumulé : **{r[2]:,.2f} Dhs**"
     )
 
