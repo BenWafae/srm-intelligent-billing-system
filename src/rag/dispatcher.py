@@ -34,20 +34,31 @@ def _norm_dispatcher(question: str) -> str:
     q = re.sub(r'consom+[a-z]*', 'consomme', q)
     q = re.sub(r'pai+e+[a-z]*', 'paye', q)
     q = re.sub(r'pay[eé]+[a-z]*', 'paye', q)
+    q = re.sub(r'e+leve+[a-z]*', 'eleve', q)   # eeleve, élevée, elevees → eleve
     return q
 
 
 # ════════════════════════════════════════════════════════════
 # TOKENS — consommation élevée / faible
-# ✅ Couvrent : "qui consomme le plus", "quel client consomme le plus",
-#               "quel client a une consommation élevée/faible",
-#               "client avec la plus grande consommation", etc.
+# ✅ Couvrent toutes les variantes orthographiques et formulations
+#    approximatives qu'un utilisateur non expert peut écrire :
+#
+#   Formulations couvertes (après _norm_dispatcher) :
+#   "qui consomme le plus"        → "qui consomme le plus"
+#   "qui consome le plus"         → "qui consomme le plus"   (regex)
+#   "client le plus consomé"      → "client le plus consomme"
+#   "quel client consomme le plus"→ "quel client consomme le plus"
+#   "quel client a une consomation eeleve" → "... consomme eleve"
+#   "client avec la plus grande consomation" → "... consomme"
+#   "consomation eleve / elevée"  → "consomme eleve"
+#   "consomation faible / basse"  → "consomme faible"
 # ════════════════════════════════════════════════════════════
 
 _TOKENS_CONSO_ELEVEE = [
-    # forme directe après normalisation
-    "consomme le plus",            # "qui consomme le plus" / "quel client consomme le plus"
-    "le plus consomme",            # "le plus consommé"
+    # ── superlatif direct ──
+    "consomme le plus",
+    "le plus consomme",
+    # ── adjectifs après normalisation ──
     "consomme eleve", "consomme elevee",
     "consomme la plus eleve", "consomme la plus elevee",
     "la plus eleve", "la plus elevee",
@@ -59,12 +70,31 @@ _TOKENS_CONSO_ELEVEE = [
     "grande consomme", "grand consomme",
     "eleve consomme", "elevee consomme",
     "consomme plus",
+    # ── variantes "client le plus..." ──
+    "client le plus consomme",
+    "client la plus consomme",
+    # ── "a une consomation eleve" → après norm → "a une consomme eleve" ──
+    "a une consomme eleve", "a une consomme elevee",
+    "a une consomme max", "a une consomme haute",
+    "a une consomme grand", "a une consomme grande",
+    # ── "avec la consomation eleve" ──
+    "avec la consomme eleve", "avec la consomme elevee",
+    "avec la consomme max", "avec la consomme haute",
+    "avec la consomme grand", "avec la consomme grande",
+    # ── "consomation importante / forte" ──
+    "consomme importante", "consomme fort", "consomme forte",
+    "importante consomme", "forte consomme",
+    # ── "le plus grand consommateur" ──
+    "grand consommateur", "grand consomme",
+    # ── "top consommateur" ──
+    "top consomme", "top consommateur",
 ]
 
 _TOKENS_CONSO_FAIBLE = [
-    # forme directe après normalisation
-    "consomme le moins",           # "qui consomme le moins"
-    "le moins consomme",           # "le moins consommé"
+    # ── superlatif direct ──
+    "consomme le moins",
+    "le moins consomme",
+    # ── adjectifs après normalisation ──
     "consomme faible", "consomme la plus faible",
     "la plus faible", "le plus faible",
     "consomme basse", "consomme bas",
@@ -72,6 +102,20 @@ _TOKENS_CONSO_FAIBLE = [
     "faible consomme", "basse consomme",
     "petite consomme", "consomme petit", "consomme petite",
     "moins consomme", "consomme moins",
+    # ── variantes "client le moins..." ──
+    "client le moins consomme",
+    "client la moins consomme",
+    # ── "a une consomation faible" → après norm ──
+    "a une consomme faible", "a une consomme basse",
+    "a une consomme min", "a une consomme petite",
+    # ── "avec la consomation faible" ──
+    "avec la consomme faible", "avec la consomme basse",
+    "avec la consomme min",
+    # ── "consomation reduite / legere" ──
+    "consomme reduite", "consomme legere",
+    "reduite consomme", "legere consomme",
+    # ── "petit consommateur" ──
+    "petit consommateur", "petit consomme",
 ]
 
 # ── Mapping mois local ──
@@ -191,12 +235,14 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     # ════════════════════════════════════════════════════════════
     # ✅ RÈGLE PRIORITAIRE — consommation élevée / faible
-    # Intercepte AVANT le LLM et AVANT toute confusion avec client
-    # Couvre :
-    #   "qui consomme le plus [en mois]"
-    #   "quel client consomme le plus [en mois]"
-    #   "quel client a une consommation élevée/faible [en mois]"
-    #   "client avec la plus grande consommation [en mois]"
+    # Intercepte AVANT le LLM et AVANT toute confusion avec client.
+    #
+    # ⚠️  LOGIQUE DU MODE :
+    #   - Si la question porte sur UN client (superlatif, "qui",
+    #     "quel client", "client le plus/moins") → forcer mode "top1"
+    #     pour ne retourner QUE le meilleur/pire, pas toute la liste.
+    #   - Si classement explicite demandé ("classement", "liste",
+    #     "tous", "ordre") → garder le mode détecté (detail/list).
     # ════════════════════════════════════════════════════════════
     _detect_conso_elevee = any(t in q_norm for t in _TOKENS_CONSO_ELEVEE)
     _detect_conso_faible = any(t in q_norm for t in _TOKENS_CONSO_FAIBLE)
@@ -204,23 +250,37 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     if _detect_conso_elevee or _detect_conso_faible:
         mois_detecte = _extraire_mois_disp(q_norm)
 
+        # ── Forcer top1 si question sur UN seul client ──
+        _demande_classement = any(t in q_norm for t in [
+            "classement", "classe", "classer", "tous", "toutes",
+            "liste", "lister", "ordre", "rang", "ranking",
+        ])
+        _demande_top1 = any(t in q_norm for t in [
+            "qui ", "quel ", "client le plus", "client la plus",
+            "le client", "la client",
+            "client avec", "avec la plus", "avec le plus",
+        ])
+        mode_effectif = mode
+        if _demande_top1 and not _demande_classement:
+            mode_effectif = "top1"
+
         # Avec service eau ou elec précisé
         if _detect_conso_elevee and demande_eau and not demande_elec:
-            return fetch_max_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode)
+            return fetch_max_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode_effectif)
         if _detect_conso_elevee and demande_elec and not demande_eau:
-            return fetch_max_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode)
+            return fetch_max_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode_effectif)
         if _detect_conso_faible and demande_eau and not demande_elec:
-            return fetch_min_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode)
+            return fetch_min_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode_effectif)
         if _detect_conso_faible and demande_elec and not demande_eau:
-            return fetch_min_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode)
+            return fetch_min_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode_effectif)
 
         # Sans service précis → tous services
         if _detect_conso_elevee:
-            print(f"  [RÈGLE] consomme élevée → fetch_top_consommateurs(mois={mois_detecte})")
-            return fetch_top_consommateurs(mois=mois_detecte, mode=mode)
+            print(f"  [RÈGLE] consomme élevée → fetch_top_consommateurs(mois={mois_detecte}, mode={mode_effectif})")
+            return fetch_top_consommateurs(mois=mois_detecte, mode=mode_effectif)
         if _detect_conso_faible:
-            print(f"  [RÈGLE] consomme faible → fetch_min_consommateurs(mois={mois_detecte})")
-            return fetch_min_consommateurs(mois=mois_detecte, mode=mode)
+            print(f"  [RÈGLE] consomme faible → fetch_min_consommateurs(mois={mois_detecte}, mode={mode_effectif})")
+            return fetch_min_consommateurs(mois=mois_detecte, mode=mode_effectif)
 
     # ════════════════════════════════════════════════════════════
     # MODE COUNT

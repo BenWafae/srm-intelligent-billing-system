@@ -1,16 +1,17 @@
 # src/rag/mode.py
 import unicodedata
+import re
 
 _TOKENS_COUNT = {
     "combien", "nombre", "nbr", "nbre", "nb",
-    "compter", "comptre", "complez", "comptez", "calculer",  # ✅ virgule ajoutée
-    "quantite", "qte", "qt",                                  # ✅ virgule ajoutée
+    "compter", "comptre", "complez", "comptez", "calculer",
+    "quantite", "qte", "qt",
     "effectif", "effectifs",
     "quel est le nombre", "quel est le total",
-    "nbr de", "calculer le nbr de",                           # ✅ virgule ajoutée
+    "nbr de", "calculer le nbr de",
     "count", "how many",
     "nmbr", "nmbre", "nomb",
-    # ✅ Nouveaux patterns courts sans bonne formulation
+    # patterns courts sans bonne formulation
     "nbr client", "nbr clients",
     "nbr service", "nbr services",
     "nbr usage", "nbr usages",
@@ -52,24 +53,43 @@ _TOKENS_DETAIL_FORCE = {
     "historique", "historiq",
     "analyse", "analyser",
     "repartition",
-    "qui consomme", "qui paie", "qui paye", "qui consome",
-    "qui consomment",                                         # ✅ virgule ajoutée
-    "consommation", "consommations", "consomaatioon",         # ✅ virgule ajoutée
+    "consommations", "consomaatioon",
 }
 
 _TOKENS_TOP1 = {
+    # ── Formulations exactes ou proches ──
     "quel est le client", "quel client", "qui est le client",
     "le client qui", "le client avec",
     "quel est la consommation", "quelle est la consommation",
     "quel est le montant", "quelle est le montant",
     "quel est le plus", "quelle est la plus",
     "qui a la", "qui a le",
+    # ── "qui consomme/consome le plus/moins" — toutes variantes ──
     "qui consomme le plus", "qui consomme le moins",
-    "qui paie le plus", "qui paie le moins",
+    "qui consome le plus",  "qui consome le moins",
+    "qui consomme plus",    "qui consomme moins",
+    "qui consome plus",     "qui consome moins",
+    # ── "qui paie/paye le plus/moins" ──
+    "qui paie le plus",  "qui paie le moins",
+    "qui paye le plus",  "qui paye le moins",
+    # ── superlatifs ──
     "le plus eleve", "le plus elevee", "la plus elevee",
-    "eleve", "elevees",                                       # ✅ virgule ajoutée
+    "eleve", "elevees",
     "le plus faible", "la plus faible",
     "le maximum", "le minimum",
+    # ── "client le plus consomé/consome..." ──
+    "client le plus",
+    "client la plus",
+    # ── "quel client a une consomation..." ──
+    "a une consomation", "a une consommation",
+    "avec la consomation", "avec la consommation",
+    # ── variantes orthographiques "consomé/consome/consomation" ──
+    "consomation eleve",  "consomation elevee",
+    "consomation faible", "consomation basse",
+    "consomation max",    "consomation min",
+    "consome le plus",    "consome le moins",
+    "consome eleve",      "consome elevee",
+    "consome faible",
 }
 
 
@@ -82,6 +102,11 @@ def _normaliser_q(question: str) -> str:
 
 def detecter_mode_reponse(question: str) -> str:
     q = _normaliser_q(question)
+
+    # ── Normalisation légère des verbes pour la détection de mode ──
+    q = re.sub(r'consom+[a-z]*', 'consomme', q)
+    q = re.sub(r'pai+e+[a-z]*', 'paye', q)
+    q = re.sub(r'pay[eé]+[a-z]*', 'paye', q)
 
     for token in _TOKENS_TOP1:
         if token in q:
