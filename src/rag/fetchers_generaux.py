@@ -491,6 +491,63 @@ def fetch_par_agence(agence: str = None, mode: str = "detail") -> str:
     return "\n".join(lignes)
 
 
+# ════════════════════════════════════════════════════════════
+# ✅ NOUVEAU — Agence de chaque client
+# Retourne l'agence rattachée à chaque client,
+# groupé par agence en mode detail, liste plate en mode list.
+#
+# Modes :
+#   detail → groupé par agence, avec service et usage
+#   list   → liste plate "Client → Agence"
+#   count  → nombre de clients et d'agences uniques
+#   top1   → identique à list (pas de notion de "top" ici)
+# ════════════════════════════════════════════════════════════
+
+def fetch_agence_par_client(mode: str = "detail") -> str:
+    conn = _connexion()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT nom_client, agence, type_service, usage
+        FROM factures_excel
+        GROUP BY nom_client
+        ORDER BY agence, nom_client
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        return "Aucune donnée trouvée."
+
+    if mode == "count":
+        agences_uniques = len(set(r[1] for r in rows if r[1]))
+        return (
+            f"**{len(rows)} clients** répartis dans "
+            f"**{agences_uniques} agences**."
+        )
+
+    if mode in ("list", "top1"):
+        lignes = [f"Agence de chaque client ({len(rows)}) :\n"]
+        for r in rows:
+            lignes.append(f"- **{r[0]}** → {r[1]}")
+        return "\n".join(lignes)
+
+    # ── mode detail : groupé par agence ──
+    par_agence = {}
+    for r in rows:
+        agence = r[1] or "Non définie"
+        if agence not in par_agence:
+            par_agence[agence] = []
+        par_agence[agence].append(r)
+
+    lignes = [f"Agence de chaque client ({len(rows)} clients) :\n"]
+    for agence_label, clients in par_agence.items():
+        lignes.append(f"🏢 **{agence_label}** ({len(clients)} client(s)) :")
+        for r in clients:
+            lignes.append(f"   • **{r[0]}** | Service : {r[2]} | Usage : {r[3]}")
+        lignes.append("")
+    return "\n".join(lignes)
+
+
 def fetch_par_usage(usage: str = None, mode: str = "detail") -> str:
     conn = _connexion()
     cursor = conn.cursor()
@@ -848,14 +905,15 @@ def fetch_evolution_mois(mode: str = "detail") -> str:
             f"Moyenne : {r[4]:,.2f} Dhs"
         )
     return "\n".join(lignes)
-# fetshh somme consomation
+
+
 def fetch_somme_conso_mois(mois: str) -> str:
     from normalisation import normaliser_mois
     mois_norm = normaliser_mois(mois)
     conn = _connexion()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT 
+        SELECT
             LOWER(type_service) as service,
             ROUND(SUM(consommation), 2) as total_conso,
             unite,
@@ -878,6 +936,7 @@ def fetch_somme_conso_mois(mois: str) -> str:
             f"({r[3]} clients)"
         )
     return "\n".join(lignes)
+
 
 def fetch_question_libre(question: str, historique_texte: str) -> str:
     return (

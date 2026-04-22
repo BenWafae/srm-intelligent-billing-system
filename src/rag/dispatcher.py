@@ -14,7 +14,8 @@ from rag.fetchers_generaux import (
     fetch_top_montants, fetch_classement_par_mois, fetch_par_agence,
     fetch_par_usage, fetch_par_service, fetch_alertes,
     fetch_stats_generales, fetch_evolution_mois, fetch_question_libre,
-    fetch_somme_conso_mois
+    fetch_somme_conso_mois,
+    fetch_agence_par_client,          # ← NOUVEAU
 )
 from rag.fetchers_client import (
     fetch_client_max_consommation, fetch_client_min_consommation,
@@ -34,31 +35,88 @@ def _norm_dispatcher(question: str) -> str:
     q = re.sub(r'consom+[a-z]*', 'consomme', q)
     q = re.sub(r'pai+e+[a-z]*', 'paye', q)
     q = re.sub(r'pay[eé]+[a-z]*', 'paye', q)
-    q = re.sub(r'e+leve+[a-z]*', 'eleve', q)   # eeleve, élevée, elevees → eleve
+    q = re.sub(r'e+leve+[a-z]*', 'eleve', q)
     return q
 
 
 # ════════════════════════════════════════════════════════════
+# TOKENS — agence par client
+# Couvrent toutes les formulations sans LLM :
+#   "agence de chaque client"
+#   "agence par client"
+#   "quelle agence pour chaque client"
+#   "lister les agences par client"
+#   "agence de tous les clients"
+#   "agence de chaque"
+#   "par client agence"
+#   "afficher agence de chaque client"
+# ════════════════════════════════════════════════════════════
+
+_TOKENS_AGENCE_PAR_CLIENT = [
+    # ── formulations directes ──
+    "agence de chaque client",
+    "agence par client",
+    "agence de tous les clients",
+    "agence pour chaque client",
+    "agence pour tous les clients",
+    "agences de chaque client",
+    "agences par client",
+    "agences de tous les clients",
+
+    # ── avec verbe lister / afficher / montrer / voir / donner ──
+    "lister les agences par client",
+    "lister agence par client",
+    "lister les agences de chaque",
+    "afficher agence de chaque",
+    "afficher les agences par client",
+    "afficher agence pour chaque",
+    "montrer agence de chaque",
+    "montrer les agences par client",
+    "montrer agence pour chaque",
+    "montrer moi les agence",           # couvre "montrer moi les agence utulise..."
+    "montrer moi agence",
+    "voir agence de chaque",
+    "voir les agences par client",
+    "voir agence pour chaque",
+    "donner moi agence",
+    "donnez moi agence",
+    "donner agence de chaque",
+    "donner agence par client",
+
+    # ── avec "utilise / utulise / rattachee" (fautes fréquentes) ──
+    "agence utulise",                   # faute de frappe fréquente
+    "agence utilise",
+    "agence utilisee",
+    "agence utilise pour chaque",
+    "agence utulise pour chaque",
+    "agence rattachee",
+    "agence rattache",
+    "agence associee",
+    "agence associe",
+
+    # ── "quelle agence pour chaque / tous" ──
+    "quelle agence pour chaque",
+    "quelle agence pour tous",
+    "quelle est l agence de chaque",
+    "quelle est l agence pour chaque",
+    "quel agence pour chaque",
+    "quel agence de chaque",
+
+    # ── ordre inversé ou reformulations ──
+    "par client agence",
+    "agence client par client",
+    "agence de chaque",
+    "agences pour chaque",
+]
+
+
+# ════════════════════════════════════════════════════════════
 # TOKENS — consommation élevée / faible
-# ✅ Couvrent toutes les variantes orthographiques et formulations
-#    approximatives qu'un utilisateur non expert peut écrire :
-#
-#   Formulations couvertes (après _norm_dispatcher) :
-#   "qui consomme le plus"        → "qui consomme le plus"
-#   "qui consome le plus"         → "qui consomme le plus"   (regex)
-#   "client le plus consomé"      → "client le plus consomme"
-#   "quel client consomme le plus"→ "quel client consomme le plus"
-#   "quel client a une consomation eeleve" → "... consomme eleve"
-#   "client avec la plus grande consomation" → "... consomme"
-#   "consomation eleve / elevée"  → "consomme eleve"
-#   "consomation faible / basse"  → "consomme faible"
 # ════════════════════════════════════════════════════════════
 
 _TOKENS_CONSO_ELEVEE = [
-    # ── superlatif direct ──
     "consomme le plus",
     "le plus consomme",
-    # ── adjectifs après normalisation ──
     "consomme eleve", "consomme elevee",
     "consomme la plus eleve", "consomme la plus elevee",
     "la plus eleve", "la plus elevee",
@@ -70,31 +128,23 @@ _TOKENS_CONSO_ELEVEE = [
     "grande consomme", "grand consomme",
     "eleve consomme", "elevee consomme",
     "consomme plus",
-    # ── variantes "client le plus..." ──
     "client le plus consomme",
     "client la plus consomme",
-    # ── "a une consomation eleve" → après norm → "a une consomme eleve" ──
     "a une consomme eleve", "a une consomme elevee",
     "a une consomme max", "a une consomme haute",
     "a une consomme grand", "a une consomme grande",
-    # ── "avec la consomation eleve" ──
     "avec la consomme eleve", "avec la consomme elevee",
     "avec la consomme max", "avec la consomme haute",
     "avec la consomme grand", "avec la consomme grande",
-    # ── "consomation importante / forte" ──
     "consomme importante", "consomme fort", "consomme forte",
     "importante consomme", "forte consomme",
-    # ── "le plus grand consommateur" ──
     "grand consommateur", "grand consomme",
-    # ── "top consommateur" ──
     "top consomme", "top consommateur",
 ]
 
 _TOKENS_CONSO_FAIBLE = [
-    # ── superlatif direct ──
     "consomme le moins",
     "le moins consomme",
-    # ── adjectifs après normalisation ──
     "consomme faible", "consomme la plus faible",
     "la plus faible", "le plus faible",
     "consomme basse", "consomme bas",
@@ -102,19 +152,14 @@ _TOKENS_CONSO_FAIBLE = [
     "faible consomme", "basse consomme",
     "petite consomme", "consomme petit", "consomme petite",
     "moins consomme", "consomme moins",
-    # ── variantes "client le moins..." ──
     "client le moins consomme",
     "client la moins consomme",
-    # ── "a une consomation faible" → après norm ──
     "a une consomme faible", "a une consomme basse",
     "a une consomme min", "a une consomme petite",
-    # ── "avec la consomation faible" ──
     "avec la consomme faible", "avec la consomme basse",
     "avec la consomme min",
-    # ── "consomation reduite / legere" ──
     "consomme reduite", "consomme legere",
     "reduite consomme", "legere consomme",
-    # ── "petit consommateur" ──
     "petit consommateur", "petit consomme",
 ]
 
@@ -148,9 +193,6 @@ def _extraire_mois_disp(q: str):
 
 # ════════════════════════════════════════════════════════════
 # TOKENS — somme de consommation par mois
-# ✅ Couvrent : "somme de consommation en mai",
-#               "total consommé en décembre",
-#               "combien a-t-on consommé en mars", etc.
 # ════════════════════════════════════════════════════════════
 
 _TOKENS_SOMME_MOIS = [
@@ -164,7 +206,7 @@ _TOKENS_SOMME_MOIS = [
     "consomme totale",
     "combien a-t-on consomme",
     "combien consomme",
-    "consomme en ",    # "consommation en janvier" → après norm → "consomme en janvier"
+    "consomme en ",
     "conso en ",
 ]
 
@@ -174,6 +216,20 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     print(f"  [MODE] {mode}")
 
     q_norm = _norm_dispatcher(question)
+
+    # ════════════════════════════════════════════════════════════
+    # ✅ RÈGLE PRIORITAIRE N°1 — AGENCE PAR CLIENT
+    # Intercepte avant tout : pas de LLM, pas d'ambiguïté.
+    # Formulations couvertes :
+    #   "agence de chaque client"
+    #   "agence par client"
+    #   "quelle agence pour chaque client"
+    #   "lister les agences par client"
+    #   "agence de tous les clients"
+    # ════════════════════════════════════════════════════════════
+    if any(t in q_norm for t in _TOKENS_AGENCE_PAR_CLIENT):
+        print(f"  [RÈGLE] agence par client → fetch_agence_par_client(mode={mode})")
+        return fetch_agence_par_client(mode=mode)
 
     # ── Détection des sujets ──
     _sujet_facture = any(t in q_norm for t in [
@@ -235,14 +291,6 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     # ════════════════════════════════════════════════════════════
     # ✅ RÈGLE PRIORITAIRE — consommation élevée / faible
-    # Intercepte AVANT le LLM et AVANT toute confusion avec client.
-    #
-    # ⚠️  LOGIQUE DU MODE :
-    #   - Si la question porte sur UN client (superlatif, "qui",
-    #     "quel client", "client le plus/moins") → forcer mode "top1"
-    #     pour ne retourner QUE le meilleur/pire, pas toute la liste.
-    #   - Si classement explicite demandé ("classement", "liste",
-    #     "tous", "ordre") → garder le mode détecté (detail/list).
     # ════════════════════════════════════════════════════════════
     _detect_conso_elevee = any(t in q_norm for t in _TOKENS_CONSO_ELEVEE)
     _detect_conso_faible = any(t in q_norm for t in _TOKENS_CONSO_FAIBLE)
@@ -250,7 +298,6 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     if _detect_conso_elevee or _detect_conso_faible:
         mois_detecte = _extraire_mois_disp(q_norm)
 
-        # ── Forcer top1 si question sur UN seul client ──
         _demande_classement = any(t in q_norm for t in [
             "classement", "classe", "classer", "tous", "toutes",
             "liste", "lister", "ordre", "rang", "ranking",
@@ -264,7 +311,6 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         if _demande_top1 and not _demande_classement:
             mode_effectif = "top1"
 
-        # Avec service eau ou elec précisé
         if _detect_conso_elevee and demande_eau and not demande_elec:
             return fetch_max_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode_effectif)
         if _detect_conso_elevee and demande_elec and not demande_eau:
@@ -274,7 +320,6 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         if _detect_conso_faible and demande_elec and not demande_eau:
             return fetch_min_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode_effectif)
 
-        # Sans service précis → tous services
         if _detect_conso_elevee:
             print(f"  [RÈGLE] consomme élevée → fetch_top_consommateurs(mois={mois_detecte}, mode={mode_effectif})")
             return fetch_top_consommateurs(mois=mois_detecte, mode=mode_effectif)
@@ -349,11 +394,6 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     # ════════════════════════════════════════════════════════════
     # ✅ RÈGLE PRIORITAIRE — SOMME_CONSO_MOIS
-    # Intercepte AVANT le LLM
-    # Couvre :
-    #   "donner moi la somme de consommation en mai"
-    #   "total consommé en décembre"
-    #   "combien a-t-on consommé en mars"
     # ════════════════════════════════════════════════════════════
     _detect_somme_mois = any(t in q_norm for t in _TOKENS_SOMME_MOIS)
 
@@ -382,6 +422,8 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_top_montants(mois=params.get("mois"), mode=mode)
     elif intent == "CLASSEMENT_PAR_MOIS":
         return fetch_classement_par_mois(mode=mode)
+    elif intent == "AGENCE_PAR_CLIENT":                          # ← NOUVEAU
+        return fetch_agence_par_client(mode=mode)
     elif intent == "PAR_AGENCE":
         return fetch_par_agence(agence=params.get("agence"), mode=mode)
     elif intent == "PAR_USAGE":

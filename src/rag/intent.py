@@ -15,6 +15,7 @@ TOP_CONSOMMATEURS    : qui consomme le plus, consommation la plus élevée, clas
 MIN_CONSOMMATEURS    : qui consomme le moins, consommation faible, consommation minimale, plus faible consommation 
 TOP_MONTANTS         : qui paie le plus, montant le plus élevé, facture la plus chère, classement montant
 CLASSEMENT_PAR_MOIS  : classer clients par montant ou consommation pour chaque mois, voir classement mois par mois
+AGENCE_PAR_CLIENT    : agence de chaque client, quelle agence pour chaque client, agence de tous les clients, lister agence par client
 PAR_AGENCE           : clients d'une agence, quelle agence, combien par agence
 PAR_USAGE            : usage domestique, force motrice, commercial, administratif, type d'usage, quels usages existent, professionnel, agricole
 PAR_SERVICE          : eau, électricité, type de service, combien utilisent eau vs electricite, lister clients eau ou electricite
@@ -78,8 +79,71 @@ _NOMS_MOIS = list(_MAP_MOIS.keys())
 
 
 # ════════════════════════════════════════════════════════════
+# TOKENS — AGENCE_PAR_CLIENT
+# Partagés avec dispatcher.py pour cohérence.
+# Interceptés AVANT le LLM dans detecter_intent().
+# ════════════════════════════════════════════════════════════
+
+_TOKENS_AGENCE_PAR_CLIENT = [
+    # ── formulations directes ──
+    "agence de chaque client",
+    "agence par client",
+    "agence de tous les clients",
+    "agence pour chaque client",
+    "agence pour tous les clients",
+    "agences de chaque client",
+    "agences par client",
+    "agences de tous les clients",
+
+    # ── avec verbe lister / afficher / montrer / voir / donner ──
+    "lister les agences par client",
+    "lister agence par client",
+    "lister les agences de chaque",
+    "afficher agence de chaque",
+    "afficher les agences par client",
+    "afficher agence pour chaque",
+    "montrer agence de chaque",
+    "montrer les agences par client",
+    "montrer agence pour chaque",
+    "montrer moi les agence",           # couvre "montrer moi les agence utulise..."
+    "montrer moi agence",
+    "voir agence de chaque",
+    "voir les agences par client",
+    "voir agence pour chaque",
+    "donner moi agence",
+    "donnez moi agence",
+    "donner agence de chaque",
+    "donner agence par client",
+
+    # ── avec "utilise / utulise / rattachee" (fautes fréquentes) ──
+    "agence utulise",                   # faute de frappe fréquente
+    "agence utilise",
+    "agence utilisee",
+    "agence utilise pour chaque",
+    "agence utulise pour chaque",
+    "agence rattachee",
+    "agence rattache",
+    "agence associee",
+    "agence associe",
+
+    # ── "quelle agence pour chaque / tous" ──
+    "quelle agence pour chaque",
+    "quelle agence pour tous",
+    "quelle est l agence de chaque",
+    "quelle est l agence pour chaque",
+    "quel agence pour chaque",
+    "quel agence de chaque",
+
+    # ── ordre inversé ou reformulations ──
+    "par client agence",
+    "agence client par client",
+    "agence de chaque",
+    "agences pour chaque",
+]
+
+
+# ════════════════════════════════════════════════════════════
 # NORMALISATION ROBUSTE — appliquée AVANT toute comparaison
-# Ramène toutes les variantes/fautes vers une forme canonique
 # ════════════════════════════════════════════════════════════
 
 def _normaliser_verbes(q: str) -> str:
@@ -93,17 +157,9 @@ def _normaliser_verbes(q: str) -> str:
       consommme / consommmee / consomation / consommasion ...
       paye / paie / payé / payee / paiee / paié ...
     """
-    # ── Normaliser "consomm..." → "consomme" ──
-    # Couvre : consomme, consome, consommé, consomé, consommee,
-    #          consomee, consomm, consom, consomation, consommasion, etc.
     q = re.sub(r'consom+[a-z]*', 'consomme', q)
-
-    # ── Normaliser "pay..." / "pai..." → "paye" ──
-    # Couvre : paye, payé, payee, paie, paié, paiee, paiement (exclure)
-    # On exclut "paiement" pour ne pas casser ce token
     q = re.sub(r'pai+e+[a-z]*', 'paye', q)
     q = re.sub(r'pay[eé]+[a-z]*', 'paye', q)
-
     return q
 
 
@@ -119,42 +175,32 @@ def _normaliser_intent_q(question: str) -> str:
 
 
 # ── Tokens SOMME_CONSO_CLIENT ──
-# ⚠️ IMPORTANT : ne pas mettre "somme" seul — il est contenu dans "consomme"
-#    après normalisation (consom... → consomme), ce qui crée un faux positif.
-#    Utiliser uniquement des tokens suffisamment longs et précis.
 _TOKENS_SOMME_CLIENT = [
-    # "somme" seul → RETIRÉ (faux positif : "consomme" contient "somme")
     "somme totale",
     "somme de consomme", "somme des consomme",
     "somme de conso", "somme des conso",
-    # total + consommation (après normalisation "consommation" → "consomme")
     "consomme totale", "consomme total",
     "total consomme", "total de consomme",
     "total conso", "total de conso",
     "totale consomme", "totale de consomme",
     "totale conso", "totale de conso",
-    # combien
     "combien a consomme en tout",
     "combien a-t-il consomme",
     "combien a consomme",
     "en tout",
-    # autres
     "cumul", "cumulee", "cumulees",
     "sur tous les mois", "sur l ensemble",
     "global", "globale",
 ]
 
 # ── Tokens MAX_CONSOMMATION ──
-# Après normalisation, toutes les variantes de "consommé" → "consomme"
 _TOKENS_MAX_CONSO = [
-    # forme canonique après normalisation
     "le plus consomme",
     "consomme le plus",
     "a le plus consomme",
     "consomme maximale",
     "consomme la plus elevee",
     "pic de consomme",
-    # mois + max
     "mois ou il a le plus consomme",
     "mois ou elle a le plus consomme",
     "mois ou le client a le plus consomme",
@@ -168,7 +214,6 @@ _TOKENS_MAX_CONSO = [
     "mois maximum",
     "mois max",
     "plus consomme",
-    # superlatifs génériques (après normalisation)
     "plus elevee", "plus eleve",
     "la plus haute", "plus haute",
     "le plus grand", "la plus grande",
@@ -176,13 +221,11 @@ _TOKENS_MAX_CONSO = [
 
 # ── Tokens MIN_CONSOMMATION ──
 _TOKENS_MIN_CONSO = [
-    # forme canonique après normalisation
     "le moins consomme",
     "consomme le moins",
     "a le moins consomme",
     "consomme minimale",
     "consomme la plus faible",
-    # mois + min
     "mois ou il a le moins consomme",
     "mois ou elle a le moins consomme",
     "mois ou le client a le moins consomme",
@@ -196,7 +239,6 @@ _TOKENS_MIN_CONSO = [
     "mois minimum",
     "mois min",
     "moins consomme",
-    # superlatifs génériques
     "plus faible consomme", "moins elevee", "moins eleve",
     "la moins eleve", "la moins elevee",
     "faible consomme", "consomme faible", "consomme basse",
@@ -233,21 +275,14 @@ _TOKENS_NUMERO_CLI = ["numero client", "n client", "numero de client", "id clien
 
 
 def _contient_mois(q: str) -> bool:
-    """Retourne True si la question contient un nom de mois."""
     return any(m in q for m in _NOMS_MOIS)
 
 
 def _extraire_mois(q: str) -> str:
-    """
-    Extrait et retourne le nom canonique du mois depuis la question normalisée.
-    Priorité aux tokens longs (ex: "janvier" avant "jan").
-    Retourne "" si aucun mois trouvé.
-    """
     tokens_tries = sorted(_MAP_MOIS.keys(), key=len, reverse=True)
     for token in tokens_tries:
         if re.search(r'\b' + re.escape(token) + r'\b', q):
             return _MAP_MOIS[token]
-    # Fallback : sous-chaîne simple
     for token in tokens_tries:
         if token in q:
             return _MAP_MOIS[token]
@@ -262,7 +297,29 @@ def _appeler_llm(prompt: str) -> str:
     return response.json()["response"].strip()
 
 
+# ════════════════════════════════════════════════════════════
+# DÉTECTION INTENT GÉNÉRAL
+# ════════════════════════════════════════════════════════════
+
 def detecter_intent(question: str) -> dict:
+    q = _normaliser_q(question)
+
+    # ════════════════════════════════════════════════════════════
+    # ✅ RÈGLE PRIORITAIRE — AGENCE_PAR_CLIENT
+    # Intercepte AVANT le LLM : zéro latence, zéro ambiguïté.
+    # Même liste de tokens que dans dispatcher.py.
+    # Couvre :
+    #   "agence de chaque client"
+    #   "agence par client"
+    #   "agence de tous les clients"
+    #   "quelle agence pour chaque client"
+    #   "lister les agences par client"
+    # ════════════════════════════════════════════════════════════
+    if any(t in q for t in _TOKENS_AGENCE_PAR_CLIENT):
+        print(f"  [RÈGLE INTENT] AGENCE_PAR_CLIENT détecté sans LLM")
+        return {"intent": "AGENCE_PAR_CLIENT", "params": {}}
+
+    # ── Fallback LLM pour tous les autres cas ──
     prompt = f"""Tu es un classificateur de questions. Tu dois identifier l'intent de la question posée.
 
 Voici les intents disponibles :
@@ -291,14 +348,17 @@ JSON :"""
     return {"intent": "QUESTION_LIBRE", "params": {}}
 
 
+# ════════════════════════════════════════════════════════════
+# DÉTECTION INTENT CLIENT
+# ════════════════════════════════════════════════════════════
+
 def detecter_intent_client(question: str) -> dict:
-    # ✅ Utiliser la normalisation ROBUSTE (inclut normalisation des verbes)
+    # ✅ Normalisation ROBUSTE (inclut normalisation des verbes)
     q = _normaliser_intent_q(question)
 
     # ════════════════════════════════════════════════════════════
     # ÉTAPE 1 — MOIS_SPECIFIQUE (priorité absolue)
     # ════════════════════════════════════════════════════════════
-    # Après normalisation : "consommé", "consomé", "consome" → "consomme"
     _mots_conso_montant = [
         "consomme", "conso", "montant", "facture",
         "combien", "paye",
