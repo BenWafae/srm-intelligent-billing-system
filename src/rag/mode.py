@@ -19,6 +19,29 @@ _TOKENS_COUNT = {
     "nbr agence", "nbr agences",
     "nbr alerte", "nbr alertes",
     "nmb client", "nmb service",
+    "nbr d alert","nbr alert","nombre alerte"," nbr alerts"
+    # ── ALERTES — toutes variantes COUNT ──────────────────────
+    "combien d alerte", "combien d alertes",
+    "combien d alert","combien d alerts"
+    "combien alertes", "combien alerte",
+    "nombre d alerte", "nombre d alertes",
+    "nombre alertes", "nombre alerte",
+    "nbre alerte", "nbre alertes",
+    "nb alerte", "nb alertes",
+    "nbr alerte", "nbr alertes",           # déjà présent mais on garde pour clarté
+    "quel est le nombre d alerte",
+    "quel est le nombre d alertes",
+    "donner moi le nombre d alerte",
+    "donner moi le nombre d alertes",
+    "montrer moi le nombre d alerte",
+    "montrer moi le nombre d alertes",
+    "montrer moi nbr alerte",
+    "montrer moi nbr alertes",
+    "afficher le nombre d alerte",
+    "afficher le nombre d alertes",
+    "total alerte", "total alertes",
+    "il y a combien", "ya combien",
+    "c est quoi le nombre", "quel chiffre",
 }
 
 _TOKENS_LIST = {
@@ -38,6 +61,20 @@ _TOKENS_LIST = {
     "l ensemble", "l'ensemble",
     "list", "show", "display", "get all",
     "give me",
+    # ── ALERTES — toutes variantes LIST ───────────────────────
+    "lister les alertes", "liste des alertes",
+    "lister alert","montrer moi les alerts"
+    "afficher les alertes", "montrer les alertes",
+    "voir les alertes", "donner les alertes",
+    "montrer moi les alertes", "montrer moi alerte",
+    "afficher moi les alertes", "afficher moi alerte",
+    "donner moi les alertes", "donner moi alerte",
+    "quelles sont les alertes", "quels sont les alertes",
+    "clients avec alerte", "clients ayant alerte",
+    "clients en alerte", "factures avec alerte",
+    "factures en alerte", "qui a des alertes",
+    "qui a une alerte", "qui sont en alerte",
+    "afficher alertt","afficher alert","montrer alert"
 }
 
 _TOKENS_DETAIL_FORCE = {

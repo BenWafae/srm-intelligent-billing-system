@@ -764,25 +764,60 @@ def fetch_alertes(mode: str = "detail") -> str:
     """)
     rows = cursor.fetchall()
     conn.close()
+ 
     if not rows:
         return "✅ Aucune alerte trouvée dans la base de données."
-
+ 
+    clients_uniques = sorted(set(r[0] for r in rows))
+    nb_factures     = len(rows)
+    nb_clients      = len(clients_uniques)
+ 
+    # ── MODE COUNT : juste les chiffres, instantané ──────────
     if mode == "count":
-        clients_uniques = len(set(r[0] for r in rows))
-        return f"⚠️ **{len(rows)} factures** avec alerte concernant **{clients_uniques} clients**."
-
+        return (
+            f"⚠️ **{nb_factures} factures** avec alerte "
+            f"concernant **{nb_clients} clients**."
+        )
+ 
+    # ── MODE LIST : clients + toutes leurs factures en alerte ─
+    # (plus de simple liste de noms — on donne le détail utile)
     if mode in ("list", "top1"):
-        clients_uniques = list(set(r[0] for r in rows))
-        lignes = [f"⚠️ Clients avec alertes ({len(clients_uniques)}) :"]
-        for c in sorted(clients_uniques):
-            lignes.append(f"- {c}")
+        lignes = [
+            f"⚠️ **{nb_factures} factures** avec alerte "
+            f"— **{nb_clients} clients** concernés :\n"
+        ]
+        # Regrouper par client
+        par_client: dict = {}
+        for r in rows:
+            if r[0] not in par_client:
+                par_client[r[0]] = []
+            par_client[r[0]].append(r)
+ 
+        for client, factures in par_client.items():
+            agence = factures[0][1]
+            lignes.append(f"👤 **{client}** ({agence}) — {len(factures)} facture(s) :")
+            for f in factures:
+                lignes.append(
+                    f"   • {f[2]} | {f[3]:,.2f} Dhs | {f[4]}"
+                )
         return "\n".join(lignes)
-
-    lignes = [f"⚠️ **{len(rows)} factures** avec alerte :\n"]
+ 
+    # ── MODE DETAIL : vue complète ligne par ligne ────────────
+    lignes = [
+        f"⚠️ **{nb_factures} factures** avec alerte "
+        f"({nb_clients} clients concernés) :\n"
+    ]
     for r in rows:
         lignes.append(
             f"- **{r[0]}** | {r[1]} | {r[2]} | {r[3]:,.2f} Dhs | Alerte : {r[4]}"
         )
+ 
+    # Récapitulatif clients en bas
+    lignes.append(f"\n📋 **Clients concernés ({nb_clients}) :**")
+    for c in clients_uniques:
+        nb = sum(1 for r in rows if r[0] == c)
+        lignes.append(f"  • {c} ({nb} alerte{'s' if nb > 1 else ''})")
+ 
     return "\n".join(lignes)
 
 

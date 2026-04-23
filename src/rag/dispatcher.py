@@ -109,6 +109,48 @@ _TOKENS_AGENCE_PAR_CLIENT = [
     "agences pour chaque",
 ]
 
+# ── TOKENS alertes — count ──
+_TOKENS_ALERTE_COUNT = [
+    "combien d alerte", "combien d alertes",
+    "combien alertes", "combien alerte",
+    "nombre d alerte", "nombre d alertes",
+    "nombre alertes", "nombre alerte",
+    "nbre alerte", "nbre alertes",
+    "nb alerte", "nb alertes",
+    "nbr alerte", "nbr alertes",
+    "quel est le nombre d alerte",
+    "quel est le nombre d alertes",
+    "donner moi le nombre d alerte",
+    "montrer moi le nombre d alerte",
+    "montrer moi nbr alerte",
+    "afficher le nombre d alerte",
+    "total alerte", "total alertes",
+    "y a combien d alerte", "ya combien d alerte",
+    "il y a combien d alerte",
+]
+ 
+# ── TOKENS alertes — list ──
+_TOKENS_ALERTE_LIST = [
+    "lister les alertes", "liste des alertes",
+    "afficher les alertes", "montrer les alertes",
+    "voir les alertes", "donner les alertes",
+    "montrer moi les alertes", "montrer moi alerte",
+    "afficher moi les alertes", "afficher moi alerte",
+    "donner moi les alertes", "donner moi alerte",
+    "quelles sont les alertes",
+    "clients avec alerte", "clients ayant alerte",
+    "clients en alerte", "factures avec alerte",
+    "factures en alerte", "qui a des alertes",
+    "qui a une alerte", "qui sont en alerte",
+    "quelles factures ont une alerte",
+    "quels clients ont une alerte",
+]
+ 
+# ── TOKENS alertes — présence générale (pour déclencher le bloc) ──
+_TOKENS_ALERTE_PRESENCES = [
+    "alerte", "alertes",
+]
+ 
 
 # ════════════════════════════════════════════════════════════
 # TOKENS — consommation élevée / faible
