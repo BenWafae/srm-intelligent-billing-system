@@ -245,6 +245,13 @@ _TOKENS_MIN_CONSO = [
     "la moins eleve", "la moins elevee",
     "faible consomme", "consomme faible", "consomme basse",
     "la plus basse", "plus basse",
+      "a une consomme min",
+    "a une consomme minimale",
+    "min consomme",
+    "consomme min",
+    "consomme minimale",
+    "consomme minimum",
+    "plus petite consomme",
 ]
 _TOKENS_SOMME_MONTANT_MOIS = [
     # somme + montant
@@ -527,6 +534,13 @@ def detecter_intent_client(question: str) -> dict:
         return {"intent": "INFOS_CLIENT", "params": {"champ": "compteur"}}
     if any(t in q for t in _TOKENS_NUMERO_CLI):
         return {"intent": "INFOS_CLIENT", "params": {"champ": "numero_client"}}
+    
+    # ════════════════════════════════════════════════════════════
+    # ÉTAPE 2b — SOMME_MONTANT_CLIENT
+    # ════════════════════════════════════════════════════════════
+    for token in _TOKENS_SOMME_MONTANT_CLIENT:
+        if token in q:
+            return {"intent": "SOMME_MONTANT_CLIENT", "params": {}}
 
     # ════════════════════════════════════════════════════════════
     # ÉTAPE 3 — SOMME_CONSO_CLIENT

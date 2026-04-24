@@ -24,7 +24,7 @@ from rag.fetchers_client import (
     fetch_client_max_montant, fetch_client_min_montant,
     fetch_client_evolution, fetch_client_moyenne, fetch_client_infos,
     fetch_client_mois_specifique, fetch_client_toutes_factures,
-    fetch_client_somme_conso
+    fetch_client_somme_conso,fetch_client_somme_montant
 
 )
 
@@ -197,6 +197,7 @@ _TOKENS_CONSO_FAIBLE = [
     "faible consomme", "basse consomme",
     "petite consomme", "consomme petit", "consomme petite",
     "moins consomme", "consomme moins",
+    "consome le moins ","consome le moin"
     "client le moins consomme",
     "client la moins consomme",
     "a une consomme faible", "a une consomme basse",
@@ -206,6 +207,24 @@ _TOKENS_CONSO_FAIBLE = [
     "consomme reduite", "consomme legere",
     "reduite consomme", "legere consomme",
     "petit consommateur", "petit consomme",
+    "a une consomme min",
+    "a une consomme minimale",
+    "a une consomme minimum",
+    "min consomme",
+    "minimum consomme",
+    "minimale consomme",
+    "consomme min",
+    "consomme minimum",
+    "consomme minimale",
+    "consomme la min",
+    "consomme la minimale",
+    "plus petite consomme",
+    "petite consomme",
+    "avec la min consomme",
+    "avec la minimale consomme",
+    "avec la minimum consomme",
+    "avec le min consomme",
+
 ]
 
 # ── Mapping mois local ──
@@ -551,5 +570,7 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
         return fetch_client_mois_specifique(nom_client, mois, champ=champ)
     elif intent == "SOMME_CONSO_CLIENT":
         return fetch_client_somme_conso(nom_client)
+    elif intent == "SOMME_MONTANT_CLIENT":
+        return fetch_client_somme_montant(nom_client)
     else:
         return fetch_client_toutes_factures(nom_client)

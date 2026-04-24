@@ -286,3 +286,35 @@ def fetch_client_toutes_factures(nom_client: str) -> str:
         total += r[5]
     lignes.append(f"\n💰 **Total cumulé : {round(total, 2):,.2f} Dhs**")
     return "\n".join(lignes)
+    #  add fetcher monton client
+
+def fetch_client_somme_montant(nom_client: str) -> str:
+    conn = _connexion()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT
+            ROUND(SUM(montant_ttc), 2) as total,
+            COUNT(*) as nb_mois,
+            ROUND(AVG(montant_ttc), 2) as moyenne,
+            ROUND(MIN(montant_ttc), 2) as minimum,
+            ROUND(MAX(montant_ttc), 2) as maximum
+        FROM factures_excel
+        WHERE nom_client = ?
+    """, (nom_client,))
+    r = cursor.fetchone()
+    conn.close()
+
+    if not r or r[0] is None:
+        return f"Aucune donnée trouvée pour {nom_client}."
+
+    return (
+        f"💰 **Total montants — {nom_client}** :\n\n"
+        f"- Montant total cumulé : **{r[0]:,.2f} Dhs**\n"
+        f"- Nombre de mois      : {r[1]}\n"
+        f"- Montant moyen       : {r[2]:,.2f} Dhs\n"
+        f"- Montant minimum     : {r[3]:,.2f} Dhs\n"
+        f"- Montant maximum     : {r[4]:,.2f} Dhs"
+    )
+
+
+    
