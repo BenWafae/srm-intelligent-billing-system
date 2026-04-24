@@ -391,6 +391,60 @@ def fetch_top_montants(mois: str = None, mode: str = "detail") -> str:
                 lignes.append(f"  {i}. {r[0]} — {r[1]:,.2f} Dhs")
     return "\n".join(lignes)
 
+def fetch_min_montants(mois: str = None, mode: str = "detail") -> str:
+    conn = _connexion()
+    cursor = conn.cursor()
+    if mois:
+        mois = normaliser_mois(mois)
+        cursor.execute("""
+            SELECT nom_client, montant_ttc, mois_source
+            FROM factures_excel
+            WHERE mois_source LIKE ?
+            ORDER BY montant_ttc ASC
+        """, (f"%{mois}%",))
+        rows = cursor.fetchall()
+        conn.close()
+        if not rows:
+            return f"Aucune donnée trouvée pour le mois {mois}."
+
+        if mode in ("top1", "count"):
+            return (f"🔻 Client avec le montant le plus faible en **{mois}** : "
+                    f"**{rows[0][0]}** — {rows[0][1]:,.2f} Dhs")
+        if mode == "list":
+            return (f"🔻 Client avec le montant le plus faible en **{mois}** : "
+                    f"**{rows[0][0]}** ({rows[0][1]:,.2f} Dhs)")
+
+        min_val = rows[0][1]
+        lignes = [f"Client(s) avec le montant le plus faible en **{mois}** :\n"]
+        for r in rows:
+            prefix = "🔻" if r[1] == min_val else f"  {rows.index(r)+1}."
+            lignes.append(f"{prefix} **{r[0]}** — {r[1]:,.2f} Dhs")
+    else:
+        cursor.execute("""
+            SELECT nom_client, ROUND(SUM(montant_ttc), 2) as total
+            FROM factures_excel
+            GROUP BY nom_client
+            ORDER BY total ASC
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        if not rows:
+            return "Aucune donnée trouvée."
+
+        if mode in ("top1", "count"):
+            return (f"🔻 Client avec le montant total le plus faible : "
+                    f"**{rows[0][0]}** — {rows[0][1]:,.2f} Dhs")
+        if mode == "list":
+            return (f"🔻 Client avec le montant total le plus faible : "
+                    f"**{rows[0][0]}** ({rows[0][1]:,.2f} Dhs)")
+
+        min_val = rows[0][1]
+        lignes = ["Client(s) avec le montant total le plus faible :\n"]
+        for i, r in enumerate(rows, 1):
+            prefix = "🔻" if r[1] == min_val else f"  {i}."
+            lignes.append(f"{prefix} **{r[0]}** — {r[1]:,.2f} Dhs")
+    return "\n".join(lignes)
+
 
 def fetch_classement_par_mois(mode: str = "detail") -> str:
     conn = _connexion()

@@ -11,7 +11,7 @@ from rag.intent import detecter_intent, detecter_intent_client
 from rag.fetchers_generaux import (
     fetch_liste_clients, fetch_top_consommateurs, fetch_min_consommateurs,
     fetch_min_consommateurs_par_service, fetch_max_consommateurs_par_service,
-    fetch_top_montants, fetch_classement_par_mois, fetch_par_agence,
+    fetch_top_montants, fetch_classement_par_mois, fetch_par_agence,fetch_min_montants, 
     fetch_par_usage, fetch_par_service, fetch_alertes,
     fetch_stats_generales, fetch_evolution_mois, fetch_question_libre,
     fetch_somme_conso_mois,
@@ -287,6 +287,63 @@ _TOKENS_SOMME_MONTANT = [
     "combien ont paye",
 ]
 
+# ── TOKENS montant élevé (général) ──
+_TOKENS_MONTANT_ELEVE = [
+    "montant le plus eleve",
+    "montant le plus haut",
+    "montant le plus grand",
+    "montant eleve",
+    "montant elevee",
+    "montant maximum",
+    "montant max",
+    "montant maximal",
+    "montant maximal",
+    "montant la plus eleve",
+    "facture la plus chere",
+    "facture la plus elevee",
+    "plus grand montant",
+    "plus haut montant",
+    "montant le plus fort",
+    "paie le plus",
+    "paye le plus",
+    "qui paie le plus",
+    "qui paye le plus",
+    "client le plus cher",
+    "client avec le montant",
+    "client qui paie le plus",
+    "client qui paye le plus",
+    "montant fort",
+    "montant eleve",
+]
+
+# ── TOKENS montant faible (général) ──
+_TOKENS_MONTANT_FAIBLE = [
+    "montant le plus faible",
+    "montant le plus bas",
+    "montant le plus petit",
+    "montant faible",
+    "montant minimum",
+    "montant min",
+    "montant minimal",
+    "montant la plus faible",
+    "facture la moins chere",
+    "facture la plus faible",
+    "plus faible montant",
+    "plus bas montant",
+    "plus petit montant",
+    "montant le moins eleve",
+    "montant le moins haut",
+    "paie le moins",
+    "paye le moins",
+    "qui paie le moins",
+    "qui paye le moins",
+    "client le moins cher",
+    "client avec le moins",
+    "client qui paie le moins",
+    "client qui paye le moins",
+    "moins eleve montant",
+    "moins cher montant",
+]
 
 def repondre_question_generale(question: str, historique_texte: str) -> str:
     mode = detecter_mode_reponse(question)
@@ -294,16 +351,9 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     q_norm = _norm_dispatcher(question)
 
-    # ════════════════════════════════════════════════════════════
-    # ✅ RÈGLE PRIORITAIRE N°1 — AGENCE PAR CLIENT
-    # Intercepte avant tout : pas de LLM, pas d'ambiguïté.
-    # Formulations couvertes :
-    #   "agence de chaque client"
-    #   "agence par client"
-    #   "quelle agence pour chaque client"
-    #   "lister les agences par client"
-    #   "agence de tous les clients"
-    # ════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════
+    # RÈGLE 1 — AGENCE PAR CLIENT
+    # ════════════════════════════════════════════
     if any(t in q_norm for t in _TOKENS_AGENCE_PAR_CLIENT):
         print(f"  [RÈGLE] agence par client → fetch_agence_par_client(mode={mode})")
         return fetch_agence_par_client(mode=mode)
@@ -366,9 +416,25 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     if usage_detecte and any(t in q_norm for t in ["client", "clients", "qui", "liste", "lister", "combien"]):
         return fetch_par_usage(usage=usage_detecte, mode=mode)
 
-    # ════════════════════════════════════════════════════════════
-    # ✅ RÈGLE PRIORITAIRE — consommation élevée / faible
-    # ════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════
+    # RÈGLE 2 — MONTANT élevé / faible   ← INDENTATION CORRECTE ICI
+    # ════════════════════════════════════════════
+    _detect_montant_eleve = any(t in q_norm for t in _TOKENS_MONTANT_ELEVE)
+    _detect_montant_faible = any(t in q_norm for t in _TOKENS_MONTANT_FAIBLE)
+
+    if _detect_montant_eleve:
+        mois_detecte = _extraire_mois_disp(q_norm)
+        print(f"  [RÈGLE] montant élevé → fetch_top_montants(mois={mois_detecte}, mode={mode})")
+        return fetch_top_montants(mois=mois_detecte, mode=mode)
+
+    if _detect_montant_faible:
+        mois_detecte = _extraire_mois_disp(q_norm)
+        print(f"  [RÈGLE] montant faible → fetch_min_montants(mois={mois_detecte}, mode={mode})")
+        return fetch_min_montants(mois=mois_detecte, mode=mode)
+
+    # ════════════════════════════════════════════
+    # RÈGLE 3 — CONSOMMATION élevée / faible
+    # ════════════════════════════════════════════
     _detect_conso_elevee = any(t in q_norm for t in _TOKENS_CONSO_ELEVEE)
     _detect_conso_faible = any(t in q_norm for t in _TOKENS_CONSO_FAIBLE)
 
@@ -404,9 +470,9 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             print(f"  [RÈGLE] consomme faible → fetch_min_consommateurs(mois={mois_detecte}, mode={mode_effectif})")
             return fetch_min_consommateurs(mois=mois_detecte, mode=mode_effectif)
 
-    # ════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════
     # MODE COUNT
-    # ════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════
     if mode == "count":
         if _sujet_facture and not _sujet_client:
             return fetch_stats_generales(mode="count", question=question)
@@ -429,9 +495,9 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         if demande_eau and demande_elec:
             return fetch_par_service(service=None, mode="count")
 
-    # ════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════
     # MODE LIST
-    # ════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════
     if mode == "list":
         if _sujet_client and not demande_eau and not demande_elec and not _sujet_service:
             return fetch_liste_clients(mode="list")
@@ -448,9 +514,9 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         if demande_elec and not demande_eau:
             return fetch_par_service(service="electricite", mode="list")
 
-    # ════════════════════════════════════════════════════════════
-    # Pré-détection service / conso (eau ou elec précisé)
-    # ════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════
+    # Pré-détection service / conso
+    # ════════════════════════════════════════════
     if demande_faible and demande_eau and not demande_elec:
         return fetch_min_consommateurs_par_service(service="eau", mode=mode)
     if demande_faible and demande_elec and not demande_eau:
@@ -468,22 +534,21 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_par_service(service="eau", mode=mode)
     if demande_elec and not demande_eau and any(m in q_norm for m in ["combien", "liste", "quels", "client", "utilis"]):
         return fetch_par_service(service="electricite", mode=mode)
-# ════════════════════════════════════════════════════════════
-    # ✅ RÈGLE PRIORITAIRE — SOMME_CONSO_MOIS
-    # ════════════════════════════════════════════════════════════
-    _detect_somme_mois = any(t in q_norm for t in _TOKENS_SOMME_MOIS)
 
+    # ════════════════════════════════════════════
+    # SOMME CONSO MOIS
+    # ════════════════════════════════════════════
+    _detect_somme_mois = any(t in q_norm for t in _TOKENS_SOMME_MOIS)
     if _detect_somme_mois:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
             print(f"  [RÈGLE] somme conso mois → fetch_somme_conso_mois(mois={mois_detecte})")
             return fetch_somme_conso_mois(mois_detecte)
 
-    # ════════════════════════════════════════════════════════════
-    # ✅ RÈGLE PRIORITAIRE — SOMME_MONTANT_MOIS / global
-    # ════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════
+    # SOMME MONTANT MOIS
+    # ════════════════════════════════════════════
     _detect_somme_montant = any(t in q_norm for t in _TOKENS_SOMME_MONTANT)
-
     if _detect_somme_montant:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
@@ -493,9 +558,9 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             print(f"  [RÈGLE] somme montant global → fetch_stats_generales")
             return fetch_stats_generales(mode="count", question="montant total")
 
-    # ════════════════════════════════════════════════════════════
-    # LLM fallback
-    # ════════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════
+    # LLM FALLBACK
+    # ════════════════════════════════════════════
     print(f"  [RAG] Détection intent...")
     resultat = detecter_intent(question)
     intent = resultat.get("intent", "QUESTION_LIBRE")
@@ -510,6 +575,8 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_min_consommateurs(mois=params.get("mois"), mode=mode)
     elif intent == "TOP_MONTANTS":
         return fetch_top_montants(mois=params.get("mois"), mode=mode)
+    elif intent == "MIN_MONTANTS":                                        # ← AJOUT
+        return fetch_min_montants(mois=params.get("mois"), mode=mode)    # ← AJOUT
     elif intent == "CLASSEMENT_PAR_MOIS":
         return fetch_classement_par_mois(mode=mode)
     elif intent == "AGENCE_PAR_CLIENT":
@@ -540,7 +607,6 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_somme_montant_mois(mois)
     else:
         return fetch_question_libre(question, historique_texte)
-
 
 def repondre_question_client(question: str, nom_client: str, historique_texte: str) -> str:
     print(f"  [RAG CLIENT] Détection intent pour {nom_client}...")
