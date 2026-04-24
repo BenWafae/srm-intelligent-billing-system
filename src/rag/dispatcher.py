@@ -15,7 +15,9 @@ from rag.fetchers_generaux import (
     fetch_par_usage, fetch_par_service, fetch_alertes,
     fetch_stats_generales, fetch_evolution_mois, fetch_question_libre,
     fetch_somme_conso_mois,
-    fetch_agence_par_client,          # ← NOUVEAU
+    fetch_agence_par_client, 
+                # ← NOUVEAU
+    fetch_somme_montant_mois,             
 )
 from rag.fetchers_client import (
     fetch_client_max_consommation, fetch_client_min_consommation,
@@ -23,6 +25,7 @@ from rag.fetchers_client import (
     fetch_client_evolution, fetch_client_moyenne, fetch_client_infos,
     fetch_client_mois_specifique, fetch_client_toutes_factures,
     fetch_client_somme_conso
+
 )
 
 
@@ -251,6 +254,19 @@ _TOKENS_SOMME_MOIS = [
     "consomme en ",
     "conso en ",
 ]
+# ── TOKENS somme montant (sans mois précis) ──
+_TOKENS_SOMME_MONTANT = [
+    "somme des montant",
+    "somme de montant",
+    "somme montant",
+    "total montant",
+    "total des montant",
+    "montant total",
+    "montant global",
+    "montant cumule",
+    "combien a-t-on paye",
+    "combien ont paye",
+]
 
 
 def repondre_question_generale(question: str, historique_texte: str) -> str:
@@ -433,8 +449,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_par_service(service="eau", mode=mode)
     if demande_elec and not demande_eau and any(m in q_norm for m in ["combien", "liste", "quels", "client", "utilis"]):
         return fetch_par_service(service="electricite", mode=mode)
-
-    # ════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════
     # ✅ RÈGLE PRIORITAIRE — SOMME_CONSO_MOIS
     # ════════════════════════════════════════════════════════════
     _detect_somme_mois = any(t in q_norm for t in _TOKENS_SOMME_MOIS)
@@ -444,6 +459,20 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         if mois_detecte:
             print(f"  [RÈGLE] somme conso mois → fetch_somme_conso_mois(mois={mois_detecte})")
             return fetch_somme_conso_mois(mois_detecte)
+
+    # ════════════════════════════════════════════════════════════
+    # ✅ RÈGLE PRIORITAIRE — SOMME_MONTANT_MOIS / global
+    # ════════════════════════════════════════════════════════════
+    _detect_somme_montant = any(t in q_norm for t in _TOKENS_SOMME_MONTANT)
+
+    if _detect_somme_montant:
+        mois_detecte = _extraire_mois_disp(q_norm)
+        if mois_detecte:
+            print(f"  [RÈGLE] somme montant mois → fetch_somme_montant_mois(mois={mois_detecte})")
+            return fetch_somme_montant_mois(mois_detecte)
+        else:
+            print(f"  [RÈGLE] somme montant global → fetch_stats_generales")
+            return fetch_stats_generales(mode="count", question="montant total")
 
     # ════════════════════════════════════════════════════════════
     # LLM fallback
@@ -464,7 +493,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_top_montants(mois=params.get("mois"), mode=mode)
     elif intent == "CLASSEMENT_PAR_MOIS":
         return fetch_classement_par_mois(mode=mode)
-    elif intent == "AGENCE_PAR_CLIENT":                          # ← NOUVEAU
+    elif intent == "AGENCE_PAR_CLIENT":
         return fetch_agence_par_client(mode=mode)
     elif intent == "PAR_AGENCE":
         return fetch_par_agence(agence=params.get("agence"), mode=mode)
@@ -485,6 +514,11 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         if not mois:
             return "Veuillez préciser le mois souhaité."
         return fetch_somme_conso_mois(mois)
+    elif intent == "SOMME_MONTANT_MOIS":
+        mois = params.get("mois", "")
+        if not mois:
+            return fetch_stats_generales(mode="count", question="montant total")
+        return fetch_somme_montant_mois(mois)
     else:
         return fetch_question_libre(question, historique_texte)
 

@@ -971,6 +971,73 @@ def fetch_somme_conso_mois(mois: str) -> str:
             f"({r[3]} clients)"
         )
     return "\n".join(lignes)
+# fetsh somme_montant
+def fetch_somme_montant_mois(mois: str) -> str:
+    """
+    Retourne la somme totale des montants TTC pour un mois précis,
+    ventilée par service (eau / électricité).
+ 
+    Exemples de questions couvertes :
+      - "montant total en janvier"
+      - "somme des montants de mars"
+      - "combien a-t-on payé en février"
+      - "total mantant de juil"       ← faute gérée en amont
+      - "monton global d octobre"     ← faute gérée en amont
+    """
+    from normalisation import normaliser_mois
+    mois_norm = normaliser_mois(mois)
+    conn = _connexion()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT
+            LOWER(type_service)                  AS service,
+            ROUND(SUM(montant_ttc), 2)           AS total_montant,
+            COUNT(DISTINCT nom_client)           AS nb_clients,
+            ROUND(AVG(montant_ttc), 2)           AS moy_montant,
+            ROUND(MIN(montant_ttc), 2)           AS min_montant,
+            ROUND(MAX(montant_ttc), 2)           AS max_montant
+        FROM factures_excel
+        WHERE mois_source LIKE ?
+        GROUP BY LOWER(type_service)
+    """, (f"%{mois_norm}%",))
+    rows = cursor.fetchall()
+ 
+    # Total global (tous services confondus)
+    cursor.execute("""
+        SELECT
+            ROUND(SUM(montant_ttc), 2)  AS total_global,
+            COUNT(DISTINCT nom_client)  AS nb_clients_total,
+            COUNT(*)                    AS nb_factures
+        FROM factures_excel
+        WHERE mois_source LIKE ?
+    """, (f"%{mois_norm}%",))
+    totaux = cursor.fetchone()
+    conn.close()
+ 
+    if not rows:
+        return f"Aucune donnée trouvée pour le mois **{mois_norm}**."
+ 
+    lignes = [f"💰 Montants TTC en **{mois_norm}** :\n"]
+ 
+    for r in rows:
+        label = "Électricité" if r[0] == "electricite" else "Eau"
+        emoji = "⚡" if r[0] == "electricite" else "💧"
+        lignes.append(
+            f"{emoji} **{label}** :\n"
+            f"   • Total TTC       : **{r[1]:,.2f} Dhs**\n"
+            f"   • Nb clients      : {r[2]}\n"
+            f"   • Montant moyen   : {r[3]:,.2f} Dhs\n"
+            f"   • Montant minimum : {r[4]:,.2f} Dhs\n"
+            f"   • Montant maximum : {r[5]:,.2f} Dhs"
+        )
+ 
+    if totaux and totaux[0] is not None:
+        lignes.append(
+            f"\n📊 **Total global {mois_norm}** : **{totaux[0]:,.2f} Dhs**"
+            f"  ({totaux[1]} clients · {totaux[2]} factures)"
+        )
+ 
+    return "\n".join(lignes)
 
 
 def fetch_question_libre(question: str, historique_texte: str) -> str:

@@ -21,6 +21,7 @@ PAR_USAGE            : usage domestique, force motrice, commercial, administrati
 PAR_SERVICE          : eau, électricité, type de service, combien utilisent eau vs electricite, lister clients eau ou electricite
 ALERTES              : alertes, qui a des alertes, factures avec alerte
 STATS_GENERALES      : total, moyenne, somme, montant global, statistiques générales
+SOMME_MONTANT_MOIS   : somme des montants, total des montants, montant total en janvier, combien a-t-on payé en mars, montant global d'un mois
 SOMME_CONSO_MOIS     : somme de consommation en un mois précis, total consommé en janvier, combien a-t-on consommé en mars
 EVOLUTION_MOIS       : évolution, progression, mois par mois, historique général, tendance
 QUESTION_LIBRE       : toute autre question qui ne rentre pas dans les catégories ci-dessus
@@ -29,6 +30,7 @@ QUESTION_LIBRE       : toute autre question qui ne rentre pas dans les catégori
 INTENTS_CLIENT = """
 MAX_CONSOMMATION     : mois où le client a le plus consommé, consommation maximale, pic de consommation
 MIN_CONSOMMATION     : mois où le client a le moins consommé, consommation minimale
+SOMME_MONTANT_MOIS   : somme des montants, total des montants, montant total en janvier, combien a-t-on payé en mars, montant global d'un mois
 MAX_MONTANT          : mois où le client a payé le plus, montant maximum, facture la plus chère
 MIN_MONTANT          : mois où le client a payé le moins, montant minimum, facture la moins chère
 SOMME_CONSO_CLIENT   : somme totale de consommation du client sur tous les mois, total consommé, combien a-t-il consommé en tout
@@ -244,7 +246,126 @@ _TOKENS_MIN_CONSO = [
     "faible consomme", "consomme faible", "consomme basse",
     "la plus basse", "plus basse",
 ]
-
+_TOKENS_SOMME_MONTANT_MOIS = [
+    # somme + montant
+    "somme de montant",
+    "somme des montant",
+    "somme du montant",
+    "somme montant",
+    "somme de mantant",
+    "somme des mantant",
+    "somme mantant",
+    "somme de monton",
+    "somme des monton",
+    "somme monton",
+    "somme de montan",
+    "somme des montan",
+    "somme montan",
+    "somme de mntant",
+    "somme mntant",
+ 
+    # total + montant
+    "total montant",
+    "total de montant",
+    "total des montant",
+    "total du montant",
+    "total mantant",
+    "total de mantant",
+    "total monton",
+    "total de monton",
+    "total montan",
+    "total de montan",
+    "total mntant",
+ 
+    # montant total/global
+    "montant total",
+    "montant totale",
+    "montant global",
+    "montant cumule",
+    "montants total",
+    "montants totaux",
+    "montants cumules",
+    "mantant total",
+    "mantant totale",
+    "mantant global",
+    "monton total",
+    "monton totale",
+    "monton global",
+    "montan total",
+    "montan global",
+    "mntant total",
+ 
+    # combien + paye / depense
+    "combien a-t-on paye",
+    "combien ont paye",
+    "combien a paye",
+    "combien on paye",
+    "combien depense",
+    "combien a-t-on depense",
+    # montant en [mois] — détection via regex dans le code
+    # (le token "montant en" est trop court, géré séparément)
+]
+# ── Tokens SOMME_MONTANT_CLIENT (par client) ──
+_TOKENS_SOMME_MONTANT_CLIENT = [
+    # somme + montant
+    "somme totale montant",
+    "somme totale de montant",
+    "somme totale des montant",
+    "somme montant",
+    "somme de montant",
+    "somme des montant",
+    "somme mantant",
+    "somme de mantant",
+    "somme monton",
+    "somme montan",
+    "somme mntant",
+ 
+    # total payé
+    "total paye",
+    "total de montant",
+    "total des montant",
+    "total montant",
+    "montant total",
+    "montant totale",
+    "montant cumule",
+    "montant global",
+    "montant cumulee",
+ 
+    # combien payé
+    "combien a-t-il paye",
+    "combien a-t-elle paye",
+    "combien a paye",
+    "combien il a paye",
+    "combien elle a paye",
+    "combien paye",
+    "combien a depense",
+    "combien a-t-il depense",
+    "combien a-t-elle depense",
+ 
+    # sur tous les mois / en tout
+    "montant sur tous les mois",
+    "montant sur l ensemble",
+    "montant en tout",
+    "montant cumule sur",
+    "montant total sur",
+    "paye en tout",
+    "depense en tout",
+    "total des factures",
+    "somme des factures",
+    "somme totale des factures",
+ 
+    # fautes fréquentes
+    "mantant total",
+    "mantant global",
+    "monton total",
+    "montan total",
+    "mntant total",
+    "mantant cumule",
+    "monton cumule",
+]
+print("Tokens définis avec succès.")
+print(f"SOMME_MONTANT_MOIS   : {len(_TOKENS_SOMME_MONTANT_MOIS)} tokens")
+print(f"SOMME_MONTANT_CLIENT : {len(_TOKENS_SOMME_MONTANT_CLIENT)} tokens")
 
 
 # ── Tokens MAX_MONTANT ──
