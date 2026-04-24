@@ -195,7 +195,7 @@ def fetch_client_infos(nom_client: str, champ: str = None) -> str:
 - Type service : {r[7]}"""
 
 
-def fetch_client_mois_specifique(nom_client: str, mois: str) -> str:
+def fetch_client_mois_specifique(nom_client: str, mois: str, champ: str = None) -> str:
     mois_normalise = normaliser_mois(mois)
     conn = _connexion()
     cursor = conn.cursor()
@@ -210,13 +210,33 @@ def fetch_client_mois_specifique(nom_client: str, mois: str) -> str:
     if not rows:
         return f"Aucune facture trouvée pour **{nom_client}** en {mois_normalise}."
     r = rows[0]
+
+    # ── Réponse ciblée selon le champ demandé ──
+    if champ == "consommation":
+        return (
+            f"⚡💧 Consommation de **{nom_client}** en **{r[0]}** :\n"
+            f"→ **{r[3]:,} {r[4]}**"
+        )
+
+    if champ == "montant":
+        return (
+            f"💰 Montant de **{nom_client}** en **{r[0]}** :\n"
+            f"→ **{r[5]:,.2f} Dhs**"
+        )
+
+    if champ == "date_limite":
+        return (
+            f"📅 Date limite de paiement — **{nom_client}** ({r[0]}) :\n"
+            f"→ **{r[6]}**"
+        )
+
+    # ── Fiche complète (facture / paiement / aucun champ précis) ──
     return f"""🧾 Facture de **{nom_client}** — {r[0]} :
 
 - Période            : {r[1]} → {r[2]}
 - Consommation       : **{r[3]:,} {r[4]}**
 - Montant TTC        : **{r[5]:,.2f} Dhs**
 - Date limite pmt    : {r[6]}"""
-
 
 def fetch_client_somme_conso(nom_client: str) -> str:
     conn = _connexion()

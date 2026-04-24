@@ -512,8 +512,9 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
         champ = params.get("champ")
         return fetch_client_infos(nom_client, champ=champ)
     elif intent == "MOIS_SPECIFIQUE":
-        mois = params.get("mois", "")
-        return fetch_client_mois_specifique(nom_client, mois)
+        mois  = params.get("mois", "")
+        champ = params.get("champ")          # ← récupérer le champ
+        return fetch_client_mois_specifique(nom_client, mois, champ=champ)
     elif intent == "SOMME_CONSO_CLIENT":
         return fetch_client_somme_conso(nom_client)
     else:

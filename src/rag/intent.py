@@ -245,6 +245,8 @@ _TOKENS_MIN_CONSO = [
     "la plus basse", "plus basse",
 ]
 
+
+
 # ── Tokens MAX_MONTANT ──
 _TOKENS_MAX_MONTANT = [
     "le plus paye", "montant le plus eleve",
@@ -263,6 +265,7 @@ _TOKENS_MIN_MONTANT = [
     "mois ou il a le moins paye", "mois ou elle a le moins paye",
     "mois a le moins paye", "quel mois a le moins paye",
 ]
+
 
 # ── Tokens champs spécifiques INFOS_CLIENT ──
 _TOKENS_USAGE      = ["usage", "type d usage", "type usage", "quel usage", "quel est l usage", "quel est son usage", "montrer les ussages", "usagges", "usaage"]
@@ -363,12 +366,28 @@ def detecter_intent_client(question: str) -> dict:
         "consomme", "conso", "montant", "facture",
         "combien", "paye",
     ]
+    # Tokens champ — définis ici pour éviter variables globales inutiles
+    _TOKENS_CHAMP_DATE    = ["date", "limite", "echeance", "date limite", "date paiement", "date limit"]
+    _TOKENS_CHAMP_MONTANT = ["montant", "paye", "ttc", "dhs", "prix", "cout", "paie"]
+    _TOKENS_CHAMP_CONSO   = ["consomme", "conso", "kwh", "m3"]
+
     if _contient_mois(q) and any(t in q for t in _mots_conso_montant):
         _tokens_tous = ["tous les mois", "chaque mois", "sur tous", "l ensemble"]
         if not any(t in q for t in _tokens_tous):
             mois_extrait = _extraire_mois(q)
-            print(f"  [PRÉ-DÉTECTION CLIENT] MOIS_SPECIFIQUE → mois='{mois_extrait}'")
-            return {"intent": "MOIS_SPECIFIQUE", "params": {"mois": mois_extrait}}
+
+            # ── Détection du champ précis ──
+            champ = None
+            if any(t in q for t in _TOKENS_CHAMP_DATE):
+                champ = "date_limite"
+            elif any(t in q for t in _TOKENS_CHAMP_MONTANT) and not any(t in q for t in _TOKENS_CHAMP_CONSO):
+                champ = "montant"
+            elif any(t in q for t in _TOKENS_CHAMP_CONSO) and not any(t in q for t in _TOKENS_CHAMP_MONTANT):
+                champ = "consommation"
+            # si les deux ou aucun → champ=None → fiche complète
+
+            print(f"  [PRÉ-DÉTECTION CLIENT] MOIS_SPECIFIQUE → mois='{mois_extrait}' champ='{champ}'")
+            return {"intent": "MOIS_SPECIFIQUE", "params": {"mois": mois_extrait, "champ": champ}}
 
     # ════════════════════════════════════════════════════════════
     # ÉTAPE 2 — Champs spécifiques INFOS_CLIENT
