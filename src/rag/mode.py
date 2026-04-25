@@ -132,6 +132,10 @@ _TOKENS_TOP1 = {
     "top conso",
     "top consommation",
     "maximum conso",
+    "facture la plus chere",
+     "facture la moins chere",
+     "facture la plus elevee",
+     "facture chere",
 }
 
 

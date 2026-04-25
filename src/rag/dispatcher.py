@@ -539,7 +539,10 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         "pro", "dom", "agri"
     ])
 
-    demande_eau    = any(m in q_norm for m in ["eau", "eauu", "eeau"])
+    demande_eau = any(
+    re.search(r'\beau\b', q_norm) or
+    m in q_norm for m in ["eauu", "eeau"]
+)    
     demande_elec   = any(m in q_norm for m in ["elec", "electricit", "electr"])
     demande_faible = any(m in q_norm for m in ["faible", "minimum", "minimale", "plus faible"])
     demande_elevee = any(m in q_norm for m in ["eleve", "plus grand", "maximum", "haut", "top"])
@@ -585,6 +588,13 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_par_usage(usage=None, mode="detail")
 
     # ── Cas spécial : usage précis + demande clients ──
+
+    _demande_agence_usage = any(t in q_norm for t in [
+    "quel agence", "quelle agence", "agence a le plus",
+    "agence avec le plus", "agence qui a"
+])
+    if usage_detecte and _demande_agence_usage:
+      return repondre_fallback_sql(question)
     if usage_detecte and any(t in q_norm for t in ["client", "clients", "qui", "liste", "lister", "combien"]):
         return fetch_par_usage(usage=usage_detecte, mode=mode)
 

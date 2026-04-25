@@ -309,6 +309,7 @@ JSON :"""
             result = json.loads(match.group())
             intent_llm = result.get("intent", "QUESTION_LIBRE")
             q_val = _normaliser_q(question)
+            # ── 1. INFOS_CLIENT sans nom propre ──
             _a_nom_propre = any(
                 len(mot) >= 4 and mot[0].isupper()
                 for mot in question.split()
@@ -316,7 +317,25 @@ JSON :"""
             if intent_llm == "INFOS_CLIENT" and not _a_nom_propre:
                 print(f"  [VALIDATION] INFOS_CLIENT sans nom propre → QUESTION_LIBRE")
                 return {"intent": "QUESTION_LIBRE", "params": {}}
+
+            # ── 1b. MIN_CONSOMMATEURS sans contexte min ──
+            if intent_llm == "MIN_CONSOMMATEURS":
+                _mots_min = ["moins", "faible", "min", "minimum", "bas", "petit", "reduit"]
+                if not any(m in q_val for m in _mots_min):
+                    print(f"  [VALIDATION] MIN_CONSOMMATEURS sans contexte min → QUESTION_LIBRE")
+                    return {"intent": "QUESTION_LIBRE", "params": {}}
+
+            # ── 1c. TOP_CONSOMMATEURS sans contexte max ──
+            if intent_llm == "TOP_CONSOMMATEURS":
+                _mots_max = ["plus", "eleve", "max", "maximum", "haut", "grand", "top", "fort", "beaucoup"]
+                if not any(m in q_val for m in _mots_max):
+                    print(f"  [VALIDATION] TOP_CONSOMMATEURS sans contexte max → QUESTION_LIBRE")
+                    return {"intent": "QUESTION_LIBRE", "params": {}}
+
+            # ── 2. PAR_AGENCE avec valeur numérique ──
             agence_val = result.get("params", {}).get("agence", "")
+            if intent_llm == "PAR_AGENCE" and agence_val and agence_val.strip().isdigit():
+             agence_val = result.get("params", {}).get("agence", "")
             if intent_llm == "PAR_AGENCE" and agence_val and agence_val.strip().isdigit():
                 print(f"  [VALIDATION] PAR_AGENCE valeur numérique → QUESTION_LIBRE")
                 return {"intent": "QUESTION_LIBRE", "params": {}}
