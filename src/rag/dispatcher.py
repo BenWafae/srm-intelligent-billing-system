@@ -414,6 +414,14 @@ RÈGLES ABSOLUES :
     utilise GROUP BY mois_source avec ORDER BY mois_source
 13. Si la question demande "total des factures", retourne COUNT(*) 
     groupé par mois_source, pas un COUNT global
+14. Si la question demande une LISTE de clients avec des filtres (agence, usage, service...),
+    retourne UNIQUEMENT : nom_client, agence, usage, type_service
+    avec SELECT DISTINCT et GROUP BY nom_client — jamais de colonnes mois/montant/conso
+15. Pour filtrer agence et usage, utilise TOUJOURS LIKE avec % :
+    agence LIKE '%agadir%' — jamais agence = 'agadir'
+    usage LIKE '%agricole%' — jamais usage = 'agricole'
+    LOWER(agence) LIKE '%agadir%' pour ignorer la casse
+
 
 
 Question : {question}
