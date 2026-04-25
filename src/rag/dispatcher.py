@@ -549,10 +549,9 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         "pro", "dom", "agri"
     ])
 
-    demande_eau = any(
-    re.search(r'\beau\b', q_norm) or
+    demande_eau = bool(re.search(r'\beau\b', q_norm)) or any(
     m in q_norm for m in ["eauu", "eeau"]
-)    
+)
     demande_elec   = any(m in q_norm for m in ["elec", "electricit", "electr"])
     demande_faible = any(m in q_norm for m in ["faible", "minimum", "minimale", "plus faible"])
     demande_elevee = any(m in q_norm for m in ["eleve", "plus grand", "maximum", "haut", "top"])
