@@ -302,17 +302,58 @@ Si la question mentionne un usage précis, retourne UNIQUEMENT le mot brut tel q
 Si la question mentionne un service précis (eau ou electricite), ajoute : {{"service": "eau"}} ou {{"service": "electricite"}}
 
 JSON :"""
-
     texte = _appeler_llm(prompt)
     match = re.search(r'\{.*\}', texte, re.DOTALL)
     if match:
         try:
-            return json.loads(match.group())
+            result = json.loads(match.group())
+            intent_llm = result.get("intent", "QUESTION_LIBRE")
+            q_val = _normaliser_q(question)
+            _a_nom_propre = any(
+                len(mot) >= 4 and mot[0].isupper()
+                for mot in question.split()
+            )
+            if intent_llm == "INFOS_CLIENT" and not _a_nom_propre:
+                print(f"  [VALIDATION] INFOS_CLIENT sans nom propre → QUESTION_LIBRE")
+                return {"intent": "QUESTION_LIBRE", "params": {}}
+            agence_val = result.get("params", {}).get("agence", "")
+            if intent_llm == "PAR_AGENCE" and agence_val and agence_val.strip().isdigit():
+                print(f"  [VALIDATION] PAR_AGENCE valeur numérique → QUESTION_LIBRE")
+                return {"intent": "QUESTION_LIBRE", "params": {}}
+            _mots_specifiques = ["compteur", "contrat", "numero de", "numero compteur", "numero contrat"]
+            _intent_adaptes = ["INFOS_CLIENT", "QUESTION_LIBRE"]
+            if any(m in q_val for m in _mots_specifiques) and intent_llm not in _intent_adaptes:
+                print(f"  [VALIDATION] mot spécifique → QUESTION_LIBRE")
+                return {"intent": "QUESTION_LIBRE", "params": {}}
+            if intent_llm in ("SOMME_CONSO_MOIS", "SOMME_MONTANT_MOIS"):
+                mois_presents = any(m in q_val for m in [
+                    "jan", "fev", "mar", "avr", "mai", "jun",
+                    "jul", "aou", "sep", "oct", "nov", "dec",
+                    "janvier", "fevrier", "mars", "avril", "juin",
+                    "juillet", "aout", "septembre", "octobre",
+                    "novembre", "decembre"
+                ])
+                if not mois_presents:
+                    print(f"  [VALIDATION] {intent_llm} sans mois → QUESTION_LIBRE")
+                    return {"intent": "QUESTION_LIBRE", "params": {}}
+            _mots_analytiques = ["par agence", "par service", "par usage", "par mois", "par client", "par type", "moyenne par", "total par", "somme par"]
+            if intent_llm == "STATS_GENERALES" and any(m in q_val for m in _mots_analytiques):
+                print(f"  [VALIDATION] STATS_GENERALES analytique → QUESTION_LIBRE")
+                return {"intent": "QUESTION_LIBRE", "params": {}}
+            _intents_valides = [
+                "LISTE_CLIENTS", "TOP_CONSOMMATEURS", "MIN_CONSOMMATEURS",
+                "TOP_MONTANTS", "MIN_MONTANTS", "CLASSEMENT_PAR_MOIS",
+                "AGENCE_PAR_CLIENT", "PAR_AGENCE", "PAR_USAGE", "PAR_SERVICE",
+                "ALERTES", "STATS_GENERALES", "SOMME_MONTANT_MOIS",
+                "SOMME_CONSO_MOIS", "EVOLUTION_MOIS", "QUESTION_LIBRE"
+            ]
+            if intent_llm not in _intents_valides:
+                print(f"  [VALIDATION] Intent inconnu {intent_llm} → QUESTION_LIBRE")
+                return {"intent": "QUESTION_LIBRE", "params": {}}
+            return result
         except:
             pass
     return {"intent": "QUESTION_LIBRE", "params": {}}
-
-
 # ════════════════════════════════════════════════════════════
 # DÉTECTION INTENT CLIENT
 # ════════════════════════════════════════════════════════════

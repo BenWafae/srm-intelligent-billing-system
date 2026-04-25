@@ -3,17 +3,19 @@ import re
 import unicodedata
 import sys
 import os
+import sqlite3
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from normalisation import normaliser_usage
 from rag.mode import detecter_mode_reponse, _normaliser_q
-from rag.intent import detecter_intent, detecter_intent_client
+from rag.intent import detecter_intent, detecter_intent_client, _appeler_llm
 from rag.fetchers_generaux import (
     fetch_liste_clients, fetch_top_consommateurs, fetch_min_consommateurs,
     fetch_min_consommateurs_par_service, fetch_max_consommateurs_par_service,
     fetch_top_montants, fetch_classement_par_mois, fetch_par_agence,fetch_min_montants, 
     fetch_par_usage, fetch_par_service, fetch_alertes,
-    fetch_stats_generales, fetch_evolution_mois, fetch_question_libre,
+     fetch_stats_generales, fetch_evolution_mois, 
     fetch_somme_conso_mois,
     fetch_agence_par_client, 
                 # ← NOUVEAU
@@ -345,12 +347,162 @@ _TOKENS_MONTANT_FAIBLE = [
     "moins cher montant",
 ]
 
+
+# ════════════════════════════════════════════════════════════
+# FALLBACK TEXT-TO-SQL
+# Utilisé uniquement quand aucune règle ni intent LLM
+# n'a pu traiter la question.
+# Le LLM génère uniquement le SQL → Python exécute → réponse fiable
+# ════════════════════════════════════════════════════════════
+
+DB_PATH_FALLBACK = os.path.join(
+    os.path.dirname(__file__), "..", "..", "data", "srm.db"
+)
+
+def repondre_fallback_sql(question: str) -> str:
+    print(f"  [FALLBACK SQL] Question : {question}")
+
+    schema = """
+Table : factures_excel
+Colonnes disponibles :
+- nom_client       TEXT    : nom complet du client
+- agence           TEXT    : agence SRM du client
+- usage            TEXT    : ex 'USAGE DOMESTIQUE', 'USAGE PROFESSIONNEL', 'USAGE AGRICOLE'
+- type_service     TEXT    : 'eau' ou 'electricite'
+- mois_source      TEXT    : ex 'Octobre 2025', 'Janvier 2026'
+- periode_debut    TEXT    : format DD/MM/YYYY
+- periode_fin      TEXT    : format DD/MM/YYYY
+- consommation     REAL    : valeur numérique de la consommation
+- unite            TEXT    : 'm³' pour eau, 'kWh' pour électricité
+- montant_ttc      REAL    : montant en dirhams
+- date_limite_paiement TEXT : date limite de paiement
+- alerte           TEXT    : message d'alerte si présent, sinon NULL
+- numero_client    TEXT    : identifiant unique du client (ex: C30EF340/690200) — JAMAIS un nombre simple
+- numero_contrat   TEXT    : numéro de contrat (ex: 0005567200/2063200) — JAMAIS un nombre simple
+- numero_compteur  TEXT    : numéro de compteur (ex: 8301, 8302...) — nombre simple à 4 chiffres
+- adresse          TEXT    : adresse du client
+"""
+
+    prompt = f"""Tu es un expert SQL SQLite. Tu dois générer une requête SELECT pour répondre à une question sur des factures SRM (eau et électricité au Maroc).
+
+{schema}
+
+RÈGLES ABSOLUES :
+1. Génère UNIQUEMENT une requête SELECT — jamais INSERT, UPDATE, DELETE, DROP
+2. Utilise UNIQUEMENT les colonnes listées ci-dessus
+3. Pour filtrer par mois, utilise : mois_source LIKE '%Janvier 2026%'
+4. Pour filtrer par client, utilise : nom_client LIKE '%nom%'
+5. Pour filtrer par service, utilise : LOWER(type_service) = 'eau' ou 'electricite'
+6. Utilise ROUND(..., 2) pour les montants
+7. Si la question est totalement incompréhensible, réponds exactement : INCOMPREHENSIBLE
+8. Utilise toujours GROUP BY nom_client pour éviter les doublons par client
+9. Réponds avec UNIQUEMENT le SQL brut, sans explication, sans markdown, sans backticks
+10. Si la question mentionne "compteur", "compt", "comp", "n comp", "n compteur" 
+   suivi d'un nombre → utilise TOUJOURS numero_compteur, jamais numero_client
+
+Question : {question}
+
+SQL :"""
+
+    try:
+        sql_genere = _appeler_llm(prompt).strip()
+        print(f"  [FALLBACK SQL] SQL généré : {sql_genere}")
+    except Exception as e:
+        print(f"  [FALLBACK SQL] Erreur LLM : {e}")
+        return "Je n'ai pas pu traiter cette question pour le moment."
+
+    # ── Sécurité : refuser tout ce qui n'est pas SELECT ──
+    if sql_genere.upper() == "INCOMPREHENSIBLE":
+        return (
+            "Je n'ai pas compris votre question.\n"
+            "Essayez par exemple :\n"
+            "- Combien de clients utilisent l'eau ?\n"
+            "- Quel est le montant moyen en janvier 2026 ?\n"
+            "- Quels clients sont dans l'agence Agadir Nord ?"
+        )
+
+    sql_upper = sql_genere.upper().strip()
+    mots_dangereux = ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE"]
+    if not sql_upper.startswith("SELECT") or any(m in sql_upper for m in mots_dangereux):
+        print(f"  [FALLBACK SQL] ⚠️ SQL refusé pour sécurité : {sql_genere}")
+        return "Je n'ai pas pu traiter cette question. Pouvez-vous la reformuler ?"
+
+    # ── Exécution sécurisée ──
+    try:
+        conn = sqlite3.connect(DB_PATH_FALLBACK)
+        cursor = conn.cursor()
+        cursor.execute(sql_genere)
+        rows = cursor.fetchall()
+        cols = [d[0] for d in cursor.description]
+        conn.close()
+    except Exception as e:
+        print(f"  [FALLBACK SQL] Erreur exécution : {e}")
+        return "Je n'ai pas pu exécuter cette recherche. Pouvez-vous reformuler votre question ?"
+
+    if not rows:
+        return "Aucun résultat trouvé pour votre question."
+
+    return _formater_resultat_fallback(rows, cols, question)
+
+
+def _formater_resultat_fallback(rows: list, cols: list, question: str) -> str:
+    # ── Cas 1 : une seule valeur (COUNT, SUM, AVG...) ──
+    if len(rows) == 1 and len(cols) == 1:
+        valeur = rows[0][0]
+        if isinstance(valeur, float):
+            return f"**{valeur:,.2f}**"
+        return f"**{valeur}**"
+
+    # ── Cas 2 : une ligne, plusieurs colonnes ──
+    if len(rows) == 1:
+        lignes = []
+        for i, col in enumerate(cols):
+            val = rows[0][i]
+            if isinstance(val, float):
+                lignes.append(f"- {col} : **{val:,.2f}**")
+            else:
+                lignes.append(f"- {col} : **{val}**")
+        return "\n".join(lignes)
+
+    # ── Cas 3 : plusieurs lignes ──
+    lignes = []
+    for i, row in enumerate(rows, 1):
+        parties = []
+        for j, col in enumerate(cols):
+            val = row[j]
+            if val is None:
+                continue
+            if isinstance(val, float):
+                parties.append(f"{col}: {val:,.2f}")
+            else:
+                parties.append(f"{col}: {val}")
+        lignes.append(f"{i}. " + " | ".join(parties))
+
+    return "\n".join(lignes)
+
+
 def repondre_question_generale(question: str, historique_texte: str) -> str:
     mode = detecter_mode_reponse(question)
     print(f"  [MODE] {mode}")
 
     q_norm = _norm_dispatcher(question)
 
+# ════════════════════════════════════════════
+    # RÈGLE 0 — Questions courtes prioritaires
+    # Gérées avant tout pour éviter hallucinations
+    # ════════════════════════════════════════════
+    _tokens_count_client = [
+        "nbr client", "nb client", "nbre client",
+        "nbr clients", "nb clients", "nbre clients",
+        "nmb client", "nmb clients",
+        "nbr de client", "nb de client",
+        "nombre client", "nombre de client",
+        "nombre clients", "nombre de clients",
+    ]
+    if any(t in q_norm for t in _tokens_count_client):
+        return fetch_liste_clients(mode="count")
+
+    
     # ════════════════════════════════════════════
     # RÈGLE 1 — AGENCE PAR CLIENT
     # ════════════════════════════════════════════
@@ -384,6 +536,14 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     demande_elec   = any(m in q_norm for m in ["elec", "electricit", "electr"])
     demande_faible = any(m in q_norm for m in ["faible", "minimum", "minimale", "plus faible"])
     demande_elevee = any(m in q_norm for m in ["eleve", "plus grand", "maximum", "haut", "top"])
+
+    _tokens_client_eau = [
+        "client eau", "clients eau",
+        "client utilise eau", "client eau uniquement",
+        "client eau seulement",
+    ]
+    if any(t in q_norm for t in _tokens_client_eau) and not demande_elec:
+        return fetch_par_service(service="eau", mode=mode)
 
     # ── Détection usage précis ──
     usage_detecte = None
@@ -606,8 +766,8 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             return fetch_stats_generales(mode="count", question="montant total")
         return fetch_somme_montant_mois(mois)
     else:
-        return fetch_question_libre(question, historique_texte)
-
+        print(f"  [FALLBACK] Intent non reconnu → Text-to-SQL")
+        return repondre_fallback_sql(question)
 def repondre_question_client(question: str, nom_client: str, historique_texte: str) -> str:
     print(f"  [RAG CLIENT] Détection intent pour {nom_client}...")
     resultat = detecter_intent_client(question)

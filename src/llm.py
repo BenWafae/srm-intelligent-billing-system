@@ -164,6 +164,20 @@ def question_fait_reference(question: str) -> bool:
     if est_question_generale(question):
         return False
 
+    # ── Questions courtes sur les stats globales ──
+    q_norm = normaliser(question)
+    _questions_globales = [
+        "nbr client", "nb client", "nbre client",
+        "nombre client", "nombre de client",
+        "nbr clients", "nb clients",
+        "client eau", "client elec",
+        "client electricite", "clients eau",
+        "clients elec", "nbr facture",
+        "nb facture", "nombre facture",
+    ]
+    if any(t in q_norm for t in _questions_globales):
+        return False
+
     question_lower = question.lower()
     for mot in MOTS_REFERENCE_IMPLICITE:
         if mot in question_lower:
@@ -177,7 +191,6 @@ def question_fait_reference(question: str) -> bool:
             return True
 
     return False
-
 
 def _extraire_client_depuis_historique(historique: list, liste_clients: list) -> str | None:
     for msg in reversed(historique):
