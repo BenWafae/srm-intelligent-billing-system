@@ -187,6 +187,13 @@ _TOKENS_CONSO_ELEVEE = [
     "importante consomme", "forte consomme",
     "grand consommateur", "grand consomme",
     "top consomme", "top consommateur",
+    "max conso",
+    "conso max",
+    "client max conso",
+    "max consomme",
+    "consomme max",
+    "maximum conso",
+    "conso maximum",
 ]
 
 _TOKENS_CONSO_FAIBLE = [
@@ -542,7 +549,12 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         "client utilise eau", "client eau uniquement",
         "client eau seulement",
     ]
-    if any(t in q_norm for t in _tokens_client_eau) and not demande_elec:
+    _detect_intention_conso = any(t in q_norm for t in [
+        "consomme", "conso", "consommation",
+        "max", "plus", "top", "eleve",
+        "min", "moins", "faible"
+    ])
+    if any(t in q_norm for t in _tokens_client_eau) and not demande_elec and not _detect_intention_conso:
         return fetch_par_service(service="eau", mode=mode)
 
     # ── Détection usage précis ──
@@ -699,7 +711,11 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # SOMME CONSO MOIS
     # ════════════════════════════════════════════
     _detect_somme_mois = any(t in q_norm for t in _TOKENS_SOMME_MOIS)
-    if _detect_somme_mois:
+    _detect_intention_classement = any(t in q_norm for t in [
+        "max", "plus", "top", "eleve", "elevee", "grand", "haut",
+        "min", "moins", "faible", "bas", "petit"
+    ])
+    if _detect_somme_mois and not _detect_intention_classement:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
             print(f"  [RÈGLE] somme conso mois → fetch_somme_conso_mois(mois={mois_detecte})")

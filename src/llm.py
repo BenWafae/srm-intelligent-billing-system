@@ -174,6 +174,12 @@ def question_fait_reference(question: str) -> bool:
         "client electricite", "clients eau",
         "clients elec", "nbr facture",
         "nb facture", "nombre facture",
+        "top consommation", "top conso",
+        "max conso", "conso max",
+        "qui consomme", "qui consome",
+        "quel client consomme", "quel client a",
+        "client max", "client min",
+        "consomme le plus", "consomme le moins",
     ]
     if any(t in q_norm for t in _questions_globales):
         return False

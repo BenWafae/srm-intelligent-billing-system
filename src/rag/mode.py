@@ -127,6 +127,11 @@ _TOKENS_TOP1 = {
     "consome le plus",    "consome le moins",
     "consome eleve",      "consome elevee",
     "consome faible",
+    "max conso",
+    "conso max",
+    "top conso",
+    "top consommation",
+    "maximum conso",
 }
 
 
