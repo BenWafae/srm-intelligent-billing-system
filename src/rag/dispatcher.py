@@ -366,6 +366,9 @@ DB_PATH_FALLBACK = os.path.join(
     os.path.dirname(__file__), "..", "..", "data", "srm.db"
 )
 
+
+
+
 def repondre_fallback_sql(question: str) -> str:
     print(f"  [FALLBACK SQL] Question : {question}")
 
@@ -406,6 +409,12 @@ RÈGLES ABSOLUES :
 9. Réponds avec UNIQUEMENT le SQL brut, sans explication, sans markdown, sans backticks
 10. Si la question mentionne "compteur", "compt", "comp", "n comp", "n compteur" 
    suivi d'un nombre → utilise TOUJOURS numero_compteur, jamais numero_client
+11. Pour les numéros (compteur, contrat, client), utilise toujours SELECT DISTINCT
+12. Si la question demande un résultat "par mois" ou "pour chaque mois", 
+    utilise GROUP BY mois_source avec ORDER BY mois_source
+13. Si la question demande "total des factures", retourne COUNT(*) 
+    groupé par mois_source, pas un COUNT global
+
 
 Question : {question}
 
@@ -413,6 +422,7 @@ SQL :"""
 
     try:
         sql_genere = _appeler_llm(prompt).strip()
+  
         print(f"  [FALLBACK SQL] SQL généré : {sql_genere}")
     except Exception as e:
         print(f"  [FALLBACK SQL] Erreur LLM : {e}")
@@ -595,6 +605,24 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 ])
     if usage_detecte and _demande_agence_usage:
       return repondre_fallback_sql(question)
+    
+    
+    # ════════════════════════════════════════════════════════
+    # COMBINAISON DE FILTRES → fallback SQL
+    # ════════════════════════════════════════════════════════
+    _a_filtre_agence = any(t in q_norm for t in [
+        "agence agadir", "agence inezgane", "agence ait melloul",
+        "agence taroudant", "agence tiznit", "agadir nord", "agadir sud",
+    ])
+    _a_filtre_usage = usage_detecte is not None
+    _a_filtre_service = demande_eau or demande_elec
+    _a_filtre_mois = _extraire_mois_disp(q_norm) is not None
+
+    _nb_filtres = sum([_a_filtre_agence, _a_filtre_usage, _a_filtre_service, _a_filtre_mois])
+    if _nb_filtres >= 2:
+        print(f"  [RÈGLE] combinaison {_nb_filtres} filtres → fallback SQL")
+        return repondre_fallback_sql(question)
+
     if usage_detecte and any(t in q_norm for t in ["client", "clients", "qui", "liste", "lister", "combien"]):
         return fetch_par_usage(usage=usage_detecte, mode=mode)
 
