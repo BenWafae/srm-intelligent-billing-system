@@ -281,6 +281,13 @@ _TOKENS_SOMME_MOIS = [
     "combien consomme",
     "consomme en ",
     "conso en ",
+    "consomation total",
+    "consomtion total", 
+    "consommation total",
+    "total consommation",
+    "total consomation",
+     "total de consommation",
+     "total de consomation",
 ]
 # ── TOKENS somme montant (sans mois précis) ──
 _TOKENS_SOMME_MONTANT = [
