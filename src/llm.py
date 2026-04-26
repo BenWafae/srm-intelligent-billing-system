@@ -85,6 +85,10 @@ PATTERNS_QUESTION_GENERALE = [
     r"\bquel\s+est\s+le\s+client\b",               # "quel est le client qui..."
     r"\bconsomme\s+(le\s+plus|le\s+moins|eleve|elevee|faible|max|min)\b",
     r"\bconsomme\s+la\s+plus\b",                   # "consomme la plus élevée/faible"
+    r"\bquel\w*\s+usage\b",      # "quel usage", "quels usages"
+    r"\busages?\s+exist",         # "usage existe", "usages existants"
+    r"\bclients?\s+par\s+usage",  # "clients par usage"
+    r"\bpar\s+usage\b",           # "par usage"
 ]
 
 MOTS_REFERENCE_IMPLICITE = [
