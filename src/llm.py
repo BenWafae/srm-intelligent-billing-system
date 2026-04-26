@@ -214,11 +214,16 @@ def question_fait_reference(question: str) -> bool:
         return False
 
     question_lower = question.lower()
+
+    # ── Question trop courte → jamais de référence implicite ──
+    mots = question_lower.split()
+    if len(mots) <= 2:
+        return False
+
     for mot in MOTS_REFERENCE_IMPLICITE:
         if mot in question_lower:
             return True
 
-    mots = question_lower.split()
     if len(mots) <= 8:
         mots_norm = [normaliser(m) for m in mots]
         tous_fonctionnels = all(m in MOTS_FONCTIONNELS or len(m) <= 3 for m in mots_norm)

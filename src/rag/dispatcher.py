@@ -525,6 +525,16 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     print(f"  [MODE] {mode}")
 
     q_norm = _norm_dispatcher(question)
+     # ── Question trop courte / ambiguë ──
+    if len(question.strip().split()) <= 2:
+        return (
+            "Je n'ai pas bien compris votre question. "
+            "Pourriez-vous la préciser ?\n\n"
+            "Par exemple :\n"
+            "- *Quel est le montant total en janvier ?*\n"
+            "- *Qui consomme le plus ?*\n"
+            "- *Liste des clients*"
+        )
 
 # ════════════════════════════════════════════
     # RÈGLE 0 — Questions courtes prioritaires
