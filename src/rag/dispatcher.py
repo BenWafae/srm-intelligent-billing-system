@@ -287,7 +287,9 @@ _TOKENS_SOMME_MOIS = [
     "total consommation",
     "total consomation",
      "total de consommation",
-     "total de consomation",
+    "total de consomation",
+    "consomtion total",
+    "consomtion en ",
 ]
 # ── TOKENS somme montant (sans mois précis) ──
 _TOKENS_SOMME_MONTANT = [
@@ -301,6 +303,10 @@ _TOKENS_SOMME_MONTANT = [
     "montant cumule",
     "combien a-t-on paye",
     "combien ont paye",
+    "mantant total",
+    "mantant en ",
+    "total mantant",
+    "somme mantant",
 ]
 
 # ── TOKENS montant élevé (général) ──
