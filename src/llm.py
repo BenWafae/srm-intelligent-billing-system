@@ -68,11 +68,13 @@ PATTERNS_QUESTION_GENERALE = [
     r"\bresume\b",
     r"\bbilan\b",
     r"\bagence",
-    r"\busage",
+    r"\busage\b(?!\s+de\b)",
+
     r"\bclassement\b",
     r"\bevolution\b",
     r"\balerte",
-    r"\bservice",
+    r"\bservice\b(?!\s+de\b)",
+
     # ✅ NOUVEAUX — questions générales sur la consommation de tous les clients
     r"\bquel\s+client\b",                          # "quel client consomme/a/..."
     r"\bqui\s+consomme\b",                         # "qui consomme le plus/moins"
@@ -217,7 +219,7 @@ def question_fait_reference(question: str) -> bool:
 
     # ── Question trop courte → jamais de référence implicite ──
     mots = question_lower.split()
-    if len(mots) <= 2:
+    if len(mots) <= 1:
         return False
 
     for mot in MOTS_REFERENCE_IMPLICITE:

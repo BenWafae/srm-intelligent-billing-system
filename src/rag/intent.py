@@ -183,7 +183,8 @@ _TOKENS_USAGE      = ["usage", "type d usage", "type usage", "quel usage",
 _TOKENS_ADRESSE    = ["adresse", "ou habite", "ou se trouve", "quelle adresse"]
 _TOKENS_AGENCE     = ["agence", "quelle agence", "quel agence",
                       "quelle est son agence", "quel est son agence"]
-_TOKENS_SERVICE    = ["type de service", "type service", "quel service",
+_TOKENS_SERVICE    = ["type de service", "type service", "quel service","service de", "quel est le service", "quel service utulise"
+
                       "quel est son service", "quel est le service", "quel type de service"]
 _TOKENS_CONTRAT    = ["contrat", "numero de contrat", "n contrat", "numero contrat"]
 _TOKENS_COMPTEUR   = ["compteur", "numero de compteur", "n compteur", "numero compteur"]

@@ -526,7 +526,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     q_norm = _norm_dispatcher(question)
      # ── Question trop courte / ambiguë ──
-    if len(question.strip().split()) <= 2:
+    if len(question.strip().split()) <= 1:
         return (
             "Je n'ai pas bien compris votre question. "
             "Pourriez-vous la préciser ?\n\n"
