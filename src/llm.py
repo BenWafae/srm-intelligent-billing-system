@@ -202,7 +202,13 @@ def question_fait_reference(question: str) -> bool:
         "total en septembre",
         "total en octobre",
         "total en novembre",
-         "total en decembre",
+        "total en decembre",
+        "montant maximum",
+        "montant minimum",
+        "montant moyen",
+        "montant max",
+        "montant min",
+        "montant moy",
     ]
     if any(t in q_norm for t in _questions_globales):
         return False
