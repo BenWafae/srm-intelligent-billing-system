@@ -45,7 +45,12 @@ MOTS_FONCTIONNELS = {
     "paye", "payee", "payes",
     "quel", "quelle", "quels", "quelles",
     "est", "sont", "etait", "etaient",
-    "meme", "aussi", "encore",
+    "meme", "aussi", "encore","somme", "sommes",
+    "janv", "fevr", "juil", "aout", "sept", "oct", "nov", "dec",
+    "jan", "fev", "mar", "avr", "jun", "jul", "aug", "sep",
+    "lusage", "lagence", "ladresse", "linfos",
+   "lhistorique", "levolution", "lidentifiant",
+    "lagence", "lusages", "lagences",
 }
 
 # ─────────────────────────────────────────────────────────
@@ -112,7 +117,12 @@ def est_question_generale(question: str) -> bool:
 
     # ── Références explicites → jamais question générale ──
     _refs_explicites = ["son usage", "son service", "son agence",
-                        "son adresse", "son contrat", "son compteur"]
+                    "son adresse", "son contrat", "son compteur",
+                    "agence de", "usage de", "service de",
+                    "adresse de", "contrat de", "compteur de",
+                    "consomation de", "consommation de",
+                    "montant de", "facture de""informations de", "infos de", "info de",
+                      "historique de", "evolution de", "factures de",]
     if any(t in q for t in _refs_explicites):
         return False
 
@@ -156,6 +166,17 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
     mots_dans_base = [m for m in mots_nom_question
                       if any(m in cn for (_, cn) in clients_norm)]
     if not mots_dans_base:
+        # ── Fuzzy matching ──
+        from difflib import get_close_matches
+        for mot in mots_nom_question:
+            if len(mot) >= 4:
+                noms_norm = [cn for (_, cn) in clients_norm]
+                prenoms = [cn.split()[0] for cn in noms_norm]
+                matches = get_close_matches(mot, prenoms, n=1, cutoff=0.65)
+                if matches:
+                    idx = prenoms.index(matches[0])
+                    client_suggere = clients_norm[idx][0]
+                    return None, f"suggestion:{client_suggere}"
         return None, "aucun"
 
     # Étape 4 : filtrer mots plausibles (longueur >= 4)
@@ -303,10 +324,6 @@ Réponds de façon claire et précise en français, en tenant compte du contexte
     return response.json()["response"]
 
 
-# ─────────────────────────────────────────────────────────
-# MODE EXCEL — POINT D'ENTRÉE PRINCIPAL
-# ─────────────────────────────────────────────────────────
-
 def poser_question_excel(question: str, historique: list = []) -> str:
     resume = get_resume_excel()
 
@@ -325,12 +342,27 @@ def poser_question_excel(question: str, historique: list = []) -> str:
             + noms_formates
         )
 
+    if statut.startswith("suggestion:"):
+        nom_suggere = statut.replace("suggestion:", "")
+        return f"⚠️ Aucun client nommé trouvé.\nVouliez-vous dire **{nom_suggere}** ?"
+
     client_trouve = resultat if statut == "exact" else None
 
     if not client_trouve and question_fait_reference(question):
         client_trouve = _extraire_client_depuis_historique(historique, liste_clients)
         if client_trouve:
             print(f"  [CONTEXTE] Réutilisation client depuis historique : {client_trouve}")
+
+    # ── Client introuvable après toutes les étapes ──
+    if not client_trouve and statut == "aucun":
+        mots = extraire_mots_nom(question)
+        noms_suspects = [m for m in mots if len(m) >= 4]
+        _indicateurs_client = ["de ", "du client", "pour ", "infos de",
+                               "informations de", "consomation de",
+                               "montant de", "facture de"]
+        q_lower = question.lower()
+        if noms_suspects and not est_question_generale(question) and any(t in q_lower for t in _indicateurs_client):
+            return f"⚠️ Aucun client nommé **'{noms_suspects[0]}'** trouvé dans la base."
 
     historique_texte = ""
     for msg in historique[:-1]:
