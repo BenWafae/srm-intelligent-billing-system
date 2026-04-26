@@ -94,14 +94,28 @@ MOTS_REFERENCE_IMPLICITE = [
     "quel est le mois", "quel mois", "quelle est sa",
     "quel est son", "et sa ", "et son ", "et ses ",
     "et pour", "maintenant", "aussi", "egalement",
+    "son usage",
+    "son service",
+    "son agence",
+    "son adresse",
+    "son contrat",
+    "son compteur",
 ]
 
 
 def est_question_generale(question: str) -> bool:
     q = normaliser(question)
+
+    # ── Références explicites → jamais question générale ──
+    _refs_explicites = ["son usage", "son service", "son agence",
+                        "son adresse", "son contrat", "son compteur"]
+    if any(t in q for t in _refs_explicites):
+        return False
+
     for pattern in PATTERNS_QUESTION_GENERALE:
         if re.search(pattern, q):
             return True
+
     return False
 
 
