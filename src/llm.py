@@ -109,6 +109,7 @@ MOTS_REFERENCE_IMPLICITE = [
     "son adresse",
     "son contrat",
     "son compteur",
+    
 ]
 
 
@@ -122,7 +123,7 @@ def est_question_generale(question: str) -> bool:
                     "adresse de", "contrat de", "compteur de",
                     "consomation de", "consommation de",
                     "montant de", "facture de""informations de", "infos de", "info de",
-                      "historique de", "evolution de", "factures de",]
+                      "historique de", "evolution de", "factures de","information de",]
     if any(t in q for t in _refs_explicites):
         return False
 
@@ -250,6 +251,32 @@ def question_fait_reference(question: str) -> bool:
         "montant max",
         "montant min",
         "montant moy",
+        "montant total en janvier",
+       "montant total en fevrier",
+       "montant total en mars",
+       "montant total en avril",
+       "montant total en mai",
+       "montant total en juin",
+       "montant total en juillet",
+       "montant total en aout",
+       "montant total en septembre",
+        "montant total en octobre",
+       "montant total en novembre",
+      "montant total en decembre",
+      "somme de montant en",
+     "somme montant en",
+      "montant en janvier",
+      "montant en fevrier",
+      "montant en mars",
+       "montant en avril",
+       "montant en mai",
+      "montant en juin",
+     "montant en juillet",
+      "montant en aout",
+      "montant en septembre",
+      "montant en octobre",
+      "montant en novembre",
+     "montant en decembre",
     ]
     if any(t in q_norm for t in _questions_globales):
         return False
