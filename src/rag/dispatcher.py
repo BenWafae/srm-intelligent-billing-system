@@ -418,10 +418,11 @@ RÈGLES ABSOLUES :
     retourne UNIQUEMENT : nom_client, agence, usage, type_service
     avec SELECT DISTINCT et GROUP BY nom_client — jamais de colonnes mois/montant/conso
 15. Pour filtrer agence et usage, utilise TOUJOURS LIKE avec % :
-    agence LIKE '%agadir%' — jamais agence = 'agadir'
-    usage LIKE '%agricole%' — jamais usage = 'agricole'
-    LOWER(agence) LIKE '%agadir%' pour ignorer la casse
-
+    LOWER(agence) LIKE '%agadir%' — jamais agence = 'agadir'
+    LOWER(usage) LIKE '%domestique%' — jamais LOWER(usage) = 'domestique'
+    LOWER(usage) LIKE '%agricole%' — jamais LOWER(usage) = 'agricole'
+    LOWER(usage) LIKE '%professionnel%' — jamais LOWER(usage) = 'professionnel'
+    Cette règle s'applique à TOUTES les valeurs de usage et agence sans exception
 
 
 Question : {question}
