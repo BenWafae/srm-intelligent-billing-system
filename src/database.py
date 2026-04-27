@@ -7,6 +7,7 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "srm.db")
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+    # facture pdf table
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS factures (
@@ -26,6 +27,7 @@ def init_db():
             date_enregistrement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # factures excel table
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS factures_excel (
@@ -50,6 +52,16 @@ def init_db():
             date_enregistrement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # user table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        role TEXT NOT NULL,
+        numero_client TEXT
+    )
+""")
 
     conn.commit()
     conn.close()
@@ -325,3 +337,43 @@ def reset_base_excel() -> int:
     conn.commit()
     conn.close()
     return total
+import hashlib
+# hash password sert  a  sécurise le mot de passe, on ne stocke jamais le mot de passe en clair
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+# creer user sert aa cree un compte, retourne False si lemail existe déjà
+
+def creer_user(email: str, password: str, role: str, numero_client: str = None) -> bool:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO users (email, password, role, numero_client)
+            VALUES (?, ?, ?, ?)
+        """, (email, hash_password(password), role, numero_client))
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+# verifier login ::vérifie email + password, retourne les infos de l'utilisateur ou None
+def verifier_login(email: str, password: str) -> dict | None:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, email, role, numero_client 
+        FROM users 
+        WHERE email = ? AND password = ?
+    """, (email, hash_password(password)))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {
+            "id": row[0],
+            "email": row[1],
+            "role": row[2],
+            "numero_client": row[3]
+        }
+    return None
