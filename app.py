@@ -1,6 +1,7 @@
 import streamlit as st
 import sys
 import os
+st.set_page_config(page_title="SRM Assistant", layout="wide")
 
 sys.path.insert(0, os.path.dirname(__file__))
 

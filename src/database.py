@@ -10,23 +10,29 @@ def init_db():
     # facture pdf table
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS factures (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            numero_client TEXT,
-            numero_contrat TEXT,
-            nom_client TEXT,
-            adresse TEXT,
-            usage TEXT,
-            periode_debut TEXT,
-            periode_fin TEXT,
-            date_facture TEXT,
-            date_limite_paiement TEXT,
-            consommation REAL,
-            type_service TEXT,
-            montant_total_ttc REAL,
-            date_enregistrement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
+    CREATE TABLE IF NOT EXISTS factures (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        numero_client TEXT,
+        numero_contrat TEXT,
+        nom_client TEXT,
+        adresse TEXT,
+        usage TEXT,
+        periode_debut TEXT,
+        periode_fin TEXT,
+        date_facture TEXT,
+        date_limite_paiement TEXT,
+        consommation REAL,
+        type_service TEXT,
+        montant_total_ttc REAL,
+        texte_extrait TEXT,
+        date_enregistrement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+""")
+     # Migration : ajouter texte_extrait si absent
+    try:
+        cursor.execute("ALTER TABLE factures ADD COLUMN texte_extrait TEXT")
+    except:
+        pass 
     # factures excel table
 
     cursor.execute("""
@@ -81,15 +87,17 @@ def enregistrer_facture(donnees: dict):
         INSERT INTO factures (
             numero_client, numero_contrat, nom_client, adresse,
             usage, periode_debut, periode_fin, date_facture,
-            date_limite_paiement, consommation, type_service, montant_total_ttc
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            date_limite_paiement, consommation, type_service, 
+            montant_total_ttc, texte_extrait
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         donnees.get("numero_client"), donnees.get("numero_contrat"),
         donnees.get("nom_client"), donnees.get("adresse"),
         donnees.get("usage"), donnees.get("periode_debut"),
         donnees.get("periode_fin"), donnees.get("date_facture"),
         donnees.get("date_limite_paiement"), donnees.get("consommation"),
-        donnees.get("type_service"), donnees.get("montant_total_ttc")
+        donnees.get("type_service"), donnees.get("montant_total_ttc"),
+        donnees.get("texte_extrait")
     ))
     conn.commit()
     conn.close()
@@ -377,3 +385,32 @@ def verifier_login(email: str, password: str) -> dict | None:
             "numero_client": row[3]
         }
     return None
+def get_clients_avec_pdf() -> list:
+    """Retourne la liste des clients qui ont un PDF importé."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT nom_client 
+        FROM factures 
+        WHERE nom_client IS NOT NULL AND nom_client != ''
+        ORDER BY nom_client
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return [r[0] for r in rows]
+
+
+def get_texte_pdf_client(nom_client: str) -> str:
+    """Retourne le texte extrait du PDF pour un client donné."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT texte_extrait 
+        FROM factures 
+        WHERE nom_client = ?
+        ORDER BY date_enregistrement DESC
+        LIMIT 1
+    """, (nom_client,))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row and row[0] else ""
