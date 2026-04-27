@@ -50,7 +50,7 @@ MOTS_FONCTIONNELS = {
     "jan", "fev", "mar", "avr", "jun", "jul", "aug", "sep",
     "lusage", "lagence", "ladresse", "linfos",
    "lhistorique", "levolution", "lidentifiant",
-    "lagence", "lusages", "lagences",
+    "lagence", "lusages", "lagences","give"
 }
 
 # ─────────────────────────────────────────────────────────
@@ -88,12 +88,15 @@ PATTERNS_QUESTION_GENERALE = [
     r"\bqui\s+a\s+(la|le|les|une)\b",              # "qui a la consommation..."
     r"\bclient\s+(avec|qui|a\s+une|ayant)\b",      # "client avec consommation..."
     r"\bquel\s+est\s+le\s+client\b",               # "quel est le client qui..."
-    r"\bconsomme\s+(le\s+plus|le\s+moins|eleve|elevee|faible|max|min)\b",
+r"\bconsomme\s+(le\s+plus|le\s+moins|eleve|elevee|faible|max|min)\b(?!\s+de\b)",
     r"\bconsomme\s+la\s+plus\b",                   # "consomme la plus élevée/faible"
     r"\bquel\w*\s+usage\b",      # "quel usage", "quels usages"
     r"\busages?\s+exist",         # "usage existe", "usages existants"
     r"\bclients?\s+par\s+usage",  # "clients par usage"
-    r"\bpar\s+usage\b",           # "par usage"
+    r"\bpar\s+usage\b",     
+                # "par usage"
+     r"\bquel\s+mois\b.*\b(consomme|paye|paie)\b",
+
 ]
 
 MOTS_REFERENCE_IMPLICITE = [
@@ -123,7 +126,15 @@ def est_question_generale(question: str) -> bool:
                     "adresse de", "contrat de", "compteur de",
                     "consomation de", "consommation de",
                     "montant de", "facture de""informations de", "infos de", "info de",
-                      "historique de", "evolution de", "factures de","information de",]
+                      "historique de", "evolution de", "factures de","information de",
+                      "a consomme le plus",
+               "a consomme le moins",
+             "a paye le plus",
+             "a paye le moins",
+             "mois fatima",
+             "mois bilal",
+             "quel mois",
+]
     if any(t in q for t in _refs_explicites):
         return False
 
@@ -277,6 +288,9 @@ def question_fait_reference(question: str) -> bool:
       "montant en octobre",
       "montant en novembre",
      "montant en decembre",
+     "somme de consomation en",
+     "somme consomation en",
+     "la somme de consomation en",
     ]
     if any(t in q_norm for t in _questions_globales):
         return False
