@@ -23,34 +23,80 @@ _TOKENS_INFOS = [
     "mon adresse", "mon agence", "mon usage",
     "mon contrat", "mon compteur", "mon service",
     "mon numero", "qui suis je", "mon compte",
+    "adress","adresse","usage","agence","n compteur","n compt","infos","infos"
 ]
 
 _TOKENS_MONTANT_MAX = [
     "mon montant le plus eleve", "mon montant max",
     "ma facture la plus chere", "j ai le plus paye",
     "mois ou j ai le plus paye", "mon maximum",
-    "mon mois le plus cher",
+    "mon mois le plus cher", "montant max", "montant eleve",
+    "montant le plus eleve", "montant le plus haut",
+    "facture chere", "facture elevee", "facture max",
+    "j ai paye beaucoup", "j ai beaucoup paye",
+    "mois ou j ai paye le plus", "mois cher",
+    "mois couteux", "mois le plus cher",
+    "mon montant eleve", "mon montant haut",
+    "paye le plus", "plus paye", "max montant",
+    "montant maximum", "montant maximal",
+    "mantant max", "mantant eleve", "monton max",
+    "facture la plus grande", "ma plus grande facture",
+    "mon pic montant", "pic facture",
 ]
 
 _TOKENS_MONTANT_MIN = [
     "mon montant le plus faible", "mon montant min",
     "ma facture la moins chere", "j ai le moins paye",
     "mois ou j ai le moins paye", "mon minimum",
-    "mon mois le moins cher",
+    "mon mois le moins cher", "montant min", "montant faible",
+    "montant le plus faible", "montant le plus bas",
+    "facture pas chere", "facture faible", "facture min",
+    "j ai paye peu", "j ai peu paye",
+    "mois ou j ai paye le moins", "mois pas cher",
+    "mois le moins cher", "mois le plus bas",
+    "mon montant faible", "mon montant bas",
+    "paye le moins", "moins paye", "min montant",
+    "montant minimum", "montant minimal",
+    "mantant min", "mantant faible", "monton min",
+    "facture la plus petite", "ma plus petite facture",
+    "mon minimum facture",
 ]
 
 _TOKENS_CONSO_MAX = [
-    "ma consommation la plus elevee", "ma conso max","ma conso elevee"
+    "ma consommation la plus elevee", "ma conso max",
     "mois ou j ai le plus consomme", "j ai le plus consomme",
     "ma consommation maximale", "mon pic de consommation",
     "mois ou j ai consomme le plus",
+    "ma conso eleve", "ma conso elevee",
+    "ma consommation eleve", "ma consommation elevee",
+    "mois ou j ai plus consomme", "mois ou j ai consomme plus",
+    "j ai plus consomme", "conso eleve", "conso elevee",
+    "consomme le plus", "plus consomme", "mois max conso",
+    "conso max", "mon max conso", "max consommation",
+    "consommation max", "consommation elevee", "consommation eleve",
+    "consomme beaucoup", "forte consommation", "grande consommation",
+    "mois fort", "mois eleve", "pic conso", "sommet conso",
+    "consomation eleve", "consomation max", "consomation elevee",
+    "consome le plus", "consome beaucoup", "consome eleve",
+    "kwh eleve", "kwh max", "m3 eleve", "m3 max",
 ]
 
 _TOKENS_CONSO_MIN = [
-    "ma consommation la plus faible", "ma conso min","ma conso faible","ma conso moins eleve"
+  "ma consommation la plus faible", "ma conso min",
     "mois ou j ai le moins consomme", "j ai le moins consomme",
-    "ma consommation minimale","ma consomation faible"
-    "mois ou j ai consomme le moins",
+    "ma consommation minimale", "mois ou j ai consomme le moins",
+    "ma conso faible", "ma conso basse",
+    "ma consommation faible", "ma consommation basse",
+    "mois ou j ai moins consomme", "mois ou j ai consomme moins",
+    "j ai moins consomme", "conso faible", "conso basse",
+    "consomme le moins", "moins consomme", "mois min conso",
+    "conso min", "mon min conso", "min consommation",
+    "consommation min", "consommation faible", "consommation basse",
+    "consomme peu", "faible consommation", "petite consommation",
+    "mois faible", "mois bas", "mois minimum",
+    "consomation faible", "consomation min", "consomation basse",
+    "consome le moins", "consome peu", "consome faible",
+    "kwh faible", "kwh min", "m3 faible", "m3 min",
 ]
 
 _TOKENS_SOMME_MONTANT = [

@@ -57,7 +57,6 @@ def afficher_employe():
                 st.session_state.historique = []
                 st.session_state.texte_facture = get_texte_pdf_client(client_selectionne_pdf)
 
-            st.write(f"DEBUG texte : {len(st.session_state.texte_facture) if st.session_state.texte_facture else 'VIDE'}")
 
             st.markdown("---")
             st.markdown(f"### 💬 Questions sur la facture de **{client_selectionne_pdf}**")
