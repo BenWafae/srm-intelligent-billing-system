@@ -14,6 +14,7 @@ from src.excel_reader import lire_excel
 from src.pdf_reader import extraire_texte
 from src.extractor import extraire_infos_facture
 from src.database import get_contrats_disponibles
+from src.database import  get_all_users, supprimer_user
 
 
 def afficher_admin():
@@ -205,7 +206,7 @@ def afficher_admin():
             with st.expander("📋 Contrats disponibles"):
                 for c in contrats:
                     st.write(f"• {c['nom_client']} → {c['numero_contrat']}")
-            
+
             numero_contrat_nouveau = st.text_input(
                 "Numéro de contrat du client",
                 key="numero_contrat_nouveau",
@@ -229,3 +230,36 @@ def afficher_admin():
                         st.error("❌ Cet email existe déjà.")
             else:
                 st.warning("⚠️ Remplissez email et mot de passe.")
+
+        st.markdown("---")
+        st.markdown("### 📋 Utilisateurs existants")
+
+        col1, col2, col3, col4 = st.columns([3, 2, 3, 1])
+        with col1:
+            st.markdown("**Email**")
+        with col2:
+            st.markdown("**Rôle**")
+        with col3:
+            st.markdown("**N° Contrat**")
+        with col4:
+            st.markdown("**Action**")
+
+        st.markdown("---")
+
+        users = get_all_users()
+        if not users:
+            st.info("Aucun utilisateur créé.")
+        else:
+            for u in users:
+                col1, col2, col3, col4 = st.columns([3, 2, 3, 1])
+                with col1:
+                    st.write(f"📧 {u['email']}")
+                with col2:
+                    role_emoji = "⚙️" if u['role'] == "admin" else "👔" if u['role'] == "employe" else "👤"
+                    st.write(f"{role_emoji} {u['role']}")
+                with col3:
+                    st.write(f"📄 {u['numero_client'] or '—'}")
+                with col4:
+                    if st.button("🗑️", key=f"del_user_{u['id']}"):
+                        supprimer_user(u['id'])
+                        st.rerun()

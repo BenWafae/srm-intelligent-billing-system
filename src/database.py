@@ -427,3 +427,24 @@ def get_contrats_disponibles() -> list:
     rows = cursor.fetchall()
     conn.close()
     return [{"nom_client": r[0], "numero_contrat": r[1]} for r in rows]
+
+# liste users
+def get_all_users() -> list:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, email, role, numero_client 
+        FROM users 
+        ORDER BY role, email
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "email": r[1], "role": r[2], "numero_client": r[3]} for r in rows]
+
+def supprimer_user(user_id: int) -> bool:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return True
