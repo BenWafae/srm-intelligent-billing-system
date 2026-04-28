@@ -448,3 +448,17 @@ def supprimer_user(user_id: int) -> bool:
     conn.commit()
     conn.close()
     return True
+# recuperer num contrat
+def get_nom_client_par_contrat(numero_contrat: str) -> str:
+    """Retourne le nom du client depuis son numéro de contrat."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT nom_client 
+        FROM factures_excel 
+        WHERE numero_contrat = ?
+        LIMIT 1
+    """, (numero_contrat,))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else None
