@@ -1,7 +1,3 @@
-# ════════════════════════════════════════════
-# IMPORTS
-# ════════════════════════════════════════════
-
 from rag_client.tokens import (
     _TOKENS_CHAMP_USAGE,
     _TOKENS_CHAMP_SERVICE,
@@ -11,31 +7,39 @@ from rag_client.tokens import (
     _TOKENS_CHAMP_CONTRAT,
     _TOKENS_CHAMP_CLIENT,
 )
+from rag_client.normalisation_client import _levenshtein
 
-
-# ════════════════════════════════════════════
-# DÉTECTION CHAMP PRÉCIS — pour INFOS
-# ════════════════════════════════════════════
 
 def _detecter_champ_infos(q: str):
-    """
-    Retourne le nom du champ précis si le client demande
-    une info spécifique (usage, agence, adresse...).
-    Retourne None si c'est une demande de profil complet.
-    """
-    # Ordre important : du plus spécifique au plus général
-    if any(t in q for t in _TOKENS_CHAMP_USAGE):
-        return "usage"
-    if any(t in q for t in _TOKENS_CHAMP_SERVICE):
-        return "service"
-    if any(t in q for t in _TOKENS_CHAMP_AGENCE):
-        return "agence"
-    if any(t in q for t in _TOKENS_CHAMP_ADRESSE):
-        return "adresse"
-    if any(t in q for t in _TOKENS_CHAMP_COMPTEUR):
-        return "compteur"
-    if any(t in q for t in _TOKENS_CHAMP_CONTRAT):
-        return "contrat"
-    if any(t in q for t in _TOKENS_CHAMP_CLIENT):
-        return "client"
-    return None  # profil complet
+
+    _CHAMPS = {
+        "compteur" : _TOKENS_CHAMP_COMPTEUR,
+        "contrat"  : _TOKENS_CHAMP_CONTRAT,
+        "client"   : _TOKENS_CHAMP_CLIENT,
+        "adresse"  : _TOKENS_CHAMP_ADRESSE,
+        "service"  : _TOKENS_CHAMP_SERVICE,
+        "agence"   : _TOKENS_CHAMP_AGENCE,
+        "usage"    : _TOKENS_CHAMP_USAGE,
+    }
+
+    # ── Matching exact d'abord ──
+    for champ, tokens in _CHAMPS.items():
+        if any(t in q for t in tokens):
+            return champ
+
+    # ── Matching fuzzy — uniquement mots longs ──
+    mots_q = q.split()
+    for champ, tokens in _CHAMPS.items():
+        for token in tokens:
+            mots_token = token.split()
+            for mot_token in mots_token:
+                if len(mot_token) < 7:
+                    continue
+                seuil = 3 if len(mot_token) >= 10 else 2
+                for mot_q in mots_q:
+                    if len(mot_q) < 5:
+                        continue
+                    if _levenshtein(mot_token, mot_q) <= seuil:
+                        return champ
+
+    return None

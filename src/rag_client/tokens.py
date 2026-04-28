@@ -10,11 +10,25 @@ _TOKENS_INFOS = [
 ]
 
 # Champs précis — détectés AVANT l'intent INFOS général
-_TOKENS_CHAMP_USAGE    = ["usage", "mon usage", "quel usage", "type usage", "quel est mon usage"]
-_TOKENS_CHAMP_AGENCE   = ["agence", "mon agence", "quelle agence", "quel agence"]
+_TOKENS_CHAMP_USAGE = [
+    "usage", "mon usage", "quel usage", "type usage",
+    "quel est mon usage", "mon type usage",
+    "usagge", "ussage", "ussagge", "uzage", "uasge",
+]
+_TOKENS_CHAMP_AGENCE = [
+    "agence", "mon agence", "quelle agence", "quel agence",
+    "agenncee", "agencce", "agencc", "agennce", "agemce",
+]
 _TOKENS_CHAMP_ADRESSE  = ["adresse", "mon adresse", "ou j habite", "ou je suis", "habite"]
-_TOKENS_CHAMP_SERVICE  = ["service", "mon service", "quel service", "type service", "quel est mon service"]
-_TOKENS_CHAMP_CONTRAT  = ["contrat", "mon contrat", "numero contrat", "n contrat"]
+_TOKENS_CHAMP_SERVICE = [
+    "service", "mon service", "quel service", "type service",
+    "quel est mon service", "servicce", "serrvice",
+]
+_TOKENS_CHAMP_CONTRAT = [
+    "contrat", "mon contrat", "numero contrat", "n contrat",
+    "numero de contrat", "mon numero de contrat",
+    "contratt", "contrat", "cntrat", "conttrat",
+]
 _TOKENS_CHAMP_COMPTEUR = ["compteur", "mon compteur", "numero compteur", "n compteur", "n compt"]
 _TOKENS_CHAMP_CLIENT   = ["numero client", "mon numero", "n client", "identifiant"]
 
@@ -71,6 +85,10 @@ _TOKENS_CONSO_MAX = [
     "consomation eleve", "consomation max", "consomation elevee",
     "consome le plus", "consome beaucoup", "consome eleve",
     "kwh eleve", "kwh max", "m3 eleve", "m3 max",
+    "le mois le plus consomme",
+"mois le plus consomme", 
+"le mois consomme le plus",
+"mois consomme le plus",
 ]
 
 _TOKENS_CONSO_MIN = [
@@ -96,6 +114,10 @@ _TOKENS_SOMME_MONTANT = [
     "somme de mes montants", "total mes montants",
     "combien j ai depense", "mon total paye",
     "mes paiements totaux", "total factures",
+    "somme de montant", "somme montant", "somme du montant",
+    "la somme de montant", "quel est la somme de montant",
+    "somme de montantt", "somme montantt",
+"total montant", "total de montant",
 ]
 
 _TOKENS_SOMME_CONSO = [
