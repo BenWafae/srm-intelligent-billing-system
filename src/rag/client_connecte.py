@@ -18,13 +18,21 @@ from rag.fetchers_client import (
 # TOKENS — langage personnel du client
 # ════════════════════════════════════════════
 
+# INFOS : uniquement les questions générales sur le profil complet
 _TOKENS_INFOS = [
-    "mes infos", "mon profil", "mes informations","mes info","mes information"
-    "mon adresse", "mon agence", "mon usage",
-    "mon contrat", "mon compteur", "mon service",
-    "mon numero", "qui suis je", "mon compte",
-    "adress","adresse","usage","agence","n compteur","n compt","infos","infos"
+    "mes infos", "mon profil", "mes informations", "mes info", "mes information",
+    "qui suis je", "mon compte", "infos", "mon identite",
+    "donner moi mes infos", "voir mon profil",
 ]
+
+# Champs précis — détectés AVANT l'intent INFOS général
+_TOKENS_CHAMP_USAGE    = ["usage", "mon usage", "quel usage", "type usage", "quel est mon usage"]
+_TOKENS_CHAMP_AGENCE   = ["agence", "mon agence", "quelle agence", "quel agence"]
+_TOKENS_CHAMP_ADRESSE  = ["adresse", "mon adresse", "ou j habite", "ou je suis", "habite"]
+_TOKENS_CHAMP_SERVICE  = ["service", "mon service", "quel service", "type service", "quel est mon service"]
+_TOKENS_CHAMP_CONTRAT  = ["contrat", "mon contrat", "numero contrat", "n contrat"]
+_TOKENS_CHAMP_COMPTEUR = ["compteur", "mon compteur", "numero compteur", "n compteur", "n compt"]
+_TOKENS_CHAMP_CLIENT   = ["numero client", "mon numero", "n client", "identifiant"]
 
 _TOKENS_MONTANT_MAX = [
     "mon montant le plus eleve", "mon montant max",
@@ -82,7 +90,7 @@ _TOKENS_CONSO_MAX = [
 ]
 
 _TOKENS_CONSO_MIN = [
-  "ma consommation la plus faible", "ma conso min",
+    "ma consommation la plus faible", "ma conso min",
     "mois ou j ai le moins consomme", "j ai le moins consomme",
     "ma consommation minimale", "mois ou j ai consomme le moins",
     "ma conso faible", "ma conso basse",
@@ -115,7 +123,7 @@ _TOKENS_SOMME_CONSO = [
 _TOKENS_EVOLUTION = [
     "mon historique", "mes factures", "toutes mes factures",
     "mon evolution", "mois par mois", "ma progression",
-    "voir tout", "tout afficher", "historique complet","donner moi tous mes "
+    "voir tout", "tout afficher", "historique complet", "donner moi tous mes",
 ]
 
 _TOKENS_MOYENNE = [
@@ -125,20 +133,17 @@ _TOKENS_MOYENNE = [
 
 _TOKENS_MOIS = [
     "mon montant", "ma consommation", "ma facture",
-    "combien j ai", "combien ai je", "en janvier",
-    "en fevrier", "en mars", "en avril", "en mai",
-    "en juin", "en juillet", "en aout", "en septembre",
-    "en octobre", "en novembre", "en decembre",
+    "combien j ai", "combien ai je", "en janvier", "en janv",
+    "en fevrier", "en fev", "en mars",
+    "en avril", "en avr", "en mai",
+    "en juin", "en juillet", "en juil",
+    "en aout", "en aou", "en septembre", "en sept", "en sep",
+    "en octobre", "en oct", "en novembre", "en nov",
+    "en decembre", "en dec",
 ]
 
-_TOKENS_CHAMP_MONTANT = ["montant", "paye", "facture", "prix", "cout", "dhs"]
-_TOKENS_CHAMP_CONSO   = ["consomme", "conso", "consommation", "kwh", "m3"]
-_TOKENS_CHAMP_AGENCE  = ["agence"]
-_TOKENS_CHAMP_ADRESSE = ["adresse", "habite", "trouve"]
-_TOKENS_CHAMP_USAGE   = ["usage", "type"]
-_TOKENS_CHAMP_SERVICE = ["service"]
-_TOKENS_CHAMP_CONTRAT = ["contrat"]
-_TOKENS_CHAMP_COMPTEUR= ["compteur"]
+_TOKENS_CHAMP_MONTANT = ["montant", "mantant", "monton", "paye", "facture", "prix", "cout", "dhs"]
+_TOKENS_CHAMP_CONSO   = ["consomme", "conso", "consommation", "consomation", "kwh", "m3"]
 
 INTENTS_CLIENT_CONNECTE = """
 MAX_MONTANT       : mois où j'ai payé le plus, ma facture la plus chère
@@ -149,78 +154,236 @@ SOMME_MONTANT     : total de ce que j'ai payé, combien j'ai dépensé en tout
 SOMME_CONSO       : total de ce que j'ai consommé, ma consommation totale
 EVOLUTION         : mon historique, toutes mes factures, mois par mois
 MOYENNE           : ma moyenne, montant moyen, consommation moyenne
-INFOS             : mes infos, mon adresse, mon agence, mon usage, mon contrat
+INFOS             : mes infos, mon profil, mes informations générales
+INFOS_CHAMP       : mon usage, mon agence, mon adresse, mon service, mon contrat
 MOIS_SPECIFIQUE   : mon montant en janvier, ma consommation en mars
 """
+
+# ════════════════════════════════════════════
+# MOTS VIDES — ignorés dans le scoring
+# ════════════════════════════════════════════
+
+_MOTS_VIDES = {
+    "le", "la", "les", "de", "du", "des", "un", "une",
+    "je", "j", "ai", "et", "en", "ou", "est", "ce",
+    "que", "qui", "il", "elle", "on", "nous", "vous",
+    "mon", "ma", "mes", "ton", "ta", "tes", "son", "sa",
+    "ses", "par", "sur", "pour", "dans", "avec", "plus",
+    "moi", "toi", "lui", "suis", "quel", "quelle", "quels", "quelles",
+    "donner", "donne", "voir", "afficher", "montrer",
+}
+
+# ════════════════════════════════════════════
+# LEVENSHTEIN — distance entre deux mots
+# ════════════════════════════════════════════
+
+def _levenshtein(a: str, b: str) -> int:
+    if a == b:
+        return 0
+    if len(a) < len(b):
+        a, b = b, a
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a):
+        curr = [i + 1]
+        for j, cb in enumerate(b):
+            curr.append(min(prev[j+1] + 1, curr[j] + 1, prev[j] + (ca != cb)))
+        prev = curr
+    return prev[-1]
+
+# ════════════════════════════════════════════
+# SCORE INTENT
+# ════════════════════════════════════════════
+
+def _score_intent(question_normalisee: str, tokens: list) -> float:
+    mots_question = question_normalisee.split()
+    meilleur_score = 0.0
+
+    for token in tokens:
+        if token in question_normalisee:
+            return 1.0
+
+        mots_token = [m for m in token.split() if m not in _MOTS_VIDES]
+        if not mots_token:
+            continue
+
+        mots_importants_q = set(mots_question)
+        if all(m in mots_importants_q for m in mots_token):
+            meilleur_score = max(meilleur_score, 0.9)
+            continue
+
+        correspondances = 0
+        for mot_token in mots_token:
+            if len(mot_token) < 4:
+                if mot_token in mots_importants_q:
+                    correspondances += 1
+                continue
+
+            seuil = 2 if len(mot_token) >= 8 else 1
+
+            for mot_q in mots_question:
+                if len(mot_q) < 3:
+                    continue
+                dist = _levenshtein(mot_token, mot_q)
+                if dist <= seuil:
+                    correspondances += 1
+                    break
+
+        ratio = correspondances / len(mots_token)
+        score_flou = ratio * 0.75
+        meilleur_score = max(meilleur_score, score_flou)
+
+    return meilleur_score
+
+
+# ════════════════════════════════════════════
+# DÉTECTION CHAMP PRÉCIS — pour INFOS
+# ════════════════════════════════════════════
+
+def _detecter_champ_infos(q: str):
+    """
+    Retourne le nom du champ précis si le client demande
+    une info spécifique (usage, agence, adresse...).
+    Retourne None si c'est une demande de profil complet.
+    """
+    # Ordre important : du plus spécifique au plus général
+    if any(t in q for t in _TOKENS_CHAMP_USAGE):
+        return "usage"
+    if any(t in q for t in _TOKENS_CHAMP_SERVICE):
+        return "service"
+    if any(t in q for t in _TOKENS_CHAMP_AGENCE):
+        return "agence"
+    if any(t in q for t in _TOKENS_CHAMP_ADRESSE):
+        return "adresse"
+    if any(t in q for t in _TOKENS_CHAMP_COMPTEUR):
+        return "compteur"
+    if any(t in q for t in _TOKENS_CHAMP_CONTRAT):
+        return "contrat"
+    if any(t in q for t in _TOKENS_CHAMP_CLIENT):
+        return "client"
+    return None  # profil complet
+
+
+# ════════════════════════════════════════════
+# RÉPONSE CHAMP PRÉCIS — sans toucher à fetchers_client
+# ════════════════════════════════════════════
+
+def _repondre_champ_infos(nom_client: str, champ: str) -> str:
+    """
+    Récupère le profil complet via fetch_client_infos
+    puis extrait et retourne uniquement le champ demandé.
+    Aucune modification de fetchers_client nécessaire.
+    """
+    from src.database import rechercher_client_excel
+
+    rows = rechercher_client_excel(nom_client)
+    if not rows:
+        return f"Aucune donnée trouvée pour {nom_client}."
+
+    row = rows[0]
+
+    _MAP = {
+        "usage"    : ("Usage",            row.get("usage", "")),
+        "agence"   : ("Agence",           row.get("agence", "")),
+        "adresse"  : ("Adresse",          row.get("adresse", "")),
+        "service"  : ("Type de service",  row.get("type_service", "")),
+        "contrat"  : ("N° Contrat",       row.get("numero_contrat", "")),
+        "compteur" : ("N° Compteur",      row.get("numero_compteur", "")),
+        "client"   : ("N° Client",        row.get("numero_client", "")),
+    }
+
+    if champ in _MAP:
+        label, valeur = _MAP[champ]
+        return f"**{label} :** {valeur or 'Non disponible'}"
+
+    return fetch_client_infos(nom_client)
+
+
+# ════════════════════════════════════════════
+# DISPATCHER
+# ════════════════════════════════════════════
+
+def _dispatcher(intent: str, nom_client: str, mois: str = "", champ_infos: str = None) -> str:
+    if intent == "MAX_MONTANT":
+        return fetch_client_max_montant(nom_client)
+    elif intent == "MIN_MONTANT":
+        return fetch_client_min_montant(nom_client)
+    elif intent == "MAX_CONSOMMATION":
+        return fetch_client_max_consommation(nom_client)
+    elif intent == "MIN_CONSOMMATION":
+        return fetch_client_min_consommation(nom_client)
+    elif intent == "SOMME_MONTANT":
+        return fetch_client_somme_montant(nom_client)
+    elif intent == "SOMME_CONSO":
+        return fetch_client_somme_conso(nom_client)
+    elif intent == "EVOLUTION":
+        return fetch_client_evolution(nom_client)
+    elif intent == "MOYENNE":
+        return fetch_client_moyenne(nom_client)
+    elif intent == "INFOS":
+        if champ_infos:
+            return _repondre_champ_infos(nom_client, champ_infos)
+        return fetch_client_infos(nom_client)
+    elif intent == "MOIS_SPECIFIQUE" and mois:
+        return fetch_client_mois_specifique(nom_client, mois)
+    return None
 
 
 # ════════════════════════════════════════════
 # FONCTION PRINCIPALE
 # ════════════════════════════════════════════
 
+_SEUIL_CONFIANCE = 0.60
+
 def repondre_client_connecte(question: str, nom_client: str, historique: str = "") -> str:
     q = _normaliser_q(question)
 
-    # ── ÉTAPE 1 : MOIS SPÉCIFIQUE (priorité absolue) ──
+    # ══════════════════════════════════════════
+    # ÉTAPE 0 — CHAMP PRÉCIS (priorité absolue)
+    # Si le client demande usage / agence / service / etc.
+    # on répond directement sans passer par le scoring
+    # ══════════════════════════════════════════
+    champ = _detecter_champ_infos(q)
+    if champ:
+        return _repondre_champ_infos(nom_client, champ)
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 1 — MOIS SPÉCIFIQUE
+    # ══════════════════════════════════════════
     if _contient_mois(q) and any(t in q for t in _TOKENS_MOIS):
         mois = _extraire_mois(q)
-        champ = None
+        champ_mois = None
         if any(t in q for t in _TOKENS_CHAMP_MONTANT) and not any(t in q for t in _TOKENS_CHAMP_CONSO):
-            champ = "montant"
+            champ_mois = "montant"
         elif any(t in q for t in _TOKENS_CHAMP_CONSO) and not any(t in q for t in _TOKENS_CHAMP_MONTANT):
-            champ = "consommation"
-        return fetch_client_mois_specifique(nom_client, mois, champ=champ)
+            champ_mois = "consommation"
+        return fetch_client_mois_specifique(nom_client, mois, champ=champ_mois)
 
-    # ── ÉTAPE 2 : INFOS CLIENT ──
-    if any(t in q for t in _TOKENS_INFOS):
-        champ = None
-        if any(t in q for t in _TOKENS_CHAMP_AGENCE):
-            champ = "agence"
-        elif any(t in q for t in _TOKENS_CHAMP_ADRESSE):
-            champ = "adresse"
-        elif any(t in q for t in _TOKENS_CHAMP_USAGE):
-            champ = "usage"
-        elif any(t in q for t in _TOKENS_CHAMP_SERVICE):
-            champ = "service"
-        elif any(t in q for t in _TOKENS_CHAMP_CONTRAT):
-            champ = "contrat"
-        elif any(t in q for t in _TOKENS_CHAMP_COMPTEUR):
-            champ = "compteur"
-        return fetch_client_infos(nom_client, champ=champ)
+    # ══════════════════════════════════════════
+    # ÉTAPE 2 — SCORING LEVENSHTEIN
+    # ══════════════════════════════════════════
+    scores = {
+        "MAX_MONTANT"     : _score_intent(q, _TOKENS_MONTANT_MAX),
+        "MIN_MONTANT"     : _score_intent(q, _TOKENS_MONTANT_MIN),
+        "MAX_CONSOMMATION": _score_intent(q, _TOKENS_CONSO_MAX),
+        "MIN_CONSOMMATION": _score_intent(q, _TOKENS_CONSO_MIN),
+        "SOMME_MONTANT"   : _score_intent(q, _TOKENS_SOMME_MONTANT),
+        "SOMME_CONSO"     : _score_intent(q, _TOKENS_SOMME_CONSO),
+        "EVOLUTION"       : _score_intent(q, _TOKENS_EVOLUTION),
+        "MOYENNE"         : _score_intent(q, _TOKENS_MOYENNE),
+        "INFOS"           : _score_intent(q, _TOKENS_INFOS),
+    }
 
-    # ── ÉTAPE 3 : SOMME MONTANT ──
-    if any(t in q for t in _TOKENS_SOMME_MONTANT):
-        return fetch_client_somme_montant(nom_client)
+    meilleur_intent = max(scores, key=scores.get)
+    meilleur_score  = scores[meilleur_intent]
 
-    # ── ÉTAPE 4 : SOMME CONSO ──
-    if any(t in q for t in _TOKENS_SOMME_CONSO):
-        return fetch_client_somme_conso(nom_client)
+    if meilleur_score >= _SEUIL_CONFIANCE:
+        resultat = _dispatcher(meilleur_intent, nom_client)
+        if resultat:
+            return resultat
 
-    # ── ÉTAPE 5 : MAX MONTANT ──
-    if any(t in q for t in _TOKENS_MONTANT_MAX):
-        return fetch_client_max_montant(nom_client)
-
-    # ── ÉTAPE 6 : MIN MONTANT ──
-    if any(t in q for t in _TOKENS_MONTANT_MIN):
-        return fetch_client_min_montant(nom_client)
-
-    # ── ÉTAPE 7 : MAX CONSOMMATION ──
-    if any(t in q for t in _TOKENS_CONSO_MAX):
-        return fetch_client_max_consommation(nom_client)
-
-    # ── ÉTAPE 8 : MIN CONSOMMATION ──
-    if any(t in q for t in _TOKENS_CONSO_MIN):
-        return fetch_client_min_consommation(nom_client)
-
-    # ── ÉTAPE 9 : EVOLUTION ──
-    if any(t in q for t in _TOKENS_EVOLUTION):
-        return fetch_client_evolution(nom_client)
-
-    # ── ÉTAPE 10 : MOYENNE ──
-    if any(t in q for t in _TOKENS_MOYENNE):
-        return fetch_client_moyenne(nom_client)
-
-    # ── ÉTAPE 11 : LLM FALLBACK ──
+    # ══════════════════════════════════════════
+    # ÉTAPE 3 — LLM FALLBACK
+    # ══════════════════════════════════════════
     prompt = f"""Tu es un assistant pour un client SRM connecté.
 Le client s'appelle : {nom_client}
 Il pose une question sur SES propres factures uniquement.
@@ -233,6 +396,8 @@ Question : {question}
 Réponds UNIQUEMENT avec un JSON :
 {{"intent": "NOM_INTENT", "params": {{}}}}
 Si mois précis ajoute : {{"mois": "Janvier"}}
+Si la question n'a aucun rapport avec les factures, réponds :
+{{"intent": "HORS_SUJET", "params": {{}}}}
 """
     texte = _appeler_llm(prompt)
     match = re.search(r'\{.*\}', texte, re.DOTALL)
@@ -242,28 +407,28 @@ Si mois précis ajoute : {{"mois": "Janvier"}}
             intent = result.get("intent", "")
             mois   = result.get("params", {}).get("mois", "")
 
-            if intent == "MAX_MONTANT":
-                return fetch_client_max_montant(nom_client)
-            elif intent == "MIN_MONTANT":
-                return fetch_client_min_montant(nom_client)
-            elif intent == "MAX_CONSOMMATION":
-                return fetch_client_max_consommation(nom_client)
-            elif intent == "MIN_CONSOMMATION":
-                return fetch_client_min_consommation(nom_client)
-            elif intent == "SOMME_MONTANT":
-                return fetch_client_somme_montant(nom_client)
-            elif intent == "SOMME_CONSO":
-                return fetch_client_somme_conso(nom_client)
-            elif intent == "EVOLUTION":
-                return fetch_client_evolution(nom_client)
-            elif intent == "MOYENNE":
-                return fetch_client_moyenne(nom_client)
-            elif intent == "INFOS":
-                return fetch_client_infos(nom_client)
-            elif intent == "MOIS_SPECIFIQUE" and mois:
-                return fetch_client_mois_specifique(nom_client, mois)
-        except:
+            if intent == "HORS_SUJET":
+                return (
+                    "Je suis votre assistant SRM dédié à vos factures. "
+                    "Je ne peux répondre qu'aux questions concernant "
+                    "vos consommations, montants, ou informations de compte."
+                )
+
+            resultat = _dispatcher(intent, nom_client, mois)
+            if resultat:
+                return resultat
+
+        except Exception:
             pass
 
-    # ── ÉTAPE 12 : Réponse par défaut ──
-    return fetch_client_toutes_factures(nom_client)
+    # ══════════════════════════════════════════
+    # ÉTAPE 4 — Réponse guidée
+    # ══════════════════════════════════════════
+    return (
+        "Je n'ai pas bien compris votre question. "
+        "Vous pouvez me demander par exemple :\n"
+        "• Mon montant le plus élevé\n"
+        "• Ma consommation en janvier\n"
+        "• Mon historique complet\n"
+        "• Mes informations de compte"
+    )
