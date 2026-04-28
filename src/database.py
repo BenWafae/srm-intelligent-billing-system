@@ -414,3 +414,16 @@ def get_texte_pdf_client(nom_client: str) -> str:
     row = cursor.fetchone()
     conn.close()
     return row[0] if row and row[0] else ""
+
+def get_contrats_disponibles() -> list:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT nom_client, numero_contrat 
+        FROM factures_excel 
+        WHERE numero_contrat IS NOT NULL AND numero_contrat != ''
+        ORDER BY nom_client
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"nom_client": r[0], "numero_contrat": r[1]} for r in rows]
