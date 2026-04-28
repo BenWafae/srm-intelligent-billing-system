@@ -113,6 +113,10 @@ _TOKENS_EVOLUTION = [
 _TOKENS_MOYENNE = [
     "ma moyenne", "mon montant moyen", "ma consommation moyenne",
     "en moyenne", "montant moyen", "conso moyenne",
+    # ── AJOUTS ──
+    "mes statistiques", "mes stats", "statistiques",
+    "mes chiffres", "mon bilan", "mon resume",
+    "resume de mes factures", "bilan de mes factures",
 ]
 
 _TOKENS_MOIS = [

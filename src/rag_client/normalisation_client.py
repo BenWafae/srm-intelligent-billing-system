@@ -51,7 +51,7 @@ def _score_intent(question_normalisee: str, tokens: list) -> float:
                     correspondances += 1
                 continue
 
-            seuil = 2 if len(mot_token) >= 8 else 1
+            seuil = 3 if len(mot_token) >= 10 else 2 if len(mot_token) >= 6 else 1
 
             for mot_q in mots_question:
                 if len(mot_q) < 3:
