@@ -68,16 +68,18 @@ def _extraire_annee(q: str) -> str:
 # TOKENS TOP N
 # ════════════════════════════════════════════
 _TOKENS_TOP_N_CONSO = [
-    "les", "mois les plus consomme", "mois les moins consomme",
-    "top", "premiers mois", "derniers mois",
-    "mois les plus", "mois les moins",
+     "mois les plus consomme", "mois les moins consomme",
     "plus consomme", "moins consomme",
+    "consomme le plus", "consomme le moins",
+    "top conso", "pic conso",
 ]
 
 _TOKENS_TOP_N_MONTANT = [
-    "mois les plus chers", "mois les moins chers",
+     "mois les plus chers", "mois les moins chers",
     "mois les plus eleves", "mois les moins eleves",
     "factures les plus cheres", "factures les moins cheres",
+    "plus cher", "moins cher", "plus eleve",
+    "chere", "cher", "eleve", "haut",
 ]
 
 _TOKENS_DERNIERS = [

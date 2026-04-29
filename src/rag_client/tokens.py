@@ -152,7 +152,7 @@ _TOKENS_MOIS = [
     "en decembre", "en dec",
 ]
 
-_TOKENS_CHAMP_MONTANT = ["montant", "mantant", "monton", "paye", "facture", "prix", "cout", "dhs"]
+_TOKENS_CHAMP_MONTANT = ["montant", "mantant", "monton", "paye", "prix", "cout", "dhs"]
 _TOKENS_CHAMP_CONSO   = ["consomme", "conso", "consommation", "consomation", "kwh", "m3"]
 
 INTENTS_CLIENT_CONNECTE = """
