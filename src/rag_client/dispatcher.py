@@ -196,6 +196,7 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
         return _fallback_llm(question, numero_contrat)
 
     q = _normaliser_q(question)
+    q = re.sub(r'^(et|mais|aussi|donc|alors|puis)\s+', '', q)
 
     # ══════════════════════════════════════════
     # ÉTAPE 0 — CHAMP PRÉCIS
