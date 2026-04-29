@@ -4,8 +4,9 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from src.database import get_nom_client_par_contrat
+from src.database import get_nom_client_par_contrat, get_mois_client  # ← ajouter get_mois_client
 from src.rag.client_connecte import repondre_client_connecte
+from src.rag_client.pdf_facture import generer_pdf_facture
 
 
 def afficher_client():
@@ -29,7 +30,6 @@ def afficher_client():
 
     nom_client = st.session_state.nom_client_connecte
 
-    # CLIENT INTROUVABLE
     if not nom_client:
         st.error("❌ Aucun client trouvé pour ce compte. Contactez l'administrateur.")
         return
@@ -59,13 +59,38 @@ def afficher_client():
             historique_texte += f"{role}: {msg['content']}\n"
 
         with st.spinner("⏳ Recherche en cours..."):
-
             reponse = repondre_client_connecte(
                 question,
-                # numero client est garde uniquemnt pour laffichage de nom client et pas pour les requetes
-                st.session_state.user["numero_client"],  # numero_contrat
+                st.session_state.user["numero_client"],
                 historique_texte
             )
 
         st.session_state.historique_client.append({"role": "assistant", "content": reponse})
         st.chat_message("assistant").write(reponse)
+
+    # ── TÉLÉCHARGEMENT FACTURE ── (toujours dans la fonction)
+    st.markdown("---")
+    st.markdown("### 📥 Télécharger une facture")
+
+    numero_contrat = st.session_state.user["numero_client"]
+    mois_disponibles = get_mois_client(numero_contrat)
+
+    if mois_disponibles:
+        mois_choisi = st.selectbox(
+            "Choisir un mois",
+            options=mois_disponibles,
+            key="mois_telechargement"
+        )
+        if st.button("📄 Générer la facture"):
+            pdf = generer_pdf_facture(numero_contrat, mois_choisi)
+            if pdf:
+                st.download_button(
+                    label="💾 Sauvegarder le PDF",
+                    data=pdf,
+                    file_name=f"facture_{mois_choisi}.pdf",
+                    mime="application/pdf"
+                )
+            else:
+                st.error("❌ Facture introuvable pour ce mois.")
+    else:
+        st.info("Aucune facture disponible pour votre compte.")

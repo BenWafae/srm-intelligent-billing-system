@@ -462,3 +462,15 @@ def get_nom_client_par_contrat(numero_contrat: str) -> str:
     row = cursor.fetchone()
     conn.close()
     return row[0] if row else None
+def get_mois_client(numero_contrat: str) -> list:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT mois_source
+        FROM factures_excel
+        WHERE numero_contrat = ?
+        ORDER BY SUBSTR(periode_debut,7,4)||SUBSTR(periode_debut,4,2)||SUBSTR(periode_debut,1,2)
+    """, (numero_contrat,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [r[0] for r in rows]
