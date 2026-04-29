@@ -59,9 +59,11 @@ def afficher_client():
             historique_texte += f"{role}: {msg['content']}\n"
 
         with st.spinner("⏳ Recherche en cours..."):
+
             reponse = repondre_client_connecte(
                 question,
-                nom_client,
+                # numero client est garde uniquemnt pour laffichage de nom client et pas pour les requetes
+                st.session_state.user["numero_client"],  # numero_contrat
                 historique_texte
             )
 

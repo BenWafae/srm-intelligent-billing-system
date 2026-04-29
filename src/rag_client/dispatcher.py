@@ -1,18 +1,18 @@
-# ════════════════════════════════════════════
-# IMPORTS
-# ════════════════════════════════════════════
 import re
 import json
 
 from rag.mode import _normaliser_q
 from rag.intent import _appeler_llm, _extraire_mois, _contient_mois
+from rag_client.intent import _detecter_champ_infos
 
-from rag.fetchers_client import (
-    fetch_client_max_consommation, fetch_client_min_consommation,
-    fetch_client_max_montant, fetch_client_min_montant,
-    fetch_client_evolution, fetch_client_moyenne, fetch_client_infos,
-    fetch_client_mois_specifique, fetch_client_toutes_factures,
-    fetch_client_somme_conso, fetch_client_somme_montant
+from rag_client.fetchers import (
+    get_infos, get_mois_specifique,
+    get_max_consommation, get_min_consommation,
+    get_max_montant, get_min_montant,
+    get_somme_montant, get_somme_conso, get_moyenne,
+    get_evolution, get_par_annee,
+    get_top_n_conso, get_top_n_montant,
+    get_derniers_n_mois, get_premiers_n_mois
 )
 
 from rag_client.tokens import (
@@ -25,143 +25,99 @@ from rag_client.tokens import (
     INTENTS_CLIENT_CONNECTE
 )
 
-from rag_client.normalisation_client import _score_intent
-from rag_client.intent import _detecter_champ_infos
-
+# ════════════════════════════════════════════
+# MOTS ANGLAIS
+# ════════════════════════════════════════════
+_MOTS_ANGLAIS = [
+    "last", "year", "month", "show", "give",
+    "what", "when", "how", "much", "my",
+    "consumption", "amount", "invoice", "bill"
+]
 
 # ════════════════════════════════════════════
-# RÉPONSE CHAMP PRÉCIS — sans toucher à fetchers_client
+# EXTRACTION NOMBRE (pour top N)
 # ════════════════════════════════════════════
-
-def _repondre_champ_infos(nom_client: str, champ: str) -> str:
-    """
-    Récupère le profil complet via fetch_client_infos
-    puis extrait et retourne uniquement le champ demandé.
-    Aucune modification de fetchers_client nécessaire.
-    """
-    from src.database import rechercher_client_excel
-
-    rows = rechercher_client_excel(nom_client)
-    if not rows:
-        return f"Aucune donnée trouvée pour {nom_client}."
-
-    row = rows[0]
-
-    _MAP = {
-        "usage"    : ("Usage",            row.get("usage", "")),
-        "agence"   : ("Agence",           row.get("agence", "")),
-        "adresse"  : ("Adresse",          row.get("adresse", "")),
-        "service"  : ("Type de service",  row.get("type_service", "")),
-        "contrat"  : ("N° Contrat",       row.get("numero_contrat", "")),
-        "compteur" : ("N° Compteur",      row.get("numero_compteur", "")),
-        "client"   : ("N° Client",        row.get("numero_client", "")),
+def _extraire_nombre(q: str) -> int:
+    _MOTS_NOMBRES = {
+        "un": 1, "une": 1, "deux": 2, "trois": 3,
+        "quatre": 4, "cinq": 5, "six": 6, "sept": 7,
+        "huit": 8, "neuf": 9, "dix": 10
     }
-
-    if champ in _MAP:
-        label, valeur = _MAP[champ]
-        return f"**{label} :** {valeur or 'Non disponible'}"
-
-    return fetch_client_infos(nom_client)
-
-
-# ════════════════════════════════════════════
-# DISPATCHER
-# ════════════════════════════════════════════
-
-def _dispatcher(intent: str, nom_client: str, mois: str = "", champ_infos: str = None) -> str:
-    if intent == "MAX_MONTANT":
-        return fetch_client_max_montant(nom_client)
-    elif intent == "MIN_MONTANT":
-        return fetch_client_min_montant(nom_client)
-    elif intent == "MAX_CONSOMMATION":
-        return fetch_client_max_consommation(nom_client)
-    elif intent == "MIN_CONSOMMATION":
-        return fetch_client_min_consommation(nom_client)
-    elif intent == "SOMME_MONTANT":
-        return fetch_client_somme_montant(nom_client)
-    elif intent == "SOMME_CONSO":
-        return fetch_client_somme_conso(nom_client)
-    elif intent == "EVOLUTION":
-        return fetch_client_evolution(nom_client)
-    elif intent == "MOYENNE":
-        return fetch_client_moyenne(nom_client)
-    elif intent == "INFOS":
-        if champ_infos:
-            return _repondre_champ_infos(nom_client, champ_infos)
-        return fetch_client_infos(nom_client)
-    elif intent == "MOIS_SPECIFIQUE" and mois:
-        return fetch_client_mois_specifique(nom_client, mois)
-    return None
-
+    match = re.search(r'\b(\d+)\b', q)
+    if match:
+        return int(match.group(1))
+    for mot, val in _MOTS_NOMBRES.items():
+        if mot in q:
+            return val
+    return 3  # valeur par défaut
 
 # ════════════════════════════════════════════
-# FONCTION PRINCIPALE
+# EXTRACTION ANNÉE
 # ════════════════════════════════════════════
+def _extraire_annee(q: str) -> str:
+    match = re.search(r'\b(202[0-9])\b', q)
+    if match:
+        return match.group(1)
+    if any(t in q for t in ["annee derniere", "l annee derniere", "an passe", "annee passee", "last year"]):
+        return "2025"
+    if any(t in q for t in ["cette annee", "annee actuelle", "annee en cours", "this year"]):
+        return "2026"
+    return ""
 
-_SEUIL_CONFIANCE = 0.60
+# ════════════════════════════════════════════
+# TOKENS TOP N
+# ════════════════════════════════════════════
+_TOKENS_TOP_N_CONSO = [
+    "les", "mois les plus consomme", "mois les moins consomme",
+    "top", "premiers mois", "derniers mois",
+    "mois les plus", "mois les moins",
+    "plus consomme", "moins consomme",
+]
 
-def repondre_client_connecte(question: str, nom_client: str, historique: str = "") -> str:
-    q = _normaliser_q(question)
+_TOKENS_TOP_N_MONTANT = [
+    "mois les plus chers", "mois les moins chers",
+    "mois les plus eleves", "mois les moins eleves",
+    "factures les plus cheres", "factures les moins cheres",
+]
 
-    # ══════════════════════════════════════════
-    # ÉTAPE 0 — CHAMP PRÉCIS
-    # ══════════════════════════════════════════
-    champ = _detecter_champ_infos(q)
-    if champ:
-        return _repondre_champ_infos(nom_client, champ)
+_TOKENS_DERNIERS = [
+    "derniers mois", "dernier mois", "les derniers",
+    "recents", "recent", "derniere periode",
+]
 
-    # ══════════════════════════════════════════
-    # ÉTAPE 1 — MOIS SPÉCIFIQUE
-    # ══════════════════════════════════════════
-    if _contient_mois(q) and any(t in q for t in _TOKENS_MOIS):
-        mois = _extraire_mois(q)
-        champ_mois = None
-        if any(t in q for t in _TOKENS_CHAMP_MONTANT) and not any(t in q for t in _TOKENS_CHAMP_CONSO):
-            champ_mois = "montant"
-        elif any(t in q for t in _TOKENS_CHAMP_CONSO) and not any(t in q for t in _TOKENS_CHAMP_MONTANT):
-            champ_mois = "consommation"
-        return fetch_client_mois_specifique(nom_client, mois, champ=champ_mois)
+_TOKENS_PREMIERS = [
+    "premiers mois", "premier mois", "les premiers",
+    "debut", "premiere periode",
+]
 
-    # ══════════════════════════════════════════
-    # ÉTAPE 2 — SCORING
-    # ══════════════════════════════════════════
-    scores = {
-        "MAX_MONTANT"     : _score_intent(q, _TOKENS_MONTANT_MAX),
-        "MIN_MONTANT"     : _score_intent(q, _TOKENS_MONTANT_MIN),
-        "MAX_CONSOMMATION": _score_intent(q, _TOKENS_CONSO_MAX),
-        "MIN_CONSOMMATION": _score_intent(q, _TOKENS_CONSO_MIN),
-        "SOMME_MONTANT"   : _score_intent(q, _TOKENS_SOMME_MONTANT),
-        "SOMME_CONSO"     : _score_intent(q, _TOKENS_SOMME_CONSO),
-        "EVOLUTION"       : _score_intent(q, _TOKENS_EVOLUTION),
-        "MOYENNE"         : _score_intent(q, _TOKENS_MOYENNE),
-        "INFOS"           : _score_intent(q, _TOKENS_INFOS),
-    }
-
-    meilleur_intent = max(scores, key=scores.get)
-    meilleur_score  = scores[meilleur_intent]
-
-    if meilleur_score >= _SEUIL_CONFIANCE:
-        resultat = _dispatcher(meilleur_intent, nom_client)
-        if resultat:
-            return resultat
-
-    # ══════════════════════════════════════════
-    # ÉTAPE 3 — LLM FALLBACK
-    # ══════════════════════════════════════════
+# ════════════════════════════════════════════
+# FALLBACK LLM
+# ════════════════════════════════════════════
+def _fallback_llm(question: str, numero_contrat: str) -> str:
     prompt = f"""Tu es un assistant pour un client SRM connecté.
-Le client s'appelle : {nom_client}
-Il pose une question sur SES propres factures uniquement.
+Les données couvrent : Octobre 2025 à Septembre 2026.
+"last year" ou "année dernière" = 2025.
+"this year" ou "cette année" = 2026.
 
 Intents disponibles :
 {INTENTS_CLIENT_CONNECTE}
+
+TOP_N_CONSO   : les 3 mois les plus/moins consommés, top N consommation
+TOP_N_MONTANT : les 3 mois les plus/moins chers, top N montant
+DERNIERS_N    : les 3 derniers mois, dernière période
+PREMIERS_N    : les 3 premiers mois, début
+PAR_ANNEE     : consommation en 2025, factures de 2026
 
 Question : {question}
 
 Réponds UNIQUEMENT avec un JSON :
 {{"intent": "NOM_INTENT", "params": {{}}}}
-Si mois précis ajoute : {{"mois": "Janvier"}}
-Si la question n'a aucun rapport avec les factures, réponds :
-{{"intent": "HORS_SUJET", "params": {{}}}}
+Ajoute selon l'intent :
+- mois précis : {{"mois": "Janvier"}}
+- année : {{"annee": "2025"}}
+- nombre N : {{"n": 3}}
+- ordre : {{"ordre": "DESC"}} pour plus, {{"ordre": "ASC"}} pour moins
+Si hors sujet : {{"intent": "HORS_SUJET", "params": {{}}}}
 """
     texte = _appeler_llm(prompt)
     match = re.search(r'\{.*\}', texte, re.DOTALL)
@@ -169,7 +125,7 @@ Si la question n'a aucun rapport avec les factures, réponds :
         try:
             result = json.loads(match.group())
             intent = result.get("intent", "")
-            mois   = result.get("params", {}).get("mois", "")
+            params = result.get("params", {})
 
             if intent == "HORS_SUJET":
                 return (
@@ -178,21 +134,135 @@ Si la question n'a aucun rapport avec les factures, réponds :
                     "vos consommations, montants, ou informations de compte."
                 )
 
-            resultat = _dispatcher(intent, nom_client, mois)
-            if resultat:
-                return resultat
+            mois   = params.get("mois", "")
+            annee  = params.get("annee", "")
+            n      = int(params.get("n", 3))
+            ordre  = params.get("ordre", "DESC")
+
+            if intent == "MAX_MONTANT":
+                return get_max_montant(numero_contrat)
+            elif intent == "MIN_MONTANT":
+                return get_min_montant(numero_contrat)
+            elif intent == "MAX_CONSOMMATION":
+                return get_max_consommation(numero_contrat)
+            elif intent == "MIN_CONSOMMATION":
+                return get_min_consommation(numero_contrat)
+            elif intent == "SOMME_MONTANT":
+                return get_somme_montant(numero_contrat)
+            elif intent == "SOMME_CONSO":
+                return get_somme_conso(numero_contrat)
+            elif intent == "EVOLUTION":
+                return get_evolution(numero_contrat)
+            elif intent == "MOYENNE":
+                return get_moyenne(numero_contrat)
+            elif intent == "INFOS":
+                return get_infos(numero_contrat)
+            elif intent == "MOIS_SPECIFIQUE" and mois:
+                return get_mois_specifique(numero_contrat, mois)
+            elif intent == "PAR_ANNEE" and annee:
+                return get_par_annee(numero_contrat, annee)
+            elif intent == "TOP_N_CONSO":
+                return get_top_n_conso(numero_contrat, n, ordre)
+            elif intent == "TOP_N_MONTANT":
+                return get_top_n_montant(numero_contrat, n, ordre)
+            elif intent == "DERNIERS_N":
+                return get_derniers_n_mois(numero_contrat, n)
+            elif intent == "PREMIERS_N":
+                return get_premiers_n_mois(numero_contrat, n)
 
         except Exception:
             pass
 
-    # ══════════════════════════════════════════
-    # ÉTAPE 4 — Réponse guidée
-    # ══════════════════════════════════════════
     return (
         "Je n'ai pas bien compris votre question. "
         "Vous pouvez me demander par exemple :\n"
         "• Mon montant le plus élevé\n"
         "• Ma consommation en janvier\n"
-        "• Mon historique complet\n"
-        "• Mes informations de compte"
+        "• Les 3 mois les plus consommés\n"
+        "• Mes factures de 2025\n"
+        "• Mon historique complet"
     )
+
+
+# ════════════════════════════════════════════
+# FONCTION PRINCIPALE
+# ════════════════════════════════════════════
+def repondre_client_connecte(question: str, numero_contrat: str, historique: str = "") -> str:
+    
+    # ── Détection anglais sur question brute ──
+    question_lower = question.lower()
+    mots_bruts = question_lower.split()
+    if any(m in mots_bruts for m in _MOTS_ANGLAIS):
+        return _fallback_llm(question, numero_contrat)
+
+    q = _normaliser_q(question)
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 0 — CHAMP PRÉCIS
+    # ══════════════════════════════════════════
+    champ = _detecter_champ_infos(q)
+    if champ:
+        return get_infos(numero_contrat, champ)
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 1 — ANNÉE PRÉCISE
+    # ══════════════════════════════════════════
+    annee = _extraire_annee(q)
+    if annee:
+        return get_par_annee(numero_contrat, annee)
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 2 — TOP N
+    # ══════════════════════════════════════════
+    _detect_nombre = re.search(r'\b(\d+|deux|trois|quatre|cinq)\b', q)
+    if _detect_nombre:
+        n = _extraire_nombre(q)
+        if any(t in q for t in _TOKENS_DERNIERS):
+            return get_derniers_n_mois(numero_contrat, n)
+        if any(t in q for t in _TOKENS_PREMIERS):
+            return get_premiers_n_mois(numero_contrat, n)
+        if any(t in q for t in _TOKENS_TOP_N_MONTANT):
+            ordre = "ASC" if any(t in q for t in ["moins", "faible", "bas", "petit"]) else "DESC"
+            return get_top_n_montant(numero_contrat, n, ordre)
+        if any(t in q for t in _TOKENS_TOP_N_CONSO):
+            ordre = "ASC" if any(t in q for t in ["moins", "faible", "bas", "petit"]) else "DESC"
+            return get_top_n_conso(numero_contrat, n, ordre)
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 3 — MOIS SPÉCIFIQUE
+    # ══════════════════════════════════════════
+    if _contient_mois(q) and any(t in q for t in _TOKENS_MOIS):
+        mois = _extraire_mois(q)
+        champ_mois = None
+        if any(t in q for t in _TOKENS_CHAMP_MONTANT) and not any(t in q for t in _TOKENS_CHAMP_CONSO):
+            champ_mois = "montant"
+        elif any(t in q for t in _TOKENS_CHAMP_CONSO) and not any(t in q for t in _TOKENS_CHAMP_MONTANT):
+            champ_mois = "consommation"
+        return get_mois_specifique(numero_contrat, mois, champ_mois)
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 4 — RÈGLES EXACTES
+    # ══════════════════════════════════════════
+    if any(t in q for t in _TOKENS_MONTANT_MAX):
+        return get_max_montant(numero_contrat)
+    if any(t in q for t in _TOKENS_MONTANT_MIN):
+        return get_min_montant(numero_contrat)
+    if any(t in q for t in _TOKENS_CONSO_MAX):
+        return get_max_consommation(numero_contrat)
+    if any(t in q for t in _TOKENS_CONSO_MIN):
+        return get_min_consommation(numero_contrat)
+    if any(t in q for t in _TOKENS_SOMME_MONTANT):
+        return get_somme_montant(numero_contrat)
+    if any(t in q for t in _TOKENS_SOMME_CONSO):
+        return get_somme_conso(numero_contrat)
+    if any(t in q for t in _TOKENS_EVOLUTION):
+        return get_evolution(numero_contrat)
+    if any(t in q for t in _TOKENS_MOYENNE):
+        return get_moyenne(numero_contrat)
+    if any(t in q for t in _TOKENS_INFOS):
+        return get_infos(numero_contrat)
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 5 — LLM
+    # ══════════════════════════════════════════
+    return _fallback_llm(question, numero_contrat)
