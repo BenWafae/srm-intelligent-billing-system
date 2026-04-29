@@ -94,30 +94,51 @@ _TOKENS_PREMIERS = [
 # FALLBACK LLM
 # ════════════════════════════════════════════
 def _fallback_llm(question: str, numero_contrat: str) -> str:
-    prompt = f"""Tu es un assistant pour un client SRM connecté.
+    prompt = f"""Tu es un assistant pour un client SRM (eau et électricité au Maroc).
 Les données couvrent : Octobre 2025 à Septembre 2026.
 "last year" ou "année dernière" = 2025.
 "this year" ou "cette année" = 2026.
 
 Intents disponibles :
-{INTENTS_CLIENT_CONNECTE}
+MAX_MONTANT       : mois où j'ai payé le plus
+MIN_MONTANT       : mois où j'ai payé le moins
+MAX_CONSOMMATION  : mois où j'ai le plus consommé
+MIN_CONSOMMATION  : mois où j'ai le moins consommé
+SOMME_MONTANT     : total de ce que j'ai payé
+SOMME_CONSO       : total de ce que j'ai consommé
+EVOLUTION         : historique complet, toutes les factures
+MOYENNE           : moyenne mensuelle
+INFOS             : informations du compte
+MOIS_SPECIFIQUE   : facture d'un mois précis
+PAR_ANNEE         : factures d'une année précise
+TOP_N_CONSO       : les N mois les plus/moins consommés
+TOP_N_MONTANT     : les N mois les plus/moins chers
+DERNIERS_N        : les N derniers mois
+PREMIERS_N        : les N premiers mois
+HORS_SUJET        : question sans rapport avec les factures
 
-TOP_N_CONSO   : les 3 mois les plus/moins consommés, top N consommation
-TOP_N_MONTANT : les 3 mois les plus/moins chers, top N montant
-DERNIERS_N    : les 3 derniers mois, dernière période
-PREMIERS_N    : les 3 premiers mois, début
-PAR_ANNEE     : consommation en 2025, factures de 2026
+EXEMPLES :
+"le mois que je consomme beaucoup" → MAX_CONSOMMATION
+"quand est ce que j ai beaucoup depense" → MAX_MONTANT
+"donne moi tout" → EVOLUTION
+"c est quoi ma moyenne" → MOYENNE
+"resume moi mes factures" → EVOLUTION
+"je veux voir mes 3 premiers mois" → PREMIERS_N avec n=3
+"les mois ou j ai peu consomme" → MIN_CONSOMMATION
+"montre moi les 5 factures les plus cheres" → TOP_N_MONTANT avec n=5, ordre=DESC
+"factures recentes" → DERNIERS_N avec n=3
+"bonjour", "merci", "aide moi" → HORS_SUJET
+"quel temps fait il" → HORS_SUJET
 
 Question : {question}
 
-Réponds UNIQUEMENT avec un JSON :
+Réponds UNIQUEMENT avec un JSON valide :
 {{"intent": "NOM_INTENT", "params": {{}}}}
 Ajoute selon l'intent :
 - mois précis : {{"mois": "Janvier"}}
 - année : {{"annee": "2025"}}
 - nombre N : {{"n": 3}}
-- ordre : {{"ordre": "DESC"}} pour plus, {{"ordre": "ASC"}} pour moins
-Si hors sujet : {{"intent": "HORS_SUJET", "params": {{}}}}
+- ordre : {{"ordre": "DESC"}} pour plus/élevé, {{"ordre": "ASC"}} pour moins/faible
 """
     texte = _appeler_llm(prompt)
     match = re.search(r'\{.*\}', texte, re.DOTALL)
@@ -134,10 +155,10 @@ Si hors sujet : {{"intent": "HORS_SUJET", "params": {{}}}}
                     "vos consommations, montants, ou informations de compte."
                 )
 
-            mois   = params.get("mois", "")
-            annee  = params.get("annee", "")
-            n      = int(params.get("n", 3))
-            ordre  = params.get("ordre", "DESC")
+            mois  = params.get("mois", "")
+            annee = params.get("annee", "")
+            n     = int(params.get("n", 3))
+            ordre = params.get("ordre", "DESC")
 
             if intent == "MAX_MONTANT":
                 return get_max_montant(numero_contrat)
@@ -176,14 +197,11 @@ Si hors sujet : {{"intent": "HORS_SUJET", "params": {{}}}}
     return (
         "Je n'ai pas bien compris votre question. "
         "Vous pouvez me demander par exemple :\n"
-        "• Mon montant le plus élevé\n"
-        "• Ma consommation en janvier\n"
-        "• Les 3 mois les plus consommés\n"
+        "• Le mois où j'ai le plus consommé\n"
+        "• Les 3 mois les plus chers\n"
         "• Mes factures de 2025\n"
         "• Mon historique complet"
     )
-
-
 # ════════════════════════════════════════════
 # FONCTION PRINCIPALE
 # ════════════════════════════════════════════
