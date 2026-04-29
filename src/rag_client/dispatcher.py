@@ -226,10 +226,10 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
         return get_infos(numero_contrat, champ)
 
     # ══════════════════════════════════════════
-    # ÉTAPE 1 — ANNÉE PRÉCISE
+    # ÉTAPE 1 — ANNÉE PRÉCISE (sans mois)
     # ══════════════════════════════════════════
     annee = _extraire_annee(q)
-    if annee:
+    if annee and not _contient_mois(q):
         return get_par_annee(numero_contrat, annee)
 
     # ══════════════════════════════════════════
@@ -250,16 +250,17 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
             return get_top_n_conso(numero_contrat, n, ordre)
 
     # ══════════════════════════════════════════
-    # ÉTAPE 3 — MOIS SPÉCIFIQUE
+    # ÉTAPE 3 — MOIS SPÉCIFIQUE (avec ou sans année)
     # ══════════════════════════════════════════
     if _contient_mois(q) and any(t in q for t in _TOKENS_MOIS):
         mois = _extraire_mois(q)
+        annee_mois = annee  # déjà extrait à l'étape 1, "" si absent
         champ_mois = None
         if any(t in q for t in _TOKENS_CHAMP_MONTANT) and not any(t in q for t in _TOKENS_CHAMP_CONSO):
             champ_mois = "montant"
         elif any(t in q for t in _TOKENS_CHAMP_CONSO) and not any(t in q for t in _TOKENS_CHAMP_MONTANT):
             champ_mois = "consommation"
-        return get_mois_specifique(numero_contrat, mois, champ_mois)
+        return get_mois_specifique(numero_contrat, mois, champ_mois, annee_mois)
 
     # ══════════════════════════════════════════
     # ÉTAPE 4 — RÈGLES EXACTES

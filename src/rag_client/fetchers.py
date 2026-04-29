@@ -49,14 +49,17 @@ def get_infos(numero_contrat: str, champ: str = None) -> str:
 - Usage : **{row[2]}**
 - Type service : **{row[3]}**"""
 
-
 # ════════════════════════════════════════════
 # MOIS SPÉCIFIQUE
 # ════════════════════════════════════════════
 
-def get_mois_specifique(numero_contrat: str, mois: str, champ: str = None) -> str:
+def get_mois_specifique(numero_contrat: str, mois: str, champ: str = None, annee: str = "") -> str:
     from normalisation import normaliser_mois
     mois_norm = normaliser_mois(mois)
+    
+    # Si année précisée : chercher "Janvier 2026", sinon juste "Janvier"
+    pattern = f"%{mois_norm}%{annee}%" if annee else f"%{mois_norm}%"
+    
     conn = _connexion()
     cursor = conn.cursor()
     cursor.execute("""
@@ -64,12 +67,13 @@ def get_mois_specifique(numero_contrat: str, mois: str, champ: str = None) -> st
                periode_debut, periode_fin, date_limite_paiement
         FROM factures_excel
         WHERE numero_contrat = ? AND mois_source LIKE ?
-    """, (numero_contrat, f"%{mois_norm}%"))
+    """, (numero_contrat, pattern))
     row = cursor.fetchone()
     conn.close()
 
     if not row:
-        return f"Aucune facture trouvée pour **{mois_norm}**."
+        label = f"**{mois_norm} {annee}**" if annee else f"**{mois_norm}**"
+        return f"Aucune facture trouvée pour {label}."
 
     if champ == "montant":
         return f"💰 Votre montant en **{row[0]}** : → **{row[3]:,.2f} Dhs**"
