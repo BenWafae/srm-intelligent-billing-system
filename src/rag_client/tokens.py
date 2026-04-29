@@ -48,6 +48,16 @@ _TOKENS_MONTANT_MAX = [
     "mantant max", "mantant eleve", "monton max",
     "facture la plus grande", "ma plus grande facture",
     "mon pic montant", "pic facture",
+    "montant est eleve",
+    "montant est haut",
+    "montant est cher",
+    "montant eleve ce mois",
+    "c est eleve",
+    "c est cher",
+    "trop eleve",
+    "trop cher",
+    "beaucoup ce mois",
+    "eleve ce mois",
 ]
 
 _TOKENS_MONTANT_MIN = [
@@ -66,6 +76,18 @@ _TOKENS_MONTANT_MIN = [
     "mantant min", "mantant faible", "monton min",
     "facture la plus petite", "ma plus petite facture",
     "mon minimum facture",
+    "montant est faible",
+    "montant est bas",
+    "montant est petit",
+    "montant faible ce mois",
+    "montant bas ce mois",
+    "c est faible",
+    "c est bas",
+    "trop faible",
+    "trop bas",
+    "peu eleve",
+    "faible ce mois",
+    "bas ce mois",
 ]
 
 _TOKENS_CONSO_MAX = [

@@ -79,7 +79,7 @@ _TOKENS_TOP_N_MONTANT = [
     "mois les plus eleves", "mois les moins eleves",
     "factures les plus cheres", "factures les moins cheres",
     "plus cher", "moins cher", "plus eleve",
-    "chere", "cher", "eleve", "haut",
+    
 ]
 
 _TOKENS_DERNIERS = [
@@ -232,35 +232,68 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
     if annee and not _contient_mois(q):
         return get_par_annee(numero_contrat, annee)
 
+    
     # ══════════════════════════════════════════
     # ÉTAPE 2 — TOP N
     # ══════════════════════════════════════════
     _detect_nombre = re.search(r'\b(\d+|deux|trois|quatre|cinq)\b', q)
     if _detect_nombre:
         n = _extraire_nombre(q)
-        if any(t in q for t in _TOKENS_DERNIERS):
-            return get_derniers_n_mois(numero_contrat, n)
-        if any(t in q for t in _TOKENS_PREMIERS):
-            return get_premiers_n_mois(numero_contrat, n)
-        if any(t in q for t in _TOKENS_TOP_N_MONTANT):
-            ordre = "ASC" if any(t in q for t in ["moins", "faible", "bas", "petit"]) else "DESC"
-            return get_top_n_montant(numero_contrat, n, ordre)
-        if any(t in q for t in _TOKENS_TOP_N_CONSO):
-            ordre = "ASC" if any(t in q for t in ["moins", "faible", "bas", "petit"]) else "DESC"
-            return get_top_n_conso(numero_contrat, n, ordre)
+        has_top_token = (
+            any(t in q for t in _TOKENS_DERNIERS) or
+            any(t in q for t in _TOKENS_PREMIERS) or
+            any(t in q for t in _TOKENS_TOP_N_MONTANT) or
+            any(t in q for t in _TOKENS_TOP_N_CONSO)
+        )
+        if has_top_token:
+            if any(t in q for t in _TOKENS_DERNIERS):
+                return get_derniers_n_mois(numero_contrat, n)
+            if any(t in q for t in _TOKENS_PREMIERS):
+                return get_premiers_n_mois(numero_contrat, n)
+            if any(t in q for t in _TOKENS_TOP_N_MONTANT):
+                ordre = "ASC" if any(t in q for t in ["moins", "faible", "bas", "petit"]) else "DESC"
+                return get_top_n_montant(numero_contrat, n, ordre)
+            if any(t in q for t in _TOKENS_TOP_N_CONSO):
+                ordre = "ASC" if any(t in q for t in ["moins", "faible", "bas", "petit"]) else "DESC"
+                return get_top_n_conso(numero_contrat, n, ordre)
 
     # ══════════════════════════════════════════
     # ÉTAPE 3 — MOIS SPÉCIFIQUE (avec ou sans année)
     # ══════════════════════════════════════════
-    if _contient_mois(q) and any(t in q for t in _TOKENS_MOIS):
+    # ══════════════════════════════════════════
+
+    if _contient_mois(q):
         mois = _extraire_mois(q)
-        annee_mois = annee  # déjà extrait à l'étape 1, "" si absent
-        champ_mois = None
-        if any(t in q for t in _TOKENS_CHAMP_MONTANT) and not any(t in q for t in _TOKENS_CHAMP_CONSO):
-            champ_mois = "montant"
-        elif any(t in q for t in _TOKENS_CHAMP_CONSO) and not any(t in q for t in _TOKENS_CHAMP_MONTANT):
-            champ_mois = "consommation"
-        return get_mois_specifique(numero_contrat, mois, champ_mois, annee_mois)
+        if mois:
+            annee_mois = annee
+            champ_mois = None
+            if any(t in q for t in _TOKENS_CHAMP_MONTANT) and \
+               not any(t in q for t in _TOKENS_CHAMP_CONSO):
+                champ_mois = "montant"
+            elif any(t in q for t in _TOKENS_CHAMP_CONSO) and \
+                 not any(t in q for t in _TOKENS_CHAMP_MONTANT):
+                champ_mois = "consommation"
+            return get_mois_specifique(numero_contrat, mois, champ_mois, annee_mois)
+    
+    # ══════════════════════════════════════════
+    # ÉTAPE 3.5 — CE MOIS / MOIS ACTUEL
+    # ══════════════════════════════════════════
+    _TOKENS_CE_MOIS = [
+        "ce mois", "ce mois ci", "mois actuel",
+        "mois en cours", "mois courant"
+    ]
+    if any(t in q for t in _TOKENS_CE_MOIS):
+        from datetime import datetime
+        _MOIS_FR = {
+            "January": "Janvier", "February": "Fevrier", "March": "Mars",
+            "April": "Avril", "May": "Mai", "June": "Juin",
+            "July": "Juillet", "August": "Aout", "September": "Septembre",
+            "October": "Octobre", "November": "Novembre", "December": "Decembre"
+        }
+        now = datetime.now()
+        mois_fr = _MOIS_FR[now.strftime("%B")]
+        annee = now.strftime("%Y")
+        return get_mois_specifique(numero_contrat, mois_fr, None, annee)
 
     # ══════════════════════════════════════════
     # ÉTAPE 4 — RÈGLES EXACTES
