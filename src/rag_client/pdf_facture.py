@@ -97,7 +97,8 @@ def generer_pdf_facture(numero_contrat: str, mois_source: str) -> bytes | None:
     # ══════════════════════════════════════════
     # HEADER — Logo + Références
     # ══════════════════════════════════════════
-    LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "assets", "logo_srm.png")
+    LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "assets", "srm_logo.png")
+
 
     if os.path.exists(LOGO_PATH):
         from reportlab.platypus import Image
