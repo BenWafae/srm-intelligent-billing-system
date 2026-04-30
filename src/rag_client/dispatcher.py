@@ -201,10 +201,16 @@ Ajoute selon l'intent :
             
 
             # ── ANALYSE PERSONNALISÉE ──
+           # ── ANALYSE PERSONNALISÉE ──
             if intent == "ANALYSE":
                 infos     = get_infos(numero_contrat)
                 evolution = get_evolution(numero_contrat)
                 moyenne   = get_moyenne(numero_contrat)
+
+                # ── Récupérer le prénom directement depuis la DB ──
+                from src.database import get_nom_client_par_contrat
+                nom_complet = get_nom_client_par_contrat(numero_contrat) or ""
+                prenom = nom_complet.split()[0] if nom_complet else "client"
 
                 # ── Injecter les données réelles des mois mentionnés ──
                 mois_mentionnes = _extraire_tous_les_mois(question)
@@ -215,6 +221,9 @@ Ajoute selon l'intent :
 
                 prompt_analyse = f"""Tu es un assistant SRM pour un client au Maroc (eau et électricité).
 
+Le prénom du client est : {prenom}
+Commence TOUJOURS ta réponse par "Bonjour {prenom},"
+
 Voici le profil réel de ce client :
 {infos}
 
@@ -224,13 +233,14 @@ Voici son historique complet de consommation :
 Voici ses statistiques :
 {moyenne}
 
-{"Données réelles des mois mentionnés par le client :" + chr(10) + donnees_mois if donnees_mois else ""}
+{"Données réelles des mois mentionnés :" + chr(10) + donnees_mois if donnees_mois else ""}
 
 Question du client : {question}
 
 RÈGLES STRICTES :
-- Commence TOUJOURS par "Bonjour [premier mot de nom_client],"
-  exemple : "Wissam Fakhri" → "Bonjour Wissam,"
+- Ne jamais dire "heureuse de vous rencontrer", "ravi de vous aider" ou toute formule de politesse inutile
+- Commence TOUJOURS par "Bonjour {prenom},"
+- Va directement à l'explication après "Bonjour {prenom},"
 - Cite obligatoirement les chiffres réels (kWh, Dhs) des mois mentionnés
 - Cite la moyenne réelle du client pour comparer
 - Utilise UNIQUEMENT les chiffres présents ci-dessus, ne jamais inventer
@@ -240,9 +250,8 @@ RÈGLES STRICTES :
 - Ne jamais dire "je suppose" ou "probablement" sur des chiffres
 - Donne des conseils uniquement si le client le demande explicitement
 - Réponds en français, clair et bienveillant, maximum 5-6 lignes
+- Le client est au MAROC, jamais mentionner la Tunisie ou un autre pays
 """
-
-
                 return _appeler_llm(prompt_analyse)
 
             mois  = params.get("mois", "")
