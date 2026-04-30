@@ -4,12 +4,22 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from src.database import get_nom_client_par_contrat, get_mois_client  # ← ajouter get_mois_client
+from src.database import get_nom_client_par_contrat, get_mois_client
 from src.rag.client_connecte import repondre_client_connecte
 from src.rag_client.pdf_facture import generer_pdf_facture
 
 
 def afficher_client():
+
+    # ══════════════════════════════════════════
+    # RESET SESSION SI NOUVEAU UTILISATEUR
+    # ══════════════════════════════════════════
+    email_actuel = st.session_state.user.get("email")
+
+    if st.session_state.get("_client_email_courant") != email_actuel:
+        st.session_state["_client_email_courant"] = email_actuel
+        st.session_state["historique_client"] = []
+        st.session_state["nom_client_connecte"] = None
 
     # SIDEBAR
     with st.sidebar:
@@ -22,9 +32,11 @@ def afficher_client():
             st.rerun()
 
     # SESSION STATE
-    if "historique_client" not in st.session_state:
+    if not st.session_state.get("historique_client"):
         st.session_state.historique_client = []
-    if "nom_client_connecte" not in st.session_state:
+
+    # ── Vérifier None aussi, pas juste l'absence de la clé ──
+    if not st.session_state.get("nom_client_connecte"):
         numero_contrat = st.session_state.user.get("numero_client")
         st.session_state.nom_client_connecte = get_nom_client_par_contrat(numero_contrat)
 
@@ -68,7 +80,7 @@ def afficher_client():
         st.session_state.historique_client.append({"role": "assistant", "content": reponse})
         st.chat_message("assistant").write(reponse)
 
-    # ── TÉLÉCHARGEMENT FACTURE ── (toujours dans la fonction)
+    # ── TÉLÉCHARGEMENT FACTURE ──
     st.markdown("---")
     st.markdown("### 📥 Télécharger une facture")
 
