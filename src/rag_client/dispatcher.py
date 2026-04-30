@@ -12,7 +12,8 @@ from rag_client.fetchers import (
     get_somme_montant, get_somme_conso, get_moyenne,
     get_evolution, get_par_annee,
     get_top_n_conso, get_top_n_montant,
-    get_derniers_n_mois, get_premiers_n_mois
+    get_derniers_n_mois, get_premiers_n_mois,
+    get_comparaison  
 )
 
 from rag_client.tokens import (
@@ -50,6 +51,20 @@ def _extraire_nombre(q: str) -> int:
         if mot in q:
             return val
     return 3  # valeur par défaut
+# ════════════════════════════════════════════
+# EXTRACTION TOUS LES MOIS
+# ════════════════════════════════════════════
+def _extraire_tous_les_mois(q: str) -> list:
+    """Extrait tous les mois mentionnés dans la question"""
+    from rag.intent import _MAP_MOIS
+    mois_trouves = []
+    tokens_tries = sorted(_MAP_MOIS.keys(), key=len, reverse=True)
+    for token in tokens_tries:
+        if re.search(r'\b' + re.escape(token) + r'\b', q):
+            mois_canon = _MAP_MOIS[token]
+            if mois_canon not in mois_trouves:  # éviter doublons
+                mois_trouves.append(mois_canon)
+    return mois_trouves
 
 # ════════════════════════════════════════════
 # EXTRACTION ANNÉE
@@ -264,7 +279,31 @@ Maximum 5-6 lignes, pas de listes à puces excessives.
 # FONCTION PRINCIPALE
 # ════════════════════════════════════════════
 def repondre_client_connecte(question: str, numero_contrat: str, historique: str = "") -> str:
-    
+
+    from datetime import datetime
+    from dateutil.relativedelta import relativedelta
+
+    # ── Constantes date/mois — définies UNE SEULE FOIS en haut ──
+    _MOIS_FR = {
+        "January": "Janvier", "February": "Fevrier", "March": "Mars",
+        "April": "Avril", "May": "Mai", "June": "Juin",
+        "July": "Juillet", "August": "Aout", "September": "Septembre",
+        "October": "Octobre", "November": "Novembre", "December": "Decembre"
+    }
+    _TOKENS_CE_MOIS       = ["ce mois", "ce mois ci", "mois actuel", "mois en cours", "mois courant"]
+    _TOKENS_MOIS_PRECEDENT = ["mois dernier", "mois precedent", "mois passe", "le mois d avant"]
+    _TOKENS_MOIS_PROCHAIN  = ["mois prochain", "mois suivant", "mois d apres"]
+    now = datetime.now()
+
+    def _detecter_champ(q):
+        if any(t in q for t in _TOKENS_CHAMP_MONTANT) and \
+           not any(t in q for t in _TOKENS_CHAMP_CONSO):
+            return "montant"
+        elif any(t in q for t in _TOKENS_CHAMP_CONSO) and \
+             not any(t in q for t in _TOKENS_CHAMP_MONTANT):
+            return "consommation"
+        return None
+
     # ── Détection anglais sur question brute ──
     question_lower = question.lower()
     mots_bruts = question_lower.split()
@@ -288,7 +327,6 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
     if annee and not _contient_mois(q):
         return get_par_annee(numero_contrat, annee)
 
-    
     # ══════════════════════════════════════════
     # ÉTAPE 2 — TOP N
     # ══════════════════════════════════════════
@@ -312,26 +350,70 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
             if any(t in q for t in _TOKENS_TOP_N_CONSO):
                 ordre = "ASC" if any(t in q for t in ["moins", "faible", "bas", "petit"]) else "DESC"
                 return get_top_n_conso(numero_contrat, n, ordre)
+
     # ══════════════════════════════════════════
-# ÉTAPE 2.5 — QUESTION ANALYSE AVEC MOIS
-# ══════════════════════════════════════════
+    # ÉTAPE 2.5 — QUESTION ANALYSE AVEC MOIS
+    # ══════════════════════════════════════════
     _TOKENS_ANALYSE = [
         "pourquoi", "comment", "normal", "bizarre",
         "beaucoup", "trop", "eleve", "expliquer",
         "raison", "cause", "augmente", "diminue",
         "comprends pas", "je comprends", "conseil",
         "reduire", "economiser", "c est normal",
-]
-
+    ]
     if _contient_mois(q) and any(t in q for t in _TOKENS_ANALYSE):
         return _fallback_llm(question, numero_contrat)
 
+    # ══════════════════════════════════════════
+    # ÉTAPE 2.7 — COMPARAISON FACTUELLE ENTRE 2 MOIS
+    # ══════════════════════════════════════════
+    _TOKENS_COMPARAISON = [
+        "compare", "comparer", "comparaison",
+        "difference entre", "diff entre",
+        "plus que", "moins que",
+        "par rapport a", "par rapport au",
+        "vs", "versus",
+    ]
+    _TOKENS_COMPARAISON_ANNEE = [
+        "difference entre 2025 et 2026",
+        "compare 2025 et 2026",
+        "2025 vs 2026",
+        "evolution entre 2025 et 2026",
+        "2025 par rapport a 2026",
+        "2026 par rapport a 2025",
+    ]
+
+    # --- Comparaison entre 2 années ---
+    if any(t in q for t in _TOKENS_COMPARAISON_ANNEE):
+        r2025 = get_par_annee(numero_contrat, "2025")
+        r2026 = get_par_annee(numero_contrat, "2026")
+        return f"📅 **Comparaison 2025 vs 2026 :**\n\n{r2025}\n\n---\n\n{r2026}"
+
+    # --- Comparaison entre 2 mois nommés ---
+    if any(t in q for t in _TOKENS_COMPARAISON) and _contient_mois(q):
+        mois_trouves = _extraire_tous_les_mois(q)
+
+        if len(mois_trouves) >= 2:
+            return get_comparaison(numero_contrat, mois_trouves[0], mois_trouves[1])
+
+        if len(mois_trouves) == 1:
+            if any(t in q for t in _TOKENS_MOIS_PRECEDENT):
+                mois_prec = _MOIS_FR[(now - relativedelta(months=1)).strftime("%B")]
+                return get_comparaison(numero_contrat, mois_trouves[0], mois_prec)
+            if any(t in q for t in _TOKENS_CE_MOIS):
+                mois_actuel = _MOIS_FR[now.strftime("%B")]
+                return get_comparaison(numero_contrat, mois_trouves[0], mois_actuel)
+
+    # --- Comparaison mois relatifs sans mois nommé ---
+    if any(t in q for t in _TOKENS_COMPARAISON):
+        if any(t in q for t in _TOKENS_CE_MOIS) and any(t in q for t in _TOKENS_MOIS_PRECEDENT):
+            mois_actuel = _MOIS_FR[now.strftime("%B")]
+            mois_prec   = _MOIS_FR[(now - relativedelta(months=1)).strftime("%B")]
+            return get_comparaison(numero_contrat, mois_prec, mois_actuel)
 
     # ══════════════════════════════════════════
     # ÉTAPE 3 — MOIS SPÉCIFIQUE (avec ou sans année)
     # ══════════════════════════════════════════
-    # ══════════════════════════════════════════
-
     if _contient_mois(q):
         mois = _extraire_mois(q)
         if mois:
@@ -344,52 +426,26 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
                  not any(t in q for t in _TOKENS_CHAMP_MONTANT):
                 champ_mois = "consommation"
             return get_mois_specifique(numero_contrat, mois, champ_mois, annee_mois)
-    
-    def _detecter_champ(q):
-        if any(t in q for t in _TOKENS_CHAMP_MONTANT) and \
-           not any(t in q for t in _TOKENS_CHAMP_CONSO):
-            return "montant"
-        elif any(t in q for t in _TOKENS_CHAMP_CONSO) and \
-             not any(t in q for t in _TOKENS_CHAMP_MONTANT):
-            return "consommation"
-        return None
+
     # ══════════════════════════════════════════
     # ÉTAPE 3.5 — CE MOIS / MOIS PRÉCÉDENT / PROCHAIN
     # ══════════════════════════════════════════
-    from datetime import datetime
-    from dateutil.relativedelta import relativedelta
-
-    _MOIS_FR = {
-        "January": "Janvier", "February": "Fevrier", "March": "Mars",
-        "April": "Avril", "May": "Mai", "June": "Juin",
-        "July": "Juillet", "August": "Aout", "September": "Septembre",
-        "October": "Octobre", "November": "Novembre", "December": "Decembre"
-    }
-
-    _TOKENS_CE_MOIS = ["ce mois", "ce mois ci", "mois actuel", "mois en cours", "mois courant"]
-    _TOKENS_MOIS_PRECEDENT = ["mois dernier", "mois precedent", "mois passe", "le mois d avant"]
-    _TOKENS_MOIS_PROCHAIN = ["mois prochain", "mois suivant", "mois d apres"]
-
-    now = datetime.now()
-
     if any(t in q for t in _TOKENS_CE_MOIS):
         mois_fr = _MOIS_FR[now.strftime("%B")]
-        annee = now.strftime("%Y")
-        return get_mois_specifique(numero_contrat, mois_fr, _detecter_champ(q), annee)
+        annee_fr = now.strftime("%Y")
+        return get_mois_specifique(numero_contrat, mois_fr, _detecter_champ(q), annee_fr)
 
     if any(t in q for t in _TOKENS_MOIS_PRECEDENT):
         date_prec = now - relativedelta(months=1)
-        mois_fr = _MOIS_FR[date_prec.strftime("%B")]
-        annee = date_prec.strftime("%Y")
-        return get_mois_specifique(numero_contrat, mois_fr, _detecter_champ(q), annee)
-
+        mois_fr   = _MOIS_FR[date_prec.strftime("%B")]
+        annee_fr  = date_prec.strftime("%Y")
+        return get_mois_specifique(numero_contrat, mois_fr, _detecter_champ(q), annee_fr)
 
     if any(t in q for t in _TOKENS_MOIS_PROCHAIN):
         date_suiv = now + relativedelta(months=1)
-        mois_fr = _MOIS_FR[date_suiv.strftime("%B")]
-        annee = date_suiv.strftime("%Y")
-        return get_mois_specifique(numero_contrat, mois_fr, _detecter_champ(q), annee)
-
+        mois_fr   = _MOIS_FR[date_suiv.strftime("%B")]
+        annee_fr  = date_suiv.strftime("%Y")
+        return get_mois_specifique(numero_contrat, mois_fr, _detecter_champ(q), annee_fr)
 
     # ══════════════════════════════════════════
     # ÉTAPE 4 — RÈGLES EXACTES

@@ -379,3 +379,46 @@ def get_premiers_n_mois(numero_contrat: str, n: int) -> str:
     for r in rows:
         lignes.append(f"- **{r[0]}** : {r[1]:,} {r[2]} | {r[3]:,.2f} Dhs")
     return "\n".join(lignes)
+# ════════════════════════════════════════════
+# COMPARAISON ENTRE 2 MOIS
+# ════════════════════════════════════════════
+
+def get_comparaison(numero_contrat: str, mois1: str, mois2: str) -> str:
+    conn = _connexion()
+    cursor = conn.cursor()
+
+    resultats = []
+    for mois in [mois1, mois2]:
+        cursor.execute("""
+            SELECT mois_source, consommation, unite, montant_ttc
+            FROM factures_excel
+            WHERE numero_contrat = ? AND mois_source LIKE ?
+        """, (numero_contrat, f"%{mois}%"))
+        row = cursor.fetchone()
+        if row:
+            resultats.append(row)
+
+    conn.close()
+
+    if len(resultats) < 2:
+        return "Je n'ai pas trouvé les deux mois demandés."
+
+    r1, r2 = resultats[0], resultats[1]
+    diff_conso   = r2[1] - r1[1]
+    diff_montant = r2[3] - r1[3]
+    sens_conso   = "↑ augmenté" if diff_conso   > 0 else "↓ diminué"
+    sens_montant = "↑ augmenté" if diff_montant > 0 else "↓ diminué"
+    pct_conso    = round(abs(diff_conso)   / r1[1] * 100, 1) if r1[1] else 0
+    pct_montant  = round(abs(diff_montant) / r1[3] * 100, 1) if r1[3] else 0
+
+    return f"""📊 **Comparaison {r1[0]} vs {r2[0]} :**
+
+⚡ Consommation :
+  • {r1[0]} : {r1[1]:,} {r1[2]}
+  • {r2[0]} : {r2[1]:,} {r2[2]}
+  • {sens_conso} de {abs(diff_conso):,} {r1[2]} ({pct_conso}%)
+
+💰 Montant :
+  • {r1[0]} : {r1[3]:,.2f} Dhs
+  • {r2[0]} : {r2[3]:,.2f} Dhs
+  • {sens_montant} de {abs(diff_montant):,.2f} Dhs ({pct_montant}%)"""
