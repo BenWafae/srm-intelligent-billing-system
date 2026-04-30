@@ -198,11 +198,20 @@ Ajoute selon l'intent :
                     "Posez-moi une question sur vos factures !"
                 )
 
+            
+
             # ── ANALYSE PERSONNALISÉE ──
             if intent == "ANALYSE":
-                infos      = get_infos(numero_contrat)
-                evolution  = get_evolution(numero_contrat)
-                moyenne    = get_moyenne(numero_contrat)
+                infos     = get_infos(numero_contrat)
+                evolution = get_evolution(numero_contrat)
+                moyenne   = get_moyenne(numero_contrat)
+
+                # ── Injecter les données réelles des mois mentionnés ──
+                mois_mentionnes = _extraire_tous_les_mois(question)
+                donnees_mois = ""
+                if mois_mentionnes:
+                    for m in mois_mentionnes:
+                        donnees_mois += get_mois_specifique(numero_contrat, m) + "\n"
 
                 prompt_analyse = f"""Tu es un assistant SRM pour un client au Maroc (eau et électricité).
 
@@ -215,18 +224,25 @@ Voici son historique complet de consommation :
 Voici ses statistiques :
 {moyenne}
 
+{"Données réelles des mois mentionnés par le client :" + chr(10) + donnees_mois if donnees_mois else ""}
+
 Question du client : {question}
 
-Réponds de manière personnalisée et humaine en tenant compte de :
-- Son type d'usage (agricole → eau importante en été, domestique → chauffage en hiver...)
-- Ses mois de forte et faible consommation réels
-- La saisonnalité (été = climatisation/irrigation, hiver = chauffage)
-- La comparaison avec sa propre moyenne
-- Des conseils adaptés à SA situation réelle, pas des conseils génériques
-
-Réponds en français, de manière claire, bienveillante et utile.
-Maximum 5-6 lignes, pas de listes à puces excessives.
+RÈGLES STRICTES :
+- Commence TOUJOURS par "Bonjour [premier mot de nom_client],"
+  exemple : "Wissam Fakhri" → "Bonjour Wissam,"
+- Cite obligatoirement les chiffres réels (kWh, Dhs) des mois mentionnés
+- Cite la moyenne réelle du client pour comparer
+- Utilise UNIQUEMENT les chiffres présents ci-dessus, ne jamais inventer
+- Si un mois n'est pas dans l'historique, dis-le clairement sans inventer
+- Explique en tenant compte du type d'usage réel (agricole, domestique, professionnel)
+- Adapte à la saisonnalité marocaine (été = irrigation/climatisation, hiver = chauffage)
+- Ne jamais dire "je suppose" ou "probablement" sur des chiffres
+- Donne des conseils uniquement si le client le demande explicitement
+- Réponds en français, clair et bienveillant, maximum 5-6 lignes
 """
+
+
                 return _appeler_llm(prompt_analyse)
 
             mois  = params.get("mois", "")
