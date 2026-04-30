@@ -23,7 +23,8 @@ from rag_client.tokens import (
     _TOKENS_EVOLUTION, _TOKENS_MOYENNE,
     _TOKENS_INFOS, _TOKENS_MOIS,
     _TOKENS_CHAMP_MONTANT, _TOKENS_CHAMP_CONSO,
-    INTENTS_CLIENT_CONNECTE
+    INTENTS_CLIENT_CONNECTE,
+    _TOKENS_COMPARAISON, 
 )
 
 # ════════════════════════════════════════════
@@ -283,16 +284,35 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
     from datetime import datetime
     from dateutil.relativedelta import relativedelta
 
-    # ── Constantes date/mois — définies UNE SEULE FOIS en haut ──
     _MOIS_FR = {
         "January": "Janvier", "February": "Fevrier", "March": "Mars",
         "April": "Avril", "May": "Mai", "June": "Juin",
         "July": "Juillet", "August": "Aout", "September": "Septembre",
         "October": "Octobre", "November": "Novembre", "December": "Decembre"
     }
-    _TOKENS_CE_MOIS       = ["ce mois", "ce mois ci", "mois actuel", "mois en cours", "mois courant"]
+    _TOKENS_CE_MOIS        = ["ce mois", "ce mois ci", "mois actuel", "mois en cours", "mois courant"]
     _TOKENS_MOIS_PRECEDENT = ["mois dernier", "mois precedent", "mois passe", "le mois d avant"]
     _TOKENS_MOIS_PROCHAIN  = ["mois prochain", "mois suivant", "mois d apres"]
+    
+    # ── Tokens comparaison (définis ici pour être disponibles partout dans la fonction) ──
+    _TOKENS_COMPARAISON = [
+        "compare", "comparer", "comparaison",
+        "difference entre", "diff entre",
+        "diffirence entre",
+        "quelle est la difference", "quel est la difference",
+        "quelle est la diffirence", "quel est la diffirence",
+        "plus que", "moins que",
+        "par rapport a", "par rapport au",
+        "vs", "versus",
+    ]
+    _TOKENS_ANALYSE = [
+        "pourquoi", "comment", "normal", "bizarre",
+        "beaucoup", "trop", "eleve", "expliquer",
+        "raison", "cause", "augmente", "diminue",
+        "comprends pas", "je comprends", "conseil",
+        "reduire", "economiser", "c est normal",
+    ]
+
     now = datetime.now()
 
     def _detecter_champ(q):
@@ -314,7 +334,7 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
     q = re.sub(r'^(et|mais|aussi|donc|alors|puis)\s+', '', q)
 
     # ══════════════════════════════════════════
-    # ÉTAPE 0 — CHAMP PRÉCIS
+    # ÉTAPE 0 — CHAMP PRÉCIS (infos compte)
     # ══════════════════════════════════════════
     champ = _detecter_champ_infos(q)
     if champ:
@@ -352,67 +372,38 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
                 return get_top_n_conso(numero_contrat, n, ordre)
 
     # ══════════════════════════════════════════
-    # ÉTAPE 2.5 — QUESTION ANALYSE AVEC MOIS
+    # ÉTAPE 2.5 — COMPARAISON (AVANT mois spécifique)
     # ══════════════════════════════════════════
-    _TOKENS_ANALYSE = [
-        "pourquoi", "comment", "normal", "bizarre",
-        "beaucoup", "trop", "eleve", "expliquer",
-        "raison", "cause", "augmente", "diminue",
-        "comprends pas", "je comprends", "conseil",
-        "reduire", "economiser", "c est normal",
-    ]
+    if any(t in q for t in _TOKENS_COMPARAISON):
+        mois_resolus = []
+
+        # Résoudre références relatives
+        if any(t in q for t in _TOKENS_CE_MOIS):
+            mois_resolus.append(_MOIS_FR[now.strftime("%B")])
+        if any(t in q for t in _TOKENS_MOIS_PRECEDENT):
+            mois_resolus.append(_MOIS_FR[(now - relativedelta(months=1)).strftime("%B")])
+
+        # Ajouter mois explicites
+        mois_explicites = _extraire_tous_les_mois(q)
+        for m in mois_explicites:
+            if m not in mois_resolus:
+                mois_resolus.append(m)
+
+        if len(mois_resolus) >= 2:
+            # Analytique → LLM
+            if any(t in q for t in _TOKENS_ANALYSE):
+                return _fallback_llm(question, numero_contrat)
+            # Factuelle → données directes
+            return get_comparaison(numero_contrat, mois_resolus[0], mois_resolus[1])
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 2.8 — ANALYSE AVEC MOIS (LLM)
+    # ══════════════════════════════════════════
     if _contient_mois(q) and any(t in q for t in _TOKENS_ANALYSE):
         return _fallback_llm(question, numero_contrat)
 
     # ══════════════════════════════════════════
-    # ÉTAPE 2.7 — COMPARAISON FACTUELLE ENTRE 2 MOIS
-    # ══════════════════════════════════════════
-    _TOKENS_COMPARAISON = [
-        "compare", "comparer", "comparaison",
-        "difference entre", "diff entre",
-        "plus que", "moins que",
-        "par rapport a", "par rapport au",
-        "vs", "versus",
-    ]
-    _TOKENS_COMPARAISON_ANNEE = [
-        "difference entre 2025 et 2026",
-        "compare 2025 et 2026",
-        "2025 vs 2026",
-        "evolution entre 2025 et 2026",
-        "2025 par rapport a 2026",
-        "2026 par rapport a 2025",
-    ]
-
-    # --- Comparaison entre 2 années ---
-    if any(t in q for t in _TOKENS_COMPARAISON_ANNEE):
-        r2025 = get_par_annee(numero_contrat, "2025")
-        r2026 = get_par_annee(numero_contrat, "2026")
-        return f"📅 **Comparaison 2025 vs 2026 :**\n\n{r2025}\n\n---\n\n{r2026}"
-
-    # --- Comparaison entre 2 mois nommés ---
-    if any(t in q for t in _TOKENS_COMPARAISON) and _contient_mois(q):
-        mois_trouves = _extraire_tous_les_mois(q)
-
-        if len(mois_trouves) >= 2:
-            return get_comparaison(numero_contrat, mois_trouves[0], mois_trouves[1])
-
-        if len(mois_trouves) == 1:
-            if any(t in q for t in _TOKENS_MOIS_PRECEDENT):
-                mois_prec = _MOIS_FR[(now - relativedelta(months=1)).strftime("%B")]
-                return get_comparaison(numero_contrat, mois_trouves[0], mois_prec)
-            if any(t in q for t in _TOKENS_CE_MOIS):
-                mois_actuel = _MOIS_FR[now.strftime("%B")]
-                return get_comparaison(numero_contrat, mois_trouves[0], mois_actuel)
-
-    # --- Comparaison mois relatifs sans mois nommé ---
-    if any(t in q for t in _TOKENS_COMPARAISON):
-        if any(t in q for t in _TOKENS_CE_MOIS) and any(t in q for t in _TOKENS_MOIS_PRECEDENT):
-            mois_actuel = _MOIS_FR[now.strftime("%B")]
-            mois_prec   = _MOIS_FR[(now - relativedelta(months=1)).strftime("%B")]
-            return get_comparaison(numero_contrat, mois_prec, mois_actuel)
-
-    # ══════════════════════════════════════════
-    # ÉTAPE 3 — MOIS SPÉCIFIQUE (avec ou sans année)
+    # ÉTAPE 3 — MOIS SPÉCIFIQUE
     # ══════════════════════════════════════════
     if _contient_mois(q):
         mois = _extraire_mois(q)
@@ -431,7 +422,7 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
     # ÉTAPE 3.5 — CE MOIS / MOIS PRÉCÉDENT / PROCHAIN
     # ══════════════════════════════════════════
     if any(t in q for t in _TOKENS_CE_MOIS):
-        mois_fr = _MOIS_FR[now.strftime("%B")]
+        mois_fr  = _MOIS_FR[now.strftime("%B")]
         annee_fr = now.strftime("%Y")
         return get_mois_specifique(numero_contrat, mois_fr, _detecter_champ(q), annee_fr)
 
@@ -470,6 +461,6 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
         return get_infos(numero_contrat)
 
     # ══════════════════════════════════════════
-    # ÉTAPE 5 — LLM
+    # ÉTAPE 5 — LLM FALLBACK
     # ══════════════════════════════════════════
     return _fallback_llm(question, numero_contrat)

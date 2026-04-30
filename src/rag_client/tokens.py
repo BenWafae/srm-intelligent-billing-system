@@ -204,3 +204,13 @@ _MOTS_VIDES = {
     "moi", "toi", "lui", "suis", "quel", "quelle", "quels", "quelles",
     "donner", "donne", "voir", "afficher", "montrer",
 }
+# tokkeen comparaison
+_TOKENS_COMPARAISON = [
+    "compare", "comparer", "comparaison",
+    "difference entre", "diff entre",
+    "diffirence entre",                          # faute fréquente
+    "quelle est la difference", "quel est la difference",
+    "quelle est la diffirence", "quel est la diffirence",
+    "par rapport a", "par rapport au",
+    "vs", "versus",
+]
