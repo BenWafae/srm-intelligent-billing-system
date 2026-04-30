@@ -92,9 +92,6 @@ _TOKENS_PREMIERS = [
     "debut", "premiere periode",
 ]
 
-# ════════════════════════════════════════════
-# FALLBACK LLM
-# ════════════════════════════════════════════
 def _fallback_llm(question: str, numero_contrat: str) -> str:
     prompt = f"""Tu es un assistant pour un client SRM (eau et électricité au Maroc).
 Les données couvrent : Octobre 2025 à Septembre 2026.
@@ -117,6 +114,7 @@ TOP_N_CONSO       : les N mois les plus/moins consommés
 TOP_N_MONTANT     : les N mois les plus/moins chers
 DERNIERS_N        : les N derniers mois
 PREMIERS_N        : les N premiers mois
+ANALYSE           : question sur normalité, comparaison, conseil, explication personnalisée
 HORS_SUJET        : question sans rapport avec les factures
 
 EXEMPLES :
@@ -131,6 +129,28 @@ EXEMPLES :
 "factures recentes" → DERNIERS_N avec n=3
 "bonjour", "merci", "aide moi" → HORS_SUJET
 "quel temps fait il" → HORS_SUJET
+
+EXEMPLES ANALYSE :
+"est ce que ma consommation est normale" → ANALYSE
+"je consomme trop ?" → ANALYSE
+"pourquoi je paie autant" → ANALYSE
+"ma facture est elle elevee" → ANALYSE
+"c est normal comme montant" → ANALYSE
+"comment reduire ma consommation" → ANALYSE
+"des conseils pour payer moins" → ANALYSE
+"ma conso est bizarre" → ANALYSE
+"c est beaucoup ou pas" → ANALYSE
+"je comprends pas ma facture" → ANALYSE
+"est ce que ce mois est normal par rapport au mois dernier" → ANALYSE
+"pourquoi ma conso a augmente" → ANALYSE
+"quelle est la raison de cette hausse" → ANALYSE
+
+RÈGLES IMPORTANTES :
+- "normal", "bizarre", "conseil", "pourquoi", "comment reduire", "expliquer", "raison", "augmente", "diminue" → ANALYSE
+- "infos", "profil", "compte", "numero" → INFOS
+- Ne jamais retourner INFOS pour une question sur consommation ou montant
+- Ne jamais retourner INFOS si la question contient "normal", "conseil", "pourquoi"
+- HORS_SUJET uniquement si aucun rapport avec factures, eau, electricite, consommation
 
 Question : {question}
 
@@ -150,12 +170,48 @@ Ajoute selon l'intent :
             intent = result.get("intent", "")
             params = result.get("params", {})
 
+            # ── HORS SUJET ──
             if intent == "HORS_SUJET":
                 return (
-                    "Je suis votre assistant SRM dédié à vos factures. "
-                    "Je ne peux répondre qu'aux questions concernant "
-                    "vos consommations, montants, ou informations de compte."
+                    "Je suis votre assistant SRM 😊\n\n"
+                    "Je peux vous aider sur :\n"
+                    "• Vos consommations et montants par mois\n"
+                    "• Vos factures par année\n"
+                    "• L'analyse et comparaison de votre consommation\n"
+                    "• Des conseils adaptés à votre situation\n\n"
+                    "Posez-moi une question sur vos factures !"
                 )
+
+            # ── ANALYSE PERSONNALISÉE ──
+            if intent == "ANALYSE":
+                infos      = get_infos(numero_contrat)
+                evolution  = get_evolution(numero_contrat)
+                moyenne    = get_moyenne(numero_contrat)
+
+                prompt_analyse = f"""Tu es un assistant SRM pour un client au Maroc (eau et électricité).
+
+Voici le profil réel de ce client :
+{infos}
+
+Voici son historique complet de consommation :
+{evolution}
+
+Voici ses statistiques :
+{moyenne}
+
+Question du client : {question}
+
+Réponds de manière personnalisée et humaine en tenant compte de :
+- Son type d'usage (agricole → eau importante en été, domestique → chauffage en hiver...)
+- Ses mois de forte et faible consommation réels
+- La saisonnalité (été = climatisation/irrigation, hiver = chauffage)
+- La comparaison avec sa propre moyenne
+- Des conseils adaptés à SA situation réelle, pas des conseils génériques
+
+Réponds en français, de manière claire, bienveillante et utile.
+Maximum 5-6 lignes, pas de listes à puces excessives.
+"""
+                return _appeler_llm(prompt_analyse)
 
             mois  = params.get("mois", "")
             annee = params.get("annee", "")
@@ -256,6 +312,20 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
             if any(t in q for t in _TOKENS_TOP_N_CONSO):
                 ordre = "ASC" if any(t in q for t in ["moins", "faible", "bas", "petit"]) else "DESC"
                 return get_top_n_conso(numero_contrat, n, ordre)
+    # ══════════════════════════════════════════
+# ÉTAPE 2.5 — QUESTION ANALYSE AVEC MOIS
+# ══════════════════════════════════════════
+    _TOKENS_ANALYSE = [
+        "pourquoi", "comment", "normal", "bizarre",
+        "beaucoup", "trop", "eleve", "expliquer",
+        "raison", "cause", "augmente", "diminue",
+        "comprends pas", "je comprends", "conseil",
+        "reduire", "economiser", "c est normal",
+]
+
+    if _contient_mois(q) and any(t in q for t in _TOKENS_ANALYSE):
+        return _fallback_llm(question, numero_contrat)
+
 
     # ══════════════════════════════════════════
     # ÉTAPE 3 — MOIS SPÉCIFIQUE (avec ou sans année)
