@@ -194,6 +194,15 @@ _TOKENS_CONSO_ELEVEE = [
     "consomme max",
     "maximum conso",
     "conso maximum",
+    "consomme beaucoup",
+    "consomateur beaucoup",
+    "grand consomateur","gros consomateur",
+    "grosse consomation",
+    "grande consomation",
+    "consomme bcp",
+    "conso bcp",
+    "consome bcp","consomme bcp"
+
 ]
 
 _TOKENS_CONSO_FAIBLE = [
@@ -290,7 +299,62 @@ _TOKENS_SOMME_MOIS = [
     "total de consomation",
     "consomtion total",
     "consomtion en ",
+    "somme de consommation","somme consommation"
+    "somme consomation","somme  de consomation",
+
+    # ── variantes avec une seule m (fautes fréquentes) ──
+    "somme de consomation",
+    "somme des consomation",
+    "somme de consomation",
+    "somme consomation",
+    "total consomation",
+    "total de consomation",
+    "consomation total",
+    "consomation totale",
+    "consomation en ",
+    "consomation dans ",
+    "consomation du mois",
+    "consomation pour ",
+     # ── variantes avec "dans" / "en" / "de" + mois ──
+    "consomme en ",
+    "consomme dans ",
+    "consomme de ",
+    "conso en ",
+    "conso dans ",
+    "consommation en ",
+    "consommation dans ",
+
+    # ── variantes interrogatives ──
+    "combien a-t-on consomme",
+    "combien ont consomme",
+    "combien on a consomme",
+    "combien consomme",
+    "combien de consomation",
+    "combien de consommation",
+    "quelle est la consomation",
+    "quel est la consomation",
+    "quelle consomation",
+    "quel consomation",
+    "quelle est la consommation",
+    "quel est la consommation",
+
+    # ── variantes "consome" (faute fréquente) ──
+    "somme de consome",
+    "total consome",
+    "consome en ",
+    "consome dans ",
+    "consome total",
+
+    # ── variantes avec "global" / "general" ──
+    "consomation global",
+    "consomation generale",
+    "consommation global",
+    "consommation generale",
+    "consomtion total",
+    "consomtion en ",
 ]
+
+
 # ── TOKENS somme montant (sans mois précis) ──
 _TOKENS_SOMME_MONTANT = [
     "somme des montant",
@@ -437,10 +501,127 @@ RÈGLES ABSOLUES :
     LOWER(usage) LIKE '%professionnel%' — jamais LOWER(usage) = 'professionnel'
     Cette règle s'applique à TOUTES les valeurs de usage et agence sans exception
 
+    #  enrechiiir le promppt fallbackk 
+16. INTENTION CONSOMMATION vs MONTANT — ne jamais confondre :
+    - "consomme", "consomation", "consomateur", "consomme beaucoup",
+      "grand consomateur", "gros consomateur", "pompe", "utilise beaucoup"
+      → ORDER BY consommation ou SUM(consommation) — colonne : consommation
+    - "paie", "paye", "montant", "depense", "cher", "facture elevee",
+      "paie beaucoup", "montant eleve"
+      → ORDER BY montant_ttc ou SUM(montant_ttc) — colonne : montant_ttc
+    - Ne jamais utiliser montant_ttc quand la question parle de consommation
+    - Ne jamais utiliser consommation quand la question parle de montant
+
+17. CLASSEMENT — quand la question demande "le plus" ou "le moins" :
+    - "le plus", "maximum", "max", "eleve", "grand", "gros",
+      "beaucoup", "record", "premier", "top", "bzaf"
+      → ORDER BY [colonne] DESC
+    - "le moins", "minimum", "min", "faible", "petit", "peu", "bas"
+      → ORDER BY [colonne] ASC
+    - Toujours ajouter LIMIT 1 si la question demande UN seul client
+    - Ajouter LIMIT 5 si la question demande "les plus..." sans préciser combien
+    - Pas de LIMIT si la question demande un classement complet ou "tous"
+
+18. AGRÉGATION OBLIGATOIRE par client :
+    - Toujours utiliser SUM(consommation) et non consommation directe
+      quand un client a plusieurs lignes (plusieurs mois)
+    - Toujours GROUP BY nom_client avant ORDER BY sur une somme
+    - Exception : si la question mentionne un mois précis,
+      filtrer d'abord par mois_source LIKE '...' puis grouper
+
+19. COLONNES À RETOURNER selon l'intention :
+    - Question sur consommation → nom_client, SUM(consommation) as total_conso, unite
+    - Question sur montant → nom_client, ROUND(SUM(montant_ttc),2) as total_ttc
+    - Question sur infos client → nom_client, agence, usage, type_service, adresse
+    - Question sur numéros → SELECT DISTINCT numero_compteur (ou contrat ou client)
+    - Question générale → nom_client + colonnes pertinentes uniquement
+    - Ne jamais retourner toutes les colonnes avec SELECT * — toujours préciser
+
+20. FAUTES D'ORTHOGRAPHE ET LANGAGE FAMILIER — traduction sémantique :
+    - "consomateur", "consomateur", "consomatrice" → consommation
+    - "montont", "mantant", "monton", "montan" → montant_ttc
+    - "aganse", "aganse", "agancy" → agence
+    - "cliant", "clent", "clyant" → nom_client
+    - "beaucoup", "bzaf", "enormement", "fort", "trop" → sens de MAX/DESC
+    - "peu", "rien", "leger", "presque rien" → sens de MIN/ASC
+    - "grand", "grande", "gros", "grosse", "important" → sens de MAX/DESC
+    - "petit", "petite", "faible", "bas", "basse" → sens de MIN/ASC
+    - "c qui", "cest qui", "y a qui", "ya qui" → question sur nom_client
+    - "donne moi", "montre moi", "affiche", "liste" → SELECT sans modifier la logique
+    - "bcp", "bcp" → sens de MAX/DESC
+
+
+21. QUESTION SUR UN SEUL CLIENT (contexte client) :
+    - Si la question contient un prénom ou nom propre reconnaissable,
+      ajouter WHERE nom_client LIKE '%prenom%' ou '%nom%'
+    - Ne jamais confondre un prénom avec un mot fonctionnel
+    - Si le nom est ambigu, utiliser LIKE avec % des deux côtés
+
+22. COMPARAISON ENTRE SERVICES :
+    - "eau vs electricite", "eau et electricite", "les deux services"
+      → ne pas filtrer par type_service, retourner GROUP BY type_service
+    - "uniquement eau" ou "uniquement electricite"
+      → filtrer avec WHERE LOWER(type_service) = 'eau' ou 'electricite'
+
+23. QUESTIONS SUR DES PÉRIODES :
+    - "ce mois", "mois en cours" → utilise le mois le plus récent dans la base :
+      WHERE mois_source = (SELECT MAX(mois_source) FROM factures_excel)
+    - "tous les mois", "chaque mois", "evolution" → GROUP BY mois_source ORDER BY mois_source
+    - "dernier mois" → ORDER BY mois_source DESC LIMIT 1 dans une sous-requête
+    - Un mois nommé précisément → mois_source LIKE '%Janvier%'
+
+24. RÉSULTAT VIDE — toujours construire une requête valide :
+    - Ne jamais retourner INCOMPREHENSIBLE si la question a un sens approximatif
+    - Préférer une requête large qui retourne quelque chose
+      plutôt qu'une requête trop filtrée qui retourne vide
+    - En cas de doute sur un filtre, l'omettre plutôt que de risquer 0 résultats
+
+EXEMPLES DE TRADUCTION QUESTION → SQL :
+
+Q: "qui consomme le plus ?"
+SQL: SELECT nom_client, ROUND(SUM(consommation),2) as total_conso, unite
+     FROM factures_excel GROUP BY nom_client ORDER BY total_conso DESC LIMIT 1
+
+Q: "grand consomateur" / "consomme beaucoup" / "gros consomateur"
+SQL: SELECT nom_client, ROUND(SUM(consommation),2) as total_conso, unite
+     FROM factures_excel GROUP BY nom_client ORDER BY total_conso DESC LIMIT 5
+
+Q: "qui paie le plus ?" / "montant le plus eleve"
+SQL: SELECT nom_client, ROUND(SUM(montant_ttc),2) as total_ttc
+     FROM factures_excel GROUP BY nom_client ORDER BY total_ttc DESC LIMIT 1
+
+Q: "clients agence agadir usage domestique"
+SQL: SELECT DISTINCT nom_client, agence, usage, type_service
+     FROM factures_excel
+     WHERE LOWER(agence) LIKE '%agadir%'
+     AND LOWER(usage) LIKE '%domestique%'
+     GROUP BY nom_client
+
+Q: "conso en janvier" / "consommation janvier"
+SQL: SELECT nom_client, consommation, unite, mois_source
+     FROM factures_excel
+     WHERE mois_source LIKE '%Janvier%'
+     ORDER BY consommation DESC
+
+Q: "total montant janvier"
+SQL: SELECT ROUND(SUM(montant_ttc),2) as total, COUNT(DISTINCT nom_client) as nb_clients
+     FROM factures_excel WHERE mois_source LIKE '%Janvier%'
+
+Q: "evolution par mois"
+SQL: SELECT mois_source, COUNT(DISTINCT nom_client) as nb_clients,
+     ROUND(SUM(montant_ttc),2) as total_ttc
+     FROM factures_excel GROUP BY mois_source ORDER BY mois_source
+
+Q: "numero compteur de Fatima"
+SQL: SELECT DISTINCT nom_client, numero_compteur
+     FROM factures_excel WHERE nom_client LIKE '%Fatima%'
 
 Question : {question}
 
 SQL :"""
+
+
+
 
     try:
         sql_genere = _appeler_llm(prompt).strip()
@@ -780,11 +961,22 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # SOMME CONSO MOIS
     # ════════════════════════════════════════════
     _detect_somme_mois = any(t in q_norm for t in _TOKENS_SOMME_MOIS)
+
+    _pattern_somme_conso_mois = (
+        any(t in q_norm for t in ["somme", "total", "combien"]) and
+        any(t in q_norm for t in [
+            "consomme", "conso", "consomation", "consommation",
+            "consome", "consomtion"
+        ]) and
+        _extraire_mois_disp(q_norm) is not None
+    )
+
     _detect_intention_classement = any(t in q_norm for t in [
         "max", "plus", "top", "eleve", "elevee", "grand", "haut",
         "min", "moins", "faible", "bas", "petit"
     ])
-    if _detect_somme_mois and not _detect_intention_classement:
+
+    if (_detect_somme_mois or _pattern_somme_conso_mois) and not _detect_intention_classement:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
             print(f"  [RÈGLE] somme conso mois → fetch_somme_conso_mois(mois={mois_detecte})")

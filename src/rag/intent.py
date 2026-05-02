@@ -42,7 +42,6 @@ MOIS_SPECIFIQUE      : consommation ou montant d'un mois précis, facture de tel
 FACTURES_CLIENT      : toutes les factures, liste des factures, historique complet, tous les mois
 """
 
-# ── Mapping mois → nom canonique ──
 _MAP_MOIS = {
     "jan": "Janvier", "janv": "Janvier", "janvier": "Janvier",
     "fev": "Fevrier", "fevr": "Fevrier", "fevrier": "Fevrier", "feb": "Fevrier",
@@ -61,7 +60,7 @@ _MAP_MOIS = {
 _NOMS_MOIS = list(_MAP_MOIS.keys())
 
 # ════════════════════════════════════════════════════════════
-# TOKENS NIVEAU MODULE (utilisés dans plusieurs fonctions)
+# TOKENS (tous inchangés)
 # ════════════════════════════════════════════════════════════
 
 _TOKENS_AGENCE_PAR_CLIENT = [
@@ -183,8 +182,8 @@ _TOKENS_USAGE      = ["usage", "type d usage", "type usage", "quel usage",
 _TOKENS_ADRESSE    = ["adresse", "ou habite", "ou se trouve", "quelle adresse"]
 _TOKENS_AGENCE     = ["agence", "quelle agence", "quel agence",
                       "quelle est son agence", "quel est son agence"]
-_TOKENS_SERVICE    = ["type de service", "type service", "quel service","service de", "quel est le service", "son service","quel service utulise",
-
+_TOKENS_SERVICE    = ["type de service", "type service", "quel service", "service de",
+                      "quel est le service", "son service", "quel service utulise",
                       "quel est son service", "quel est le service", "quel type de service"]
 _TOKENS_CONTRAT    = ["contrat", "numero de contrat", "n contrat", "numero contrat"]
 _TOKENS_COMPTEUR   = ["compteur", "numero de compteur", "n compteur", "numero compteur"]
@@ -229,6 +228,147 @@ def _appeler_llm(prompt: str) -> str:
         json={"model": "mistral", "prompt": prompt, "stream": False}
     )
     return response.json()["response"].strip()
+
+
+# ════════════════════════════════════════════════════════════
+# VALIDATION EN 3 COUCHES — protection anti-hallucination LLM
+# ════════════════════════════════════════════════════════════
+
+_INTENT_REQUIRED_EVIDENCE = {
+    "TOP_CONSOMMATEURS": {
+            "au_moins_un":    ["consomme", "conso", "consome", "consomation","consomaation","consoo","consommation"
+            "consomateur", "consommateur", 
+        "consomatrice", "consommatrice",
+],
+        "au_moins_un_de": [
+        "plus", "eleve", "max", "maximum", "haut", "top","elevee",
+        "beaucoup", "bzaf", "enormement", "fort", "grande",
+        "grand", "gros", "grosse", "important", "record",
+        "premier", "premiere", "meilleur",
+    ],
+    },
+    "MIN_CONSOMMATEURS": {
+        "au_moins_un": [
+        "consomme", "conso", "consome",        # variantes correctes
+        "consomation", "consommation",           # fautes fréquentes  
+        "consomateur", "consommateur",          # "grand consomateur"
+        "consomatrice", "consommatrice",],
+        "au_moins_un_de": [
+        "moins", "faible", "min", "minimum", "bas", "petit",
+        "peu", "rien", "leger", "legere", "reduit",]
+    },
+    "TOP_MONTANTS": {
+        "au_moins_un":    ["montant", "paye", "paie", "facture", "depense"],
+        "au_moins_un_de": ["plus", "eleve", "max", "cher", "haut"],
+    },
+    "MIN_MONTANTS": {
+        "au_moins_un":    ["montant", "paye", "paie", "facture"],
+        "au_moins_un_de": ["moins", "faible", "min", "bas", "petit"],
+    },
+    "SOMME_CONSO_MOIS": {
+        "au_moins_un":    ["jan","fev","mar","avr","mai","jun",
+                           "jul","aou","sep","oct","nov","dec",
+                           "janvier","fevrier","mars","avril","juin",
+                           "juillet","aout","septembre","octobre",
+                           "novembre","decembre"],
+        "au_moins_un_de": ["somme","total","consomme","conso","combien"],
+    },
+    "SOMME_MONTANT_MOIS": {
+        "au_moins_un":    ["jan","fev","mar","avr","mai","jun",
+                           "jul","aou","sep","oct","nov","dec",
+                           "janvier","fevrier","mars","avril","juin",
+                           "juillet","aout","septembre","octobre",
+                           "novembre","decembre"],
+        "au_moins_un_de": ["montant","somme","total","paye","mantant","depense"],
+    },
+    "PAR_AGENCE": {
+        "au_moins_un": ["agence"],
+    },
+    "PAR_SERVICE": {
+        "au_moins_un": ["eau", "elec", "electricit", "service"],
+    },
+    "PAR_USAGE": {
+        "au_moins_un": ["usage", "domestique", "professionnel", "agricole", "pro", "dom"],
+    },
+    "ALERTES": {
+        "au_moins_un": ["alerte", "alertes"],
+    },
+    "STATS_GENERALES": {
+        "aucun_de": ["par agence", "par service", "par usage",
+                     "par mois", "chaque", "agence", "service",
+                     "usage", "eau", "elec"],
+    },
+    "EVOLUTION_MOIS": {
+        "au_moins_un": ["evolution", "mois", "progression",
+                        "historique", "tendance", "periode"],
+    },
+}
+
+
+def _valider_params(intent: str, params: dict, q_norm: str) -> dict:
+    params_propres = dict(params)
+
+    if "mois" in params_propres:
+        mois_brut = params_propres.get("mois", "")
+        mois_depuis_q = _extraire_mois(q_norm)
+        if mois_depuis_q:
+            params_propres["mois"] = mois_depuis_q
+            if mois_brut != mois_depuis_q:
+                print(f"  [PARAMS] mois corrigé : '{mois_brut}' → '{mois_depuis_q}'")
+        else:
+            print(f"  [PARAMS] mois '{mois_brut}' non trouvé dans la question → supprimé")
+            params_propres.pop("mois", None)
+
+    if "agence" in params_propres:
+        agence_val = str(params_propres.get("agence", ""))
+        if agence_val.strip().isdigit() or len(agence_val.strip()) < 3:
+            print(f"  [PARAMS] agence invalide rejetée : '{agence_val}'")
+            params_propres.pop("agence", None)
+
+    if "usage" in params_propres:
+        usage_brut = params_propres.get("usage", "")
+        usage_norm = normaliser_usage(usage_brut) if usage_brut else None
+        if usage_norm:
+            params_propres["usage"] = usage_norm
+        else:
+            print(f"  [PARAMS] usage '{usage_brut}' non normalisable → supprimé")
+            params_propres.pop("usage", None)
+
+    return params_propres
+
+
+def _valider_coherence(intent: str, params: dict) -> bool:
+    intents_mois_obligatoire = ["SOMME_CONSO_MOIS", "SOMME_MONTANT_MOIS"]
+    if intent in intents_mois_obligatoire:
+        if not params.get("mois"):
+            print(f"  [COHERENCE] {intent} sans mois dans params → rejeté")
+            return False
+    return True
+
+
+def valider_intent_complet(intent: str, params: dict, q_norm: str) -> tuple:
+    """Retourne (intent_validé, params_validés) ou ('QUESTION_LIBRE', {})"""
+    regles = _INTENT_REQUIRED_EVIDENCE.get(intent)
+    if regles:
+        if "au_moins_un" in regles:
+            if not any(t in q_norm for t in regles["au_moins_un"]):
+                print(f"  [V1] {intent} rejeté — token obligatoire absent")
+                return "QUESTION_LIBRE", {}
+        if "au_moins_un_de" in regles:
+            if not any(t in q_norm for t in regles["au_moins_un_de"]):
+                print(f"  [V1] {intent} rejeté — contexte absent")
+                return "QUESTION_LIBRE", {}
+        if "aucun_de" in regles:
+            if any(t in q_norm for t in regles["aucun_de"]):
+                print(f"  [V1] {intent} rejeté — token poison présent")
+                return "QUESTION_LIBRE", {}
+
+    params_propres = _valider_params(intent, params, q_norm)
+
+    if not _valider_coherence(intent, params_propres):
+        return "QUESTION_LIBRE", {}
+
+    return intent, params_propres
 
 
 # ════════════════════════════════════════════════════════════
@@ -303,63 +443,17 @@ Si la question mentionne un usage précis, retourne UNIQUEMENT le mot brut tel q
 Si la question mentionne un service précis (eau ou electricite), ajoute : {{"service": "eau"}} ou {{"service": "electricite"}}
 
 JSON :"""
+
     texte = _appeler_llm(prompt)
     match = re.search(r'\{.*\}', texte, re.DOTALL)
     if match:
         try:
             result = json.loads(match.group())
             intent_llm = result.get("intent", "QUESTION_LIBRE")
-            q_val = _normaliser_q(question)
-            # ── 1. INFOS_CLIENT sans nom propre ──
-            _a_nom_propre = any(
-                len(mot) >= 4 and mot[0].isupper()
-                for mot in question.split()
-            )
-            if intent_llm == "INFOS_CLIENT" and not _a_nom_propre:
-                print(f"  [VALIDATION] INFOS_CLIENT sans nom propre → QUESTION_LIBRE")
-                return {"intent": "QUESTION_LIBRE", "params": {}}
+            params_llm = result.get("params", {})
+            q_norm_val = _normaliser_q(question)
 
-            # ── 1b. MIN_CONSOMMATEURS sans contexte min ──
-            if intent_llm == "MIN_CONSOMMATEURS":
-                _mots_min = ["moins", "faible", "min", "minimum", "bas", "petit", "reduit"]
-                if not any(m in q_val for m in _mots_min):
-                    print(f"  [VALIDATION] MIN_CONSOMMATEURS sans contexte min → QUESTION_LIBRE")
-                    return {"intent": "QUESTION_LIBRE", "params": {}}
-
-            # ── 1c. TOP_CONSOMMATEURS sans contexte max ──
-            if intent_llm == "TOP_CONSOMMATEURS":
-                _mots_max = ["plus", "eleve", "max", "maximum", "haut", "grand", "top", "fort", "beaucoup"]
-                if not any(m in q_val for m in _mots_max):
-                    print(f"  [VALIDATION] TOP_CONSOMMATEURS sans contexte max → QUESTION_LIBRE")
-                    return {"intent": "QUESTION_LIBRE", "params": {}}
-
-            # ── 2. PAR_AGENCE avec valeur numérique ──
-            agence_val = result.get("params", {}).get("agence", "")
-            if intent_llm == "PAR_AGENCE" and agence_val and agence_val.strip().isdigit():
-             agence_val = result.get("params", {}).get("agence", "")
-            if intent_llm == "PAR_AGENCE" and agence_val and agence_val.strip().isdigit():
-                print(f"  [VALIDATION] PAR_AGENCE valeur numérique → QUESTION_LIBRE")
-                return {"intent": "QUESTION_LIBRE", "params": {}}
-            _mots_specifiques = ["compteur", "contrat", "numero de", "numero compteur", "numero contrat"]
-            _intent_adaptes = ["INFOS_CLIENT", "QUESTION_LIBRE"]
-            if any(m in q_val for m in _mots_specifiques) and intent_llm not in _intent_adaptes:
-                print(f"  [VALIDATION] mot spécifique → QUESTION_LIBRE")
-                return {"intent": "QUESTION_LIBRE", "params": {}}
-            if intent_llm in ("SOMME_CONSO_MOIS", "SOMME_MONTANT_MOIS"):
-                mois_presents = any(m in q_val for m in [
-                    "jan", "fev", "mar", "avr", "mai", "jun",
-                    "jul", "aou", "sep", "oct", "nov", "dec",
-                    "janvier", "fevrier", "mars", "avril", "juin",
-                    "juillet", "aout", "septembre", "octobre",
-                    "novembre", "decembre"
-                ])
-                if not mois_presents:
-                    print(f"  [VALIDATION] {intent_llm} sans mois → QUESTION_LIBRE")
-                    return {"intent": "QUESTION_LIBRE", "params": {}}
-            _mots_analytiques = ["par agence", "par service", "par usage", "par mois", "par client", "par type", "moyenne par", "total par", "somme par"]
-            if intent_llm == "STATS_GENERALES" and any(m in q_val for m in _mots_analytiques):
-                print(f"  [VALIDATION] STATS_GENERALES analytique → QUESTION_LIBRE")
-                return {"intent": "QUESTION_LIBRE", "params": {}}
+            # Whitelist des intents reconnus
             _intents_valides = [
                 "LISTE_CLIENTS", "TOP_CONSOMMATEURS", "MIN_CONSOMMATEURS",
                 "TOP_MONTANTS", "MIN_MONTANTS", "CLASSEMENT_PAR_MOIS",
@@ -370,18 +464,27 @@ JSON :"""
             if intent_llm not in _intents_valides:
                 print(f"  [VALIDATION] Intent inconnu {intent_llm} → QUESTION_LIBRE")
                 return {"intent": "QUESTION_LIBRE", "params": {}}
-            return result
-        except:
+
+            # ── Validation en 3 couches ──
+            intent_final, params_final = valider_intent_complet(
+                intent_llm, params_llm, q_norm_val
+            )
+            return {"intent": intent_final, "params": params_final}
+
+        except Exception as e:
+            print(f"  [INTENT] Erreur parsing JSON : {e}")
             pass
+
     return {"intent": "QUESTION_LIBRE", "params": {}}
+
+
 # ════════════════════════════════════════════════════════════
-# DÉTECTION INTENT CLIENT
+# DÉTECTION INTENT CLIENT  (inchangée)
 # ════════════════════════════════════════════════════════════
 
 def detecter_intent_client(question: str) -> dict:
     q = _normaliser_intent_q(question)
 
-    # ── ÉTAPE 1 : MOIS_SPECIFIQUE (priorité absolue) ──
     _mots_conso_montant = ["consomme", "conso", "montant", "facture", "combien", "paye"]
     _TOKENS_CHAMP_DATE    = ["date", "limite", "echeance", "date limite", "date paiement", "date limit"]
     _TOKENS_CHAMP_MONTANT = ["montant", "paye", "ttc", "dhs", "prix", "cout", "paie"]
@@ -401,7 +504,6 @@ def detecter_intent_client(question: str) -> dict:
             print(f"  [PRÉ-DÉTECTION CLIENT] MOIS_SPECIFIQUE → mois='{mois_extrait}' champ='{champ}'")
             return {"intent": "MOIS_SPECIFIQUE", "params": {"mois": mois_extrait, "champ": champ}}
 
-    # ── ÉTAPE 2 : INFOS_CLIENT champs spécifiques ──
     if any(t in q for t in _TOKENS_USAGE):
         return {"intent": "INFOS_CLIENT", "params": {"champ": "usage"}}
     if any(t in q for t in _TOKENS_ADRESSE):
@@ -417,37 +519,30 @@ def detecter_intent_client(question: str) -> dict:
     if any(t in q for t in _TOKENS_NUMERO_CLI):
         return {"intent": "INFOS_CLIENT", "params": {"champ": "numero_client"}}
 
-    # ── ÉTAPE 2b : SOMME_MONTANT_CLIENT ──
     for token in _TOKENS_SOMME_MONTANT_CLIENT:
         if token in q:
             return {"intent": "SOMME_MONTANT_CLIENT", "params": {}}
 
-    # ── ÉTAPE 3 : SOMME_CONSO_CLIENT ──
     for token in _TOKENS_SOMME_CLIENT:
         if token in q:
             return {"intent": "SOMME_CONSO_CLIENT", "params": {}}
 
-    # ── ÉTAPE 4 : MAX_CONSOMMATION ──
     for token in _TOKENS_MAX_CONSO:
         if token in q:
             return {"intent": "MAX_CONSOMMATION", "params": {}}
 
-    # ── ÉTAPE 5 : MIN_CONSOMMATION ──
     for token in _TOKENS_MIN_CONSO:
         if token in q:
             return {"intent": "MIN_CONSOMMATION", "params": {}}
 
-    # ── ÉTAPE 6 : MAX_MONTANT ──
     for token in _TOKENS_MAX_MONTANT:
         if token in q:
             return {"intent": "MAX_MONTANT", "params": {}}
 
-    # ── ÉTAPE 7 : MIN_MONTANT ──
     for token in _TOKENS_MIN_MONTANT:
         if token in q:
             return {"intent": "MIN_MONTANT", "params": {}}
 
-    # ── ÉTAPE 8 : Historique complet ──
     _tokens_all = [
         "tous les mois", "toutes les factures", "historique",
         "historique complet", "evolution", "l ensemble", "l'ensemble", "chaque mois",
@@ -456,15 +551,13 @@ def detecter_intent_client(question: str) -> dict:
         if token in q:
             return {"intent": "FACTURES_CLIENT", "params": {}}
 
-    # ── ÉTAPE 9 : Moyenne ──
     if any(t in q for t in ["moyenne", "moyen", "moy"]):
         return {"intent": "MOYENNE_CLIENT", "params": {}}
 
-    # ── ÉTAPE 10 : Infos générales ──
     if any(t in q for t in ["infos", "informations", "fiche", "profil", "tout sur"]):
         return {"intent": "INFOS_CLIENT", "params": {}}
 
-    # ── ÉTAPE 11 : LLM fallback ──
+    # ── LLM fallback client ──
     prompt = f"""Tu es un classificateur de questions sur un client.
 
 Voici les intents disponibles :
@@ -484,7 +577,6 @@ JSON uniquement :
 {{"intent": "NOM_INTENT", "params": {{}}}}
 Si mois précis ajoute : {{"mois": "Mars"}}
 """
-
     texte = _appeler_llm(prompt)
     match = re.search(r'\{.*\}', texte, re.DOTALL)
     if match:
@@ -499,6 +591,8 @@ Si mois précis ajoute : {{"mois": "Mars"}}
             ]
             if result.get("intent") in intents_valides:
                 return result
-        except:
+        except Exception as e:
+            print(f"  [INTENT CLIENT] Erreur parsing JSON : {e}")
             pass
+
     return {"intent": "FACTURES_CLIENT", "params": {}}

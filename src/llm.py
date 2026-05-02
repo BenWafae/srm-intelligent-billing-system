@@ -50,7 +50,47 @@ MOTS_FONCTIONNELS = {
     "jan", "fev", "mar", "avr", "jun", "jul", "aug", "sep",
     "lusage", "lagence", "ladresse", "linfos",
    "lhistorique", "levolution", "lidentifiant",
-    "lagence", "lusages", "lagences","give"
+    "lagence", "lusages", "lagences","give",
+    #  enrechiiir mot fonctionnells 
+    # ── mots interrogatifs / démonstratifs manquants ──
+    "grande", "grand", "grands", "grandes",
+    "gros", "grosse", "gros", "grosses",
+    "petit", "petite", "petits", "petites",
+    "haut", "haute", "hauts", "hautes",
+    "bas", "basse", "basses",
+    "fort", "forte", "forts", "fortes",
+    "important", "importante", "importants", "importantes",
+    "gros", "grosse",
+        # ── verbes courants mal couverts ──
+    "cest", "c est", "cest qui", "c est qui",
+    "ya", "y a", "yaa",
+    "montre", "montrez",
+    "cherche", "chercher",
+    "trouve", "trouver",
+    "indique", "indiquer",
+    "precise", "preciser",
+    "rappelle", "rappeler",
+    "explique", "expliquer",
+    "calcule", "calculer",
+    "retourne", "retourner",
+     # ── adjectifs de quantité / intensité ──
+    "beaucoup", "peu", "trop", "assez",
+    "enormement", "vraiment", "tres",
+    "maximum", "maximal", "maximale",
+    "minimum", "minimal", "minimale",
+    "optimal", "optimale",
+    "record", "recordman", "recordwoman",
+    "top", "premier", "premiere",
+    "dernier", "derniere",
+    "meilleur", "meilleure", "pire",
+    "unique", "seul", "seule", "seuls", "seules",
+    
+    # ── mots de liaison courants ──
+    "donc", "alors", "ainsi", "car", "parce",
+    "mais", "cependant", "pourtant", "toutefois",
+    "selon", "apres", "avant", "pendant", "lors",
+    "grace", "cause", "raison",
+    "bcp", "bcp", 
 }
 
 # ─────────────────────────────────────────────────────────
@@ -150,7 +190,27 @@ def normaliser(texte: str) -> str:
     texte = unicodedata.normalize("NFD", texte)
     texte = "".join(c for c in texte if unicodedata.category(c) != "Mn")
     return texte
-
+MOTS_METIER = {
+    "consomation", "consommation", "consomme", "conso",
+    "consomateur", "consommateur", "consommatrice",
+    "montant", "mantant", "monton", "montan",
+    "facture", "factures",
+    "eleve", "elevee", "eleves", "elevees",
+    "faible", "faibles",
+    "plus", "moins", "max", "min",
+    "total", "somme", "cumul",
+    "alerte", "alertes",
+    "agence", "service", "usage",
+    "evolution", "historique",
+    "janvier", "fevrier", "mars", "avril", "mai", "juin",
+    "juillet", "aout", "septembre", "octobre", "novembre", "decembre",
+    "janv", "fevr", "juil", "sept",
+    "eau", "electricite", "elec",
+    "periode", "debut", "fin",
+    "grand", "grande", "gros", "grosse",
+    "beaucoup", "bcp", "bzaf",
+    "client", "clients",
+}
 
 def extraire_mots_nom(question: str) -> list[str]:
     mots = [normaliser(m) for m in re.findall(r'\b\w+\b', question)]
