@@ -889,6 +889,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # MODE COUNT
     # ════════════════════════════════════════════
     if mode == "count":
+        
         if _sujet_facture and not _sujet_client:
             return fetch_stats_generales(mode="count", question=question)
         if _sujet_client and not _sujet_facture and not demande_eau and not demande_elec:
@@ -914,9 +915,10 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # MODE LIST
     # ════════════════════════════════════════════
     if mode == "list":
-        if _sujet_client and not demande_eau and not demande_elec and not _sujet_service:
+        if _sujet_client and not demande_eau and not demande_elec \
+       and not _sujet_service and not _sujet_agence:  # ← ajout not _sujet_agence
             return fetch_liste_clients(mode="list")
-        if _sujet_agence and not _sujet_client:
+        if _sujet_agence:  # ← supprimé "and not _sujet_client"
             return fetch_par_agence(agence=None, mode="list")
         if _sujet_alerte:
             return fetch_alertes(mode="list")
