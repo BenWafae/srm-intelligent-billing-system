@@ -702,11 +702,21 @@ def _formater_resultat_fallback(rows: list, cols: list, question: str) -> str:
 
 
 def repondre_question_generale(question: str, historique_texte: str) -> str:
+
+    # ── ÉTAPE 0 : EN PREMIER — avant tout calcul ──
+    from rag.intent import detecter_question_ambigue
+    msg = detecter_question_ambigue(question)
+    if msg:
+        return msg
+
+    # ── Maintenant seulement on calcule le mode ──
     mode = detecter_mode_reponse(question)
     print(f"  [MODE] {mode}")
 
     q_norm = _norm_dispatcher(question)
-     # ── Question trop courte / ambiguë ──
+
+    # ── Question trop courte — GARDER comme filet de sécurité ──
+    # (cas non couverts par detecter_question_ambigue)
     if len(question.strip().split()) <= 1:
         return (
             "Je n'ai pas bien compris votre question. "
@@ -716,23 +726,6 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             "- *Qui consomme le plus ?*\n"
             "- *Liste des clients*"
         )
-
-# ════════════════════════════════════════════
-    # RÈGLE 0 — Questions courtes prioritaires
-    # Gérées avant tout pour éviter hallucinations
-    # ════════════════════════════════════════════
-    _tokens_count_client = [
-        "nbr client", "nb client", "nbre client",
-        "nbr clients", "nb clients", "nbre clients",
-        "nmb client", "nmb clients",
-        "nbr de client", "nb de client",
-        "nombre client", "nombre de client",
-        "nombre clients", "nombre de clients",
-    ]
-    if any(t in q_norm for t in _tokens_count_client):
-        return fetch_liste_clients(mode="count")
-
-    
     # ════════════════════════════════════════════
     # RÈGLE 1 — AGENCE PAR CLIENT
     # ════════════════════════════════════════════
