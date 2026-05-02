@@ -13,21 +13,19 @@ from rag.intent import detecter_intent, detecter_intent_client, _appeler_llm
 from rag.fetchers_generaux import (
     fetch_liste_clients, fetch_top_consommateurs, fetch_min_consommateurs,
     fetch_min_consommateurs_par_service, fetch_max_consommateurs_par_service,
-    fetch_top_montants, fetch_classement_par_mois, fetch_par_agence,fetch_min_montants, 
+    fetch_top_montants, fetch_classement_par_mois, fetch_par_agence, fetch_min_montants,
     fetch_par_usage, fetch_par_service, fetch_alertes,
-     fetch_stats_generales, fetch_evolution_mois, 
+    fetch_stats_generales, fetch_evolution_mois,
     fetch_somme_conso_mois,
-    fetch_agence_par_client, 
-                # ← NOUVEAU
-    fetch_somme_montant_mois,             
+    fetch_agence_par_client,
+    fetch_somme_montant_mois,
 )
 from rag.fetchers_client import (
     fetch_client_max_consommation, fetch_client_min_consommation,
     fetch_client_max_montant, fetch_client_min_montant,
     fetch_client_evolution, fetch_client_moyenne, fetch_client_infos,
     fetch_client_mois_specifique, fetch_client_toutes_factures,
-    fetch_client_somme_conso,fetch_client_somme_montant
-
+    fetch_client_somme_conso, fetch_client_somme_montant
 )
 
 
@@ -46,95 +44,42 @@ def _norm_dispatcher(question: str) -> str:
 
 # ════════════════════════════════════════════════════════════
 # TOKENS — agence par client
-# Couvrent toutes les formulations sans LLM :
-#   "agence de chaque client"
-#   "agence par client"
-#   "quelle agence pour chaque client"
-#   "lister les agences par client"
-#   "agence de tous les clients"
-#   "agence de chaque"
-#   "par client agence"
-#   "afficher agence de chaque client"
 # ════════════════════════════════════════════════════════════
 
 _TOKENS_AGENCE_PAR_CLIENT = [
-    # ── formulations directes ──
-    "agence de chaque client",
-    "agence par client",
-    "agence de tous les clients",
-    "agence pour chaque client",
-    "agence pour tous les clients",
-    "agences de chaque client",
-    "agences par client",
-    "agences de tous les clients",
-
-    # ── avec verbe lister / afficher / montrer / voir / donner ──
-    "lister les agences par client",
-    "lister agence par client",
-    "lister les agences de chaque",
-    "afficher agence de chaque",
-    "afficher les agences par client",
-    "afficher agence pour chaque",
-    "montrer agence de chaque",
-    "montrer les agences par client",
-    "montrer agence pour chaque",
-    "montrer moi les agence",           # couvre "montrer moi les agence utulise..."
-    "montrer moi agence",
-    "voir agence de chaque",
-    "voir les agences par client",
-    "voir agence pour chaque",
-    "donner moi agence",
-    "donnez moi agence",
-    "donner agence de chaque",
-    "donner agence par client",
-
-    # ── avec "utilise / utulise / rattachee" (fautes fréquentes) ──
-    "agence utulise",                   # faute de frappe fréquente
-    "agence utilise",
-    "agence utilisee",
-    "agence utilise pour chaque",
-    "agence utulise pour chaque",
-    "agence rattachee",
-    "agence rattache",
-    "agence associee",
-    "agence associe",
-
-    # ── "quelle agence pour chaque / tous" ──
-    "quelle agence pour chaque",
-    "quelle agence pour tous",
-    "quelle est l agence de chaque",
-    "quelle est l agence pour chaque",
-    "quel agence pour chaque",
-    "quel agence de chaque",
-
-    # ── ordre inversé ou reformulations ──
-    "par client agence",
-    "agence client par client",
-    "agence de chaque",
+    "agence de chaque client", "agence par client", "agence de tous les clients",
+    "agence pour chaque client", "agence pour tous les clients",
+    "agences de chaque client", "agences par client", "agences de tous les clients",
+    "lister les agences par client", "lister agence par client",
+    "lister les agences de chaque", "afficher agence de chaque",
+    "afficher les agences par client", "afficher agence pour chaque",
+    "montrer agence de chaque", "montrer les agences par client",
+    "montrer agence pour chaque", "montrer moi les agence", "montrer moi agence",
+    "voir agence de chaque", "voir les agences par client", "voir agence pour chaque",
+    "donner moi agence", "donnez moi agence", "donner agence de chaque",
+    "donner agence par client", "agence utulise", "agence utilise",
+    "agence utilisee", "agence utilise pour chaque", "agence utulise pour chaque",
+    "agence rattachee", "agence rattache", "agence associee", "agence associe",
+    "quelle agence pour chaque", "quelle agence pour tous",
+    "quelle est l agence de chaque", "quelle est l agence pour chaque",
+    "quel agence pour chaque", "quel agence de chaque",
+    "par client agence", "agence client par client", "agence de chaque",
     "agences pour chaque",
 ]
 
-# ── TOKENS alertes — count ──
+# ── TOKENS alertes ──
 _TOKENS_ALERTE_COUNT = [
-    "combien d alerte", "combien d alertes",
-    "combien alertes", "combien alerte",
-    "nombre d alerte", "nombre d alertes",
-    "nombre alertes", "nombre alerte",
-    "nbre alerte", "nbre alertes",
-    "nb alerte", "nb alertes",
+    "combien d alerte", "combien d alertes", "combien alertes", "combien alerte",
+    "nombre d alerte", "nombre d alertes", "nombre alertes", "nombre alerte",
+    "nbre alerte", "nbre alertes", "nb alerte", "nb alertes",
     "nbr alerte", "nbr alertes",
-    "quel est le nombre d alerte",
-    "quel est le nombre d alertes",
-    "donner moi le nombre d alerte",
-    "montrer moi le nombre d alerte",
-    "montrer moi nbr alerte",
-    "afficher le nombre d alerte",
+    "quel est le nombre d alerte", "quel est le nombre d alertes",
+    "donner moi le nombre d alerte", "montrer moi le nombre d alerte",
+    "montrer moi nbr alerte", "afficher le nombre d alerte",
     "total alerte", "total alertes",
-    "y a combien d alerte", "ya combien d alerte",
-    "il y a combien d alerte",
+    "y a combien d alerte", "ya combien d alerte", "il y a combien d alerte",
 ]
- 
-# ── TOKENS alertes — list ──
+
 _TOKENS_ALERTE_LIST = [
     "lister les alertes", "liste des alertes",
     "afficher les alertes", "montrer les alertes",
@@ -147,23 +92,18 @@ _TOKENS_ALERTE_LIST = [
     "clients en alerte", "factures avec alerte",
     "factures en alerte", "qui a des alertes",
     "qui a une alerte", "qui sont en alerte",
-    "quelles factures ont une alerte",
-    "quels clients ont une alerte",
+    "quelles factures ont une alerte", "quels clients ont une alerte",
 ]
- 
-# ── TOKENS alertes — présence générale (pour déclencher le bloc) ──
-_TOKENS_ALERTE_PRESENCES = [
-    "alerte", "alertes",
-]
- 
+
+_TOKENS_ALERTE_PRESENCES = ["alerte", "alertes"]
+
 
 # ════════════════════════════════════════════════════════════
 # TOKENS — consommation élevée / faible
 # ════════════════════════════════════════════════════════════
 
 _TOKENS_CONSO_ELEVEE = [
-    "consomme le plus",
-    "le plus consomme",
+    "consomme le plus", "le plus consomme",
     "consomme eleve", "consomme elevee",
     "consomme la plus eleve", "consomme la plus elevee",
     "la plus eleve", "la plus elevee",
@@ -174,9 +114,7 @@ _TOKENS_CONSO_ELEVEE = [
     "plus grande consomme", "plus grand consomme",
     "grande consomme", "grand consomme",
     "eleve consomme", "elevee consomme",
-    "consomme plus",
-    "client le plus consomme",
-    "client la plus consomme",
+    "consomme plus", "client le plus consomme", "client la plus consomme",
     "a une consomme eleve", "a une consomme elevee",
     "a une consomme max", "a une consomme haute",
     "a une consomme grand", "a une consomme grande",
@@ -187,27 +125,16 @@ _TOKENS_CONSO_ELEVEE = [
     "importante consomme", "forte consomme",
     "grand consommateur", "grand consomme",
     "top consomme", "top consommateur",
-    "max conso",
-    "conso max",
-    "client max conso",
-    "max consomme",
-    "consomme max",
-    "maximum conso",
-    "conso maximum",
-    "consomme beaucoup",
-    "consomateur beaucoup",
-    "grand consomateur","gros consomateur",
-    "grosse consomation",
-    "grande consomation",
-    "consomme bcp",
-    "conso bcp",
-    "consome bcp","consomme bcp"
-
+    "max conso", "conso max", "client max conso",
+    "max consomme", "consomme max", "maximum conso", "conso maximum",
+    "consomme beaucoup", "consomateur beaucoup",
+    "grand consomateur", "gros consomateur",
+    "grosse consomation", "grande consomation",
+    "consomme bcp", "conso bcp", "consome bcp",
 ]
 
 _TOKENS_CONSO_FAIBLE = [
-    "consomme le moins",
-    "le moins consomme",
+    "consomme le moins", "le moins consomme",
     "consomme faible", "consomme la plus faible",
     "la plus faible", "le plus faible",
     "consomme basse", "consomme bas",
@@ -215,9 +142,8 @@ _TOKENS_CONSO_FAIBLE = [
     "faible consomme", "basse consomme",
     "petite consomme", "consomme petit", "consomme petite",
     "moins consomme", "consomme moins",
-    "consome le moins ","consome le moin"
-    "client le moins consomme",
-    "client la moins consomme",
+    "consome le moins", "consome le moin",
+    "client le moins consomme", "client la moins consomme",
     "a une consomme faible", "a une consomme basse",
     "a une consomme min", "a une consomme petite",
     "avec la consomme faible", "avec la consomme basse",
@@ -225,24 +151,13 @@ _TOKENS_CONSO_FAIBLE = [
     "consomme reduite", "consomme legere",
     "reduite consomme", "legere consomme",
     "petit consommateur", "petit consomme",
-    "a une consomme min",
-    "a une consomme minimale",
-    "a une consomme minimum",
-    "min consomme",
-    "minimum consomme",
-    "minimale consomme",
-    "consomme min",
-    "consomme minimum",
-    "consomme minimale",
-    "consomme la min",
-    "consomme la minimale",
-    "plus petite consomme",
-    "petite consomme",
-    "avec la min consomme",
-    "avec la minimale consomme",
-    "avec la minimum consomme",
-    "avec le min consomme",
-
+    "a une consomme minimale", "a une consomme minimum",
+    "min consomme", "minimum consomme", "minimale consomme",
+    "consomme minimum", "consomme minimale",
+    "consomme la min", "consomme la minimale",
+    "plus petite consomme", "petite consomme",
+    "avec la min consomme", "avec la minimale consomme",
+    "avec la minimum consomme", "avec le min consomme",
 ]
 
 # ── Mapping mois local ──
@@ -274,176 +189,161 @@ def _extraire_mois_disp(q: str):
 
 
 # ════════════════════════════════════════════════════════════
-# TOKENS — somme de consommation par mois
+# TOKENS — somme consommation / montant
 # ════════════════════════════════════════════════════════════
 
 _TOKENS_SOMME_MOIS = [
-    "somme de consomme",
-    "somme des consomme",
-    "somme de conso",
-    "somme conso",
-    "total consomme",
-    "total de consomme",
-    "consomme total",
-    "consomme totale",
-    "combien a-t-on consomme",
-    "combien consomme",
-    "consomme en ",
-    "conso en ",
-    "consomation total",
-    "consomtion total", 
-    "consommation total",
-    "total consommation",
-    "total consomation",
-     "total de consommation",
-    "total de consomation",
-    "consomtion total",
-    "consomtion en ",
-    "somme de consommation","somme consommation"
-    "somme consomation","somme  de consomation",
-
-    # ── variantes avec une seule m (fautes fréquentes) ──
-    "somme de consomation",
-    "somme des consomation",
-    "somme de consomation",
-    "somme consomation",
-    "total consomation",
-    "total de consomation",
-    "consomation total",
-    "consomation totale",
-    "consomation en ",
-    "consomation dans ",
-    "consomation du mois",
-    "consomation pour ",
-     # ── variantes avec "dans" / "en" / "de" + mois ──
-    "consomme en ",
-    "consomme dans ",
-    "consomme de ",
-    "conso en ",
-    "conso dans ",
-    "consommation en ",
-    "consommation dans ",
-
-    # ── variantes interrogatives ──
-    "combien a-t-on consomme",
-    "combien ont consomme",
-    "combien on a consomme",
-    "combien consomme",
-    "combien de consomation",
-    "combien de consommation",
-    "quelle est la consomation",
-    "quel est la consomation",
-    "quelle consomation",
-    "quel consomation",
-    "quelle est la consommation",
-    "quel est la consommation",
-
-    # ── variantes "consome" (faute fréquente) ──
-    "somme de consome",
-    "total consome",
-    "consome en ",
-    "consome dans ",
-    "consome total",
-
-    # ── variantes avec "global" / "general" ──
-    "consomation global",
-    "consomation generale",
-    "consommation global",
-    "consommation generale",
-    "consomtion total",
-    "consomtion en ",
+    "somme de consomme", "somme des consomme", "somme de conso", "somme conso",
+    "total consomme", "total de consomme", "consomme total", "consomme totale",
+    "combien a-t-on consomme", "combien consomme",
+    "consomme en ", "conso en ", "consomation total", "consomtion total",
+    "consommation total", "total consommation", "total consomation",
+    "total de consommation", "total de consomation", "consomtion en ",
+    "somme de consommation", "somme consommation", "somme consomation",
+    "somme de consomation", "somme des consomation",
+    "total consomation", "total de consomation",
+    "consomation total", "consomation totale",
+    "consomation en ", "consomation dans ",
+    "consomation du mois", "consomation pour ",
+    "consomme dans ", "consomme de ",
+    "conso dans ", "consommation en ", "consommation dans ",
+    "combien a-t-on consomme", "combien ont consomme",
+    "combien on a consomme", "combien de consomation",
+    "combien de consommation", "quelle est la consomation",
+    "quel est la consomation", "quelle consomation", "quel consomation",
+    "quelle est la consommation", "quel est la consommation",
+    "somme de consome", "total consome", "consome en ", "consome dans ",
+    "consome total", "consomation global", "consomation generale",
+    "consommation global", "consommation generale", "consomtion total",
 ]
 
-
-# ── TOKENS somme montant (sans mois précis) ──
 _TOKENS_SOMME_MONTANT = [
-    "somme des montant",
-    "somme de montant",
-    "somme montant",
-    "total montant",
-    "total des montant",
-    "montant total",
-    "montant global",
-    "montant cumule",
-    "combien a-t-on paye",
-    "combien ont paye",
-    "mantant total",
-    "mantant en ",
-    "total mantant",
-    "somme mantant",
+    "somme des montant", "somme de montant", "somme montant",
+    "total montant", "total des montant", "montant total",
+    "montant global", "montant cumule",
+    "combien a-t-on paye", "combien ont paye",
+    "mantant total", "mantant en ", "total mantant", "somme mantant",
 ]
 
-# ── TOKENS montant élevé (général) ──
 _TOKENS_MONTANT_ELEVE = [
-    "montant le plus eleve",
-    "montant le plus haut",
-    "montant le plus grand",
-    "montant eleve",
-    "montant elevee",
-    "montant maximum",
-    "montant max",
-    "montant maximal",
-    "montant maximal",
-    "montant la plus eleve",
-    "facture la plus chere",
-    "facture la plus elevee",
-    "plus grand montant",
-    "plus haut montant",
-    "montant le plus fort",
-    "paie le plus",
-    "paye le plus",
-    "qui paie le plus",
-    "qui paye le plus",
-    "client le plus cher",
-    "client avec le montant",
-    "client qui paie le plus",
-    "client qui paye le plus",
+    "montant le plus eleve", "montant le plus haut", "montant le plus grand",
+    "montant eleve", "montant elevee", "montant maximum", "montant max",
+    "montant maximal", "montant la plus eleve",
+    "facture la plus chere", "facture la plus elevee",
+    "plus grand montant", "plus haut montant", "montant le plus fort",
+    "paie le plus", "paye le plus", "qui paie le plus", "qui paye le plus",
+    "client le plus cher", "client avec le montant",
+    "client qui paie le plus", "client qui paye le plus",
     "montant fort",
-    "montant eleve",
 ]
 
-# ── TOKENS montant faible (général) ──
 _TOKENS_MONTANT_FAIBLE = [
-    "montant le plus faible",
-    "montant le plus bas",
-    "montant le plus petit",
-    "montant faible",
-    "montant minimum",
-    "montant min",
-    "montant minimal",
-    "montant la plus faible",
-    "facture la moins chere",
-    "facture la plus faible",
-    "plus faible montant",
-    "plus bas montant",
-    "plus petit montant",
-    "montant le moins eleve",
-    "montant le moins haut",
-    "paie le moins",
-    "paye le moins",
-    "qui paie le moins",
-    "qui paye le moins",
-    "client le moins cher",
-    "client avec le moins",
-    "client qui paie le moins",
-    "client qui paye le moins",
-    "moins eleve montant",
-    "moins cher montant",
+    "montant le plus faible", "montant le plus bas", "montant le plus petit",
+    "montant faible", "montant minimum", "montant min", "montant minimal",
+    "montant la plus faible", "facture la moins chere", "facture la plus faible",
+    "plus faible montant", "plus bas montant", "plus petit montant",
+    "montant le moins eleve", "montant le moins haut",
+    "paie le moins", "paye le moins", "qui paie le moins", "qui paye le moins",
+    "client le moins cher", "client avec le moins",
+    "client qui paie le moins", "client qui paye le moins",
+    "moins eleve montant", "moins cher montant",
 ]
+
+
+# ════════════════════════════════════════════════════════════
+# VALIDATION SCHÉMA SQL
+# ════════════════════════════════════════════════════════════
+
+_COLONNES_REELLES = {
+    "nom_client", "agence", "usage", "type_service",
+    "mois_source", "periode_debut", "periode_fin",
+    "consommation", "unite", "montant_ttc",
+    "date_limite_paiement", "alerte",
+    "numero_client", "numero_contrat", "numero_compteur",
+    "adresse", "id", "date_enregistrement"
+}
+
+_MOTS_CLES_SQL = {
+    # fonctions
+    "select", "from", "where", "group", "order", "by",
+    "limit", "having", "join", "as", "and", "or", "not",
+    "in", "like", "between", "sum", "count", "avg", "min",
+    "max", "round", "distinct", "lower", "upper", "substr",
+    "desc", "asc", "null", "is", "case", "when", "then",
+    "else", "end", "inner", "left", "on", "factures_excel",
+    # valeurs communes
+    "eau", "electricite", "true", "false",
+}
+
+
+def valider_colonnes_sql(sql: str) -> bool:
+    """
+    Vérifie que le SQL n'utilise que des colonnes réelles de la base.
+
+    Principe :
+    1. Supprimer les alias (AS xxx) → ce sont des noms d'affichage, pas des colonnes
+    2. Supprimer les valeurs entre quotes → pas des colonnes
+    3. Vérifier uniquement dans WHERE et ORDER BY
+       car c'est là que les colonnes inexistantes causent des erreurs SQL
+    """
+    sql_lower = sql.lower()
+
+    # ── Étape 1 : supprimer les alias ──
+    # "AVG(montant_ttc) as moyenne_general" → on ignore "moyenne_general"
+    sql_sans_alias = re.sub(r'\bas\s+[a-z_]+', '', sql_lower)
+
+    # ── Étape 2 : supprimer les valeurs entre quotes ──
+    # WHERE agence LIKE '%agadir%' → on ignore 'agadir'
+    sql_sans_alias = re.sub(r"'[^']*'", '', sql_sans_alias)
+    sql_sans_alias = re.sub(r'"[^"]*"', '', sql_sans_alias)
+
+    # ── Étape 3 : extraire uniquement WHERE et ORDER BY ──
+    # car SELECT peut avoir des alias et des fonctions légitimes
+    texte_critique = ""
+
+    where_match = re.search(
+        r'\bwhere\b(.+?)(?:\bgroup\b|\border\b|\blimit\b|$)',
+        sql_sans_alias, re.DOTALL
+    )
+    order_match = re.search(
+        r'\border\s+by\b(.+?)(?:\blimit\b|$)',
+        sql_sans_alias, re.DOTALL
+    )
+
+    if where_match:
+        texte_critique += " " + where_match.group(1)
+    if order_match:
+        texte_critique += " " + order_match.group(1)
+
+    if not texte_critique:
+        return True  # pas de WHERE ni ORDER BY → OK
+
+    # ── Étape 4 : vérifier chaque mot ──
+    mots = re.findall(r'\b([a-z_]+)\b', texte_critique)
+    colonnes_inconnues = [
+        m for m in mots
+        if m not in _COLONNES_REELLES
+        and m not in _MOTS_CLES_SQL
+        and len(m) > 3
+        and not m.isdigit()
+    ]
+
+    if colonnes_inconnues:
+        print(f"  [VALIDATION SQL] ⚠️ Colonnes inexistantes : {colonnes_inconnues}")
+        return False
+
+    return True
+
+
 
 
 # ════════════════════════════════════════════════════════════
 # FALLBACK TEXT-TO-SQL
-# Utilisé uniquement quand aucune règle ni intent LLM
-# n'a pu traiter la question.
-# Le LLM génère uniquement le SQL → Python exécute → réponse fiable
 # ════════════════════════════════════════════════════════════
 
 DB_PATH_FALLBACK = os.path.join(
     os.path.dirname(__file__), "..", "..", "data", "srm.db"
 )
-
-
 
 
 def repondre_fallback_sql(question: str) -> str:
@@ -464,9 +364,9 @@ Colonnes disponibles :
 - montant_ttc      REAL    : montant en dirhams
 - date_limite_paiement TEXT : date limite de paiement
 - alerte           TEXT    : message d'alerte si présent, sinon NULL
-- numero_client    TEXT    : identifiant unique du client (ex: C30EF340/690200) — JAMAIS un nombre simple
-- numero_contrat   TEXT    : numéro de contrat (ex: 0005567200/2063200) — JAMAIS un nombre simple
-- numero_compteur  TEXT    : numéro de compteur (ex: 8301, 8302...) — nombre simple à 4 chiffres
+- numero_client    TEXT    : identifiant unique du client (ex: C30EF340/690200)
+- numero_contrat   TEXT    : numéro de contrat (ex: 0005567200/2063200)
+- numero_compteur  TEXT    : numéro de compteur (ex: 8301, 8302...)
 - adresse          TEXT    : adresse du client
 """
 
@@ -484,154 +384,70 @@ RÈGLES ABSOLUES :
 7. Si la question est totalement incompréhensible, réponds exactement : INCOMPREHENSIBLE
 8. Utilise toujours GROUP BY nom_client pour éviter les doublons par client
 9. Réponds avec UNIQUEMENT le SQL brut, sans explication, sans markdown, sans backticks
-10. Si la question mentionne "compteur", "compt", "comp", "n comp", "n compteur" 
-   suivi d'un nombre → utilise TOUJOURS numero_compteur, jamais numero_client
+10. Si la question mentionne "compteur", "compt", "comp", "n comp", "n compteur"
+    suivi d'un nombre → utilise TOUJOURS numero_compteur, jamais numero_client
 11. Pour les numéros (compteur, contrat, client), utilise toujours SELECT DISTINCT
-12. Si la question demande un résultat "par mois" ou "pour chaque mois", 
+12. Si la question demande un résultat "par mois" ou "pour chaque mois",
     utilise GROUP BY mois_source avec ORDER BY mois_source
-13. Si la question demande "total des factures", retourne COUNT(*) 
+13. Si la question demande "total des factures", retourne COUNT(*)
     groupé par mois_source, pas un COUNT global
 14. Si la question demande une LISTE de clients avec des filtres (agence, usage, service...),
     retourne UNIQUEMENT : nom_client, agence, usage, type_service
     avec SELECT DISTINCT et GROUP BY nom_client — jamais de colonnes mois/montant/conso
 15. Pour filtrer agence et usage, utilise TOUJOURS LIKE avec % :
     LOWER(agence) LIKE '%agadir%' — jamais agence = 'agadir'
-    LOWER(usage) LIKE '%domestique%' — jamais LOWER(usage) = 'domestique'
-    LOWER(usage) LIKE '%agricole%' — jamais LOWER(usage) = 'agricole'
-    LOWER(usage) LIKE '%professionnel%' — jamais LOWER(usage) = 'professionnel'
-    Cette règle s'applique à TOUTES les valeurs de usage et agence sans exception
-
-    #  enrechiiir le promppt fallbackk 
+    LOWER(usage) LIKE '%domestique%'
+    LOWER(usage) LIKE '%agricole%'
+    LOWER(usage) LIKE '%professionnel%'
 16. INTENTION CONSOMMATION vs MONTANT — ne jamais confondre :
-    - "consomme", "consomation", "consomateur", "consomme beaucoup",
-      "grand consomateur", "gros consomateur", "pompe", "utilise beaucoup"
-      → ORDER BY consommation ou SUM(consommation) — colonne : consommation
-    - "paie", "paye", "montant", "depense", "cher", "facture elevee",
-      "paie beaucoup", "montant eleve"
-      → ORDER BY montant_ttc ou SUM(montant_ttc) — colonne : montant_ttc
-    - Ne jamais utiliser montant_ttc quand la question parle de consommation
-    - Ne jamais utiliser consommation quand la question parle de montant
+    - "consomme", "consomation", "consomateur" → ORDER BY consommation
+    - "paie", "paye", "montant", "depense" → ORDER BY montant_ttc
+17. CLASSEMENT :
+    - "le plus", "max", "eleve", "grand", "beaucoup", "bzaf" → ORDER BY DESC
+    - "le moins", "min", "faible", "petit", "peu" → ORDER BY ASC
+    - LIMIT 1 si UN seul client, LIMIT 5 si "les plus..." sans précision
+18. AGRÉGATION OBLIGATOIRE : SUM(consommation) groupé par nom_client
+19. COLONNES À RETOURNER selon l'intention — jamais SELECT *
+20. FAUTES D'ORTHOGRAPHE : "bcp", "bzaf", "grand", "gros" → sens MAX/DESC
+21. NOM PROPRE dans la question → WHERE nom_client LIKE '%prenom%'
+22. COMPARAISON SERVICES : GROUP BY type_service si "eau et electricite"
+23. PÉRIODES : mois_source LIKE '%Janvier%' pour un mois précis
+24. RÉSULTAT VIDE : préférer requête large plutôt que filtre trop strict
 
-17. CLASSEMENT — quand la question demande "le plus" ou "le moins" :
-    - "le plus", "maximum", "max", "eleve", "grand", "gros",
-      "beaucoup", "record", "premier", "top", "bzaf"
-      → ORDER BY [colonne] DESC
-    - "le moins", "minimum", "min", "faible", "petit", "peu", "bas"
-      → ORDER BY [colonne] ASC
-    - Toujours ajouter LIMIT 1 si la question demande UN seul client
-    - Ajouter LIMIT 5 si la question demande "les plus..." sans préciser combien
-    - Pas de LIMIT si la question demande un classement complet ou "tous"
+EXEMPLES :
+Q: "qui consomme le plus"
+SQL: SELECT nom_client, ROUND(SUM(consommation),2) as total_conso, unite FROM factures_excel GROUP BY nom_client ORDER BY total_conso DESC LIMIT 1
 
-18. AGRÉGATION OBLIGATOIRE par client :
-    - Toujours utiliser SUM(consommation) et non consommation directe
-      quand un client a plusieurs lignes (plusieurs mois)
-    - Toujours GROUP BY nom_client avant ORDER BY sur une somme
-    - Exception : si la question mentionne un mois précis,
-      filtrer d'abord par mois_source LIKE '...' puis grouper
+Q: "grand consomateur"
+SQL: SELECT nom_client, ROUND(SUM(consommation),2) as total_conso, unite FROM factures_excel GROUP BY nom_client ORDER BY total_conso DESC LIMIT 5
 
-19. COLONNES À RETOURNER selon l'intention :
-    - Question sur consommation → nom_client, SUM(consommation) as total_conso, unite
-    - Question sur montant → nom_client, ROUND(SUM(montant_ttc),2) as total_ttc
-    - Question sur infos client → nom_client, agence, usage, type_service, adresse
-    - Question sur numéros → SELECT DISTINCT numero_compteur (ou contrat ou client)
-    - Question générale → nom_client + colonnes pertinentes uniquement
-    - Ne jamais retourner toutes les colonnes avec SELECT * — toujours préciser
-
-20. FAUTES D'ORTHOGRAPHE ET LANGAGE FAMILIER — traduction sémantique :
-    - "consomateur", "consomateur", "consomatrice" → consommation
-    - "montont", "mantant", "monton", "montan" → montant_ttc
-    - "aganse", "aganse", "agancy" → agence
-    - "cliant", "clent", "clyant" → nom_client
-    - "beaucoup", "bzaf", "enormement", "fort", "trop" → sens de MAX/DESC
-    - "peu", "rien", "leger", "presque rien" → sens de MIN/ASC
-    - "grand", "grande", "gros", "grosse", "important" → sens de MAX/DESC
-    - "petit", "petite", "faible", "bas", "basse" → sens de MIN/ASC
-    - "c qui", "cest qui", "y a qui", "ya qui" → question sur nom_client
-    - "donne moi", "montre moi", "affiche", "liste" → SELECT sans modifier la logique
-    - "bcp", "bcp" → sens de MAX/DESC
-
-
-21. QUESTION SUR UN SEUL CLIENT (contexte client) :
-    - Si la question contient un prénom ou nom propre reconnaissable,
-      ajouter WHERE nom_client LIKE '%prenom%' ou '%nom%'
-    - Ne jamais confondre un prénom avec un mot fonctionnel
-    - Si le nom est ambigu, utiliser LIKE avec % des deux côtés
-
-22. COMPARAISON ENTRE SERVICES :
-    - "eau vs electricite", "eau et electricite", "les deux services"
-      → ne pas filtrer par type_service, retourner GROUP BY type_service
-    - "uniquement eau" ou "uniquement electricite"
-      → filtrer avec WHERE LOWER(type_service) = 'eau' ou 'electricite'
-
-23. QUESTIONS SUR DES PÉRIODES :
-    - "ce mois", "mois en cours" → utilise le mois le plus récent dans la base :
-      WHERE mois_source = (SELECT MAX(mois_source) FROM factures_excel)
-    - "tous les mois", "chaque mois", "evolution" → GROUP BY mois_source ORDER BY mois_source
-    - "dernier mois" → ORDER BY mois_source DESC LIMIT 1 dans une sous-requête
-    - Un mois nommé précisément → mois_source LIKE '%Janvier%'
-
-24. RÉSULTAT VIDE — toujours construire une requête valide :
-    - Ne jamais retourner INCOMPREHENSIBLE si la question a un sens approximatif
-    - Préférer une requête large qui retourne quelque chose
-      plutôt qu'une requête trop filtrée qui retourne vide
-    - En cas de doute sur un filtre, l'omettre plutôt que de risquer 0 résultats
-
-EXEMPLES DE TRADUCTION QUESTION → SQL :
-
-Q: "qui consomme le plus ?"
-SQL: SELECT nom_client, ROUND(SUM(consommation),2) as total_conso, unite
-     FROM factures_excel GROUP BY nom_client ORDER BY total_conso DESC LIMIT 1
-
-Q: "grand consomateur" / "consomme beaucoup" / "gros consomateur"
-SQL: SELECT nom_client, ROUND(SUM(consommation),2) as total_conso, unite
-     FROM factures_excel GROUP BY nom_client ORDER BY total_conso DESC LIMIT 5
-
-Q: "qui paie le plus ?" / "montant le plus eleve"
-SQL: SELECT nom_client, ROUND(SUM(montant_ttc),2) as total_ttc
-     FROM factures_excel GROUP BY nom_client ORDER BY total_ttc DESC LIMIT 1
+Q: "qui paie le plus"
+SQL: SELECT nom_client, ROUND(SUM(montant_ttc),2) as total_ttc FROM factures_excel GROUP BY nom_client ORDER BY total_ttc DESC LIMIT 1
 
 Q: "clients agence agadir usage domestique"
-SQL: SELECT DISTINCT nom_client, agence, usage, type_service
-     FROM factures_excel
-     WHERE LOWER(agence) LIKE '%agadir%'
-     AND LOWER(usage) LIKE '%domestique%'
-     GROUP BY nom_client
-
-Q: "conso en janvier" / "consommation janvier"
-SQL: SELECT nom_client, consommation, unite, mois_source
-     FROM factures_excel
-     WHERE mois_source LIKE '%Janvier%'
-     ORDER BY consommation DESC
+SQL: SELECT DISTINCT nom_client, agence, usage, type_service FROM factures_excel WHERE LOWER(agence) LIKE '%agadir%' AND LOWER(usage) LIKE '%domestique%' GROUP BY nom_client
 
 Q: "total montant janvier"
-SQL: SELECT ROUND(SUM(montant_ttc),2) as total, COUNT(DISTINCT nom_client) as nb_clients
-     FROM factures_excel WHERE mois_source LIKE '%Janvier%'
+SQL: SELECT ROUND(SUM(montant_ttc),2) as total, COUNT(DISTINCT nom_client) as nb_clients FROM factures_excel WHERE mois_source LIKE '%Janvier%'
 
 Q: "evolution par mois"
-SQL: SELECT mois_source, COUNT(DISTINCT nom_client) as nb_clients,
-     ROUND(SUM(montant_ttc),2) as total_ttc
-     FROM factures_excel GROUP BY mois_source ORDER BY mois_source
+SQL: SELECT mois_source, COUNT(DISTINCT nom_client) as nb_clients, ROUND(SUM(montant_ttc),2) as total_ttc FROM factures_excel GROUP BY mois_source ORDER BY mois_source
 
 Q: "numero compteur de Fatima"
-SQL: SELECT DISTINCT nom_client, numero_compteur
-     FROM factures_excel WHERE nom_client LIKE '%Fatima%'
+SQL: SELECT DISTINCT nom_client, numero_compteur FROM factures_excel WHERE nom_client LIKE '%Fatima%'
 
 Question : {question}
 
 SQL :"""
 
-
-
-
     try:
         sql_genere = _appeler_llm(prompt).strip()
-  
         print(f"  [FALLBACK SQL] SQL généré : {sql_genere}")
     except Exception as e:
         print(f"  [FALLBACK SQL] Erreur LLM : {e}")
         return "Je n'ai pas pu traiter cette question pour le moment."
 
-    # ── Sécurité : refuser tout ce qui n'est pas SELECT ──
+    # ── Sécurité 1 : INCOMPREHENSIBLE ──
     if sql_genere.upper() == "INCOMPREHENSIBLE":
         return (
             "Je n'ai pas compris votre question.\n"
@@ -641,10 +457,16 @@ SQL :"""
             "- Quels clients sont dans l'agence Agadir Nord ?"
         )
 
+    # ── Sécurité 2 : whitelist SELECT ──
     sql_upper = sql_genere.upper().strip()
     mots_dangereux = ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE"]
     if not sql_upper.startswith("SELECT") or any(m in sql_upper for m in mots_dangereux):
         print(f"  [FALLBACK SQL] ⚠️ SQL refusé pour sécurité : {sql_genere}")
+        return "Je n'ai pas pu traiter cette question. Pouvez-vous la reformuler ?"
+
+    # ── Sécurité 3 : validation colonnes schéma ──
+    if not valider_colonnes_sql(sql_genere):
+        print(f"  [FALLBACK SQL] ⚠️ SQL refusé — colonnes hors schéma : {sql_genere}")
         return "Je n'ai pas pu traiter cette question. Pouvez-vous la reformuler ?"
 
     # ── Exécution sécurisée ──
@@ -666,14 +488,12 @@ SQL :"""
 
 
 def _formater_resultat_fallback(rows: list, cols: list, question: str) -> str:
-    # ── Cas 1 : une seule valeur (COUNT, SUM, AVG...) ──
     if len(rows) == 1 and len(cols) == 1:
         valeur = rows[0][0]
         if isinstance(valeur, float):
             return f"**{valeur:,.2f}**"
         return f"**{valeur}**"
 
-    # ── Cas 2 : une ligne, plusieurs colonnes ──
     if len(rows) == 1:
         lignes = []
         for i, col in enumerate(cols):
@@ -684,7 +504,6 @@ def _formater_resultat_fallback(rows: list, cols: list, question: str) -> str:
                 lignes.append(f"- {col} : **{val}**")
         return "\n".join(lignes)
 
-    # ── Cas 3 : plusieurs lignes ──
     lignes = []
     for i, row in enumerate(rows, 1):
         parties = []
@@ -703,20 +522,16 @@ def _formater_resultat_fallback(rows: list, cols: list, question: str) -> str:
 
 def repondre_question_generale(question: str, historique_texte: str) -> str:
 
-    # ── ÉTAPE 0 : EN PREMIER — avant tout calcul ──
     from rag.intent import detecter_question_ambigue
     msg = detecter_question_ambigue(question)
     if msg:
         return msg
 
-    # ── Maintenant seulement on calcule le mode ──
     mode = detecter_mode_reponse(question)
     print(f"  [MODE] {mode}")
 
     q_norm = _norm_dispatcher(question)
 
-    # ── Question trop courte — GARDER comme filet de sécurité ──
-    # (cas non couverts par detecter_question_ambigue)
     if len(question.strip().split()) <= 1:
         return (
             "Je n'ai pas bien compris votre question. "
@@ -726,12 +541,27 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             "- *Qui consomme le plus ?*\n"
             "- *Liste des clients*"
         )
+
     # ════════════════════════════════════════════
     # RÈGLE 1 — AGENCE PAR CLIENT
     # ════════════════════════════════════════════
     if any(t in q_norm for t in _TOKENS_AGENCE_PAR_CLIENT):
         print(f"  [RÈGLE] agence par client → fetch_agence_par_client(mode={mode})")
         return fetch_agence_par_client(mode=mode)
+
+    # ════════════════════════════════════════════
+    # RÈGLE 1b — EVOLUTION MOIS
+    # ════════════════════════════════════════════
+    _TOKENS_EVOLUTION_MOIS = [
+        "evolution mois", "evolution par mois",
+        "mois par mois", "progression mois",
+        "historique general", "historique global",
+        "tendance mois", "par mois",
+        "chaque mois", "tous les mois",
+    ]
+    if any(t in q_norm for t in _TOKENS_EVOLUTION_MOIS):
+        print(f"  [RÈGLE] évolution mois → fetch_evolution_mois(mode={mode})")
+        return fetch_evolution_mois(mode=mode)
 
     # ── Détection des sujets ──
     _sujet_facture = any(t in q_norm for t in [
@@ -740,37 +570,30 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     _sujet_client = any(t in q_norm for t in [
         "client", "clients", "abonne", "abonnes"
     ])
-    _sujet_mois = any(t in q_norm for t in [
-        "mois", "periode", "periodes"
-    ])
-    _sujet_agence  = any(t in q_norm for t in ["agence", "agences"])
-    _sujet_alerte  = any(t in q_norm for t in ["alerte", "alertes"])
+    _sujet_mois = any(t in q_norm for t in ["mois", "periode", "periodes"])
+    _sujet_agence = any(t in q_norm for t in ["agence", "agences"])
+    _sujet_alerte = any(t in q_norm for t in ["alerte", "alertes"])
     _sujet_service = any(t in q_norm for t in [
-        "type de service", "types de service", "type service",
-        "service", "services"
+        "type de service", "types de service", "type service", "service", "services"
     ])
     _sujet_usage = any(t in q_norm for t in [
         "usage", "usages", "type usage",
-        "professionnel", "domestique", "agricole",
-        "pro", "dom", "agri"
+        "professionnel", "domestique", "agricole", "pro", "dom", "agri"
     ])
 
     demande_eau = bool(re.search(r'\beau\b', q_norm)) or any(
-    m in q_norm for m in ["eauu", "eeau"]
-)
-    demande_elec   = any(m in q_norm for m in ["elec", "electricit", "electr"])
+        m in q_norm for m in ["eauu", "eeau"]
+    )
+    demande_elec = any(m in q_norm for m in ["elec", "electricit", "electr"])
     demande_faible = any(m in q_norm for m in ["faible", "minimum", "minimale", "plus faible"])
     demande_elevee = any(m in q_norm for m in ["eleve", "plus grand", "maximum", "haut", "top"])
 
     _tokens_client_eau = [
         "client eau", "clients eau",
-        "client utilise eau", "client eau uniquement",
-        "client eau seulement",
+        "client utilise eau", "client eau uniquement", "client eau seulement",
     ]
     _detect_intention_conso = any(t in q_norm for t in [
-        "consomme", "conso", "consommation",
-        "max", "plus", "top", "eleve",
-        "min", "moins", "faible"
+        "consomme", "conso", "consommation", "max", "plus", "top", "eleve", "min", "moins", "faible"
     ])
     if any(t in q_norm for t in _tokens_client_eau) and not demande_elec and not _detect_intention_conso:
         return fetch_par_service(service="eau", mode=mode)
@@ -779,8 +602,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     usage_detecte = None
     _mots_usage_contexte = any(t in q_norm for t in [
         "usage", "usages", "type usage",
-        "professionnel", "domestique", "agricole",
-        "pro", "dom", "agri"
+        "professionnel", "domestique", "agricole", "pro", "dom", "agri"
     ])
     if _mots_usage_contexte:
         for mot in q_norm.split():
@@ -797,21 +619,17 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
                     usage_detecte = result
                     break
 
-    # ── Cas spécial : usage par client ──
     if (any(t in q_norm for t in ["chaque client", "pour chaque", "par client"]) and
             any(t in q_norm for t in ["usage", "usages", "type", "types"])):
         return fetch_par_usage(usage=None, mode="detail")
 
-    # ── Cas spécial : usage précis + demande clients ──
-
     _demande_agence_usage = any(t in q_norm for t in [
-    "quel agence", "quelle agence", "agence a le plus",
-    "agence avec le plus", "agence qui a"
-])
+        "quel agence", "quelle agence", "agence a le plus",
+        "agence avec le plus", "agence qui a"
+    ])
     if usage_detecte and _demande_agence_usage:
-      return repondre_fallback_sql(question)
-    
-    
+        return repondre_fallback_sql(question)
+
     # ════════════════════════════════════════════════════════
     # COMBINAISON DE FILTRES → fallback SQL
     # ════════════════════════════════════════════════════════
@@ -832,10 +650,50 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_par_usage(usage=usage_detecte, mode=mode)
 
     # ════════════════════════════════════════════
-    # RÈGLE 2 — MONTANT élevé / faible   ← INDENTATION CORRECTE ICI
+    # RÈGLE — CLIENT + AGENCE PRÉCISE
     # ════════════════════════════════════════════
-    _detect_montant_eleve = any(t in q_norm for t in _TOKENS_MONTANT_ELEVE)
-    _detect_montant_faible = any(t in q_norm for t in _TOKENS_MONTANT_FAIBLE)
+    _a_filtre_agence_precise = any(t in q_norm for t in [
+        "agence agadir", "agence tiznit", "agence inezgane",
+        "agence taroudant", "agence ait melloul",
+        "agence agadir nord", "agence agadir sud",
+        "lagence agadir", "lagence tiznit", "lagence inezgane",
+        "lagence taroudant", "lagence ait melloul",
+        "lagence agadir nord", "lagence agadir sud",
+        "utulise agence agadir", "utulise agence tiznit",
+        "utulise agence inezgane", "utulise agence taroudant",
+        "utulise agence ait melloul",
+    ])
+
+    if _sujet_client and _a_filtre_agence_precise:
+        _agences_map = {
+            "agadir nord": "Agadir Nord",
+            "agadir sud": "Agadir Sud",
+            "ait melloul": "Ait Melloul",
+            "melloul": "Ait Melloul",
+            "inezgane": "Inezgane",
+            "taroudant": "Taroudant",
+            "tiznit": "Tiznit",
+            "agadir": "Agadir",
+        }
+        agence_trouvee = None
+        for token, nom in sorted(_agences_map.items(), key=lambda x: len(x[0]), reverse=True):
+            if token in q_norm:
+                agence_trouvee = nom
+                break
+        print(f"  [RÈGLE] client + agence → fetch_par_agence(agence={agence_trouvee}, mode={mode})")
+        return fetch_par_agence(agence=agence_trouvee, mode=mode)
+
+    # ════════════════════════════════════════════
+    # RÈGLE 2 — MONTANT élevé / faible
+    # ════════════════════════════════════════════
+    _detect_montant_eleve = (
+        any(t in q_norm for t in _TOKENS_MONTANT_ELEVE) and
+        not any(t in q_norm for t in ["consomme", "conso", "consomation", "consommation", "kwh", "m3"])
+    )
+    _detect_montant_faible = (
+        any(t in q_norm for t in _TOKENS_MONTANT_FAIBLE) and
+        not any(t in q_norm for t in ["consomme", "conso", "consomation", "consommation", "kwh", "m3"])
+    )
 
     if _detect_montant_eleve:
         mois_detecte = _extraire_mois_disp(q_norm)
@@ -850,8 +708,14 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # ════════════════════════════════════════════
     # RÈGLE 3 — CONSOMMATION élevée / faible
     # ════════════════════════════════════════════
-    _detect_conso_elevee = any(t in q_norm for t in _TOKENS_CONSO_ELEVEE)
-    _detect_conso_faible = any(t in q_norm for t in _TOKENS_CONSO_FAIBLE)
+    _detect_conso_elevee = (
+        any(t in q_norm for t in _TOKENS_CONSO_ELEVEE) and
+        not any(t in q_norm for t in ["montant", "paie", "paye", "depense", "mantant", "ttc"])
+    )
+    _detect_conso_faible = (
+        any(t in q_norm for t in _TOKENS_CONSO_FAIBLE) and
+        not any(t in q_norm for t in ["montant", "paie", "paye", "depense", "mantant", "ttc"])
+    )
 
     if _detect_conso_elevee or _detect_conso_faible:
         mois_detecte = _extraire_mois_disp(q_norm)
@@ -889,7 +753,6 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # MODE COUNT
     # ════════════════════════════════════════════
     if mode == "count":
-        
         if _sujet_facture and not _sujet_client:
             return fetch_stats_generales(mode="count", question=question)
         if _sujet_client and not _sujet_facture and not demande_eau and not demande_elec:
@@ -916,9 +779,9 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # ════════════════════════════════════════════
     if mode == "list":
         if _sujet_client and not demande_eau and not demande_elec \
-       and not _sujet_service and not _sujet_agence:  # ← ajout not _sujet_agence
+                and not _sujet_service and not _sujet_agence:
             return fetch_liste_clients(mode="list")
-        if _sujet_agence:  # ← supprimé "and not _sujet_client"
+        if _sujet_agence:
             return fetch_par_agence(agence=None, mode="list")
         if _sujet_alerte:
             return fetch_alertes(mode="list")
@@ -960,8 +823,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     _pattern_somme_conso_mois = (
         any(t in q_norm for t in ["somme", "total", "combien"]) and
         any(t in q_norm for t in [
-            "consomme", "conso", "consomation", "consommation",
-            "consome", "consomtion"
+            "consomme", "conso", "consomation", "consommation", "consome", "consomtion"
         ]) and
         _extraire_mois_disp(q_norm) is not None
     )
@@ -980,8 +842,17 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     # ════════════════════════════════════════════
     # SOMME MONTANT MOIS
     # ════════════════════════════════════════════
+    _pattern_somme_montant_mois = (
+        any(t in q_norm for t in ["somme", "total", "combien"]) and
+        any(t in q_norm for t in [
+            "montant", "mantant", "monton", "montan", "paie", "paye", "depense", "ttc"
+        ]) and
+        _extraire_mois_disp(q_norm) is not None
+    )
+
     _detect_somme_montant = any(t in q_norm for t in _TOKENS_SOMME_MONTANT)
-    if _detect_somme_montant:
+
+    if _detect_somme_montant or _pattern_somme_montant_mois:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
             print(f"  [RÈGLE] somme montant mois → fetch_somme_montant_mois(mois={mois_detecte})")
@@ -1007,8 +878,8 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return fetch_min_consommateurs(mois=params.get("mois"), mode=mode)
     elif intent == "TOP_MONTANTS":
         return fetch_top_montants(mois=params.get("mois"), mode=mode)
-    elif intent == "MIN_MONTANTS":                                        # ← AJOUT
-        return fetch_min_montants(mois=params.get("mois"), mode=mode)    # ← AJOUT
+    elif intent == "MIN_MONTANTS":
+        return fetch_min_montants(mois=params.get("mois"), mode=mode)
     elif intent == "CLASSEMENT_PAR_MOIS":
         return fetch_classement_par_mois(mode=mode)
     elif intent == "AGENCE_PAR_CLIENT":
@@ -1040,10 +911,10 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     else:
         print(f"  [FALLBACK] Intent non reconnu → Text-to-SQL")
         return repondre_fallback_sql(question)
-    
+
+
 def repondre_question_client(question: str, nom_client: str, historique_texte: str) -> str:
 
-    # ── Ambiguïté spécifique au contexte client ──
     from rag.mode import _normaliser_q
     q = _normaliser_q(question)
     mots = [m for m in q.split() if len(m) > 1]
@@ -1080,7 +951,6 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
                 f"- *Mois où {nom_client} a le plus consommé*"
             )
 
-    # ── Suite normale inchangée ──
     print(f"  [RAG CLIENT] Détection intent pour {nom_client}...")
     resultat = detecter_intent_client(question)
     intent = resultat.get("intent", "FACTURES_CLIENT")
@@ -1101,9 +971,41 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
         return fetch_client_moyenne(nom_client)
     elif intent == "INFOS_CLIENT":
         champ = params.get("champ")
+
+        # ── Champs inexistants dans la base ──
+        CHAMPS_INEXISTANTS = {
+            "telephone", "tel", "phone", "mobile", "gsm",
+            "email", "mail", "courriel",
+            "age", "date naissance", "naissance",
+            "photo", "image", "solde", "dette", "credit",
+            "note", "commentaire", "code postal",
+            "ville", "region", "pays", "rib", "iban",
+            "cin", "carte", "identite", "categorie",
+            "numero agence", "n agence", "num agence",
+           "code agence", "id agence","code postale"
+        }
+
+        q_norm_check = _normaliser_q(question)
+        champ_inexistant = None
+        for c in CHAMPS_INEXISTANTS:
+            # Utiliser \b pour éviter "age" dans "usage" ou "lusage"
+            if re.search(r'\b' + re.escape(c) + r'\b', q_norm_check):
+                champ_inexistant = c
+                break
+
+        if champ_inexistant:
+            return (
+                f"⚠️ L'information **« {champ_inexistant} »** "
+                f"n'est pas disponible dans notre système "
+                f"pour **{nom_client}**.\n\n"
+                f"Les informations disponibles sont :\n"
+                f"- N° Client, N° Contrat, N° Compteur\n"
+                f"- Adresse, Agence, Usage, Type de service"
+            )
+
         return fetch_client_infos(nom_client, champ=champ)
     elif intent == "MOIS_SPECIFIQUE":
-        mois  = params.get("mois", "")
+        mois = params.get("mois", "")
         champ = params.get("champ")
         return fetch_client_mois_specifique(nom_client, mois, champ=champ)
     elif intent == "SOMME_CONSO_CLIENT":
