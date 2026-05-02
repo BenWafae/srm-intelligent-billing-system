@@ -324,7 +324,7 @@ def valider_colonnes_sql(sql: str) -> bool:
         m for m in mots
         if m not in _COLONNES_REELLES
         and m not in _MOTS_CLES_SQL
-        and len(m) > 3
+        and len(m) >= 3
         and not m.isdigit()
     ]
 

@@ -90,7 +90,8 @@ MOTS_FONCTIONNELS = {
     "mais", "cependant", "pourtant", "toutefois",
     "selon", "apres", "avant", "pendant", "lors",
     "grace", "cause", "raison",
-    "bcp", "bcp", "agadir"
+    "bcp", "bcp", "agadir",
+    "affiche", "affichez","afficher",
 }
 
 # ─────────────────────────────────────────────────────────
