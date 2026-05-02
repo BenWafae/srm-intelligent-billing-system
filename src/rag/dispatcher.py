@@ -1038,7 +1038,47 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     else:
         print(f"  [FALLBACK] Intent non reconnu → Text-to-SQL")
         return repondre_fallback_sql(question)
+    
 def repondre_question_client(question: str, nom_client: str, historique_texte: str) -> str:
+
+    # ── Ambiguïté spécifique au contexte client ──
+    from rag.mode import _normaliser_q
+    q = _normaliser_q(question)
+    mots = [m for m in q.split() if len(m) > 1]
+
+    if len(mots) == 1:
+        mot = mots[0]
+
+        if mot in ["somme", "total"]:
+            return (
+                f"Vous demandez un total pour **{nom_client}**, "
+                f"mais **total de quoi ?**\n\n"
+                f"Précisez par exemple :\n"
+                f"- *Somme de consommation de {nom_client}*\n"
+                f"- *Total montant de {nom_client}*"
+            )
+
+        if mot in ["montant", "mantant", "monton"]:
+            return (
+                f"Vous parlez du montant de **{nom_client}**, "
+                f"mais **quel mois ou quel type ?**\n\n"
+                f"Précisez par exemple :\n"
+                f"- *Montant de {nom_client} en janvier*\n"
+                f"- *Montant total de {nom_client}*\n"
+                f"- *Mois où {nom_client} a payé le plus*"
+            )
+
+        if mot in ["consomme", "conso", "consommation", "consomation", "consome"]:
+            return (
+                f"Vous parlez de la consommation de **{nom_client}**, "
+                f"mais **quel mois ou quel type ?**\n\n"
+                f"Précisez par exemple :\n"
+                f"- *Consommation de {nom_client} en janvier*\n"
+                f"- *Total consommé par {nom_client}*\n"
+                f"- *Mois où {nom_client} a le plus consommé*"
+            )
+
+    # ── Suite normale inchangée ──
     print(f"  [RAG CLIENT] Détection intent pour {nom_client}...")
     resultat = detecter_intent_client(question)
     intent = resultat.get("intent", "FACTURES_CLIENT")
@@ -1062,7 +1102,7 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
         return fetch_client_infos(nom_client, champ=champ)
     elif intent == "MOIS_SPECIFIQUE":
         mois  = params.get("mois", "")
-        champ = params.get("champ")          # ← récupérer le champ
+        champ = params.get("champ")
         return fetch_client_mois_specifique(nom_client, mois, champ=champ)
     elif intent == "SOMME_CONSO_CLIENT":
         return fetch_client_somme_conso(nom_client)

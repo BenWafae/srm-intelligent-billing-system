@@ -90,7 +90,7 @@ MOTS_FONCTIONNELS = {
     "mais", "cependant", "pourtant", "toutefois",
     "selon", "apres", "avant", "pendant", "lors",
     "grace", "cause", "raison",
-    "bcp", "bcp", 
+    "bcp", "bcp", "agadir"
 }
 
 # ─────────────────────────────────────────────────────────
@@ -210,6 +210,11 @@ MOTS_METIER = {
     "grand", "grande", "gros", "grosse",
     "beaucoup", "bcp", "bzaf",
     "client", "clients",
+     # ── noms d'agences ──
+    "agadir", "inezgane", "tiznit", "taroudant",
+    "ait melloul", "melloul",
+    "agadir nord", "agadir sud",
+    "lagence", "lagences",
 }
 
 def extraire_mots_nom(question: str) -> list[str]:
@@ -351,6 +356,29 @@ def question_fait_reference(question: str) -> bool:
      "somme de consomation en",
      "somme consomation en",
      "la somme de consomation en",
+     # ── filtres par agence ──
+    "agence agadir",
+    "agence inezgane",
+    "agence tiznit",
+    "agence taroudant",
+    "agence ait melloul",
+    "agence agadir nord",
+    "agence agadir sud",
+    "lagence agadir",
+    "lagence inezgane",
+    "lagence tiznit",
+    "lagence taroudant",
+    "lagence ait melloul",
+    "utulise lagence",
+    "utilise lagence",
+    "utulise l agence",
+    "utilise l agence",
+    "de lagence",
+    "de l agence",
+    "clients agence",
+    "client agence",
+    "clients de agence",
+    "client de agence",
     ]
     if any(t in q_norm for t in _questions_globales):
         return False

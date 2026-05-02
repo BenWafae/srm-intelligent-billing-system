@@ -492,12 +492,22 @@ def detecter_question_ambigue(question: str):
  
         if mot in ["service", "services"]:
             return (
+                
                 "Vous parlez de service, mais **quel service vous intéresse ?**\n\n"
                 "Précisez par exemple :\n"
                 "- *Clients qui utilisent l'eau*\n"
                 "- *Clients qui utilisent l'électricité*\n"
                 "- *Combien de clients par service ?*"
             )
+        if mot in ["eau", "elec", "electricite"]:
+            return (
+                "Vous parlez du service **eau/électricité**, "
+                "mais **quelle information souhaitez-vous ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Clients qui utilisent l'eau*\n"
+                "- *Combien de clients électricité ?*\n"
+                "- *Consommation eau en janvier*"
+    )
  
         # Mot seul générique
         return (
@@ -548,9 +558,9 @@ def detecter_question_ambigue(question: str):
     _a_verbe_action    = any(t in q for t in _verbes_action)
     _demande_total_somme = any(t in q for t in ["total", "somme"])
     _a_sujet_clair     = any(t in q for t in [
-        "client", "agence", "alerte", "consomme", "conso",
+        "client","clients" "agence","agences" ,"alerte", "consomme","consome", "conso",
         "montant", "facture", "service", "usage", "evolution",
-        "classement", "liste", "statistique", "stat"
+        "classement", "liste", "statistique", "stat","stats"
     ])
  
     if _a_verbe_action and _demande_total_somme and not _a_mois:
