@@ -390,28 +390,19 @@ _MOTS_CLES_SQL = {
 
 
 def valider_colonnes_sql(sql: str) -> bool:
-    """
-    Vérifie que le SQL n'utilise que des colonnes réelles de la base.
-
-    Principe :
-    1. Supprimer les alias (AS xxx) → ce sont des noms d'affichage, pas des colonnes
-    2. Supprimer les valeurs entre quotes → pas des colonnes
-    3. Vérifier uniquement dans WHERE et ORDER BY
-       car c'est là que les colonnes inexistantes causent des erreurs SQL
-    """
     sql_lower = sql.lower()
 
-    # ── Étape 1 : supprimer les alias ──
-    # "AVG(montant_ttc) as moyenne_general" → on ignore "moyenne_general"
+    # ── Étape 1 : collecter les alias définis dans le SELECT ──
+    alias_definis = set(re.findall(r'\bas\s+([a-z_]+)', sql_lower))
+
+    # ── Étape 2 : supprimer les alias du texte ──
     sql_sans_alias = re.sub(r'\bas\s+[a-z_]+', '', sql_lower)
 
-    # ── Étape 2 : supprimer les valeurs entre quotes ──
-    # WHERE agence LIKE '%agadir%' → on ignore 'agadir'
+    # ── Étape 3 : supprimer les valeurs entre quotes ──
     sql_sans_alias = re.sub(r"'[^']*'", '', sql_sans_alias)
     sql_sans_alias = re.sub(r'"[^"]*"', '', sql_sans_alias)
 
-    # ── Étape 3 : extraire uniquement WHERE et ORDER BY ──
-    # car SELECT peut avoir des alias et des fonctions légitimes
+    # ── Étape 4 : extraire uniquement WHERE et ORDER BY ──
     texte_critique = ""
 
     where_match = re.search(
@@ -429,14 +420,15 @@ def valider_colonnes_sql(sql: str) -> bool:
         texte_critique += " " + order_match.group(1)
 
     if not texte_critique:
-        return True  # pas de WHERE ni ORDER BY → OK
+        return True
 
-    # ── Étape 4 : vérifier chaque mot ──
+    # ── Étape 5 : vérifier chaque mot en excluant les alias ──
     mots = re.findall(r'\b([a-z_]+)\b', texte_critique)
     colonnes_inconnues = [
         m for m in mots
         if m not in _COLONNES_REELLES
         and m not in _MOTS_CLES_SQL
+        and m not in alias_definis
         and len(m) >= 3
         and not m.isdigit()
     ]
