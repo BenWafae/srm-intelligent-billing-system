@@ -248,6 +248,119 @@ _TOKENS_MONTANT_FAIBLE = [
     "client qui paie le moins", "client qui paye le moins",
     "moins eleve montant", "moins cher montant",
 ]
+# validation # VALIDATION UNIVERSELLE DES CONCEPTS — portail d'entrée
+# a pour but de eviter des question sur des colonnes ne correspond pas au donnee reel
+# # Concepts reconnus → colonne réelle dans la base
+_CONCEPTS_CONNUS = {
+    # consommation
+    "consommation", "consomme", "conso", "consomation", "consome",
+    "consomtion", "consomateur", "consommateur", "kwh", "m3",
+    # montant
+    "montant", "mantant", "monton", "montan", "mntant", "ttc",
+    "paye", "paie", "depense", "prix", "cout", "facture", "factures",
+    # client
+    "client", "clients", "abonne", "abonnes", "nom",
+    "numero client", "numero contrat", "numero compteur",
+    "contrat", "compteur",
+    # localisation / contact disponibles
+    "adresse", "agence", "agences",
+    # service
+    "service", "type service", "eau", "electricite", "elec", "electr",
+    # usage
+    "usage", "usages", "domestique", "professionnel", "agricole",
+    "dom", "pro", "agri",
+    # temps
+    "mois", "janvier", "fevrier", "mars", "avril", "mai", "juin",
+    "juillet", "aout", "septembre", "octobre", "novembre", "decembre",
+    "jan", "fev", "mar", "avr", "jun", "jul", "sep", "oct", "nov", "dec",
+    "janv", "fevr", "juil", "aou", "sept",
+    "periode", "date", "limite", "paiement", "echeance",
+    # alertes
+    "alerte", "alertes",
+    # actions / mots outils — jamais bloqués
+    "liste", "lister", "afficher", "montrer", "donner", "voir",
+    "combien", "quel", "quelle", "quels", "quelles", "qui",
+    "somme", "total", "moyenne", "moyen", "max", "min",
+    "evolution", "classement", "statistique", "stat",
+    "plus", "moins", "eleve", "faible", "grand", "petit",
+    "top", "haut", "bas", "fort", "fort",
+}
+
+# Concepts inexistants — déclenchent le message d'indisponibilité
+_CONCEPTS_INEXISTANTS = {
+    # contact
+    "telephone", "tel", "phone", "mobile", "gsm", "portable",
+    "email", "mail", "courriel", "lemail", "lemail",
+    # identité
+    "cin", "carte", "identite", "passeport", "cni",
+    "age", "naissance", "date naissance", "sexe", "genre",
+    # localisation non disponible
+    "ville", "pays", "region", "code postal", "code postale",
+    "quartier", "commune", "province", "wilaya",
+    # financier non disponible
+    "salaire", "revenu", "solde", "dette", "credit", "rib", "iban",
+    "virement", "cheque", "banque",
+    # statut / catégorie
+    "statut", "status", "categorie", "classe", "type client",
+    "actif", "inactif", "suspendu", "bloque",
+    # autres
+    "photo", "image", "note", "commentaire", "observation",
+    "numero agence", "code agence", "id agence",
+    "profession", "metier", "emploi", "entreprise client",
+    "nationalite", "langue","tele", "telep", "telepone", "telephon", "telphone",
+   "mob", "portable", "gsm",
+     "code postalle", 
+}
+
+
+def _separer_articles(q: str) -> str:
+    """
+    Sépare les articles contractés collés aux mots.
+    ex: 'lemail' → 'email', 'ladresse' → 'adresse', 'lecode' → 'code'
+    """
+    q = re.sub(r'\bl([aeio][a-z]+)', r'\1', q)   # lemail→email, ladresse→adresse
+    q = re.sub(r'\bd([aeio][a-z]+)', r'\1', q)   # demail→email
+    q = re.sub(r'\bdu([a-z]+)', r'\1', q)         # dupays→pays
+    return q
+
+
+def valider_concept_question(question: str) -> str | None:
+    """
+    Vérifie si la question contient un concept inexistant dans la base.
+    Retourne un message d'erreur si oui, None si la question peut continuer.
+
+    Appelée en PREMIER dans repondre_question_generale et repondre_question_client.
+    """
+    q = _normaliser_q(question)
+    q = _separer_articles(q)
+    mots = q.split()
+
+    # ── Vérification par token simple ──
+    for mot in mots:
+        if mot in _CONCEPTS_INEXISTANTS and mot not in _CONCEPTS_CONNUS:
+            return (
+                f"⚠️ L'information **« {mot} »** n'est pas disponible "
+                f"dans notre système.\n\n"
+                f"Les informations disponibles sont :\n"
+                f"- Consommation, Montant, Agence, Usage\n"
+                f"- N° Client, N° Contrat, N° Compteur\n"
+                f"- Adresse, Type de service, Alertes, Mois"
+            )
+
+    # ── Vérification par bigramme (ex: "code postal", "statut actif") ──
+    for i in range(len(mots) - 1):
+        bigramme = mots[i] + " " + mots[i + 1]
+        if bigramme in _CONCEPTS_INEXISTANTS:
+            return (
+                f"⚠️ L'information **« {bigramme} »** n'est pas disponible "
+                f"dans notre système.\n\n"
+                f"Les informations disponibles sont :\n"
+                f"- Consommation, Montant, Agence, Usage\n"
+                f"- N° Client, N° Contrat, N° Compteur\n"
+                f"- Adresse, Type de service, Alertes, Mois"
+            )
+
+    return None
 
 
 # ════════════════════════════════════════════════════════════
@@ -521,7 +634,11 @@ def _formater_resultat_fallback(rows: list, cols: list, question: str) -> str:
 
 
 def repondre_question_generale(question: str, historique_texte: str) -> str:
-
+        # ── PORTAIL 1 : validation concept universel ──
+    msg_concept = valider_concept_question(question)
+    if msg_concept:
+        return msg_concept
+    # ── PORTAIL 2 : questions ambiguës (déjà en place) ─
     from rag.intent import detecter_question_ambigue
     msg = detecter_question_ambigue(question)
     if msg:
@@ -914,6 +1031,10 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
 
 def repondre_question_client(question: str, nom_client: str, historique_texte: str) -> str:
+        # ── PORTAIL 1 : validation concept universel ──
+    msg_concept = valider_concept_question(question)
+    if msg_concept:
+        return msg_concept
 
     from rag.mode import _normaliser_q
     q = _normaliser_q(question)
