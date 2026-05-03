@@ -91,7 +91,7 @@ MOTS_FONCTIONNELS = {
     "selon", "apres", "avant", "pendant", "lors",
     "grace", "cause", "raison",
     "bcp", "bcp", "agadir",
-    "affiche", "affichez","afficher",
+    "affiche", "affichez","afficher","consommateur","consomateur"
 }
 
 # ─────────────────────────────────────────────────────────

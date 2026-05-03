@@ -131,6 +131,8 @@ _TOKENS_CONSO_ELEVEE = [
     "grand consomateur", "gros consomateur",
     "grosse consomation", "grande consomation",
     "consomme bcp", "conso bcp", "consome bcp",
+    "grande consommateur", "grande consomateur",
+    "quel est le grande", "quel est le grand",
 ]
 
 _TOKENS_CONSO_FAIBLE = [

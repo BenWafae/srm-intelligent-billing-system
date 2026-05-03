@@ -532,7 +532,13 @@ def detecter_question_ambigue(question: str):
     _a_nom    = any(len(m) >= 4 and m[0].isupper() for m in question.split())
  
     # ── Cas 2 : somme/total de conso ou montant sans mois ────────────
-    if _demande_somme and _demande_conso and not _a_mois and not _a_client and not _a_nom:
+    _detect_classement = any(t in q for t in [
+        "grand", "grande", "gros", "grosse",
+        "plus", "max", "eleve", "top", "fort", "importante",
+        "moins", "faible", "petit", "min"
+    ])
+
+    if _demande_somme and _demande_conso and not _a_mois and not _a_client and not _a_nom and not _detect_classement:
         return (
             "Vous demandez une somme de consommation, "
             "mais **pour quel mois ?**\n\n"
@@ -563,7 +569,7 @@ def detecter_question_ambigue(question: str):
         "classement", "liste", "statistique", "stat","stats"
     ])
  
-    if _a_verbe_action and _demande_total_somme and not _a_mois:
+    if _a_verbe_action and _demande_total_somme and not _a_mois and not _detect_classement:
         return (
             "Vous demandez un total ou une somme, "
             "mais **de quoi et pour quel mois ?**\n\n"
