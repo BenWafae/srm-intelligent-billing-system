@@ -1029,6 +1029,11 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
     msg_concept = valider_concept_question(question)
     if msg_concept:
         return msg_concept
+    # ── PORTAIL 2 : questions ambiguës ────────────── 
+    from rag.intent import detecter_question_ambigue
+    msg_ambigue = detecter_question_ambigue(question)
+    if msg_ambigue:
+        return msg_ambigue
 
     from rag.mode import _normaliser_q
     q = _normaliser_q(question)

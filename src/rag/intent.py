@@ -387,139 +387,18 @@ def detecter_question_ambigue(question: str):
     """
     Retourne un message de clarification contextuel si la question
     est trop vague, sinon retourne None.
- 
-    3 cas gérés :
-    Cas 1 — mot seul trop vague    : "liste" / "somme" / "montant"
-    Cas 2 — sujet sans mois        : "somme conso" / "total montant"
-    Cas 3 — action sans sujet      : "donne moi la somme" / "quel est le total"
+
+    4 cas gérés :
+    Cas 1 — mot seul trop vague         : "liste" / "somme" / "montant"
+    Cas 2b — combo vague sans sujet     : "somme total" / "total somme"
+    Cas 2 — sujet sans mois             : "somme conso" / "total montant"
+    Cas 3 — action+montant sans contexte: "donne moi montant" / "donner moi somme"
     """
     q = _normaliser_q(question)
     q = _normaliser_verbes(q)
     mots = [m for m in q.split() if len(m) > 1]
- 
-    # ── Cas 1 : un seul mot fonctionnel ──────────────────────────────
-    if len(mots) == 1 and mots[0] in _MOTS_SEULS_VAGUES:
-        mot = mots[0]
- 
-        if mot == "liste":
-            return (
-                "Vous voulez une liste, mais **liste de quoi ?**\n\n"
-                "Je peux vous lister :\n"
-                "- *Liste des clients*\n"
-                "- *Liste des agences*\n"
-                "- *Liste des alertes*\n"
-                "- *Liste des clients par service (eau / électricité)*"
-            )
- 
-        if mot == "somme":
-            return (
-                "Vous demandez une somme, mais **somme de quoi ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Somme de consommation en janvier*\n"
-                "- *Somme des montants en mars*"
-            )
- 
-        if mot == "total":
-            return (
-                "Vous demandez un total, mais **total de quoi ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Total consommation en janvier*\n"
-                "- *Total montant en mars*\n"
-                "- *Statistiques générales* (pour tout voir)"
-            )
- 
-        if mot in ["montant", "mantant", "monton"]:
-            return (
-                "Vous demandez un montant, mais **montant de qui ou de quel mois ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Montant total en janvier*\n"
-                "- *Quel client a le montant le plus élevé ?*\n"
-                "- *Montant de Fatima*"
-            )
- 
-        if mot in ["consomme", "conso", "consommation"]:
-            return (
-                "Vous parlez de consommation, mais **consommation de qui ou de quel mois ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Qui consomme le plus ?*\n"
-                "- *Total consommation en janvier*\n"
-                "- *Consommation de Fatima*"
-            )
- 
-        if mot == "agence":
-            return (
-                "Vous parlez d'agence, mais **quelle information sur les agences ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Liste des agences*\n"
-                "- *Clients de l'agence Agadir*\n"
-                "- *Agence de chaque client*"
-            )
- 
-        if mot in ["client", "clients"]:
-            return (
-                "Vous parlez de clients, mais **quelle information sur les clients ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Liste des clients*\n"
-                "- *Combien de clients ?*\n"
-                "- *Clients de l'agence Agadir*"
-            )
- 
-        if mot in ["alerte", "alertes"]:
-            return (
-                "Vous parlez d'alertes, mais **quelle information sur les alertes ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Qui a des alertes ?*\n"
-                "- *Combien de clients ont une alerte ?*\n"
-                "- *Liste des alertes*"
-            )
- 
-        if mot == "evolution":
-            return (
-                "Vous parlez d'évolution, mais **évolution de quoi ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Évolution des consommations mois par mois*\n"
-                "- *Évolution des montants*"
-            )
- 
-        if mot in ["usage", "usages"]:
-            return (
-                "Vous parlez d'usage, mais **quelle information sur les usages ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Clients usage domestique*\n"
-                "- *Clients usage professionnel*\n"
-                "- *Clients usage agricole*"
-            )
- 
-        if mot in ["service", "services"]:
-            return (
-                
-                "Vous parlez de service, mais **quel service vous intéresse ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Clients qui utilisent l'eau*\n"
-                "- *Clients qui utilisent l'électricité*\n"
-                "- *Combien de clients par service ?*"
-            )
-        if mot in ["eau", "elec", "electricite"]:
-            return (
-                "Vous parlez du service **eau/électricité**, "
-                "mais **quelle information souhaitez-vous ?**\n\n"
-                "Précisez par exemple :\n"
-                "- *Clients qui utilisent l'eau*\n"
-                "- *Combien de clients électricité ?*\n"
-                "- *Consommation eau en janvier*"
-    )
- 
-        # Mot seul générique
-        return (
-            f"La question « **{question}** » est trop courte.\n\n"
-            "Pouvez-vous préciser ce que vous cherchez ?\n"
-            "Par exemple :\n"
-            "- *Qui consomme le plus ?*\n"
-            "- *Liste des clients*\n"
-            "- *Montant total en janvier*"
-        )
- 
-    # ── Variables communes Cas 2 et Cas 3 ────────────────────────────
+
+    # ── Variables globales (utilisées dans tous les cas) ─────────────
     _demande_somme   = any(t in q for t in ["somme", "total", "combien"])
     _demande_conso   = any(t in q for t in [
         "consomme", "conso", "consommation", "consomation", "consome"
@@ -530,15 +409,180 @@ def detecter_question_ambigue(question: str):
     _a_mois   = bool(_extraire_mois(q))
     _a_client = any(t in q for t in ["client", "clients"])
     _a_nom    = any(len(m) >= 4 and m[0].isupper() for m in question.split())
- 
-    # ── Cas 2 : somme/total de conso ou montant sans mois ────────────
     _detect_classement = any(t in q for t in [
         "grand", "grande", "gros", "grosse",
-        "plus", "max", "eleve", "top", "fort", "importante",
+        "plus", "max", "eleve", "elevee", "top", "fort", "importante",
         "moins", "faible", "petit", "min"
     ])
+    _verbes_action = [
+        "donne moi", "donnez moi", "montrer moi", "afficher",
+        "donner", "montrer", "voir", "quel est le", "quelle est la"
+    ]
+    _a_verbe_action = any(t in q for t in _verbes_action)
 
-    if _demande_somme and _demande_conso and not _a_mois and not _a_client and not _a_nom and not _detect_classement:
+    # ════════════════════════════════════════════════════════
+    # CAS 1 — mot seul trop vague
+    # ════════════════════════════════════════════════════════
+    if len(mots) == 1 and mots[0] in _MOTS_SEULS_VAGUES:
+        mot = mots[0]
+
+        if mot == "liste":
+            return (
+                "Vous voulez une liste, mais **liste de quoi ?**\n\n"
+                "Je peux vous lister :\n"
+                "- *Liste des clients*\n"
+                "- *Liste des agences*\n"
+                "- *Liste des alertes*\n"
+                "- *Liste des clients par service (eau / électricité)*"
+            )
+
+        if mot == "somme":
+            return (
+                "Vous demandez une somme, mais **somme de quoi ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Somme de consommation en janvier*\n"
+                "- *Somme des montants en mars*"
+            )
+
+        if mot == "total":
+            return (
+                "Vous demandez un total, mais **total de quoi ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Total consommation en janvier*\n"
+                "- *Total montant en mars*\n"
+                "- *Statistiques générales* (pour tout voir)"
+            )
+
+        if mot in ["montant", "mantant", "monton"]:
+            return (
+                "Vous demandez un montant, mais **montant de qui ou de quel mois ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Montant total en janvier*\n"
+                "- *Quel client a le montant le plus élevé ?*\n"
+                "- *Montant de Fatima*"
+            )
+
+        if mot in ["consomme", "conso", "consommation"]:
+            return (
+                "Vous parlez de consommation, mais **consommation de qui ou de quel mois ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Qui consomme le plus ?*\n"
+                "- *Total consommation en janvier*\n"
+                "- *Consommation de Fatima*"
+            )
+
+        if mot == "agence":
+            return (
+                "Vous parlez d'agence, mais **quelle information sur les agences ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Liste des agences*\n"
+                "- *Clients de l'agence Agadir*\n"
+                "- *Agence de chaque client*"
+            )
+
+        if mot in ["client", "clients"]:
+            return (
+                "Vous parlez de clients, mais **quelle information sur les clients ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Liste des clients*\n"
+                "- *Combien de clients ?*\n"
+                "- *Clients de l'agence Agadir*"
+            )
+
+        if mot in ["alerte", "alertes"]:
+            return (
+                "Vous parlez d'alertes, mais **quelle information sur les alertes ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Qui a des alertes ?*\n"
+                "- *Combien de clients ont une alerte ?*\n"
+                "- *Liste des alertes*"
+            )
+
+        if mot == "evolution":
+            return (
+                "Vous parlez d'évolution, mais **évolution de quoi ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Évolution des consommations mois par mois*\n"
+                "- *Évolution des montants*"
+            )
+
+        if mot in ["usage", "usages"]:
+            return (
+                "Vous parlez d'usage, mais **quelle information sur les usages ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Clients usage domestique*\n"
+                "- *Clients usage professionnel*\n"
+                "- *Clients usage agricole*"
+            )
+
+        if mot in ["service", "services"]:
+            return (
+                "Vous parlez de service, mais **quel service vous intéresse ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Clients qui utilisent l'eau*\n"
+                "- *Clients qui utilisent l'électricité*\n"
+                "- *Combien de clients par service ?*"
+            )
+
+        if mot in ["eau", "elec", "electricite"]:
+            return (
+                "Vous parlez du service **eau/électricité**, "
+                "mais **quelle information souhaitez-vous ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Clients qui utilisent l'eau*\n"
+                "- *Combien de clients électricité ?*\n"
+                "- *Consommation eau en janvier*"
+            )
+
+        if mot in ["facture", "factures"]:
+            return (
+                "Vous parlez de factures, mais **factures de qui ou de quel mois ?**\n\n"
+                "Précisez par exemple :\n"
+                "- *Toutes les factures de Fatima*\n"
+                "- *Facture de janvier*\n"
+                "- *Combien de factures ?*"
+            )
+
+        # Mot seul générique
+        return (
+            f"La question « **{question}** » est trop courte.\n\n"
+            "Pouvez-vous préciser ce que vous cherchez ?\n"
+            "Par exemple :\n"
+            "- *Qui consomme le plus ?*\n"
+            "- *Liste des clients*\n"
+            "- *Montant total en janvier*"
+        )
+
+    # ════════════════════════════════════════════════════════
+    # CAS 2b — combo "somme total" / "total somme" / "total global"
+    # sans aucun sujet ni mois → trop vague
+    # ════════════════════════════════════════════════════════
+    _combos_doublement_vagues = [
+        # somme + total ensemble
+        lambda: "somme" in q and "total" in q,
+        # "total global" / "somme global"
+        lambda: ("total" in q or "somme" in q) and "global" in q,
+    ]
+    _a_sujet_reel = _demande_conso or _demande_montant or _a_mois or _a_client or _a_nom
+
+    if not _a_sujet_reel and not _detect_classement:
+        for test in _combos_doublement_vagues:
+            if test():
+                return (
+                    "Vous demandez un total ou une somme, mais **de quoi ?**\n\n"
+                    "Précisez par exemple :\n"
+                    "- *Total consommation en janvier*\n"
+                    "- *Somme des montants en mars*\n"
+                    "- *Statistiques générales* (pour tout voir)"
+                )
+
+    # ════════════════════════════════════════════════════════
+    # CAS 2 — sujet présent mais mois manquant
+    # "somme conso" / "total montant" sans mois ni client
+    # ════════════════════════════════════════════════════════
+    if (_demande_somme and _demande_conso
+            and not _a_mois and not _a_client and not _a_nom
+            and not _detect_classement):
         return (
             "Vous demandez une somme de consommation, "
             "mais **pour quel mois ?**\n\n"
@@ -546,8 +590,10 @@ def detecter_question_ambigue(question: str):
             "- *Somme de consommation en janvier*\n"
             "- *Total consommé en mars 2026*"
         )
- 
-    if _demande_somme and _demande_montant and not _a_mois and not _a_client and not _a_nom:
+
+    if (_demande_somme and _demande_montant
+            and not _a_mois and not _a_client and not _a_nom
+            and not _detect_classement):
         return (
             "Vous demandez une somme de montants, "
             "mais **pour quel mois ?**\n\n"
@@ -555,21 +601,38 @@ def detecter_question_ambigue(question: str):
             "- *Total montant en janvier*\n"
             "- *Combien a-t-on payé en mars ?*"
         )
- 
-    # ── Cas 3 : action générique sans sujet clair ────────────────────
-    _verbes_action = [
-        "donne moi", "donnez moi", "montrer moi", "afficher",
-        "donner", "montrer", "voir", "quel est le", "quelle est la"
-    ]
-    _a_verbe_action    = any(t in q for t in _verbes_action)
+
+    # ════════════════════════════════════════════════════════
+    # CAS 3 — verbe d'action + montant/somme sans contexte suffisant
+    # "donne moi montant" / "donner moi somme" / "afficher montant"
+    # ════════════════════════════════════════════════════════
+
+    # Sous-cas 3a : verbe + montant seul (sans mois, sans client, sans classement)
+    if (_a_verbe_action
+            and _demande_montant
+            and not _demande_conso
+            and not _a_mois
+            and not _a_client
+            and not _a_nom
+            and not _detect_classement):
+        return (
+            "Vous demandez un montant, mais **montant de qui ou de quel mois ?**\n\n"
+            "Précisez par exemple :\n"
+            "- *Montant total en janvier*\n"
+            "- *Quel client a le montant le plus élevé ?*\n"
+            "- *Montant de Fatima*"
+        )
+
+    # Sous-cas 3b : verbe + somme/total seul (sans mois, sans classement)
     _demande_total_somme = any(t in q for t in ["total", "somme"])
-    _a_sujet_clair     = any(t in q for t in [
-        "client","clients" "agence","agences" ,"alerte", "consomme","consome", "conso",
-        "montant", "facture", "service", "usage", "evolution",
-        "classement", "liste", "statistique", "stat","stats"
-    ])
- 
-    if _a_verbe_action and _demande_total_somme and not _a_mois and not _detect_classement:
+    if (_a_verbe_action
+            and _demande_total_somme
+            and not _demande_conso
+            and not _demande_montant
+            and not _a_mois
+            and not _a_client
+            and not _a_nom
+            and not _detect_classement):
         return (
             "Vous demandez un total ou une somme, "
             "mais **de quoi et pour quel mois ?**\n\n"
@@ -578,8 +641,20 @@ def detecter_question_ambigue(question: str):
             "- *Somme des montants en mars*\n"
             "- *Statistiques générales* (pour tout voir)"
         )
- 
-    if _a_verbe_action and not _a_sujet_clair and not _demande_total_somme:
+
+    # Sous-cas 3c : verbe sans aucun sujet reconnaissable
+    _a_sujet_clair = any(t in q for t in [
+        "client", "clients", "agence", "agences", "alerte", "alertes",
+        "consomme", "consome", "conso", "consommation", "consomation",
+        "montant", "mantant", "facture", "factures",
+        "service", "usage", "evolution",
+        "classement", "liste", "statistique", "stat", "stats",
+        "eau", "elec", "electricite"
+    ])
+    if (_a_verbe_action
+            and not _a_sujet_clair
+            and not _demande_total_somme
+            and not _demande_montant):
         return (
             "Je n'ai pas compris **ce que vous souhaitez voir**.\n\n"
             "Pouvez-vous préciser ? Par exemple :\n"
@@ -588,7 +663,7 @@ def detecter_question_ambigue(question: str):
             "- *Quel est le montant total en janvier ?*\n"
             "- *Afficher les clients par agence*"
         )
- 
+
     return None  # question assez précise → continuer normalement
 # ════════════════════════════════════════════════════════════
 # DÉTECTION INTENT GÉNÉRAL
