@@ -8,7 +8,7 @@
 <img src="https://img.shields.io/badge/Status-En_cours-orange?style=for-the-badge"/>
 
 # 🧾 SRM Intelligent Billing System
-> Système Intelligent de Gestion des Factures — SRM Souss-Massa
+> Système Intelligent de Gestion des Factures, SRM Souss-Massa
 
 Réalisé par : **BEN ZHIR Wafa**
 Encadrant entreprise : **ZEROUALI Hassan** · Encadrant académique : **AIT BAHA Tarek**
@@ -21,9 +21,11 @@ Encadrant entreprise : **ZEROUALI Hassan** · Encadrant académique : **AIT BAHA
 
 Système de gestion intelligente des factures développé pour la **SRM Souss-Massa**, composé de trois interfaces dédiées et d'un assistant conversationnel basé sur une architecture RAG hybride avec LLM local.
 
-- **Interface Admin** — import Excel/PDF, gestion base de données & comptes utilisateurs
-- **Interface Employé** — assistant intelligent : analyse PDF (RAG classique) + interrogation multi-clients Excel (détection d'intents → fetchers Python → fallback Text-to-SQL)
-- **Interface Client** — authentification sécurisée, chatbot filtré par contrat, téléchargement de factures PDF personnalisées
+| Interface | Fonctionnalités |
+|---|---|
+| **Admin** | Import Excel/PDF, gestion base de données & comptes utilisateurs |
+| **Employé** | Analyse PDF (RAG classique) + interrogation multi-clients Excel (détection d'intents → fetchers Python → fallback Text-to-SQL) |
+| **Client** | Authentification sécurisée, chatbot filtré par contrat, téléchargement de factures PDF personnalisées |
 
 ---
 
@@ -46,13 +48,13 @@ Système de gestion intelligente des factures développé pour la **SRM Souss-Ma
 
 Avant de lancer le projet, assurez-vous d'avoir installé :
 
-- **Python 3.10.9** — [python.org](https://www.python.org/downloads/release/python-3109/)
-- **Ollama** — [ollama.com](https://ollama.com/)
+- **Python 3.10.9** : [python.org](https://www.python.org/downloads/release/python-3109/)
+- **Ollama** : [ollama.com](https://ollama.com/)
 - **Git**
 
 ---
 
-##  Quick Start
+## ⚡ Quick Start
 
 ```bash
 pip install -r requirements.txt
@@ -140,7 +142,7 @@ srm-intelligent-billing-system/
 
 ---
 
-## 👥 Rôles & accès
+##  Rôles & accès
 
 | Rôle | Accès |
 |---|---|
@@ -163,6 +165,6 @@ srm-intelligent-billing-system/
 
 ##  Notes
 
-- Le LLM tourne **entièrement en local** via Ollama — aucune donnée ne quitte la machine
+- Le LLM tourne **entièrement en local** via Ollama ; aucune donnée ne quitte la machine.
 - La base SQLite est stockée localement dans le répertoire du projet
 - Le premier lancement peut être lent le temps qu'Ollama charge le modèle Mistral en mémoire
