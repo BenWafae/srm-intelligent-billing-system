@@ -2,3 +2,8 @@ pdfplumber
 streamlit
 python-dotenv
 plotly
+pandas
+openpyxl
+reportlab
+fuzzywuzzy
+python-levenshtein
