@@ -191,6 +191,8 @@ def normaliser(texte: str) -> str:
     texte = unicodedata.normalize("NFD", texte)
     texte = "".join(c for c in texte if unicodedata.category(c) != "Mn")
     return texte
+
+
 MOTS_METIER = {
     "consomation", "consommation", "consomme", "conso",
     "consomateur", "consommateur", "consommatrice",
@@ -211,12 +213,61 @@ MOTS_METIER = {
     "grand", "grande", "gros", "grosse",
     "beaucoup", "bcp", "bzaf",
     "client", "clients",
-     # ── noms d'agences ──
     "agadir", "inezgane", "tiznit", "taroudant",
     "ait melloul", "melloul",
     "agadir nord", "agadir sud",
     "lagence", "lagences",
+    "code", "postal", "postale",
+    "numero", "numeros",
+    "adresse", "contrat", "compteur",
+    "liste", "information", "informations", "infos",
+    "facturee", "facturation", "factur",
 }
+
+_CONCEPTS_METIER_FUZZY = MOTS_METIER
+
+
+def _est_mot_fonctionnel_approx(mot: str, distance_max: int = 2) -> bool:
+    """
+    Retourne True si `mot` est à distance <= distance_max
+    d'un mot dans MOTS_FONCTIONNELS ou MOTS_METIER.
+    Bloque les variantes mal orthographiées comme 'clientt', 'agencee'
+    avant qu'elles entrent dans le fuzzy matching des prénoms.
+    """
+    if mot in MOTS_FONCTIONNELS:
+        return True
+    if mot in MOTS_METIER:
+        return True
+    if len(mot) < 4:
+        return False
+
+    def levenshtein(a: str, b: str) -> int:
+        if len(a) < len(b):
+            a, b = b, a
+        prev = list(range(len(b) + 1))
+        for ca in a:
+            curr = [prev[0] + 1]
+            for j, cb in enumerate(b):
+                curr.append(min(prev[j + 1] + 1, curr[j] + 1, prev[j] + (ca != cb)))
+            prev = curr
+        return prev[-1]
+
+    for fonc in MOTS_FONCTIONNELS:
+        if abs(len(mot) - len(fonc)) > distance_max:
+            continue
+        if levenshtein(mot, fonc) <= distance_max:
+            return True
+
+    for metier in MOTS_METIER:
+        if " " in metier:
+            continue
+        if abs(len(mot) - len(metier)) > distance_max:
+            continue
+        if levenshtein(mot, metier) <= distance_max:
+            return True
+
+    return False
+
 
 def extraire_mots_nom(question: str) -> list[str]:
     mots = [normaliser(m) for m in re.findall(r'\b\w+\b', question)]
@@ -244,17 +295,30 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
     mots_dans_base = [m for m in mots_nom_question
                       if any(m in cn for (_, cn) in clients_norm)]
     if not mots_dans_base:
-        # ── Fuzzy matching ──
+        mots_question_norm = [normaliser(m) for m in re.findall(r'\b\w+\b', question)]
+
+        mots_metier_presents = [m for m in mots_question_norm
+                                 if m in _CONCEPTS_METIER_FUZZY]
+        mots_candidats_prenom = [m for m in mots_nom_question
+                                  if m not in _CONCEPTS_METIER_FUZZY
+                                  and not _est_mot_fonctionnel_approx(m)
+                                  and len(m) >= 4]
+
+        # Cas 1 — que des mots métier, aucun candidat prénom
+        if mots_metier_presents and not mots_candidats_prenom:
+            print(f"  [FUZZY BLOQUÉ] Concept métier sans candidat prénom → aucun")
+            return None, "aucun"
+
+        # Cas 2 & 3 — fuzzy matching sur vrais candidats prénoms uniquement
         from difflib import get_close_matches
-        for mot in mots_nom_question:
-            if len(mot) >= 4:
-                noms_norm = [cn for (_, cn) in clients_norm]
-                prenoms = [cn.split()[0] for cn in noms_norm]
-                matches = get_close_matches(mot, prenoms, n=1, cutoff=0.65)
-                if matches:
-                    idx = prenoms.index(matches[0])
-                    client_suggere = clients_norm[idx][0]
-                    return None, f"suggestion:{client_suggere}"
+        for mot in mots_candidats_prenom:
+            noms_norm = [cn for (_, cn) in clients_norm]
+            prenoms = [cn.split()[0] for cn in noms_norm]
+            matches = get_close_matches(mot, prenoms, n=1, cutoff=0.65)
+            if matches:
+                idx = prenoms.index(matches[0])
+                client_suggere = clients_norm[idx][0]
+                return None, f"suggestion:{client_suggere}"
         return None, "aucun"
 
     # Étape 4 : filtrer mots plausibles (longueur >= 4)
@@ -486,7 +550,12 @@ def poser_question_excel(question: str, historique: list = []) -> str:
     # ── Client introuvable après toutes les étapes ──
     if not client_trouve and statut == "aucun":
         mots = extraire_mots_nom(question)
-        noms_suspects = [m for m in mots if len(m) >= 4]
+        noms_suspects = [
+    m for m in mots 
+    if len(m) >= 4 
+    and not _est_mot_fonctionnel_approx(m)
+    and not m.isdigit()
+]
         _indicateurs_client = ["de ", "du client", "pour ", "infos de",
                                "informations de", "consomation de",
                                "montant de", "facture de"]
