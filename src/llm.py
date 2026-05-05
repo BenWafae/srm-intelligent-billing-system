@@ -45,23 +45,19 @@ MOTS_FONCTIONNELS = {
     "paye", "payee", "payes",
     "quel", "quelle", "quels", "quelles",
     "est", "sont", "etait", "etaient",
-    "meme", "aussi", "encore","somme", "sommes",
+    "meme", "aussi", "encore", "somme", "sommes",
     "janv", "fevr", "juil", "aout", "sept", "oct", "nov", "dec",
     "jan", "fev", "mar", "avr", "jun", "jul", "aug", "sep",
     "lusage", "lagence", "ladresse", "linfos",
-   "lhistorique", "levolution", "lidentifiant",
-    "lagence", "lusages", "lagences","give",
-    #  enrechiiir mot fonctionnells 
-    # ── mots interrogatifs / démonstratifs manquants ──
+    "lhistorique", "levolution", "lidentifiant",
+    "lagence", "lusages", "lagences", "give",
     "grande", "grand", "grands", "grandes",
-    "gros", "grosse", "gros", "grosses",
+    "gros", "grosse", "grosses",
     "petit", "petite", "petits", "petites",
     "haut", "haute", "hauts", "hautes",
     "bas", "basse", "basses",
     "fort", "forte", "forts", "fortes",
     "important", "importante", "importants", "importantes",
-    "gros", "grosse",
-        # ── verbes courants mal couverts ──
     "cest", "c est", "cest qui", "c est qui",
     "ya", "y a", "yaa",
     "montre", "montrez",
@@ -73,7 +69,6 @@ MOTS_FONCTIONNELS = {
     "explique", "expliquer",
     "calcule", "calculer",
     "retourne", "retourner",
-     # ── adjectifs de quantité / intensité ──
     "beaucoup", "peu", "trop", "assez",
     "enormement", "vraiment", "tres",
     "maximum", "maximal", "maximale",
@@ -84,24 +79,15 @@ MOTS_FONCTIONNELS = {
     "dernier", "derniere",
     "meilleur", "meilleure", "pire",
     "unique", "seul", "seule", "seuls", "seules",
-    
-    # ── mots de liaison courants ──
     "donc", "alors", "ainsi", "car", "parce",
     "mais", "cependant", "pourtant", "toutefois",
     "selon", "apres", "avant", "pendant", "lors",
     "grace", "cause", "raison",
-    "bcp", "bcp", "agadir",
-    "affiche", "affichez","afficher","consommateur","consomateur"
+    "bcp", "agadir",
+    "affiche", "affichez", "afficher", "consommateur", "consomateur"
 }
 
-# ─────────────────────────────────────────────────────────
-# PATTERNS QUESTIONS GÉNÉRALES
-# ✅ Ajout : "quel client consomme...", "qui consomme...",
-#            "quel client a une consommation...", etc.
-# Ces questions portent sur TOUS les clients, pas un seul.
-# ─────────────────────────────────────────────────────────
 PATTERNS_QUESTION_GENERALE = [
-    # patterns originaux
     r"\bcombien\b.*(client|facture|enregistrement)",
     r"\b(liste|lister|afficher|montrer|donner)\b.*(client|tous|toutes)",
     r"\b(tous|toutes)\b.*(client|facture)",
@@ -115,29 +101,24 @@ PATTERNS_QUESTION_GENERALE = [
     r"\bbilan\b",
     r"\bagence",
     r"\busage\b(?!\s+de\b)",
-
     r"\bclassement\b",
     r"\bevolution\b",
     r"\balerte",
     r"\bservice\b(?!\s+de\b)",
-
-    # ✅ NOUVEAUX — questions générales sur la consommation de tous les clients
-    r"\bquel\s+client\b",                          # "quel client consomme/a/..."
-    r"\bqui\s+consomme\b",                         # "qui consomme le plus/moins"
-    r"\bqui\s+paie\b",                             # "qui paie le plus"
-    r"\bqui\s+paye\b",                             # "qui paye le plus"
-    r"\bqui\s+a\s+(la|le|les|une)\b",              # "qui a la consommation..."
-    r"\bclient\s+(avec|qui|a\s+une|ayant)\b",      # "client avec consommation..."
-    r"\bquel\s+est\s+le\s+client\b",               # "quel est le client qui..."
-r"\bconsomme\s+(le\s+plus|le\s+moins|eleve|elevee|faible|max|min)\b(?!\s+de\b)",
-    r"\bconsomme\s+la\s+plus\b",                   # "consomme la plus élevée/faible"
-    r"\bquel\w*\s+usage\b",      # "quel usage", "quels usages"
-    r"\busages?\s+exist",         # "usage existe", "usages existants"
-    r"\bclients?\s+par\s+usage",  # "clients par usage"
-    r"\bpar\s+usage\b",     
-                # "par usage"
-     r"\bquel\s+mois\b.*\b(consomme|paye|paie)\b",
-
+    r"\bquel\s+client\b",
+    r"\bqui\s+consomme\b",
+    r"\bqui\s+paie\b",
+    r"\bqui\s+paye\b",
+    r"\bqui\s+a\s+(la|le|les|une)\b",
+    r"\bclient\s+(avec|qui|a\s+une|ayant)\b",
+    r"\bquel\s+est\s+le\s+client\b",
+    r"\bconsomme\s+(le\s+plus|le\s+moins|eleve|elevee|faible|max|min)\b(?!\s+de\b)",
+    r"\bconsomme\s+la\s+plus\b",
+    r"\bquel\w*\s+usage\b",
+    r"\busages?\s+exist",
+    r"\bclients?\s+par\s+usage",
+    r"\bpar\s+usage\b",
+    r"\bquel\s+mois\b.*\b(consomme|paye|paie)\b",
 ]
 
 MOTS_REFERENCE_IMPLICITE = [
@@ -147,42 +128,30 @@ MOTS_REFERENCE_IMPLICITE = [
     "quel est le mois", "quel mois", "quelle est sa",
     "quel est son", "et sa ", "et son ", "et ses ",
     "et pour", "maintenant", "aussi", "egalement",
-    "son usage",
-    "son service",
-    "son agence",
-    "son adresse",
-    "son contrat",
-    "son compteur",
-    
+    "son usage", "son service", "son agence",
+    "son adresse", "son contrat", "son compteur",
 ]
 
 
 def est_question_generale(question: str) -> bool:
     q = normaliser(question)
-
-    # ── Références explicites → jamais question générale ──
-    _refs_explicites = ["son usage", "son service", "son agence",
-                    "son adresse", "son contrat", "son compteur",
-                    "agence de", "usage de", "service de",
-                    "adresse de", "contrat de", "compteur de",
-                    "consomation de", "consommation de",
-                    "montant de", "facture de""informations de", "infos de", "info de",
-                      "historique de", "evolution de", "factures de","information de",
-                      "a consomme le plus",
-               "a consomme le moins",
-             "a paye le plus",
-             "a paye le moins",
-             "mois fatima",
-             "mois bilal",
-             "quel mois",
-]
+    _refs_explicites = [
+        "son usage", "son service", "son agence",
+        "son adresse", "son contrat", "son compteur",
+        "agence de", "usage de", "service de",
+        "adresse de", "contrat de", "compteur de",
+        "consomation de", "consommation de",
+        "montant de", "facture de", "informations de", "infos de", "info de",
+        "historique de", "evolution de", "factures de", "information de",
+        "a consomme le plus", "a consomme le moins",
+        "a paye le plus", "a paye le moins",
+        "mois fatima", "mois bilal", "quel mois",
+    ]
     if any(t in q for t in _refs_explicites):
         return False
-
     for pattern in PATTERNS_QUESTION_GENERALE:
         if re.search(pattern, q):
             return True
-
     return False
 
 
@@ -228,12 +197,6 @@ _CONCEPTS_METIER_FUZZY = MOTS_METIER
 
 
 def _est_mot_fonctionnel_approx(mot: str, distance_max: int = 2) -> bool:
-    """
-    Retourne True si `mot` est à distance <= distance_max
-    d'un mot dans MOTS_FONCTIONNELS ou MOTS_METIER.
-    Bloque les variantes mal orthographiées comme 'clientt', 'agencee'
-    avant qu'elles entrent dans le fuzzy matching des prénoms.
-    """
     if mot in MOTS_FONCTIONNELS:
         return True
     if mot in MOTS_METIER:
@@ -257,7 +220,6 @@ def _est_mot_fonctionnel_approx(mot: str, distance_max: int = 2) -> bool:
             continue
         if levenshtein(mot, fonc) <= distance_max:
             return True
-
     for metier in MOTS_METIER:
         if " " in metier:
             continue
@@ -265,13 +227,107 @@ def _est_mot_fonctionnel_approx(mot: str, distance_max: int = 2) -> bool:
             continue
         if levenshtein(mot, metier) <= distance_max:
             return True
-
     return False
 
 
 def extraire_mots_nom(question: str) -> list[str]:
     mots = [normaliser(m) for m in re.findall(r'\b\w+\b', question)]
     return [m for m in mots if len(m) > 2 and m not in MOTS_FONCTIONNELS]
+
+
+# ─────────────────────────────────────────────────────────
+# FONCTION CLÉ : détecte si la question contient un nom
+# inconnu (ni dans la base, ni mot fonctionnel/métier)
+# ─────────────────────────────────────────────────────────
+def _detecter_nom_inconnu(question: str, liste_clients: list) -> str | None:
+    if est_question_generale(question):
+        return None
+
+    _indicateurs = [
+        "infos de", "info de", "informations de", "information de",
+        "usage de", "agence de", "service de", "adresse de",
+        "contrat de", "compteur de", "consommation de", "consomation de",
+        "montant de", "facture de", "evolution de", "historique de",
+        "moyenne de", "factures de",
+    ]
+
+    q_lower = normaliser(question)
+    if not any(t in q_lower for t in _indicateurs):
+        return None
+
+    prenoms_reels = set()
+    noms_reels = set()
+    for client in liste_clients:
+        parties = normaliser(client).split()
+        if len(parties) >= 1:
+            prenoms_reels.add(parties[0])
+        if len(parties) >= 2:
+            noms_reels.add(parties[1])
+
+    tous_noms_reels = prenoms_reels | noms_reels
+
+    def levenshtein(a: str, b: str) -> int:
+        if len(a) < len(b):
+            a, b = b, a
+        prev = list(range(len(b) + 1))
+        for ca in a:
+            curr = [prev[0] + 1]
+            for j, cb in enumerate(b):
+                curr.append(min(prev[j+1]+1, curr[j]+1, prev[j]+(ca != cb)))
+            prev = curr
+        return prev[-1]
+
+    def verifier_mot(mot: str) -> str:
+        """
+        Retourne :
+        - "exact"      : mot trouvé exactement dans la base → client valide
+        - "suggestion" : mot proche d'un client → fuzzy suggestion
+        - "inconnu"    : mot absent et pas proche → client inexistant
+        """
+        # ── Correspondance exacte ──
+        if mot in tous_noms_reels:
+            return "exact"
+
+        # ── Fuzzy selon longueur ──
+        if len(mot) <= 3:
+            seuil = 0
+        elif len(mot) <= 5:
+            seuil = 1
+        else:
+            seuil = 2
+
+        for nom in tous_noms_reels:
+            if abs(len(mot) - len(nom)) <= seuil:
+                if levenshtein(mot, nom) <= seuil:
+                    return "suggestion"  # ← proche mais pas exact
+
+        return "inconnu"
+
+    # ── Extraire le mot après l'indicateur ──
+    for indicateur in sorted(_indicateurs, key=len, reverse=True):
+        if indicateur in q_lower:
+            apres = q_lower.split(indicateur, 1)[1].strip()
+            mots_apres = [m for m in apres.split() if len(m) >= 3]
+            if not mots_apres:
+                continue
+            candidat = mots_apres[0]
+
+            if candidat in MOTS_FONCTIONNELS or candidat in MOTS_METIER:
+                continue
+
+            resultat = verifier_mot(candidat)
+
+            if resultat == "exact":
+                return None  # client valide → laisser passer
+
+            if resultat == "suggestion":
+                # ← NOUVEAU : proche mais pas exact → aussi bloquer
+                return candidat
+
+            if resultat == "inconnu":
+                return candidat  # nom vraiment inexistant
+
+    return None
 
 
 def detecter_client(question: str, liste_clients: list) -> tuple[str | list | None, str]:
@@ -296,7 +352,6 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
                       if any(m in cn for (_, cn) in clients_norm)]
     if not mots_dans_base:
         mots_question_norm = [normaliser(m) for m in re.findall(r'\b\w+\b', question)]
-
         mots_metier_presents = [m for m in mots_question_norm
                                  if m in _CONCEPTS_METIER_FUZZY]
         mots_candidats_prenom = [m for m in mots_nom_question
@@ -304,12 +359,9 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
                                   and not _est_mot_fonctionnel_approx(m)
                                   and len(m) >= 4]
 
-        # Cas 1 — que des mots métier, aucun candidat prénom
         if mots_metier_presents and not mots_candidats_prenom:
-            print(f"  [FUZZY BLOQUÉ] Concept métier sans candidat prénom → aucun")
             return None, "aucun"
 
-        # Cas 2 & 3 — fuzzy matching sur vrais candidats prénoms uniquement
         from difflib import get_close_matches
         for mot in mots_candidats_prenom:
             noms_norm = [cn for (_, cn) in clients_norm]
@@ -319,14 +371,15 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
                 idx = prenoms.index(matches[0])
                 client_suggere = clients_norm[idx][0]
                 return None, f"suggestion:{client_suggere}"
+
         return None, "aucun"
 
-    # Étape 4 : filtrer mots plausibles (longueur >= 4)
+    # Étape 4 : filtrer mots plausibles
     mots_plausibles = [m for m in mots_dans_base if len(m) >= 4]
     if not mots_plausibles:
         return None, "aucun"
 
-    # Étape 5 : clients correspondants (mot entier)
+    # Étape 5 : clients correspondants
     clients_correspondants = []
     for client_original, client_norm in clients_norm:
         for m in mots_plausibles:
@@ -347,110 +400,42 @@ def question_fait_reference(question: str) -> bool:
     if est_question_generale(question):
         return False
 
-    # ── Questions courtes sur les stats globales ──
     q_norm = normaliser(question)
     _questions_globales = [
-        "nbr client", "nb client", "nbre client",
-        "nombre client", "nombre de client",
-        "nbr clients", "nb clients",
-        "client eau", "client elec",
-        "client electricite", "clients eau",
-        "clients elec", "nbr facture",
-        "nb facture", "nombre facture",
-        "top consommation", "top conso",
-        "max conso", "conso max",
-        "qui consomme", "qui consome",
-        "quel client consomme", "quel client a",
-        "client max", "client min",
-        "consomme le plus", "consomme le moins",
-        "consomation total",
-        "consommation total",
-        "consomtion total",
-        "total consommation",
-        "total consomation",
-        "total de consommation",
-        "total de consomation",
-        "consommation en janvier",
-        "consomation en janvier",
-        "consommation en fevrier",
-        "consomation en fevrier",
-        "total en janvier",
-        "total en fevrier",
-        "total en mars",
-        "total en avril",
-        "total en mai",
-        "total en juin",
-        "total en juillet",
-        "total en aout",
-        "total en septembre",
-        "total en octobre",
-        "total en novembre",
-        "total en decembre",
-        "montant maximum",
-        "montant minimum",
-        "montant moyen",
-        "montant max",
-        "montant min",
-        "montant moy",
-        "montant total en janvier",
-       "montant total en fevrier",
-       "montant total en mars",
-       "montant total en avril",
-       "montant total en mai",
-       "montant total en juin",
-       "montant total en juillet",
-       "montant total en aout",
-       "montant total en septembre",
-        "montant total en octobre",
-       "montant total en novembre",
-      "montant total en decembre",
-      "somme de montant en",
-     "somme montant en",
-      "montant en janvier",
-      "montant en fevrier",
-      "montant en mars",
-       "montant en avril",
-       "montant en mai",
-      "montant en juin",
-     "montant en juillet",
-      "montant en aout",
-      "montant en septembre",
-      "montant en octobre",
-      "montant en novembre",
-     "montant en decembre",
-     "somme de consomation en",
-     "somme consomation en",
-     "la somme de consomation en",
-     # ── filtres par agence ──
-    "agence agadir",
-    "agence inezgane",
-    "agence tiznit",
-    "agence taroudant",
-    "agence ait melloul",
-    "agence agadir nord",
-    "agence agadir sud",
-    "lagence agadir",
-    "lagence inezgane",
-    "lagence tiznit",
-    "lagence taroudant",
-    "lagence ait melloul",
-    "utulise lagence",
-    "utilise lagence",
-    "utulise l agence",
-    "utilise l agence",
-    "de lagence",
-    "de l agence",
-    "clients agence",
-    "client agence",
-    "clients de agence",
-    "client de agence",
+        "nbr client", "nb client", "nbre client", "nombre client", "nombre de client",
+        "client eau", "client elec", "client electricite", "clients eau", "clients elec",
+        "nbr facture", "nb facture", "nombre facture",
+        "top consommation", "top conso", "max conso", "conso max",
+        "qui consomme", "qui consome", "quel client consomme", "quel client a",
+        "client max", "client min", "consomme le plus", "consomme le moins",
+        "consomation total", "consommation total", "total consommation",
+        "total consomation", "total de consommation", "total de consomation",
+        "consommation en janvier", "consomation en janvier",
+        "total en janvier", "total en fevrier", "total en mars", "total en avril",
+        "total en mai", "total en juin", "total en juillet", "total en aout",
+        "total en septembre", "total en octobre", "total en novembre", "total en decembre",
+        "montant maximum", "montant minimum", "montant moyen",
+        "montant max", "montant min", "montant moy",
+        "montant total en janvier", "montant total en fevrier", "montant total en mars",
+        "montant total en avril", "montant total en mai", "montant total en juin",
+        "montant total en juillet", "montant total en aout", "montant total en septembre",
+        "montant total en octobre", "montant total en novembre", "montant total en decembre",
+        "somme de montant en", "somme montant en",
+        "montant en janvier", "montant en fevrier", "montant en mars",
+        "montant en avril", "montant en mai", "montant en juin",
+        "montant en juillet", "montant en aout", "montant en septembre",
+        "montant en octobre", "montant en novembre", "montant en decembre",
+        "somme de consomation en", "somme consomation en",
+        "agence agadir", "agence inezgane", "agence tiznit", "agence taroudant",
+        "agence ait melloul", "agence agadir nord", "agence agadir sud",
+        "lagence agadir", "lagence inezgane", "lagence tiznit", "lagence taroudant",
+        "lagence ait melloul", "utulise lagence", "utilise lagence",
+        "de lagence", "de l agence", "clients agence", "client agence",
     ]
     if any(t in q_norm for t in _questions_globales):
         return False
 
     question_lower = question.lower()
-
-    # ── Question trop courte → jamais de référence implicite ──
     mots = question_lower.split()
     if len(mots) <= 1:
         return False
@@ -467,31 +452,25 @@ def question_fait_reference(question: str) -> bool:
 
     return False
 
+
 def _extraire_client_depuis_historique(historique: list, liste_clients: list) -> str | None:
     for msg in reversed(historique):
         contenu = msg.get("content", "")
         if msg.get("role") == "user":
             res, st = detecter_client(contenu, liste_clients)
             if st == "exact":
-                print(f"  [CONTEXTE] Client trouvé dans historique user : {res}")
                 return res
         if msg.get("role") == "assistant":
             noms_gras = re.findall(r'\*\*([^*]+)\*\*', contenu)
             for nom in noms_gras:
                 for client in liste_clients:
                     if normaliser(client) == normaliser(nom):
-                        print(f"  [CONTEXTE] Client trouvé dans réponse assistant : {client}")
                         return client
             res, st = detecter_client(contenu, liste_clients)
             if st == "exact":
-                print(f"  [CONTEXTE] Client trouvé dans texte assistant : {res}")
                 return res
     return None
 
-
-# ─────────────────────────────────────────────────────────
-# MODE PDF
-# ─────────────────────────────────────────────────────────
 
 def poser_question(texte_facture: str, question: str, historique: list = []) -> str:
     historique_texte = ""
@@ -499,17 +478,17 @@ def poser_question(texte_facture: str, question: str, historique: list = []) -> 
         role = "Client" if msg["role"] == "user" else "Assistant"
         historique_texte += f"{role}: {msg['content']}\n"
 
-    prompt = f"""Tu es un assistant intelligent spécialisé dans l'analyse de factures SRM (eau et électricité).
+    prompt = f"""Tu es un assistant intelligent spécialisé dans l'analyse de factures SRM.
 
 Voici le contenu de la facture :
 {texte_facture}
 
-Historique de la conversation :
+Historique :
 {historique_texte}
 
-Nouvelle question du client : {question}
+Question : {question}
 
-Réponds de façon claire et précise en français, en tenant compte du contexte de la conversation.
+Réponds en français de façon claire et précise.
 """
     response = requests.post(
         "http://localhost:11434/api/generate",
@@ -526,6 +505,23 @@ def poser_question_excel(question: str, historique: list = []) -> str:
 
     liste_clients = resume["clients"]
 
+    # ══════════════════════════════════════════════════════════════
+    # ÉTAPE 0 — VÉRIFICATION NOM INCONNU (AVANT TOUT LE RESTE)
+    # Si la question contient un nom qui n'existe pas dans la base
+    # et qui ne ressemble à aucun client réel → réponse immédiate
+    # ══════════════════════════════════════════════════════════════
+    nom_inconnu = _detecter_nom_inconnu(question, liste_clients)
+    if nom_inconnu:
+        # Vérifier si une suggestion existe via detecter_client
+        _, statut_check = detecter_client(question, liste_clients)
+        if statut_check.startswith("suggestion:"):
+            nom_suggere = statut_check.replace("suggestion:", "")
+            return f"⚠️ Aucun client trouvé.\nVouliez-vous dire **{nom_suggere}** ?"
+        return f"⚠️ Aucun client nommé **'{nom_inconnu}'** trouvé dans la base."
+
+    # ══════════════════════════════════════════════════════════════
+    # ÉTAPE 1 — DÉTECTION CLIENT NORMALE
+    # ══════════════════════════════════════════════════════════════
     resultat, statut = detecter_client(question, liste_clients)
 
     if statut == "ambigu":
@@ -538,31 +534,43 @@ def poser_question_excel(question: str, historique: list = []) -> str:
 
     if statut.startswith("suggestion:"):
         nom_suggere = statut.replace("suggestion:", "")
-        return f"⚠️ Aucun client nommé trouvé.\nVouliez-vous dire **{nom_suggere}** ?"
+        return f"⚠️ Aucun client trouvé.\nVouliez-vous dire **{nom_suggere}** ?"
 
     client_trouve = resultat if statut == "exact" else None
 
+    # ══════════════════════════════════════════════════════════════
+    # ÉTAPE 2 — RÉFÉRENCE IMPLICITE → HISTORIQUE
+    # Seulement si aucun nom suspect détecté (déjà vérifié étape 0)
+    # ══════════════════════════════════════════════════════════════
     if not client_trouve and question_fait_reference(question):
         client_trouve = _extraire_client_depuis_historique(historique, liste_clients)
         if client_trouve:
-            print(f"  [CONTEXTE] Réutilisation client depuis historique : {client_trouve}")
+            print(f"  [CONTEXTE] Réutilisation client : {client_trouve}")
 
-    # ── Client introuvable après toutes les étapes ──
+    # ══════════════════════════════════════════════════════════════
+    # ÉTAPE 3 — CLIENT INTROUVABLE RÉSIDUEL
+    # ══════════════════════════════════════════════════════════════
     if not client_trouve and statut == "aucun":
         mots = extraire_mots_nom(question)
         noms_suspects = [
-    m for m in mots 
-    if len(m) >= 4 
-    and not _est_mot_fonctionnel_approx(m)
-    and not m.isdigit()
-]
-        _indicateurs_client = ["de ", "du client", "pour ", "infos de",
-                               "informations de", "consomation de",
-                               "montant de", "facture de"]
+            m for m in mots
+            if len(m) >= 4
+            and not _est_mot_fonctionnel_approx(m)
+            and not m.isdigit()
+        ]
+        _indicateurs_client = [
+            "de ", "du client", "pour ", "infos de", "informations de",
+            "consomation de", "montant de", "facture de"
+        ]
         q_lower = question.lower()
-        if noms_suspects and not est_question_generale(question) and any(t in q_lower for t in _indicateurs_client):
+        if noms_suspects and not est_question_generale(question) and any(
+            t in q_lower for t in _indicateurs_client
+        ):
             return f"⚠️ Aucun client nommé **'{noms_suspects[0]}'** trouvé dans la base."
 
+    # ══════════════════════════════════════════════════════════════
+    # ÉTAPE 4 — RÉPONDRE
+    # ══════════════════════════════════════════════════════════════
     historique_texte = ""
     for msg in historique[:-1]:
         role = "Client" if msg["role"] == "user" else "Assistant"
