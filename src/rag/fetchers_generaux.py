@@ -45,7 +45,7 @@ def fetch_liste_clients(mode: str = "detail") -> str:
     return "\n".join(lignes)
 
 
-def fetch_top_consommateurs(mois: str = None, mode: str = "detail") -> str:
+def fetch_top_consommateurs(mois: str = None, mode: str = "detail", limit: int = None) -> str:
     conn = _connexion()
     cursor = conn.cursor()
     if mois:
@@ -63,6 +63,13 @@ def fetch_top_consommateurs(mois: str = None, mode: str = "detail") -> str:
 
         eau  = [r for r in rows if r[2] == "m³"]
         elec = [r for r in rows if r[2] == "kWh"]
+        if limit is not None:
+            return _formater_top_n(
+                eau[:limit], elec[:limit],
+                titre=f"Top {limit} consommateurs en **{mois}**",
+                ordre="élevée → faible", emoji_top="🏆"
+            )
+
 
         if mode in ("top1", "count"):
             lignes = [f"Client avec la consommation la plus élevée en **{mois}** :"]
@@ -109,7 +116,12 @@ def fetch_top_consommateurs(mois: str = None, mode: str = "detail") -> str:
 
         eau  = sorted([r for r in rows if r[2] == "m³"],  key=lambda r: r[1], reverse=True)
         elec = sorted([r for r in rows if r[2] == "kWh"], key=lambda r: r[1], reverse=True)
-
+        if limit is not None:
+            return _formater_top_n(
+                eau[:limit], elec[:limit],
+                titre=f"Top {limit} consommateurs (tous mois confondus)",
+                ordre="élevée → faible", emoji_top="🏆"
+            )
         if mode in ("top1", "count"):
             lignes = ["Client avec la consommation la plus élevée :"]
             if eau:
@@ -139,7 +151,7 @@ def fetch_top_consommateurs(mois: str = None, mode: str = "detail") -> str:
         return "\n".join(lignes)
 
 
-def fetch_min_consommateurs(mois: str = None, mode: str = "detail") -> str:
+def fetch_min_consommateurs(mois: str = None, mode: str = "detail", limit: int = None) -> str:
     conn = _connexion()
     cursor = conn.cursor()
 
@@ -158,6 +170,12 @@ def fetch_min_consommateurs(mois: str = None, mode: str = "detail") -> str:
 
         eau  = [r for r in rows if r[2] == "m³"]
         elec = [r for r in rows if r[2] == "kWh"]
+        if limit is not None:
+            return _formater_top_n(
+                eau[:limit], elec[:limit],
+                titre=f"{limit} plus faibles consommateurs en **{mois}**",
+                ordre="faible → élevée", emoji_top="🔻"
+            )
 
         if mode in ("top1", "count"):
             lignes = [f"Client avec la consommation la plus faible en **{mois}** :"]
@@ -207,6 +225,12 @@ def fetch_min_consommateurs(mois: str = None, mode: str = "detail") -> str:
 
         eau  = [r for r in rows if r[2] == "m³"]
         elec = [r for r in rows if r[2] == "kWh"]
+        if limit is not None:
+            return _formater_top_n(
+                eau[:limit], elec[:limit],
+                titre=f"{limit} plus faibles consommateurs (tous mois confondus)",
+                ordre="faible → élevée", emoji_top="🔻"
+            )
 
         if mode in ("top1", "count"):
             lignes = ["Client avec la consommation totale la plus faible :"]
@@ -241,7 +265,7 @@ def fetch_min_consommateurs(mois: str = None, mode: str = "detail") -> str:
         return "\n".join(lignes)
 
 
-def fetch_min_consommateurs_par_service(service: str, mois: str = None, mode: str = "detail") -> str:
+def fetch_min_consommateurs_par_service(service: str, mois: str = None, mode: str = "detail", limit: int = None) -> str:
     conn = _connexion()
     cursor = conn.cursor()
 
@@ -249,9 +273,11 @@ def fetch_min_consommateurs_par_service(service: str, mois: str = None, mode: st
     if any(k in service_norm for k in ["elec", "électr"]):
         service_filtre = "electricite"
         service_label = "Électricité"
+        emoji = "⚡"
     else:
         service_filtre = "eau"
         service_label = "Eau"
+        emoji = "💧"
 
     if mois:
         mois = normaliser_mois(mois)
@@ -275,6 +301,15 @@ def fetch_min_consommateurs_par_service(service: str, mois: str = None, mode: st
 
     if not rows:
         return f"Aucune donnée trouvée pour le service {service_label}."
+    if limit is not None:
+        titre = (
+            f"{limit} plus faibles consommateurs **{service_label}**"
+            + (f" en **{mois}**" if mois else " (tous mois confondus)")
+        )
+        return _formater_top_n_service(
+            rows[:limit], service_label, emoji,
+            titre=titre, ordre="faible → élevée", emoji_top="🔻"
+        )
 
     if mode in ("top1", "list", "count"):
         return f"🔻 Plus faible consommateur **{service_label}** : **{rows[0][0]}** ({rows[0][1]:,} {rows[0][2]})"
@@ -286,8 +321,7 @@ def fetch_min_consommateurs_par_service(service: str, mois: str = None, mode: st
         lignes.append(f"{prefix} **{r[0]}** — {r[1]:,} {r[2]}")
     return "\n".join(lignes)
 
-
-def fetch_max_consommateurs_par_service(service: str, mois: str = None, mode: str = "detail") -> str:
+def fetch_max_consommateurs_par_service(service: str, mois: str = None, mode: str = "detail", limit: int = None) -> str:
     conn = _connexion()
     cursor = conn.cursor()
 
@@ -295,9 +329,11 @@ def fetch_max_consommateurs_par_service(service: str, mois: str = None, mode: st
     if any(k in service_norm for k in ["elec", "électr"]):
         service_filtre = "electricite"
         service_label = "Électricité"
+        emoji = "⚡"
     else:
         service_filtre = "eau"
         service_label = "Eau"
+        emoji = "💧"
 
     if mois:
         mois = normaliser_mois(mois)
@@ -321,6 +357,15 @@ def fetch_max_consommateurs_par_service(service: str, mois: str = None, mode: st
 
     if not rows:
         return f"Aucune donnée trouvée pour le service {service_label}."
+    if limit is not None:
+        titre = (
+            f"Top {limit} consommateurs **{service_label}**"
+            + (f" en **{mois}**" if mois else " (tous mois confondus)")
+        )
+        return _formater_top_n_service(
+            rows[:limit], service_label, emoji,
+            titre=titre, ordre="élevée → faible", emoji_top="🏆"
+        )
 
     if mode in ("top1", "list", "count"):
         return f"🏆 Plus grand consommateur **{service_label}** : **{rows[0][0]}** ({rows[0][1]:,} {rows[0][2]})"
@@ -333,7 +378,7 @@ def fetch_max_consommateurs_par_service(service: str, mois: str = None, mode: st
     return "\n".join(lignes)
 
 
-def fetch_top_montants(mois: str = None, mode: str = "detail") -> str:
+def fetch_top_montants(mois: str = None, mode: str = "detail", limit: int = None) -> str:
     conn = _connexion()
     cursor = conn.cursor()
     if mois:
@@ -348,6 +393,12 @@ def fetch_top_montants(mois: str = None, mode: str = "detail") -> str:
         conn.close()
         if not rows:
             return f"Aucune donnée trouvée pour le mois {mois}."
+        if limit is not None:
+            return _formater_top_n_montant(
+                rows[:limit],
+                titre=f"Top {limit} montants les plus élevés en **{mois}**",
+                emoji_top="🏆"
+            )
 
         if mode in ("top1", "count"):
             return f"🏆 Client avec le montant le plus élevé en **{mois}** : **{rows[0][0]}** — {rows[0][1]:,.2f} Dhs"
@@ -374,6 +425,12 @@ def fetch_top_montants(mois: str = None, mode: str = "detail") -> str:
         conn.close()
         if not rows:
             return "Aucune donnée trouvée."
+        if limit is not None:
+            return _formater_top_n_montant(
+                rows[:limit],
+                titre=f"Top {limit} montants les plus élevés (tous mois confondus)",
+                emoji_top="🏆"
+            )
 
         if mode in ("top1", "count"):
             return f"🏆 Client avec le montant total le plus élevé : **{rows[0][0]}** — {rows[0][1]:,.2f} Dhs"
@@ -391,7 +448,7 @@ def fetch_top_montants(mois: str = None, mode: str = "detail") -> str:
                 lignes.append(f"  {i}. {r[0]} — {r[1]:,.2f} Dhs")
     return "\n".join(lignes)
 
-def fetch_min_montants(mois: str = None, mode: str = "detail") -> str:
+def fetch_min_montants(mois: str = None, mode: str = "detail", limit: int = None) -> str:
     conn = _connexion()
     cursor = conn.cursor()
     if mois:
@@ -406,6 +463,12 @@ def fetch_min_montants(mois: str = None, mode: str = "detail") -> str:
         conn.close()
         if not rows:
             return f"Aucune donnée trouvée pour le mois {mois}."
+        if limit is not None:
+            return _formater_top_n_montant(
+                rows[:limit],
+                titre=f"{limit} montants les plus faibles en **{mois}**",
+                emoji_top="🔻"
+            )
 
         if mode in ("top1", "count"):
             return (f"🔻 Client avec le montant le plus faible en **{mois}** : "
@@ -430,6 +493,12 @@ def fetch_min_montants(mois: str = None, mode: str = "detail") -> str:
         conn.close()
         if not rows:
             return "Aucune donnée trouvée."
+        if limit is not None:
+            return _formater_top_n_montant(
+                rows[:limit],
+                titre=f"{limit} montants les plus faibles (tous mois confondus)",
+                emoji_top="🔻"
+            )
 
         if mode in ("top1", "count"):
             return (f"🔻 Client avec le montant total le plus faible : "
@@ -1106,3 +1175,42 @@ def fetch_question_libre(question: str, historique_texte: str) -> str:
         "- Les alertes en cours\n"
         "- Les statistiques générales"
     )
+def _formater_top_n(eau_rows, elec_rows, titre, ordre, emoji_top):
+    """Formate un classement N pour les fonctions mixtes eau+électricité."""
+    lignes = [f"{emoji_top} **{titre}** ({ordre}) :\n"]
+    if eau_rows:
+        lignes.append("💧 **Eau (m³)** :")
+        for i, r in enumerate(eau_rows, 1):
+            marker = emoji_top if i == 1 else f"  {i}."
+            lignes.append(f"{marker} **{r[0]}** — {r[1]:,} {r[2]}")
+    if elec_rows:
+        lignes.append("\n⚡ **Électricité (kWh)** :")
+        for i, r in enumerate(elec_rows, 1):
+            marker = emoji_top if i == 1 else f"  {i}."
+            lignes.append(f"{marker} **{r[0]}** — {r[1]:,} {r[2]}")
+    if not eau_rows and not elec_rows:
+        return "Aucune donnée trouvée."
+    lignes.append("\n⚠️ Classements séparés : eau (m³) ≠ électricité (kWh).")
+    return "\n".join(lignes)
+
+
+def _formater_top_n_service(rows, service_label, emoji_service, titre, ordre, emoji_top):
+    """Formate un classement N pour un service unique (eau OU électricité)."""
+    lignes = [f"{emoji_top} **{titre}** ({ordre}) :\n"]
+    lignes.append(f"{emoji_service} **{service_label}** :")
+    for i, r in enumerate(rows, 1):
+        marker = emoji_top if i == 1 else f"  {i}."
+        lignes.append(f"{marker} **{r[0]}** — {r[1]:,} {r[2]}")
+    return "\n".join(lignes)
+
+
+def _formater_top_n_montant(rows, titre, emoji_top):
+    """Formate un classement N pour les montants."""
+    lignes = [f"{emoji_top} **{titre}** :\n"]
+    for i, r in enumerate(rows, 1):
+        marker = emoji_top if i == 1 else f"  {i}."
+        if len(r) >= 3:
+            lignes.append(f"{marker} **{r[0]}** — {r[1]:,.2f} Dhs  ({r[2]})")
+        else:
+            lignes.append(f"{marker} **{r[0]}** — {r[1]:,.2f} Dhs")
+    return "\n".join(lignes)

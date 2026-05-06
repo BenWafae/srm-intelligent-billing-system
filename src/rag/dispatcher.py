@@ -133,6 +133,9 @@ _TOKENS_CONSO_ELEVEE = [
     "consomme bcp", "conso bcp", "consome bcp",
     "grande consommateur", "grande consomateur",
     "quel est le grande", "quel est le grand",
+    "ayant conso eleve", "ayant conso elevee",        
+    "ayant consomation eleve", "ayant consomation elevee",  
+    "ayant consommation eleve", "ayant consommation elevee",
 ]
 
 _TOKENS_CONSO_FAIBLE = [
@@ -160,6 +163,10 @@ _TOKENS_CONSO_FAIBLE = [
     "plus petite consomme", "petite consomme",
     "avec la min consomme", "avec la minimale consomme",
     "avec la minimum consomme", "avec le min consomme",
+    "ayant conso faible", "ayant consomation faible",  
+    "ayant consommation faible"
+     "le moins faible", "moins faible",          # ← AJOUTER
+    "ayant le moins", "ayant conso le moins"
 ]
 
 # ── Mapping mois local ──
@@ -188,6 +195,36 @@ def _extraire_mois_disp(q: str):
         if token in q:
             return _MAP_MOIS_DISP[token]
     return None
+# ajout dune nouveau regle pour cela:donner les n client ayant conso eleve
+# donner n client qui consomme le moins , les n premieres ou derniers qui consomme plus ou moins
+def _extraire_n_limit(q: str):
+    # ── Conversion nombres en lettres → chiffres ──
+    _LETTRES = {
+        "deux": 2, "trois": 3, "quatre": 4, "cinq": 5,
+        "six": 6, "sept": 7, "huit": 8, "neuf": 9, "dix": 10,
+        "vingt": 20, "trente": 30, "quarante": 40, "cinquante": 50,
+    }
+    for mot, val in _LETTRES.items():
+        if re.search(r'\b' + mot + r'\b', q):
+            return val
+
+    patterns = [
+        r'\btop\s+(\d+)\b',
+        r'\bles\s+(\d+)\b',
+        r'\b(\d+)\s+(?:premier|premiere|premiers|premieres|dernier|derniers|derniere|dernieres)',
+        r'\b(\d+)\s+(?:client|clients|consomm)',
+        r'\bdonner?\s+(?:moi\s+)?(?:les\s+)?(\d+)\b',
+        r'\bafficher?\s+(?:les\s+)?(\d+)\b',
+        r'\bmontrer?\s+(?:les\s+)?(\d+)\b',
+    ]
+    for pattern in patterns:
+        m = re.search(pattern, q)
+        if m:
+            n = int(m.group(1))
+            if 1 <= n <= 100:
+                return n
+    return None
+
 
 
 # ════════════════════════════════════════════════════════════
@@ -805,16 +842,18 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         any(t in q_norm for t in _TOKENS_MONTANT_FAIBLE) and
         not any(t in q_norm for t in ["consomme", "conso", "consomation", "consommation", "kwh", "m3"])
     )
-
+# top n consomaateur ou le mois consomateur 
     if _detect_montant_eleve:
         mois_detecte = _extraire_mois_disp(q_norm)
-        print(f"  [RÈGLE] montant élevé → fetch_top_montants(mois={mois_detecte}, mode={mode})")
-        return fetch_top_montants(mois=mois_detecte, mode=mode)
+        n_limit = _extraire_n_limit(q_norm)
+        print(f"  [RÈGLE] montant élevé → fetch_top_montants(mois={mois_detecte}, mode={mode}, limit={n_limit})")
+        return fetch_top_montants(mois=mois_detecte, mode=mode, limit=n_limit)
 
     if _detect_montant_faible:
         mois_detecte = _extraire_mois_disp(q_norm)
-        print(f"  [RÈGLE] montant faible → fetch_min_montants(mois={mois_detecte}, mode={mode})")
-        return fetch_min_montants(mois=mois_detecte, mode=mode)
+        n_limit = _extraire_n_limit(q_norm)
+        print(f"  [RÈGLE] montant faible → fetch_min_montants(mois={mois_detecte}, mode={mode}, limit={n_limit})")
+        return fetch_min_montants(mois=mois_detecte, mode=mode, limit=n_limit)
 
     # ════════════════════════════════════════════
     # RÈGLE 3 — CONSOMMATION élevée / faible
@@ -840,25 +879,30 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             "le client", "la client",
             "client avec", "avec la plus", "avec le plus",
         ])
-        mode_effectif = mode
-        if _demande_top1 and not _demande_classement:
+        n_limit = _extraire_n_limit(q_norm)
+
+        if n_limit:
+            mode_effectif = "detail"
+        elif _demande_top1 and not _demande_classement:
             mode_effectif = "top1"
+        else:
+            mode_effectif = mode
 
         if _detect_conso_elevee and demande_eau and not demande_elec:
-            return fetch_max_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode_effectif)
+            return fetch_max_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
         if _detect_conso_elevee and demande_elec and not demande_eau:
-            return fetch_max_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode_effectif)
+            return fetch_max_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
         if _detect_conso_faible and demande_eau and not demande_elec:
-            return fetch_min_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode_effectif)
+            return fetch_min_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
         if _detect_conso_faible and demande_elec and not demande_eau:
-            return fetch_min_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode_effectif)
+            return fetch_min_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
 
         if _detect_conso_elevee:
-            print(f"  [RÈGLE] consomme élevée → fetch_top_consommateurs(mois={mois_detecte}, mode={mode_effectif})")
-            return fetch_top_consommateurs(mois=mois_detecte, mode=mode_effectif)
+            print(f"  [RÈGLE] conso élevée → fetch_top_consommateurs(mois={mois_detecte}, mode={mode_effectif}, limit={n_limit})")
+            return fetch_top_consommateurs(mois=mois_detecte, mode=mode_effectif, limit=n_limit)
         if _detect_conso_faible:
-            print(f"  [RÈGLE] consomme faible → fetch_min_consommateurs(mois={mois_detecte}, mode={mode_effectif})")
-            return fetch_min_consommateurs(mois=mois_detecte, mode=mode_effectif)
+            print(f"  [RÈGLE] conso faible → fetch_min_consommateurs(mois={mois_detecte}, mode={mode_effectif}, limit={n_limit})")
+            return fetch_min_consommateurs(mois=mois_detecte, mode=mode_effectif, limit=n_limit)
 
     # ════════════════════════════════════════════
     # MODE COUNT
@@ -944,7 +988,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         "min", "moins", "faible", "bas", "petit"
     ])
 
-    if (_detect_somme_mois or _pattern_somme_conso_mois) and not _detect_intention_classement:
+    if (_detect_somme_mois or _pattern_somme_conso_mois) and not _detect_intention_classement and _extraire_n_limit(q_norm) is None:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
             print(f"  [RÈGLE] somme conso mois → fetch_somme_conso_mois(mois={mois_detecte})")
