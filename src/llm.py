@@ -122,16 +122,15 @@ PATTERNS_QUESTION_GENERALE = [
 ]
 
 MOTS_REFERENCE_IMPLICITE = [
-    "son ", "sa ", "ses ", " il ", " elle ", "lui ", "leur ",
+    "son ", "sa ", "ses ",
+    " il ", " elle ", "lui ",
     "ce client", "ce meme client", "le meme", "la meme",
     "pour lui", "pour elle", "de lui", "d elle",
-    "quel est le mois", "quel mois", "quelle est sa",
-    "quel est son", "et sa ", "et son ", "et ses ",
-    "et pour", "maintenant", "aussi", "egalement",
+    "quelle est sa", "quel est son",
+    "et sa ", "et son ", "et ses ",
     "son usage", "son service", "son agence",
     "son adresse", "son contrat", "son compteur",
 ]
-
 
 def est_question_generale(question: str) -> bool:
     q = normaliser(question)
@@ -417,11 +416,11 @@ def question_fait_reference(question: str) -> bool:
         if mot in question_lower:
             return True
 
-    if len(mots) <= 8:
-        mots_norm = [normaliser(m) for m in mots]
-        tous_fonctionnels = all(m in MOTS_FONCTIONNELS or len(m) <= 3 for m in mots_norm)
-        if tous_fonctionnels:
-            return True
+    # if len(mots) <= 8:
+    #     mots_norm = [normaliser(m) for m in mots]
+    #     tous_fonctionnels = all(m in MOTS_FONCTIONNELS or len(m) <= 3 for m in mots_norm)
+    #     if tous_fonctionnels:
+    #         return True
 
     return False
 
