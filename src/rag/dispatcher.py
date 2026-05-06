@@ -124,7 +124,7 @@ _TOKENS_CONSO_ELEVEE = [
     "consomme importante", "consomme fort", "consomme forte",
     "importante consomme", "forte consomme",
     "grand consommateur", "grand consomme",
-    "top consomme", "top consommateur",
+    "top consomme", "top consommateur","top consomateur"
     "max conso", "conso max", "client max conso",
     "max consomme", "consomme max", "maximum conso", "conso maximum",
     "consomme beaucoup", "consomateur beaucoup",
@@ -209,13 +209,16 @@ def _extraire_n_limit(q: str):
             return val
 
     patterns = [
-        r'\btop\s+(\d+)\b',
-        r'\bles\s+(\d+)\b',
+        r'\btop\s+(\d+)\b',                                          # "top 5"
+        r'\bles\s+(\d+)\b',                                          # "les 5"
         r'\b(\d+)\s+(?:premier|premiere|premiers|premieres|dernier|derniers|derniere|dernieres)',
         r'\b(\d+)\s+(?:client|clients|consomm)',
+        # ← NOUVEAU : "donner moi 5 premier", "donner 5 premiers", etc.
         r'\bdonner?\s+(?:moi\s+)?(?:les\s+)?(\d+)\b',
         r'\bafficher?\s+(?:les\s+)?(\d+)\b',
         r'\bmontrer?\s+(?:les\s+)?(\d+)\b',
+        # ← NOUVEAU : capture le chiffre isolé après mots-clés action
+        r'\b(\d+)\s+(?:top|premier|meilleur|grand|gros|eleve|consomm)',
     ]
     for pattern in patterns:
         m = re.search(pattern, q)
@@ -223,6 +226,18 @@ def _extraire_n_limit(q: str):
             n = int(m.group(1))
             if 1 <= n <= 100:
                 return n
+
+    # ← NOUVEAU : dernier recours — cherche n'importe quel nombre isolé
+    # seulement si la question contient un mot d'action + classement
+    _mots_action = ["top", "premier", "premiers", "dernier", "derniers",
+                    "meilleur", "meilleurs", "plus", "moins"]
+    if any(m in q for m in _mots_action):
+        m = re.search(r'\b(\d+)\b', q)
+        if m:
+            n = int(m.group(1))
+            if 1 <= n <= 100:
+                return n
+
     return None
 
 
@@ -665,11 +680,11 @@ def _formater_resultat_fallback(rows: list, cols: list, question: str) -> str:
 
 
 def repondre_question_generale(question: str, historique_texte: str) -> str:
-        # ── PORTAIL 1 : validation concept universel ──
+    # ── PORTAIL 1 : validation concept universel ──
     msg_concept = valider_concept_question(question)
     if msg_concept:
         return msg_concept
-    # ── PORTAIL 2 : questions ambiguës (déjà en place) ─
+    # ── PORTAIL 2 : questions ambiguës ──
     from rag.intent import detecter_question_ambigue
     msg = detecter_question_ambigue(question)
     if msg:
@@ -842,7 +857,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         any(t in q_norm for t in _TOKENS_MONTANT_FAIBLE) and
         not any(t in q_norm for t in ["consomme", "conso", "consomation", "consommation", "kwh", "m3"])
     )
-# top n consomaateur ou le mois consomateur 
+
     if _detect_montant_eleve:
         mois_detecte = _extraire_mois_disp(q_norm)
         n_limit = _extraire_n_limit(q_norm)
@@ -854,6 +869,30 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         n_limit = _extraire_n_limit(q_norm)
         print(f"  [RÈGLE] montant faible → fetch_min_montants(mois={mois_detecte}, mode={mode}, limit={n_limit})")
         return fetch_min_montants(mois=mois_detecte, mode=mode, limit=n_limit)
+
+    # ════════════════════════════════════════════
+    # RÈGLE 2.5 — TOP N détection précoce
+    # Gère : "top 5 consomateurs", "top 3 montant", etc.
+    # ════════════════════════════════════════════
+    _match_top_n = re.search(r'\btop\s+(\d+)\b', q_norm)
+    if _match_top_n:
+        n_top = int(_match_top_n.group(1))
+        if 1 <= n_top <= 100:
+            _est_montant = any(t in q_norm for t in [
+                "montant", "mantant", "paye", "paie", "depense", "ttc", "cher"
+            ])
+            _est_conso = any(t in q_norm for t in [
+                "consomm", "consomateur", "consommateur", "conso",
+                "consomation", "consomateurs", "consommateurs", "kwh", "m3"
+            ])
+            mois_detecte = _extraire_mois_disp(q_norm)
+            if _est_montant and not _est_conso:
+                print(f"  [RÈGLE top-N] montant → fetch_top_montants(limit={n_top})")
+                return fetch_top_montants(mois=mois_detecte, mode="detail", limit=n_top)
+            else:
+                # par défaut "top N" → consommation
+                print(f"  [RÈGLE top-N] conso → fetch_top_consommateurs(limit={n_top})")
+                return fetch_top_consommateurs(mois=mois_detecte, mode="detail", limit=n_top)
 
     # ════════════════════════════════════════════
     # RÈGLE 3 — CONSOMMATION élevée / faible
@@ -1028,13 +1067,17 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     if intent == "LISTE_CLIENTS":
         return fetch_liste_clients(mode=mode)
     elif intent == "TOP_CONSOMMATEURS":
-        return fetch_top_consommateurs(mois=params.get("mois"), mode=mode)
+        n_limit = _extraire_n_limit(q_norm)
+        return fetch_top_consommateurs(mois=params.get("mois"), mode=mode, limit=n_limit)
     elif intent == "MIN_CONSOMMATEURS":
-        return fetch_min_consommateurs(mois=params.get("mois"), mode=mode)
+        n_limit = _extraire_n_limit(q_norm)
+        return fetch_min_consommateurs(mois=params.get("mois"), mode=mode, limit=n_limit)
     elif intent == "TOP_MONTANTS":
-        return fetch_top_montants(mois=params.get("mois"), mode=mode)
+        n_limit = _extraire_n_limit(q_norm)
+        return fetch_top_montants(mois=params.get("mois"), mode=mode, limit=n_limit)
     elif intent == "MIN_MONTANTS":
-        return fetch_min_montants(mois=params.get("mois"), mode=mode)
+        n_limit = _extraire_n_limit(q_norm)
+        return fetch_min_montants(mois=params.get("mois"), mode=mode, limit=n_limit)
     elif intent == "CLASSEMENT_PAR_MOIS":
         return fetch_classement_par_mois(mode=mode)
     elif intent == "AGENCE_PAR_CLIENT":
