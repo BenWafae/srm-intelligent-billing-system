@@ -235,10 +235,6 @@ def extraire_mots_nom(question: str) -> list[str]:
     return [m for m in mots if len(m) > 2 and m not in MOTS_FONCTIONNELS]
 
 
-# ─────────────────────────────────────────────────────────
-# FONCTION CLÉ : détecte si la question contient un nom
-# inconnu (ni dans la base, ni mot fonctionnel/métier)
-# ─────────────────────────────────────────────────────────
 def _detecter_nom_inconnu(question: str, liste_clients: list) -> str | None:
     if est_question_generale(question):
         return None
@@ -278,32 +274,20 @@ def _detecter_nom_inconnu(question: str, liste_clients: list) -> str | None:
         return prev[-1]
 
     def verifier_mot(mot: str) -> str:
-        """
-        Retourne :
-        - "exact"      : mot trouvé exactement dans la base → client valide
-        - "suggestion" : mot proche d'un client → fuzzy suggestion
-        - "inconnu"    : mot absent et pas proche → client inexistant
-        """
-        # ── Correspondance exacte ──
         if mot in tous_noms_reels:
             return "exact"
-
-        # ── Fuzzy selon longueur ──
         if len(mot) <= 3:
             seuil = 0
         elif len(mot) <= 5:
             seuil = 1
         else:
             seuil = 2
-
         for nom in tous_noms_reels:
             if abs(len(mot) - len(nom)) <= seuil:
                 if levenshtein(mot, nom) <= seuil:
-                    return "suggestion"  # ← proche mais pas exact
-
+                    return "suggestion"
         return "inconnu"
 
-    # ── Extraire le mot après l'indicateur ──
     for indicateur in sorted(_indicateurs, key=len, reverse=True):
         if indicateur in q_lower:
             apres = q_lower.split(indicateur, 1)[1].strip()
@@ -311,21 +295,15 @@ def _detecter_nom_inconnu(question: str, liste_clients: list) -> str | None:
             if not mots_apres:
                 continue
             candidat = mots_apres[0]
-
             if candidat in MOTS_FONCTIONNELS or candidat in MOTS_METIER:
                 continue
-
             resultat = verifier_mot(candidat)
-
             if resultat == "exact":
-                return None  # client valide → laisser passer
-
+                return None
             if resultat == "suggestion":
-                # ← NOUVEAU : proche mais pas exact → aussi bloquer
                 return candidat
-
             if resultat == "inconnu":
-                return candidat  # nom vraiment inexistant
+                return candidat
 
     return None
 
@@ -337,17 +315,14 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
     q_norm = normaliser(question)
     clients_norm = [(c, normaliser(c)) for c in liste_clients]
 
-    # Étape 1 : correspondance nom complet exact
     for client_original, client_norm in clients_norm:
         if client_norm in q_norm:
             return client_original, "exact"
 
-    # Étape 2 : extraire les mots-noms
     mots_nom_question = extraire_mots_nom(question)
     if not mots_nom_question:
         return None, "aucun"
 
-    # Étape 3 : mots reconnus dans la base
     mots_dans_base = [m for m in mots_nom_question
                       if any(m in cn for (_, cn) in clients_norm)]
     if not mots_dans_base:
@@ -374,12 +349,10 @@ def detecter_client(question: str, liste_clients: list) -> tuple[str | list | No
 
         return None, "aucun"
 
-    # Étape 4 : filtrer mots plausibles
     mots_plausibles = [m for m in mots_dans_base if len(m) >= 4]
     if not mots_plausibles:
         return None, "aucun"
 
-    # Étape 5 : clients correspondants
     clients_correspondants = []
     for client_original, client_norm in clients_norm:
         for m in mots_plausibles:
@@ -497,7 +470,12 @@ Réponds en français de façon claire et précise.
     return response.json()["response"]
 
 
-def poser_question_excel(question: str, historique: list = []) -> str:
+# ══════════════════════════════════════════════════════════════
+# SEUL CHANGEMENT : ajout du paramètre nom_fichier
+# qui est propagé jusqu'au dispatcher via
+# repondre_question_generale et repondre_question_client
+# ══════════════════════════════════════════════════════════════
+def poser_question_excel(question: str, historique: list = [], nom_fichier: str = "") -> str:
     resume = get_resume_excel()
 
     if resume["total"] == 0:
@@ -505,23 +483,16 @@ def poser_question_excel(question: str, historique: list = []) -> str:
 
     liste_clients = resume["clients"]
 
-    # ══════════════════════════════════════════════════════════════
-    # ÉTAPE 0 — VÉRIFICATION NOM INCONNU (AVANT TOUT LE RESTE)
-    # Si la question contient un nom qui n'existe pas dans la base
-    # et qui ne ressemble à aucun client réel → réponse immédiate
-    # ══════════════════════════════════════════════════════════════
+    # ── ÉTAPE 0 — VÉRIFICATION NOM INCONNU ──
     nom_inconnu = _detecter_nom_inconnu(question, liste_clients)
     if nom_inconnu:
-        # Vérifier si une suggestion existe via detecter_client
         _, statut_check = detecter_client(question, liste_clients)
         if statut_check.startswith("suggestion:"):
             nom_suggere = statut_check.replace("suggestion:", "")
             return f"⚠️ Aucun client trouvé.\nVouliez-vous dire **{nom_suggere}** ?"
         return f"⚠️ Aucun client nommé **'{nom_inconnu}'** trouvé dans la base."
 
-    # ══════════════════════════════════════════════════════════════
-    # ÉTAPE 1 — DÉTECTION CLIENT NORMALE
-    # ══════════════════════════════════════════════════════════════
+    # ── ÉTAPE 1 — DÉTECTION CLIENT ──
     resultat, statut = detecter_client(question, liste_clients)
 
     if statut == "ambigu":
@@ -538,18 +509,13 @@ def poser_question_excel(question: str, historique: list = []) -> str:
 
     client_trouve = resultat if statut == "exact" else None
 
-    # ══════════════════════════════════════════════════════════════
-    # ÉTAPE 2 — RÉFÉRENCE IMPLICITE → HISTORIQUE
-    # Seulement si aucun nom suspect détecté (déjà vérifié étape 0)
-    # ══════════════════════════════════════════════════════════════
+    # ── ÉTAPE 2 — RÉFÉRENCE IMPLICITE → HISTORIQUE ──
     if not client_trouve and question_fait_reference(question):
         client_trouve = _extraire_client_depuis_historique(historique, liste_clients)
         if client_trouve:
             print(f"  [CONTEXTE] Réutilisation client : {client_trouve}")
 
-    # ══════════════════════════════════════════════════════════════
-    # ÉTAPE 3 — CLIENT INTROUVABLE RÉSIDUEL
-    # ══════════════════════════════════════════════════════════════
+    # ── ÉTAPE 3 — CLIENT INTROUVABLE RÉSIDUEL ──
     if not client_trouve and statut == "aucun":
         mots = extraire_mots_nom(question)
         noms_suspects = [
@@ -568,15 +534,15 @@ def poser_question_excel(question: str, historique: list = []) -> str:
         ):
             return f"⚠️ Aucun client nommé **'{noms_suspects[0]}'** trouvé dans la base."
 
-    # ══════════════════════════════════════════════════════════════
-    # ÉTAPE 4 — RÉPONDRE
-    # ══════════════════════════════════════════════════════════════
+    # ── ÉTAPE 4 — RÉPONDRE ──
     historique_texte = ""
     for msg in historique[:-1]:
         role = "Client" if msg["role"] == "user" else "Assistant"
         historique_texte += f"{role}: {msg['content']}\n"
 
     if client_trouve:
-        return repondre_question_client(question, client_trouve, historique_texte)
+        # ← nom_fichier propagé au dispatcher
+        return repondre_question_client(question, client_trouve, historique_texte, nom_fichier=nom_fichier)
 
-    return repondre_question_generale(question, historique_texte)
+    # ← nom_fichier propagé au dispatcher
+    return repondre_question_generale(question, historique_texte, nom_fichier=nom_fichier)

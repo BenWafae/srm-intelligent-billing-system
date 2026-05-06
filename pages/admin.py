@@ -68,6 +68,7 @@ def afficher_admin():
         )
 
         if fichier_excel:
+            nom_fichier = fichier_excel.name
             chemin_temp = "excel_temp.xlsx"
             with open(chemin_temp, "wb") as f:
                 f.write(fichier_excel.read())
@@ -86,7 +87,7 @@ def afficher_admin():
                     )
                     if st.button("✅ Importer les nouvelles lignes", key="btn_import_excel"):
                         with st.spinner("Import en cours..."):
-                            resultat = importer_excel_en_db(lignes, mode="skip")
+                            resultat = importer_excel_en_db(lignes, mode="skip", nom_fichier=nom_fichier)
                         st.success(f"✅ {resultat['nouvelles']} factures ajoutées.")
                         st.rerun()
 
@@ -94,7 +95,7 @@ def afficher_admin():
                     st.info(f"📋 {apercu['total']} nouvelles lignes à importer.")
                     if st.button("✅ Confirmer l'import", key="btn_import_excel"):
                         with st.spinner("Import en cours..."):
-                            resultat = importer_excel_en_db(lignes, mode="skip")
+                            resultat = importer_excel_en_db(lignes, mode="skip", nom_fichier=nom_fichier)
                         st.success(f"✅ {resultat['nouvelles']} factures ajoutées.")
                         st.rerun()
 

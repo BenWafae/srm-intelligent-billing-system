@@ -14,17 +14,52 @@ def _connexion():
     return sqlite3.connect(DB_PATH)
 
 
-def fetch_liste_clients(mode: str = "detail") -> str:
+def _filtre_fichier(nom_fichier: str) -> tuple[str, list]:
+    """
+    Retourne la clause SQL et les paramètres associés au filtre nom_fichier.
+    Si nom_fichier est vide → pas de filtre (comportement original conservé).
+
+    Usage dans un WHERE existant :
+        clause, fp = _filtre_fichier(nom_fichier)
+        WHERE ... {clause}
+        params = [...] + fp
+
+    Usage sans WHERE existant (GROUP BY / ORDER BY uniquement) :
+        clause, fp = _filtre_fichier(nom_fichier)
+        # clause sera "WHERE nom_fichier = ?" ou ""
+        # à insérer avant GROUP BY
+    """
+    if nom_fichier:
+        return "AND nom_fichier = ?", [nom_fichier]
+    return "", []
+
+
+def _where_fichier(nom_fichier: str) -> tuple[str, list]:
+    """
+    Variante pour les requêtes sans WHERE préexistant.
+    Retourne ("WHERE nom_fichier = ?", [nom_fichier]) ou ("", []).
+    """
+    if nom_fichier:
+        return "WHERE nom_fichier = ?", [nom_fichier]
+    return "", []
+
+
+# ════════════════════════════════════════════════════════════
+
+
+def fetch_liste_clients(mode: str = "detail", nom_fichier: str = "") -> str:
+    where, fp = _where_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT nom_client, agence, usage, type_service,
                COUNT(*) as nb_mois,
                ROUND(SUM(montant_ttc), 2) as total_ttc
         FROM factures_excel
+        {where}
         GROUP BY nom_client
         ORDER BY nom_client
-    """)
+    """, fp)
     rows = cursor.fetchall()
     conn.close()
 
@@ -45,17 +80,19 @@ def fetch_liste_clients(mode: str = "detail") -> str:
     return "\n".join(lignes)
 
 
-def fetch_top_consommateurs(mois: str = None, mode: str = "detail", limit: int = None) -> str:
+def fetch_top_consommateurs(mois: str = None, mode: str = "detail", limit: int = None, nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
+
     if mois:
         mois = normaliser_mois(mois)
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, consommation, unite, mois_source
             FROM factures_excel
-            WHERE mois_source LIKE ?
+            WHERE mois_source LIKE ? {clause}
             ORDER BY consommation DESC
-        """, (f"%{mois}%",))
+        """, [f"%{mois}%"] + fp)
         rows = cursor.fetchall()
         conn.close()
         if not rows:
@@ -69,7 +106,6 @@ def fetch_top_consommateurs(mois: str = None, mode: str = "detail", limit: int =
                 titre=f"Top {limit} consommateurs en **{mois}**",
                 ordre="élevée → faible", emoji_top="🏆"
             )
-
 
         if mode in ("top1", "count"):
             lignes = [f"Client avec la consommation la plus élevée en **{mois}** :"]
@@ -103,12 +139,14 @@ def fetch_top_consommateurs(mois: str = None, mode: str = "detail", limit: int =
         return "\n".join(lignes)
 
     else:
-        cursor.execute("""
+        where, fp2 = _where_fichier(nom_fichier)
+        cursor.execute(f"""
             SELECT nom_client, ROUND(SUM(consommation), 2) as total_conso, unite
             FROM factures_excel
+            {where}
             GROUP BY nom_client
             ORDER BY total_conso DESC
-        """)
+        """, fp2)
         rows = cursor.fetchall()
         conn.close()
         if not rows:
@@ -151,18 +189,19 @@ def fetch_top_consommateurs(mois: str = None, mode: str = "detail", limit: int =
         return "\n".join(lignes)
 
 
-def fetch_min_consommateurs(mois: str = None, mode: str = "detail", limit: int = None) -> str:
+def fetch_min_consommateurs(mois: str = None, mode: str = "detail", limit: int = None, nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
 
     if mois:
         mois = normaliser_mois(mois)
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, consommation, unite, mois_source
             FROM factures_excel
-            WHERE mois_source LIKE ?
+            WHERE mois_source LIKE ? {clause}
             ORDER BY consommation ASC
-        """, (f"%{mois}%",))
+        """, [f"%{mois}%"] + fp)
         rows = cursor.fetchall()
         conn.close()
         if not rows:
@@ -212,12 +251,14 @@ def fetch_min_consommateurs(mois: str = None, mode: str = "detail", limit: int =
         return "\n".join(lignes)
 
     else:
-        cursor.execute("""
+        where, fp2 = _where_fichier(nom_fichier)
+        cursor.execute(f"""
             SELECT nom_client, ROUND(SUM(consommation), 2) as total_conso, unite
             FROM factures_excel
+            {where}
             GROUP BY nom_client
             ORDER BY total_conso ASC
-        """)
+        """, fp2)
         rows = cursor.fetchall()
         conn.close()
         if not rows:
@@ -265,7 +306,8 @@ def fetch_min_consommateurs(mois: str = None, mode: str = "detail", limit: int =
         return "\n".join(lignes)
 
 
-def fetch_min_consommateurs_par_service(service: str, mois: str = None, mode: str = "detail", limit: int = None) -> str:
+def fetch_min_consommateurs_par_service(service: str, mois: str = None, mode: str = "detail", limit: int = None, nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
 
@@ -281,20 +323,21 @@ def fetch_min_consommateurs_par_service(service: str, mois: str = None, mode: st
 
     if mois:
         mois = normaliser_mois(mois)
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, consommation, unite, mois_source
             FROM factures_excel
-            WHERE LOWER(type_service) = ? AND mois_source LIKE ?
+            WHERE LOWER(type_service) = ? AND mois_source LIKE ? {clause}
             ORDER BY consommation ASC
-        """, (service_filtre, f"%{mois}%"))
+        """, [service_filtre, f"%{mois}%"] + fp)
     else:
-        cursor.execute("""
+        where, fp2 = _where_fichier(nom_fichier)
+        cursor.execute(f"""
             SELECT nom_client, ROUND(SUM(consommation), 2) as total_conso, unite
             FROM factures_excel
-            WHERE LOWER(type_service) = ?
+            WHERE LOWER(type_service) = ? {clause}
             GROUP BY nom_client
             ORDER BY total_conso ASC
-        """, (service_filtre,))
+        """, [service_filtre] + fp)
 
     rows = cursor.fetchall()
     conn.close()
@@ -321,7 +364,9 @@ def fetch_min_consommateurs_par_service(service: str, mois: str = None, mode: st
         lignes.append(f"{prefix} **{r[0]}** — {r[1]:,} {r[2]}")
     return "\n".join(lignes)
 
-def fetch_max_consommateurs_par_service(service: str, mois: str = None, mode: str = "detail", limit: int = None) -> str:
+
+def fetch_max_consommateurs_par_service(service: str, mois: str = None, mode: str = "detail", limit: int = None, nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
 
@@ -337,20 +382,20 @@ def fetch_max_consommateurs_par_service(service: str, mois: str = None, mode: st
 
     if mois:
         mois = normaliser_mois(mois)
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, consommation, unite, mois_source
             FROM factures_excel
-            WHERE LOWER(type_service) = ? AND mois_source LIKE ?
+            WHERE LOWER(type_service) = ? AND mois_source LIKE ? {clause}
             ORDER BY consommation DESC
-        """, (service_filtre, f"%{mois}%"))
+        """, [service_filtre, f"%{mois}%"] + fp)
     else:
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, ROUND(SUM(consommation), 2) as total_conso, unite
             FROM factures_excel
-            WHERE LOWER(type_service) = ?
+            WHERE LOWER(type_service) = ? {clause}
             GROUP BY nom_client
             ORDER BY total_conso DESC
-        """, (service_filtre,))
+        """, [service_filtre] + fp)
 
     rows = cursor.fetchall()
     conn.close()
@@ -378,17 +423,19 @@ def fetch_max_consommateurs_par_service(service: str, mois: str = None, mode: st
     return "\n".join(lignes)
 
 
-def fetch_top_montants(mois: str = None, mode: str = "detail", limit: int = None) -> str:
+def fetch_top_montants(mois: str = None, mode: str = "detail", limit: int = None, nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
+
     if mois:
         mois = normaliser_mois(mois)
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, montant_ttc, mois_source
             FROM factures_excel
-            WHERE mois_source LIKE ?
+            WHERE mois_source LIKE ? {clause}
             ORDER BY montant_ttc DESC
-        """, (f"%{mois}%",))
+        """, [f"%{mois}%"] + fp)
         rows = cursor.fetchall()
         conn.close()
         if not rows:
@@ -399,7 +446,6 @@ def fetch_top_montants(mois: str = None, mode: str = "detail", limit: int = None
                 titre=f"Top {limit} montants les plus élevés en **{mois}**",
                 emoji_top="🏆"
             )
-
         if mode in ("top1", "count"):
             return f"🏆 Client avec le montant le plus élevé en **{mois}** : **{rows[0][0]}** — {rows[0][1]:,.2f} Dhs"
         if mode == "list":
@@ -415,12 +461,14 @@ def fetch_top_montants(mois: str = None, mode: str = "detail", limit: int = None
             for i, r in enumerate(rows, 1):
                 lignes.append(f"  {i}. {r[0]} — {r[1]:,.2f} Dhs")
     else:
-        cursor.execute("""
+        where, fp2 = _where_fichier(nom_fichier)
+        cursor.execute(f"""
             SELECT nom_client, ROUND(SUM(montant_ttc), 2) as total
             FROM factures_excel
+            {where}
             GROUP BY nom_client
             ORDER BY total DESC
-        """)
+        """, fp2)
         rows = cursor.fetchall()
         conn.close()
         if not rows:
@@ -431,7 +479,6 @@ def fetch_top_montants(mois: str = None, mode: str = "detail", limit: int = None
                 titre=f"Top {limit} montants les plus élevés (tous mois confondus)",
                 emoji_top="🏆"
             )
-
         if mode in ("top1", "count"):
             return f"🏆 Client avec le montant total le plus élevé : **{rows[0][0]}** — {rows[0][1]:,.2f} Dhs"
         if mode == "list":
@@ -448,17 +495,20 @@ def fetch_top_montants(mois: str = None, mode: str = "detail", limit: int = None
                 lignes.append(f"  {i}. {r[0]} — {r[1]:,.2f} Dhs")
     return "\n".join(lignes)
 
-def fetch_min_montants(mois: str = None, mode: str = "detail", limit: int = None) -> str:
+
+def fetch_min_montants(mois: str = None, mode: str = "detail", limit: int = None, nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
+
     if mois:
         mois = normaliser_mois(mois)
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, montant_ttc, mois_source
             FROM factures_excel
-            WHERE mois_source LIKE ?
+            WHERE mois_source LIKE ? {clause}
             ORDER BY montant_ttc ASC
-        """, (f"%{mois}%",))
+        """, [f"%{mois}%"] + fp)
         rows = cursor.fetchall()
         conn.close()
         if not rows:
@@ -469,7 +519,6 @@ def fetch_min_montants(mois: str = None, mode: str = "detail", limit: int = None
                 titre=f"{limit} montants les plus faibles en **{mois}**",
                 emoji_top="🔻"
             )
-
         if mode in ("top1", "count"):
             return (f"🔻 Client avec le montant le plus faible en **{mois}** : "
                     f"**{rows[0][0]}** — {rows[0][1]:,.2f} Dhs")
@@ -483,12 +532,14 @@ def fetch_min_montants(mois: str = None, mode: str = "detail", limit: int = None
             prefix = "🔻" if r[1] == min_val else f"  {rows.index(r)+1}."
             lignes.append(f"{prefix} **{r[0]}** — {r[1]:,.2f} Dhs")
     else:
-        cursor.execute("""
+        where, fp2 = _where_fichier(nom_fichier)
+        cursor.execute(f"""
             SELECT nom_client, ROUND(SUM(montant_ttc), 2) as total
             FROM factures_excel
+            {where}
             GROUP BY nom_client
             ORDER BY total ASC
-        """)
+        """, fp2)
         rows = cursor.fetchall()
         conn.close()
         if not rows:
@@ -499,7 +550,6 @@ def fetch_min_montants(mois: str = None, mode: str = "detail", limit: int = None
                 titre=f"{limit} montants les plus faibles (tous mois confondus)",
                 emoji_top="🔻"
             )
-
         if mode in ("top1", "count"):
             return (f"🔻 Client avec le montant total le plus faible : "
                     f"**{rows[0][0]}** — {rows[0][1]:,.2f} Dhs")
@@ -515,16 +565,18 @@ def fetch_min_montants(mois: str = None, mode: str = "detail", limit: int = None
     return "\n".join(lignes)
 
 
-def fetch_classement_par_mois(mode: str = "detail") -> str:
+def fetch_classement_par_mois(mode: str = "detail", nom_fichier: str = "") -> str:
+    where, fp = _where_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT mois_source, nom_client, montant_ttc, consommation, unite
         FROM factures_excel
+        {where}
         ORDER BY
             SUBSTR(periode_debut,7,4)||SUBSTR(periode_debut,4,2)||SUBSTR(periode_debut,1,2),
             montant_ttc DESC
-    """)
+    """, fp)
     rows = cursor.fetchall()
     conn.close()
 
@@ -550,19 +602,21 @@ def fetch_classement_par_mois(mode: str = "detail") -> str:
     return "\n".join(lignes)
 
 
-def fetch_par_agence(agence: str = None, mode: str = "detail") -> str:
+def fetch_par_agence(agence: str = None, mode: str = "detail", nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
+
     if agence:
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, usage, type_service,
                    COUNT(*) as nb_mois,
                    ROUND(SUM(montant_ttc), 2) as total
             FROM factures_excel
-            WHERE agence LIKE ?
+            WHERE agence LIKE ? {clause}
             GROUP BY nom_client
             ORDER BY nom_client
-        """, (f"%{agence}%",))
+        """, [f"%{agence}%"] + fp)
         rows = cursor.fetchall()
         conn.close()
 
@@ -581,13 +635,15 @@ def fetch_par_agence(agence: str = None, mode: str = "detail") -> str:
                 f"{r[3]} mois | Total : {r[4]:,.2f} Dhs"
             )
     else:
-        cursor.execute("""
+        where, fp2 = _where_fichier(nom_fichier)
+        cursor.execute(f"""
             SELECT agence, COUNT(DISTINCT nom_client) as nb_clients,
                    ROUND(SUM(montant_ttc), 2) as total
             FROM factures_excel
+            {where}
             GROUP BY agence
             ORDER BY nb_clients DESC
-        """)
+        """, fp2)
         rows = cursor.fetchall()
         conn.close()
         if not rows:
@@ -614,27 +670,17 @@ def fetch_par_agence(agence: str = None, mode: str = "detail") -> str:
     return "\n".join(lignes)
 
 
-# ════════════════════════════════════════════════════════════
-# ✅ NOUVEAU — Agence de chaque client
-# Retourne l'agence rattachée à chaque client,
-# groupé par agence en mode detail, liste plate en mode list.
-#
-# Modes :
-#   detail → groupé par agence, avec service et usage
-#   list   → liste plate "Client → Agence"
-#   count  → nombre de clients et d'agences uniques
-#   top1   → identique à list (pas de notion de "top" ici)
-# ════════════════════════════════════════════════════════════
-
-def fetch_agence_par_client(mode: str = "detail") -> str:
+def fetch_agence_par_client(mode: str = "detail", nom_fichier: str = "") -> str:
+    where, fp = _where_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT nom_client, agence, type_service, usage
         FROM factures_excel
+        {where}
         GROUP BY nom_client
         ORDER BY agence, nom_client
-    """)
+    """, fp)
     rows = cursor.fetchall()
     conn.close()
 
@@ -654,7 +700,6 @@ def fetch_agence_par_client(mode: str = "detail") -> str:
             lignes.append(f"- **{r[0]}** → {r[1]}")
         return "\n".join(lignes)
 
-    # ── mode detail : groupé par agence ──
     par_agence = {}
     for r in rows:
         agence = r[1] or "Non définie"
@@ -671,7 +716,8 @@ def fetch_agence_par_client(mode: str = "detail") -> str:
     return "\n".join(lignes)
 
 
-def fetch_par_usage(usage: str = None, mode: str = "detail") -> str:
+def fetch_par_usage(usage: str = None, mode: str = "detail", nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
 
@@ -682,15 +728,15 @@ def fetch_par_usage(usage: str = None, mode: str = "detail") -> str:
         filtre = f"%{usage_normalise}%"
         label = usage_normalise
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, agence, type_service,
                    COUNT(*) as nb_mois,
                    ROUND(SUM(montant_ttc), 2) as total
             FROM factures_excel
-            WHERE usage LIKE ?
+            WHERE usage LIKE ? {clause}
             GROUP BY nom_client
             ORDER BY nom_client
-        """, (filtre,))
+        """, [filtre] + fp)
         rows = cursor.fetchall()
         conn.close()
 
@@ -698,15 +744,16 @@ def fetch_par_usage(usage: str = None, mode: str = "detail") -> str:
             partie = usage_normalise.replace("USAGE ", "").strip()
             conn2 = _connexion()
             cursor2 = conn2.cursor()
-            cursor2.execute("""
+            clause2, fp2 = _filtre_fichier(nom_fichier)
+            cursor2.execute(f"""
                 SELECT nom_client, agence, type_service,
                        COUNT(*) as nb_mois,
                        ROUND(SUM(montant_ttc), 2) as total
                 FROM factures_excel
-                WHERE usage LIKE ?
+                WHERE usage LIKE ? {clause2}
                 GROUP BY nom_client
                 ORDER BY nom_client
-            """, (f"%{partie}%",))
+            """, [f"%{partie}%"] + fp2)
             rows = cursor2.fetchall()
             conn2.close()
 
@@ -731,19 +778,28 @@ def fetch_par_usage(usage: str = None, mode: str = "detail") -> str:
 
     else:
         if mode == "count":
-            cursor.execute("SELECT COUNT(DISTINCT usage) FROM factures_excel WHERE usage IS NOT NULL")
+            if nom_fichier:
+                cursor.execute("""
+                    SELECT COUNT(DISTINCT usage) FROM factures_excel
+                    WHERE usage IS NOT NULL AND nom_fichier = ?
+                """, [nom_fichier])
+            else:
+                cursor.execute("""
+                    SELECT COUNT(DISTINCT usage) FROM factures_excel
+                    WHERE usage IS NOT NULL
+                """)
             nb = cursor.fetchone()[0]
             conn.close()
             return f"Il y a **{nb} types d'usage** différents."
 
         if mode in ("list", "top1"):
-            cursor.execute("""
+            cursor.execute(f"""
                 SELECT usage, COUNT(DISTINCT nom_client) as nb_clients
                 FROM factures_excel
-                WHERE usage IS NOT NULL
+                WHERE usage IS NOT NULL {clause}
                 GROUP BY usage
                 ORDER BY nb_clients DESC
-            """)
+            """, fp)
             rows = cursor.fetchall()
             conn.close()
             lignes = ["Types d'usage disponibles :"]
@@ -751,14 +807,16 @@ def fetch_par_usage(usage: str = None, mode: str = "detail") -> str:
                 lignes.append(f"- {r[0]} ({r[1]} clients)")
             return "\n".join(lignes)
 
-        cursor.execute("""
+        where, fp2 = _where_fichier(nom_fichier)
+        cursor.execute(f"""
             SELECT nom_client, usage, agence, type_service,
                    COUNT(*) as nb_mois,
                    ROUND(SUM(montant_ttc), 2) as total
             FROM factures_excel
+            {where}
             GROUP BY nom_client
             ORDER BY usage, nom_client
-        """)
+        """, fp2)
         rows = cursor.fetchall()
         conn.close()
 
@@ -784,7 +842,8 @@ def fetch_par_usage(usage: str = None, mode: str = "detail") -> str:
         return "\n".join(lignes)
 
 
-def fetch_par_service(service: str = None, mode: str = "detail") -> str:
+def fetch_par_service(service: str = None, mode: str = "detail", nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
 
@@ -800,17 +859,17 @@ def fetch_par_service(service: str = None, mode: str = "detail") -> str:
             service_filtre = service_norm
             service_label = service
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom_client, agence, usage,
                    ROUND(SUM(consommation), 2) as total_conso,
                    unite,
                    ROUND(SUM(montant_ttc), 2) as total_ttc,
                    COUNT(*) as nb_mois
             FROM factures_excel
-            WHERE LOWER(type_service) = ?
+            WHERE LOWER(type_service) = ? {clause}
             GROUP BY nom_client
             ORDER BY nom_client
-        """, (service_filtre,))
+        """, [service_filtre] + fp)
         rows = cursor.fetchall()
         conn.close()
 
@@ -834,16 +893,17 @@ def fetch_par_service(service: str = None, mode: str = "detail") -> str:
         return "\n".join(lignes)
 
     else:
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT LOWER(type_service) as service,
                    COUNT(DISTINCT nom_client) as nb_clients,
                    GROUP_CONCAT(DISTINCT nom_client) as noms,
                    ROUND(SUM(consommation), 2) as total_conso,
                    ROUND(SUM(montant_ttc), 2) as total_ttc
             FROM factures_excel
+            WHERE 1=1 {clause}
             GROUP BY LOWER(type_service)
             ORDER BY nb_clients DESC
-        """)
+        """, fp)
         rows = cursor.fetchall()
         conn.close()
 
@@ -876,56 +936,49 @@ def fetch_par_service(service: str = None, mode: str = "detail") -> str:
         return "\n".join(lignes)
 
 
-def fetch_alertes(mode: str = "detail") -> str:
+def fetch_alertes(mode: str = "detail", nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT nom_client, agence, mois_source, montant_ttc, alerte
         FROM factures_excel
-        WHERE alerte IS NOT NULL AND alerte != '' AND alerte != 'None'
+        WHERE alerte IS NOT NULL AND alerte != '' AND alerte != 'None' {clause}
         ORDER BY nom_client, mois_source
-    """)
+    """, fp)
     rows = cursor.fetchall()
     conn.close()
- 
+
     if not rows:
         return "✅ Aucune alerte trouvée dans la base de données."
- 
+
     clients_uniques = sorted(set(r[0] for r in rows))
     nb_factures     = len(rows)
     nb_clients      = len(clients_uniques)
- 
-    # ── MODE COUNT : juste les chiffres, instantané ──────────
+
     if mode == "count":
         return (
             f"⚠️ **{nb_factures} factures** avec alerte "
             f"concernant **{nb_clients} clients**."
         )
- 
-    # ── MODE LIST : clients + toutes leurs factures en alerte ─
-    # (plus de simple liste de noms — on donne le détail utile)
+
     if mode in ("list", "top1"):
         lignes = [
             f"⚠️ **{nb_factures} factures** avec alerte "
             f"— **{nb_clients} clients** concernés :\n"
         ]
-        # Regrouper par client
         par_client: dict = {}
         for r in rows:
             if r[0] not in par_client:
                 par_client[r[0]] = []
             par_client[r[0]].append(r)
- 
         for client, factures in par_client.items():
             agence = factures[0][1]
             lignes.append(f"👤 **{client}** ({agence}) — {len(factures)} facture(s) :")
             for f in factures:
-                lignes.append(
-                    f"   • {f[2]} | {f[3]:,.2f} Dhs | {f[4]}"
-                )
+                lignes.append(f"   • {f[2]} | {f[3]:,.2f} Dhs | {f[4]}")
         return "\n".join(lignes)
- 
-    # ── MODE DETAIL : vue complète ligne par ligne ────────────
+
     lignes = [
         f"⚠️ **{nb_factures} factures** avec alerte "
         f"({nb_clients} clients concernés) :\n"
@@ -934,20 +987,18 @@ def fetch_alertes(mode: str = "detail") -> str:
         lignes.append(
             f"- **{r[0]}** | {r[1]} | {r[2]} | {r[3]:,.2f} Dhs | Alerte : {r[4]}"
         )
- 
-    # Récapitulatif clients en bas
     lignes.append(f"\n📋 **Clients concernés ({nb_clients}) :**")
     for c in clients_uniques:
         nb = sum(1 for r in rows if r[0] == c)
         lignes.append(f"  • {c} ({nb} alerte{'s' if nb > 1 else ''})")
- 
     return "\n".join(lignes)
 
 
-def fetch_stats_generales(mode: str = "detail", question: str = "") -> str:
+def fetch_stats_generales(mode: str = "detail", question: str = "", nom_fichier: str = "") -> str:
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT
             COUNT(DISTINCT nom_client) as nb_clients,
             COUNT(DISTINCT mois_source) as nb_mois,
@@ -957,7 +1008,8 @@ def fetch_stats_generales(mode: str = "detail", question: str = "") -> str:
             ROUND(MAX(montant_ttc), 2) as max_ttc,
             ROUND(MIN(montant_ttc), 2) as min_ttc
         FROM factures_excel
-    """)
+        WHERE 1=1 {clause}
+    """, fp)
     r = cursor.fetchone()
 
     q = _normaliser_q(question)
@@ -999,19 +1051,22 @@ def fetch_stats_generales(mode: str = "detail", question: str = "") -> str:
         conn.close()
         return f"Le montant minimum enregistré est **{r[6]:,.2f} Dhs**."
 
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT nom_client, ROUND(SUM(montant_ttc), 2) as total
         FROM factures_excel
+        WHERE 1=1 {clause}
         GROUP BY nom_client
         ORDER BY total DESC
         LIMIT 1
-    """)
+    """, fp)
     top = cursor.fetchone()
-    cursor.execute("""
+
+    cursor.execute(f"""
         SELECT LOWER(type_service), COUNT(DISTINCT nom_client)
         FROM factures_excel
+        WHERE 1=1 {clause}
         GROUP BY LOWER(type_service)
-    """)
+    """, fp)
     services = {row[0]: row[1] for row in cursor.fetchall()}
     conn.close()
 
@@ -1030,19 +1085,21 @@ def fetch_stats_generales(mode: str = "detail", question: str = "") -> str:
 - Client avec le plus de dépenses : **{top[0]}** ({top[1]:,.2f} Dhs cumulés)"""
 
 
-def fetch_evolution_mois(mode: str = "detail") -> str:
+def fetch_evolution_mois(mode: str = "detail", nom_fichier: str = "") -> str:
+    where, fp = _where_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT mois_source,
                COUNT(DISTINCT nom_client) as nb_clients,
                ROUND(SUM(consommation), 2) as total_conso,
                ROUND(SUM(montant_ttc), 2) as total_ttc,
                ROUND(AVG(montant_ttc), 2) as moyenne_ttc
         FROM factures_excel
+        {where}
         GROUP BY mois_source
         ORDER BY SUBSTR(MIN(periode_debut),7,4)||SUBSTR(MIN(periode_debut),4,2)||SUBSTR(MIN(periode_debut),1,2)
-    """)
+    """, fp)
     rows = cursor.fetchall()
     conn.close()
 
@@ -1065,21 +1122,22 @@ def fetch_evolution_mois(mode: str = "detail") -> str:
     return "\n".join(lignes)
 
 
-def fetch_somme_conso_mois(mois: str) -> str:
+def fetch_somme_conso_mois(mois: str, nom_fichier: str = "") -> str:
     from normalisation import normaliser_mois
     mois_norm = normaliser_mois(mois)
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT
             LOWER(type_service) as service,
             ROUND(SUM(consommation), 2) as total_conso,
             unite,
             COUNT(DISTINCT nom_client) as nb_clients
         FROM factures_excel
-        WHERE mois_source LIKE ?
+        WHERE mois_source LIKE ? {clause}
         GROUP BY LOWER(type_service)
-    """, (f"%{mois_norm}%",))
+    """, [f"%{mois_norm}%"] + fp)
     rows = cursor.fetchall()
     conn.close()
 
@@ -1094,24 +1152,15 @@ def fetch_somme_conso_mois(mois: str) -> str:
             f"({r[3]} clients)"
         )
     return "\n".join(lignes)
-# fetsh somme_montant
-def fetch_somme_montant_mois(mois: str) -> str:
-    """
-    Retourne la somme totale des montants TTC pour un mois précis,
-    ventilée par service (eau / électricité).
- 
-    Exemples de questions couvertes :
-      - "montant total en janvier"
-      - "somme des montants de mars"
-      - "combien a-t-on payé en février"
-      - "total mantant de juil"       ← faute gérée en amont
-      - "monton global d octobre"     ← faute gérée en amont
-    """
+
+
+def fetch_somme_montant_mois(mois: str, nom_fichier: str = "") -> str:
     from normalisation import normaliser_mois
     mois_norm = normaliser_mois(mois)
+    clause, fp = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT
             LOWER(type_service)                  AS service,
             ROUND(SUM(montant_ttc), 2)           AS total_montant,
@@ -1120,28 +1169,26 @@ def fetch_somme_montant_mois(mois: str) -> str:
             ROUND(MIN(montant_ttc), 2)           AS min_montant,
             ROUND(MAX(montant_ttc), 2)           AS max_montant
         FROM factures_excel
-        WHERE mois_source LIKE ?
+        WHERE mois_source LIKE ? {clause}
         GROUP BY LOWER(type_service)
-    """, (f"%{mois_norm}%",))
+    """, [f"%{mois_norm}%"] + fp)
     rows = cursor.fetchall()
- 
-    # Total global (tous services confondus)
-    cursor.execute("""
+
+    cursor.execute(f"""
         SELECT
             ROUND(SUM(montant_ttc), 2)  AS total_global,
             COUNT(DISTINCT nom_client)  AS nb_clients_total,
             COUNT(*)                    AS nb_factures
         FROM factures_excel
-        WHERE mois_source LIKE ?
-    """, (f"%{mois_norm}%",))
+        WHERE mois_source LIKE ? {clause}
+    """, [f"%{mois_norm}%"] + fp)
     totaux = cursor.fetchone()
     conn.close()
- 
+
     if not rows:
         return f"Aucune donnée trouvée pour le mois **{mois_norm}**."
- 
+
     lignes = [f"💰 Montants TTC en **{mois_norm}** :\n"]
- 
     for r in rows:
         label = "Électricité" if r[0] == "electricite" else "Eau"
         emoji = "⚡" if r[0] == "electricite" else "💧"
@@ -1153,13 +1200,12 @@ def fetch_somme_montant_mois(mois: str) -> str:
             f"   • Montant minimum : {r[4]:,.2f} Dhs\n"
             f"   • Montant maximum : {r[5]:,.2f} Dhs"
         )
- 
+
     if totaux and totaux[0] is not None:
         lignes.append(
             f"\n📊 **Total global {mois_norm}** : **{totaux[0]:,.2f} Dhs**"
             f"  ({totaux[1]} clients · {totaux[2]} factures)"
         )
- 
     return "\n".join(lignes)
 
 
@@ -1175,8 +1221,9 @@ def fetch_question_libre(question: str, historique_texte: str) -> str:
         "- Les alertes en cours\n"
         "- Les statistiques générales"
     )
+
+
 def _formater_top_n(eau_rows, elec_rows, titre, ordre, emoji_top):
-    """Formate un classement N pour les fonctions mixtes eau+électricité."""
     lignes = [f"{emoji_top} **{titre}** ({ordre}) :\n"]
     if eau_rows:
         lignes.append("💧 **Eau (m³)** :")
@@ -1195,7 +1242,6 @@ def _formater_top_n(eau_rows, elec_rows, titre, ordre, emoji_top):
 
 
 def _formater_top_n_service(rows, service_label, emoji_service, titre, ordre, emoji_top):
-    """Formate un classement N pour un service unique (eau OU électricité)."""
     lignes = [f"{emoji_top} **{titre}** ({ordre}) :\n"]
     lignes.append(f"{emoji_service} **{service_label}** :")
     for i, r in enumerate(rows, 1):
@@ -1205,7 +1251,6 @@ def _formater_top_n_service(rows, service_label, emoji_service, titre, ordre, em
 
 
 def _formater_top_n_montant(rows, titre, emoji_top):
-    """Formate un classement N pour les montants."""
     lignes = [f"{emoji_top} **{titre}** :\n"]
     for i, r in enumerate(rows, 1):
         marker = emoji_top if i == 1 else f"  {i}."

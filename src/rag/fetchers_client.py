@@ -13,15 +13,32 @@ def _connexion():
     return sqlite3.connect(DB_PATH)
 
 
-def fetch_client_max_consommation(nom_client: str) -> str:
+def _filtre_fichier(nom_fichier: str) -> tuple[str, list]:
+    """
+    Retourne la clause SQL et les paramètres associés au filtre nom_fichier.
+    Si nom_fichier est vide → pas de filtre (comportement original).
+    Usage : clause, params = _filtre_fichier(nom_fichier)
+            WHERE nom_client LIKE ? {clause}
+            params = [f"%{nom_client}%"] + params
+    """
+    if nom_fichier:
+        return "AND nom_fichier = ?", [nom_fichier]
+    return "", []
+
+
+# ════════════════════════════════════════════════════════════
+
+
+def fetch_client_max_consommation(nom_client: str, nom_fichier: str = "") -> str:
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT mois_source, consommation, unite
         FROM factures_excel
-        WHERE nom_client LIKE ?
+        WHERE nom_client LIKE ? {clause}
         ORDER BY consommation DESC
-    """, (f"%{nom_client}%",))
+    """, [f"%{nom_client}%"] + fparams)
     rows = cursor.fetchall()
     conn.close()
     if not rows:
@@ -34,15 +51,16 @@ def fetch_client_max_consommation(nom_client: str) -> str:
     return "\n".join(lignes)
 
 
-def fetch_client_min_consommation(nom_client: str) -> str:
+def fetch_client_min_consommation(nom_client: str, nom_fichier: str = "") -> str:
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT mois_source, consommation, unite
         FROM factures_excel
-        WHERE nom_client LIKE ?
+        WHERE nom_client LIKE ? {clause}
         ORDER BY consommation ASC
-    """, (f"%{nom_client}%",))
+    """, [f"%{nom_client}%"] + fparams)
     rows = cursor.fetchall()
     conn.close()
     if not rows:
@@ -55,15 +73,16 @@ def fetch_client_min_consommation(nom_client: str) -> str:
     return "\n".join(lignes)
 
 
-def fetch_client_max_montant(nom_client: str) -> str:
+def fetch_client_max_montant(nom_client: str, nom_fichier: str = "") -> str:
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT mois_source, montant_ttc
         FROM factures_excel
-        WHERE nom_client LIKE ?
+        WHERE nom_client LIKE ? {clause}
         ORDER BY montant_ttc DESC
-    """, (f"%{nom_client}%",))
+    """, [f"%{nom_client}%"] + fparams)
     rows = cursor.fetchall()
     conn.close()
     if not rows:
@@ -76,15 +95,16 @@ def fetch_client_max_montant(nom_client: str) -> str:
     return "\n".join(lignes)
 
 
-def fetch_client_min_montant(nom_client: str) -> str:
+def fetch_client_min_montant(nom_client: str, nom_fichier: str = "") -> str:
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT mois_source, montant_ttc
         FROM factures_excel
-        WHERE nom_client LIKE ?
+        WHERE nom_client LIKE ? {clause}
         ORDER BY montant_ttc ASC
-    """, (f"%{nom_client}%",))
+    """, [f"%{nom_client}%"] + fparams)
     rows = cursor.fetchall()
     conn.close()
     if not rows:
@@ -97,15 +117,16 @@ def fetch_client_min_montant(nom_client: str) -> str:
     return "\n".join(lignes)
 
 
-def fetch_client_evolution(nom_client: str) -> str:
+def fetch_client_evolution(nom_client: str, nom_fichier: str = "") -> str:
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT mois_source, consommation, unite, montant_ttc
         FROM factures_excel
-        WHERE nom_client LIKE ?
+        WHERE nom_client LIKE ? {clause}
         ORDER BY SUBSTR(periode_debut,7,4)||SUBSTR(periode_debut,4,2)||SUBSTR(periode_debut,1,2)
-    """, (f"%{nom_client}%",))
+    """, [f"%{nom_client}%"] + fparams)
     rows = cursor.fetchall()
     conn.close()
     if not rows:
@@ -118,10 +139,11 @@ def fetch_client_evolution(nom_client: str) -> str:
     return "\n".join(lignes)
 
 
-def fetch_client_moyenne(nom_client: str) -> str:
+def fetch_client_moyenne(nom_client: str, nom_fichier: str = "") -> str:
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT
             ROUND(AVG(consommation), 2) as moy_conso,
             unite,
@@ -132,8 +154,8 @@ def fetch_client_moyenne(nom_client: str) -> str:
             ROUND(MAX(montant_ttc), 2) as max_montant,
             COUNT(*) as nb_mois
         FROM factures_excel
-        WHERE nom_client LIKE ?
-    """, (f"%{nom_client}%",))
+        WHERE nom_client LIKE ? {clause}
+    """, [f"%{nom_client}%"] + fparams)
     r = cursor.fetchone()
     conn.close()
     if not r or r[0] is None:
@@ -148,26 +170,29 @@ def fetch_client_moyenne(nom_client: str) -> str:
 - Montant maximum      : {r[6]:,.2f} Dhs"""
 
 
-def fetch_client_infos(nom_client: str, champ: str = None) -> str:
+def fetch_client_infos(nom_client: str, champ: str = None, nom_fichier: str = "") -> str:
     """
     Si champ est précisé → réponse ciblée (usage, adresse, agence, service, contrat, compteur)
     Si champ est None    → fiche complète
+    Note : le filtre nom_fichier ne change pas les infos statiques du client
+    (agence, adresse...) mais garantit la cohérence si un client apparaît
+    dans plusieurs fichiers avec des données différentes.
     """
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT nom_client, numero_client, numero_contrat, numero_compteur,
                adresse, agence, usage, type_service
         FROM factures_excel
-        WHERE nom_client LIKE ?
+        WHERE nom_client LIKE ? {clause}
         LIMIT 1
-    """, (f"%{nom_client}%",))
+    """, [f"%{nom_client}%"] + fparams)
     r = cursor.fetchone()
     conn.close()
     if not r:
         return f"Aucune donnée trouvée pour « {nom_client} »."
 
-    # ── Réponses ciblées ──
     if champ == "usage":
         return f"Usage de **{r[0]}** : **{r[6]}**"
     if champ == "adresse":
@@ -183,7 +208,6 @@ def fetch_client_infos(nom_client: str, champ: str = None) -> str:
     if champ == "numero_client":
         return f"N° Client de **{r[0]}** : **{r[1]}**"
 
-    # ── Fiche complète par défaut ──
     return f"""📋 Informations du client **{r[0]}** :
 
 - N° Client    : {r[1]}
@@ -195,42 +219,39 @@ def fetch_client_infos(nom_client: str, champ: str = None) -> str:
 - Type service : {r[7]}"""
 
 
-def fetch_client_mois_specifique(nom_client: str, mois: str, champ: str = None) -> str:
+def fetch_client_mois_specifique(nom_client: str, mois: str, champ: str = None, nom_fichier: str = "") -> str:
     mois_normalise = normaliser_mois(mois)
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT mois_source, periode_debut, periode_fin,
                consommation, unite, montant_ttc, date_limite_paiement
         FROM factures_excel
-        WHERE nom_client LIKE ? AND mois_source LIKE ?
-    """, (f"%{nom_client}%", f"%{mois_normalise}%"))
+        WHERE nom_client LIKE ? AND mois_source LIKE ? {clause}
+    """, [f"%{nom_client}%", f"%{mois_normalise}%"] + fparams)
     rows = cursor.fetchall()
     conn.close()
     if not rows:
         return f"Aucune facture trouvée pour **{nom_client}** en {mois_normalise}."
     r = rows[0]
 
-    # ── Réponse ciblée selon le champ demandé ──
     if champ == "consommation":
         return (
             f"⚡💧 Consommation de **{nom_client}** en **{r[0]}** :\n"
             f"→ **{r[3]:,} {r[4]}**"
         )
-
     if champ == "montant":
         return (
             f"💰 Montant de **{nom_client}** en **{r[0]}** :\n"
             f"→ **{r[5]:,.2f} Dhs**"
         )
-
     if champ == "date_limite":
         return (
             f"📅 Date limite de paiement — **{nom_client}** ({r[0]}) :\n"
             f"→ **{r[6]}**"
         )
 
-    # ── Fiche complète (facture / paiement / aucun champ précis) ──
     return f"""🧾 Facture de **{nom_client}** — {r[0]} :
 
 - Période            : {r[1]} → {r[2]}
@@ -238,18 +259,20 @@ def fetch_client_mois_specifique(nom_client: str, mois: str, champ: str = None) 
 - Montant TTC        : **{r[5]:,.2f} Dhs**
 - Date limite pmt    : {r[6]}"""
 
-def fetch_client_somme_conso(nom_client: str) -> str:
+
+def fetch_client_somme_conso(nom_client: str, nom_fichier: str = "") -> str:
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT
             ROUND(SUM(consommation), 2) as total_conso,
             unite,
             ROUND(SUM(montant_ttc), 2) as total_ttc,
             COUNT(*) as nb_mois
         FROM factures_excel
-        WHERE nom_client LIKE ?
-    """, (f"%{nom_client}%",))
+        WHERE nom_client LIKE ? {clause}
+    """, [f"%{nom_client}%"] + fparams)
     r = cursor.fetchone()
     conn.close()
     if not r or r[0] is None:
@@ -261,16 +284,17 @@ def fetch_client_somme_conso(nom_client: str) -> str:
     )
 
 
-def fetch_client_toutes_factures(nom_client: str) -> str:
+def fetch_client_toutes_factures(nom_client: str, nom_fichier: str = "") -> str:
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT mois_source, periode_debut, periode_fin,
                consommation, unite, montant_ttc, date_limite_paiement
         FROM factures_excel
-        WHERE nom_client LIKE ?
+        WHERE nom_client LIKE ? {clause}
         ORDER BY SUBSTR(periode_debut,7,4)||SUBSTR(periode_debut,4,2)||SUBSTR(periode_debut,1,2)
-    """, (f"%{nom_client}%",))
+    """, [f"%{nom_client}%"] + fparams)
     rows = cursor.fetchall()
     conn.close()
     if not rows:
@@ -286,12 +310,13 @@ def fetch_client_toutes_factures(nom_client: str) -> str:
         total += r[5]
     lignes.append(f"\n💰 **Total cumulé : {round(total, 2):,.2f} Dhs**")
     return "\n".join(lignes)
-    #  add fetcher monton client
 
-def fetch_client_somme_montant(nom_client: str) -> str:
+
+def fetch_client_somme_montant(nom_client: str, nom_fichier: str = "") -> str:
+    clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT
             ROUND(SUM(montant_ttc), 2) as total,
             COUNT(*) as nb_mois,
@@ -299,14 +324,12 @@ def fetch_client_somme_montant(nom_client: str) -> str:
             ROUND(MIN(montant_ttc), 2) as minimum,
             ROUND(MAX(montant_ttc), 2) as maximum
         FROM factures_excel
-        WHERE nom_client = ?
-    """, (nom_client,))
+        WHERE nom_client LIKE ? {clause}
+    """, [f"%{nom_client}%"] + fparams)
     r = cursor.fetchone()
     conn.close()
-
     if not r or r[0] is None:
         return f"Aucune donnée trouvée pour {nom_client}."
-
     return (
         f"💰 **Total montants — {nom_client}** :\n\n"
         f"- Montant total cumulé : **{r[0]:,.2f} Dhs**\n"
@@ -315,6 +338,3 @@ def fetch_client_somme_montant(nom_client: str) -> str:
         f"- Montant minimum     : {r[3]:,.2f} Dhs\n"
         f"- Montant maximum     : {r[4]:,.2f} Dhs"
     )
-
-
-    

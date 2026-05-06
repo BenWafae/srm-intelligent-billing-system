@@ -36,28 +36,36 @@ def init_db():
     # factures excel table
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS factures_excel (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            agence TEXT,
-            date_edition TEXT,
-            periode_debut TEXT,
-            periode_fin TEXT,
-            numero_contrat TEXT,
-            numero_client TEXT,
-            numero_compteur TEXT,
-            usage TEXT,
-            nom_client TEXT,
-            adresse TEXT,
-            type_service TEXT,
-            consommation REAL,
-            unite TEXT,
-            montant_ttc REAL,
-            date_limite_paiement TEXT,
-            alerte TEXT,
-            mois_source TEXT,
-            date_enregistrement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
+    CREATE TABLE IF NOT EXISTS factures_excel (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        agence TEXT,
+        date_edition TEXT,
+        periode_debut TEXT,
+        periode_fin TEXT,
+        numero_contrat TEXT,
+        numero_client TEXT,
+        numero_compteur TEXT,
+        usage TEXT,
+        nom_client TEXT,
+        adresse TEXT,
+        type_service TEXT,
+        consommation REAL,
+        unite TEXT,
+        montant_ttc REAL,
+        date_limite_paiement TEXT,
+        alerte TEXT,
+        mois_source TEXT,
+        nom_fichier TEXT,
+        date_enregistrement TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+""")
+# Migration APRÈS le CREATE TABLE
+    try:
+        cursor.execute("ALTER TABLE factures_excel ADD COLUMN nom_fichier TEXT")
+    except:
+        pass
+
+
     # user table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
@@ -113,7 +121,8 @@ def get_all_factures():
     return rows
 
 
-def importer_excel_en_db(lignes: list[dict], mode: str = "skip") -> dict:
+def importer_excel_en_db(lignes: list[dict], mode: str = "skip", nom_fichier: str = "") -> dict:
+
     """
     Importe les lignes Excel en base.
 
@@ -192,8 +201,8 @@ def importer_excel_en_db(lignes: list[dict], mode: str = "skip") -> dict:
                 agence, date_edition, periode_debut, periode_fin,
                 numero_contrat, numero_client, numero_compteur, usage,
                 nom_client, adresse, type_service, consommation,
-                unite, montant_ttc, date_limite_paiement, alerte, mois_source
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                unite, montant_ttc, date_limite_paiement, alerte, mois_source, nom_fichier
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
         """, (
             str(ligne.get("agence", "")),
             str(ligne.get("date_edition", "")),
@@ -211,7 +220,8 @@ def importer_excel_en_db(lignes: list[dict], mode: str = "skip") -> dict:
             float(ligne.get("montant_ttc", 0) or 0),
             str(ligne.get("date_limite_paiement", "")),
             str(ligne.get("alerte", "")),
-            str(ligne.get("mois_source", ""))
+            str(ligne.get("mois_source", "")),
+            nom_fichier 
         ))
         nouvelles += 1
 
@@ -471,6 +481,19 @@ def get_mois_client(numero_contrat: str) -> list:
         WHERE numero_contrat = ?
         ORDER BY SUBSTR(periode_debut,7,4)||SUBSTR(periode_debut,4,2)||SUBSTR(periode_debut,1,2)
     """, (numero_contrat,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [r[0] for r in rows]
+def get_fichiers_excel() -> list[str]:
+    """Retourne la liste des fichiers Excel importés (distincts)."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT nom_fichier 
+        FROM factures_excel 
+        WHERE nom_fichier IS NOT NULL AND nom_fichier != ''
+        ORDER BY nom_fichier
+    """)
     rows = cursor.fetchall()
     conn.close()
     return [r[0] for r in rows]

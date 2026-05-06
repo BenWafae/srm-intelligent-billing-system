@@ -124,7 +124,7 @@ _TOKENS_CONSO_ELEVEE = [
     "consomme importante", "consomme fort", "consomme forte",
     "importante consomme", "forte consomme",
     "grand consommateur", "grand consomme",
-    "top consomme", "top consommateur","top consomateur"
+    "top consomme", "top consommateur", "top consomateur"
     "max conso", "conso max", "client max conso",
     "max consomme", "consomme max", "maximum conso", "conso maximum",
     "consomme beaucoup", "consomateur beaucoup",
@@ -133,8 +133,8 @@ _TOKENS_CONSO_ELEVEE = [
     "consomme bcp", "conso bcp", "consome bcp",
     "grande consommateur", "grande consomateur",
     "quel est le grande", "quel est le grand",
-    "ayant conso eleve", "ayant conso elevee",        
-    "ayant consomation eleve", "ayant consomation elevee",  
+    "ayant conso eleve", "ayant conso elevee",
+    "ayant consomation eleve", "ayant consomation elevee",
     "ayant consommation eleve", "ayant consommation elevee",
 ]
 
@@ -163,9 +163,9 @@ _TOKENS_CONSO_FAIBLE = [
     "plus petite consomme", "petite consomme",
     "avec la min consomme", "avec la minimale consomme",
     "avec la minimum consomme", "avec le min consomme",
-    "ayant conso faible", "ayant consomation faible",  
-    "ayant consommation faible"
-     "le moins faible", "moins faible",          # ← AJOUTER
+    "ayant conso faible", "ayant consomation faible",
+    "ayant consommation faible",
+    "le moins faible", "moins faible",
     "ayant le moins", "ayant conso le moins"
 ]
 
@@ -195,10 +195,9 @@ def _extraire_mois_disp(q: str):
         if token in q:
             return _MAP_MOIS_DISP[token]
     return None
-# ajout dune nouveau regle pour cela:donner les n client ayant conso eleve
-# donner n client qui consomme le moins , les n premieres ou derniers qui consomme plus ou moins
+
+
 def _extraire_n_limit(q: str):
-    # ── Conversion nombres en lettres → chiffres ──
     _LETTRES = {
         "deux": 2, "trois": 3, "quatre": 4, "cinq": 5,
         "six": 6, "sept": 7, "huit": 8, "neuf": 9, "dix": 10,
@@ -209,15 +208,13 @@ def _extraire_n_limit(q: str):
             return val
 
     patterns = [
-        r'\btop\s+(\d+)\b',                                          # "top 5"
-        r'\bles\s+(\d+)\b',                                          # "les 5"
+        r'\btop\s+(\d+)\b',
+        r'\bles\s+(\d+)\b',
         r'\b(\d+)\s+(?:premier|premiere|premiers|premieres|dernier|derniers|derniere|dernieres)',
         r'\b(\d+)\s+(?:client|clients|consomm)',
-        # ← NOUVEAU : "donner moi 5 premier", "donner 5 premiers", etc.
         r'\bdonner?\s+(?:moi\s+)?(?:les\s+)?(\d+)\b',
         r'\bafficher?\s+(?:les\s+)?(\d+)\b',
         r'\bmontrer?\s+(?:les\s+)?(\d+)\b',
-        # ← NOUVEAU : capture le chiffre isolé après mots-clés action
         r'\b(\d+)\s+(?:top|premier|meilleur|grand|gros|eleve|consomm)',
     ]
     for pattern in patterns:
@@ -227,8 +224,6 @@ def _extraire_n_limit(q: str):
             if 1 <= n <= 100:
                 return n
 
-    # ← NOUVEAU : dernier recours — cherche n'importe quel nombre isolé
-    # seulement si la question contient un mot d'action + classement
     _mots_action = ["top", "premier", "premiers", "dernier", "derniers",
                     "meilleur", "meilleurs", "plus", "moins"]
     if any(m in q for m in _mots_action):
@@ -239,7 +234,6 @@ def _extraire_n_limit(q: str):
                 return n
 
     return None
-
 
 
 # ════════════════════════════════════════════════════════════
@@ -302,36 +296,25 @@ _TOKENS_MONTANT_FAIBLE = [
     "client qui paie le moins", "client qui paye le moins",
     "moins eleve montant", "moins cher montant",
 ]
-# validation # VALIDATION UNIVERSELLE DES CONCEPTS — portail d'entrée
-# a pour but de eviter des question sur des colonnes ne correspond pas au donnee reel
-# # Concepts reconnus → colonne réelle dans la base
+
 _CONCEPTS_CONNUS = {
-    # consommation
     "consommation", "consomme", "conso", "consomation", "consome",
     "consomtion", "consomateur", "consommateur", "kwh", "m3",
-    # montant
     "montant", "mantant", "monton", "montan", "mntant", "ttc",
     "paye", "paie", "depense", "prix", "cout", "facture", "factures",
-    # client
     "client", "clients", "abonne", "abonnes", "nom",
     "numero client", "numero contrat", "numero compteur",
     "contrat", "compteur",
-    # localisation / contact disponibles
     "adresse", "agence", "agences",
-    # service
     "service", "type service", "eau", "electricite", "elec", "electr",
-    # usage
     "usage", "usages", "domestique", "professionnel", "agricole",
     "dom", "pro", "agri",
-    # temps
     "mois", "janvier", "fevrier", "mars", "avril", "mai", "juin",
     "juillet", "aout", "septembre", "octobre", "novembre", "decembre",
     "jan", "fev", "mar", "avr", "jun", "jul", "sep", "oct", "nov", "dec",
     "janv", "fevr", "juil", "aou", "sept",
     "periode", "date", "limite", "paiement", "echeance",
-    # alertes
     "alerte", "alertes",
-    # actions / mots outils — jamais bloqués
     "liste", "lister", "afficher", "montrer", "donner", "voir",
     "combien", "quel", "quelle", "quels", "quelles", "qui",
     "somme", "total", "moyenne", "moyen", "max", "min",
@@ -340,56 +323,38 @@ _CONCEPTS_CONNUS = {
     "top", "haut", "bas", "fort", "fort",
 }
 
-# Concepts inexistants — déclenchent le message d'indisponibilité
 _CONCEPTS_INEXISTANTS = {
-    # contact
     "telephone", "tel", "phone", "mobile", "gsm", "portable",
     "email", "mail", "courriel", "lemail", "lemail",
-    # identité
     "cin", "carte", "identite", "passeport", "cni",
     "age", "naissance", "date naissance", "sexe", "genre",
-    # localisation non disponible
     "ville", "pays", "region", "code postal", "code postale",
     "quartier", "commune", "province", "wilaya",
-    # financier non disponible
     "salaire", "revenu", "solde", "dette", "credit", "rib", "iban",
     "virement", "cheque", "banque",
-    # statut / catégorie
     "statut", "status", "categorie", "classe", "type client",
     "actif", "inactif", "suspendu", "bloque",
-    # autres
     "photo", "image", "note", "commentaire", "observation",
     "numero agence", "code agence", "id agence",
     "profession", "metier", "emploi", "entreprise client",
-    "nationalite", "langue","tele", "telep", "telepone", "telephon", "telphone",
-   "mob", "portable", "gsm",
-     "code postalle", 
+    "nationalite", "langue", "tele", "telep", "telepone", "telephon", "telphone",
+    "mob", "portable", "gsm",
+    "code postalle",
 }
 
 
 def _separer_articles(q: str) -> str:
-    """
-    Sépare les articles contractés collés aux mots.
-    ex: 'lemail' → 'email', 'ladresse' → 'adresse', 'lecode' → 'code'
-    """
-    q = re.sub(r'\bl([aeio][a-z]+)', r'\1', q)   # lemail→email, ladresse→adresse
-    q = re.sub(r'\bd([aeio][a-z]+)', r'\1', q)   # demail→email
-    q = re.sub(r'\bdu([a-z]+)', r'\1', q)         # dupays→pays
+    q = re.sub(r'\bl([aeio][a-z]+)', r'\1', q)
+    q = re.sub(r'\bd([aeio][a-z]+)', r'\1', q)
+    q = re.sub(r'\bdu([a-z]+)', r'\1', q)
     return q
 
 
 def valider_concept_question(question: str) -> str | None:
-    """
-    Vérifie si la question contient un concept inexistant dans la base.
-    Retourne un message d'erreur si oui, None si la question peut continuer.
-
-    Appelée en PREMIER dans repondre_question_generale et repondre_question_client.
-    """
     q = _normaliser_q(question)
     q = _separer_articles(q)
     mots = q.split()
 
-    # ── Vérification par token simple ──
     for mot in mots:
         if mot in _CONCEPTS_INEXISTANTS and mot not in _CONCEPTS_CONNUS:
             return (
@@ -401,7 +366,6 @@ def valider_concept_question(question: str) -> str | None:
                 f"- Adresse, Type de service, Alertes, Mois"
             )
 
-    # ── Vérification par bigramme (ex: "code postal", "statut actif") ──
     for i in range(len(mots) - 1):
         bigramme = mots[i] + " " + mots[i + 1]
         if bigramme in _CONCEPTS_INEXISTANTS:
@@ -427,38 +391,29 @@ _COLONNES_REELLES = {
     "consommation", "unite", "montant_ttc",
     "date_limite_paiement", "alerte",
     "numero_client", "numero_contrat", "numero_compteur",
-    "adresse", "id", "date_enregistrement"
+    "adresse", "id", "date_enregistrement",
+    "nom_fichier",  # ← ajouté pour le filtre fichier
 }
 
 _MOTS_CLES_SQL = {
-    # fonctions
     "select", "from", "where", "group", "order", "by",
     "limit", "having", "join", "as", "and", "or", "not",
     "in", "like", "between", "sum", "count", "avg", "min",
     "max", "round", "distinct", "lower", "upper", "substr",
     "desc", "asc", "null", "is", "case", "when", "then",
     "else", "end", "inner", "left", "on", "factures_excel",
-    # valeurs communes
     "eau", "electricite", "true", "false",
 }
 
 
 def valider_colonnes_sql(sql: str) -> bool:
     sql_lower = sql.lower()
-
-    # ── Étape 1 : collecter les alias définis dans le SELECT ──
     alias_definis = set(re.findall(r'\bas\s+([a-z_]+)', sql_lower))
-
-    # ── Étape 2 : supprimer les alias du texte ──
     sql_sans_alias = re.sub(r'\bas\s+[a-z_]+', '', sql_lower)
-
-    # ── Étape 3 : supprimer les valeurs entre quotes ──
     sql_sans_alias = re.sub(r"'[^']*'", '', sql_sans_alias)
     sql_sans_alias = re.sub(r'"[^"]*"', '', sql_sans_alias)
 
-    # ── Étape 4 : extraire uniquement WHERE et ORDER BY ──
     texte_critique = ""
-
     where_match = re.search(
         r'\bwhere\b(.+?)(?:\bgroup\b|\border\b|\blimit\b|$)',
         sql_sans_alias, re.DOTALL
@@ -467,16 +422,13 @@ def valider_colonnes_sql(sql: str) -> bool:
         r'\border\s+by\b(.+?)(?:\blimit\b|$)',
         sql_sans_alias, re.DOTALL
     )
-
     if where_match:
         texte_critique += " " + where_match.group(1)
     if order_match:
         texte_critique += " " + order_match.group(1)
-
     if not texte_critique:
         return True
 
-    # ── Étape 5 : vérifier chaque mot en excluant les alias ──
     mots = re.findall(r'\b([a-z_]+)\b', texte_critique)
     colonnes_inconnues = [
         m for m in mots
@@ -486,14 +438,49 @@ def valider_colonnes_sql(sql: str) -> bool:
         and len(m) >= 3
         and not m.isdigit()
     ]
-
     if colonnes_inconnues:
         print(f"  [VALIDATION SQL] ⚠️ Colonnes inexistantes : {colonnes_inconnues}")
         return False
-
     return True
 
 
+# ════════════════════════════════════════════════════════════
+# INJECTION SÉCURISÉE DU FILTRE NOM_FICHIER DANS UN SQL
+# ════════════════════════════════════════════════════════════
+
+def _injecter_filtre_fichier(sql: str, nom_fichier: str) -> str:
+    """
+    Injecte WHERE nom_fichier = '...' dans un SQL généré par le LLM.
+    Fonctionne que le SQL ait déjà un WHERE ou non.
+    Approche post-génération : plus fiable que de demander au LLM de le faire.
+    """
+    if not nom_fichier:
+        return sql
+
+    # Échapper les apostrophes dans le nom de fichier (sécurité basique)
+    nom_safe = nom_fichier.replace("'", "''")
+    filtre = f"nom_fichier = '{nom_safe}'"
+
+    # Cas 1 : SQL a déjà un WHERE → ajouter en tête du WHERE
+    if re.search(r'\bWHERE\b', sql, re.IGNORECASE):
+        sql = re.sub(
+            r'\bWHERE\b',
+            f"WHERE {filtre} AND",
+            sql, count=1, flags=re.IGNORECASE
+        )
+    # Cas 2 : pas de WHERE → injecter avant GROUP BY / ORDER BY / LIMIT / fin
+    else:
+        insertion = f" WHERE {filtre}"
+        for keyword in [r'\bGROUP\s+BY\b', r'\bORDER\s+BY\b', r'\bLIMIT\b']:
+            m = re.search(keyword, sql, re.IGNORECASE)
+            if m:
+                pos = m.start()
+                sql = sql[:pos] + insertion + " " + sql[pos:]
+                return sql
+        # Aucun mot-clé trouvé → ajouter en fin
+        sql = sql + insertion
+
+    return sql
 
 
 # ════════════════════════════════════════════════════════════
@@ -505,8 +492,8 @@ DB_PATH_FALLBACK = os.path.join(
 )
 
 
-def repondre_fallback_sql(question: str) -> str:
-    print(f"  [FALLBACK SQL] Question : {question}")
+def repondre_fallback_sql(question: str, nom_fichier: str = "") -> str:
+    print(f"  [FALLBACK SQL] Question : {question} | Fichier : {nom_fichier or 'tous'}")
 
     schema = """
 Table : factures_excel
@@ -527,6 +514,7 @@ Colonnes disponibles :
 - numero_contrat   TEXT    : numéro de contrat (ex: 0005567200/2063200)
 - numero_compteur  TEXT    : numéro de compteur (ex: 8301, 8302...)
 - adresse          TEXT    : adresse du client
+- nom_fichier      TEXT    : nom du fichier Excel source
 """
 
     prompt = f"""Tu es un expert SQL SQLite. Tu dois générer une requête SELECT pour répondre à une question sur des factures SRM (eau et électricité au Maroc).
@@ -572,6 +560,7 @@ RÈGLES ABSOLUES :
 22. COMPARAISON SERVICES : GROUP BY type_service si "eau et electricite"
 23. PÉRIODES : mois_source LIKE '%Janvier%' pour un mois précis
 24. RÉSULTAT VIDE : préférer requête large plutôt que filtre trop strict
+25. Ne jamais ajouter de filtre sur nom_fichier — ce filtre sera ajouté automatiquement
 
 EXEMPLES :
 Q: "qui consomme le plus"
@@ -628,6 +617,11 @@ SQL :"""
         print(f"  [FALLBACK SQL] ⚠️ SQL refusé — colonnes hors schéma : {sql_genere}")
         return "Je n'ai pas pu traiter cette question. Pouvez-vous la reformuler ?"
 
+    # ── Injection du filtre nom_fichier APRÈS validation ──
+    if nom_fichier:
+        sql_genere = _injecter_filtre_fichier(sql_genere, nom_fichier)
+        print(f"  [FALLBACK SQL] SQL après filtre fichier : {sql_genere}")
+
     # ── Exécution sécurisée ──
     try:
         conn = sqlite3.connect(DB_PATH_FALLBACK)
@@ -679,11 +673,17 @@ def _formater_resultat_fallback(rows: list, cols: list, question: str) -> str:
     return "\n".join(lignes)
 
 
-def repondre_question_generale(question: str, historique_texte: str) -> str:
+# ════════════════════════════════════════════════════════════
+# QUESTION GÉNÉRALE
+# ════════════════════════════════════════════════════════════
+
+def repondre_question_generale(question: str, historique_texte: str, nom_fichier: str = "") -> str:
+
     # ── PORTAIL 1 : validation concept universel ──
     msg_concept = valider_concept_question(question)
     if msg_concept:
         return msg_concept
+
     # ── PORTAIL 2 : questions ambiguës ──
     from rag.intent import detecter_question_ambigue
     msg = detecter_question_ambigue(question)
@@ -691,7 +691,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         return msg
 
     mode = detecter_mode_reponse(question)
-    print(f"  [MODE] {mode}")
+    print(f"  [MODE] {mode} | [FICHIER] {nom_fichier or 'tous'}")
 
     q_norm = _norm_dispatcher(question)
 
@@ -705,12 +705,21 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             "- *Liste des clients*"
         )
 
+    # ── Helper local : passer nom_fichier à tous les fetch ──
+    # On définit des wrappers partiels pour ne pas répéter nom_fichier partout
+    def _fetch(fn, **kwargs):
+        """Appelle fn en injectant nom_fichier si elle l'accepte."""
+        try:
+            return fn(**kwargs, nom_fichier=nom_fichier)
+        except TypeError:
+            return fn(**kwargs)
+
     # ════════════════════════════════════════════
     # RÈGLE 1 — AGENCE PAR CLIENT
     # ════════════════════════════════════════════
     if any(t in q_norm for t in _TOKENS_AGENCE_PAR_CLIENT):
         print(f"  [RÈGLE] agence par client → fetch_agence_par_client(mode={mode})")
-        return fetch_agence_par_client(mode=mode)
+        return _fetch(fetch_agence_par_client, mode=mode)
 
     # ════════════════════════════════════════════
     # RÈGLE 1b — EVOLUTION MOIS
@@ -724,7 +733,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     ]
     if any(t in q_norm for t in _TOKENS_EVOLUTION_MOIS):
         print(f"  [RÈGLE] évolution mois → fetch_evolution_mois(mode={mode})")
-        return fetch_evolution_mois(mode=mode)
+        return _fetch(fetch_evolution_mois, mode=mode)
 
     # ── Détection des sujets ──
     _sujet_facture = any(t in q_norm for t in [
@@ -759,7 +768,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         "consomme", "conso", "consommation", "max", "plus", "top", "eleve", "min", "moins", "faible"
     ])
     if any(t in q_norm for t in _tokens_client_eau) and not demande_elec and not _detect_intention_conso:
-        return fetch_par_service(service="eau", mode=mode)
+        return _fetch(fetch_par_service, service="eau", mode=mode)
 
     # ── Détection usage précis ──
     usage_detecte = None
@@ -784,14 +793,14 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
 
     if (any(t in q_norm for t in ["chaque client", "pour chaque", "par client"]) and
             any(t in q_norm for t in ["usage", "usages", "type", "types"])):
-        return fetch_par_usage(usage=None, mode="detail")
+        return _fetch(fetch_par_usage, usage=None, mode="detail")
 
     _demande_agence_usage = any(t in q_norm for t in [
         "quel agence", "quelle agence", "agence a le plus",
         "agence avec le plus", "agence qui a"
     ])
     if usage_detecte and _demande_agence_usage:
-        return repondre_fallback_sql(question)
+        return repondre_fallback_sql(question, nom_fichier)
 
     # ════════════════════════════════════════════════════════
     # COMBINAISON DE FILTRES → fallback SQL
@@ -807,10 +816,10 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     _nb_filtres = sum([_a_filtre_agence, _a_filtre_usage, _a_filtre_service, _a_filtre_mois])
     if _nb_filtres >= 2:
         print(f"  [RÈGLE] combinaison {_nb_filtres} filtres → fallback SQL")
-        return repondre_fallback_sql(question)
+        return repondre_fallback_sql(question, nom_fichier)
 
     if usage_detecte and any(t in q_norm for t in ["client", "clients", "qui", "liste", "lister", "combien"]):
-        return fetch_par_usage(usage=usage_detecte, mode=mode)
+        return _fetch(fetch_par_usage, usage=usage_detecte, mode=mode)
 
     # ════════════════════════════════════════════
     # RÈGLE — CLIENT + AGENCE PRÉCISE
@@ -844,7 +853,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
                 agence_trouvee = nom
                 break
         print(f"  [RÈGLE] client + agence → fetch_par_agence(agence={agence_trouvee}, mode={mode})")
-        return fetch_par_agence(agence=agence_trouvee, mode=mode)
+        return _fetch(fetch_par_agence, agence=agence_trouvee, mode=mode)
 
     # ════════════════════════════════════════════
     # RÈGLE 2 — MONTANT élevé / faible
@@ -862,17 +871,16 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         mois_detecte = _extraire_mois_disp(q_norm)
         n_limit = _extraire_n_limit(q_norm)
         print(f"  [RÈGLE] montant élevé → fetch_top_montants(mois={mois_detecte}, mode={mode}, limit={n_limit})")
-        return fetch_top_montants(mois=mois_detecte, mode=mode, limit=n_limit)
+        return _fetch(fetch_top_montants, mois=mois_detecte, mode=mode, limit=n_limit)
 
     if _detect_montant_faible:
         mois_detecte = _extraire_mois_disp(q_norm)
         n_limit = _extraire_n_limit(q_norm)
         print(f"  [RÈGLE] montant faible → fetch_min_montants(mois={mois_detecte}, mode={mode}, limit={n_limit})")
-        return fetch_min_montants(mois=mois_detecte, mode=mode, limit=n_limit)
+        return _fetch(fetch_min_montants, mois=mois_detecte, mode=mode, limit=n_limit)
 
     # ════════════════════════════════════════════
     # RÈGLE 2.5 — TOP N détection précoce
-    # Gère : "top 5 consomateurs", "top 3 montant", etc.
     # ════════════════════════════════════════════
     _match_top_n = re.search(r'\btop\s+(\d+)\b', q_norm)
     if _match_top_n:
@@ -888,11 +896,10 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             mois_detecte = _extraire_mois_disp(q_norm)
             if _est_montant and not _est_conso:
                 print(f"  [RÈGLE top-N] montant → fetch_top_montants(limit={n_top})")
-                return fetch_top_montants(mois=mois_detecte, mode="detail", limit=n_top)
+                return _fetch(fetch_top_montants, mois=mois_detecte, mode="detail", limit=n_top)
             else:
-                # par défaut "top N" → consommation
                 print(f"  [RÈGLE top-N] conso → fetch_top_consommateurs(limit={n_top})")
-                return fetch_top_consommateurs(mois=mois_detecte, mode="detail", limit=n_top)
+                return _fetch(fetch_top_consommateurs, mois=mois_detecte, mode="detail", limit=n_top)
 
     # ════════════════════════════════════════════
     # RÈGLE 3 — CONSOMMATION élevée / faible
@@ -928,45 +935,45 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
             mode_effectif = mode
 
         if _detect_conso_elevee and demande_eau and not demande_elec:
-            return fetch_max_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
+            return _fetch(fetch_max_consommateurs_par_service, service="eau", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
         if _detect_conso_elevee and demande_elec and not demande_eau:
-            return fetch_max_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
+            return _fetch(fetch_max_consommateurs_par_service, service="electricite", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
         if _detect_conso_faible and demande_eau and not demande_elec:
-            return fetch_min_consommateurs_par_service(service="eau", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
+            return _fetch(fetch_min_consommateurs_par_service, service="eau", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
         if _detect_conso_faible and demande_elec and not demande_eau:
-            return fetch_min_consommateurs_par_service(service="electricite", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
+            return _fetch(fetch_min_consommateurs_par_service, service="electricite", mois=mois_detecte, mode=mode_effectif, limit=n_limit)
 
         if _detect_conso_elevee:
             print(f"  [RÈGLE] conso élevée → fetch_top_consommateurs(mois={mois_detecte}, mode={mode_effectif}, limit={n_limit})")
-            return fetch_top_consommateurs(mois=mois_detecte, mode=mode_effectif, limit=n_limit)
+            return _fetch(fetch_top_consommateurs, mois=mois_detecte, mode=mode_effectif, limit=n_limit)
         if _detect_conso_faible:
             print(f"  [RÈGLE] conso faible → fetch_min_consommateurs(mois={mois_detecte}, mode={mode_effectif}, limit={n_limit})")
-            return fetch_min_consommateurs(mois=mois_detecte, mode=mode_effectif, limit=n_limit)
+            return _fetch(fetch_min_consommateurs, mois=mois_detecte, mode=mode_effectif, limit=n_limit)
 
     # ════════════════════════════════════════════
     # MODE COUNT
     # ════════════════════════════════════════════
     if mode == "count":
         if _sujet_facture and not _sujet_client:
-            return fetch_stats_generales(mode="count", question=question)
+            return _fetch(fetch_stats_generales, mode="count", question=question)
         if _sujet_client and not _sujet_facture and not demande_eau and not demande_elec:
-            return fetch_liste_clients(mode="count")
+            return _fetch(fetch_liste_clients, mode="count")
         if _sujet_mois and not _sujet_facture and not _sujet_client:
-            return fetch_evolution_mois(mode="count")
+            return _fetch(fetch_evolution_mois, mode="count")
         if _sujet_agence:
-            return fetch_par_agence(agence=None, mode="count")
+            return _fetch(fetch_par_agence, agence=None, mode="count")
         if _sujet_alerte:
-            return fetch_alertes(mode="count")
+            return _fetch(fetch_alertes, mode="count")
         if _sujet_usage and not usage_detecte and not _sujet_client:
-            return fetch_par_usage(usage=None, mode="count")
+            return _fetch(fetch_par_usage, usage=None, mode="count")
         if _sujet_service and not demande_eau and not demande_elec and not _sujet_client:
-            return fetch_par_service(service=None, mode="count")
+            return _fetch(fetch_par_service, service=None, mode="count")
         if demande_eau and not demande_elec:
-            return fetch_par_service(service="eau", mode="count")
+            return _fetch(fetch_par_service, service="eau", mode="count")
         if demande_elec and not demande_eau:
-            return fetch_par_service(service="electricite", mode="count")
+            return _fetch(fetch_par_service, service="electricite", mode="count")
         if demande_eau and demande_elec:
-            return fetch_par_service(service=None, mode="count")
+            return _fetch(fetch_par_service, service=None, mode="count")
 
     # ════════════════════════════════════════════
     # MODE LIST
@@ -974,40 +981,40 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     if mode == "list":
         if _sujet_client and not demande_eau and not demande_elec \
                 and not _sujet_service and not _sujet_agence:
-            return fetch_liste_clients(mode="list")
+            return _fetch(fetch_liste_clients, mode="list")
         if _sujet_agence:
-            return fetch_par_agence(agence=None, mode="list")
+            return _fetch(fetch_par_agence, agence=None, mode="list")
         if _sujet_alerte:
-            return fetch_alertes(mode="list")
+            return _fetch(fetch_alertes, mode="list")
         if _sujet_usage and not usage_detecte and not _sujet_client:
-            return fetch_par_usage(usage=None, mode="list")
+            return _fetch(fetch_par_usage, usage=None, mode="list")
         if _sujet_service and not demande_eau and not demande_elec:
-            return fetch_par_service(service=None, mode="list")
+            return _fetch(fetch_par_service, service=None, mode="list")
         if demande_eau and not demande_elec:
-            return fetch_par_service(service="eau", mode="list")
+            return _fetch(fetch_par_service, service="eau", mode="list")
         if demande_elec and not demande_eau:
-            return fetch_par_service(service="electricite", mode="list")
+            return _fetch(fetch_par_service, service="electricite", mode="list")
 
     # ════════════════════════════════════════════
     # Pré-détection service / conso
     # ════════════════════════════════════════════
     if demande_faible and demande_eau and not demande_elec:
-        return fetch_min_consommateurs_par_service(service="eau", mode=mode)
+        return _fetch(fetch_min_consommateurs_par_service, service="eau", mode=mode)
     if demande_faible and demande_elec and not demande_eau:
-        return fetch_min_consommateurs_par_service(service="electricite", mode=mode)
+        return _fetch(fetch_min_consommateurs_par_service, service="electricite", mode=mode)
     if demande_elevee and demande_eau and not demande_elec:
-        return fetch_max_consommateurs_par_service(service="eau", mode=mode)
+        return _fetch(fetch_max_consommateurs_par_service, service="eau", mode=mode)
     if demande_elevee and demande_elec and not demande_eau:
-        return fetch_max_consommateurs_par_service(service="electricite", mode=mode)
+        return _fetch(fetch_max_consommateurs_par_service, service="electricite", mode=mode)
 
     if _sujet_service and not demande_eau and not demande_elec:
-        return fetch_par_service(service=None, mode=mode)
+        return _fetch(fetch_par_service, service=None, mode=mode)
     if demande_eau and demande_elec:
-        return fetch_par_service(service=None, mode=mode)
+        return _fetch(fetch_par_service, service=None, mode=mode)
     if demande_eau and not demande_elec and any(m in q_norm for m in ["combien", "liste", "quels", "client", "utilis"]):
-        return fetch_par_service(service="eau", mode=mode)
+        return _fetch(fetch_par_service, service="eau", mode=mode)
     if demande_elec and not demande_eau and any(m in q_norm for m in ["combien", "liste", "quels", "client", "utilis"]):
-        return fetch_par_service(service="electricite", mode=mode)
+        return _fetch(fetch_par_service, service="electricite", mode=mode)
 
     # ════════════════════════════════════════════
     # SOMME CONSO MOIS
@@ -1031,7 +1038,7 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
             print(f"  [RÈGLE] somme conso mois → fetch_somme_conso_mois(mois={mois_detecte})")
-            return fetch_somme_conso_mois(mois_detecte)
+            return _fetch(fetch_somme_conso_mois, mois=mois_detecte)
 
     # ════════════════════════════════════════════
     # SOMME MONTANT MOIS
@@ -1050,10 +1057,10 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
             print(f"  [RÈGLE] somme montant mois → fetch_somme_montant_mois(mois={mois_detecte})")
-            return fetch_somme_montant_mois(mois_detecte)
+            return _fetch(fetch_somme_montant_mois, mois=mois_detecte)
         else:
             print(f"  [RÈGLE] somme montant global → fetch_stats_generales")
-            return fetch_stats_generales(mode="count", question="montant total")
+            return _fetch(fetch_stats_generales, mode="count", question="montant total")
 
     # ════════════════════════════════════════════
     # LLM FALLBACK
@@ -1065,58 +1072,64 @@ def repondre_question_generale(question: str, historique_texte: str) -> str:
     print(f"  [RAG] Intent : {intent} | Params : {params} | Mode : {mode}")
 
     if intent == "LISTE_CLIENTS":
-        return fetch_liste_clients(mode=mode)
+        return _fetch(fetch_liste_clients, mode=mode)
     elif intent == "TOP_CONSOMMATEURS":
         n_limit = _extraire_n_limit(q_norm)
-        return fetch_top_consommateurs(mois=params.get("mois"), mode=mode, limit=n_limit)
+        return _fetch(fetch_top_consommateurs, mois=params.get("mois"), mode=mode, limit=n_limit)
     elif intent == "MIN_CONSOMMATEURS":
         n_limit = _extraire_n_limit(q_norm)
-        return fetch_min_consommateurs(mois=params.get("mois"), mode=mode, limit=n_limit)
+        return _fetch(fetch_min_consommateurs, mois=params.get("mois"), mode=mode, limit=n_limit)
     elif intent == "TOP_MONTANTS":
         n_limit = _extraire_n_limit(q_norm)
-        return fetch_top_montants(mois=params.get("mois"), mode=mode, limit=n_limit)
+        return _fetch(fetch_top_montants, mois=params.get("mois"), mode=mode, limit=n_limit)
     elif intent == "MIN_MONTANTS":
         n_limit = _extraire_n_limit(q_norm)
-        return fetch_min_montants(mois=params.get("mois"), mode=mode, limit=n_limit)
+        return _fetch(fetch_min_montants, mois=params.get("mois"), mode=mode, limit=n_limit)
     elif intent == "CLASSEMENT_PAR_MOIS":
-        return fetch_classement_par_mois(mode=mode)
+        return _fetch(fetch_classement_par_mois, mode=mode)
     elif intent == "AGENCE_PAR_CLIENT":
-        return fetch_agence_par_client(mode=mode)
+        return _fetch(fetch_agence_par_client, mode=mode)
     elif intent == "PAR_AGENCE":
-        return fetch_par_agence(agence=params.get("agence"), mode=mode)
+        return _fetch(fetch_par_agence, agence=params.get("agence"), mode=mode)
     elif intent == "PAR_USAGE":
         usage_brut = params.get("usage")
         usage_norm = normaliser_usage(usage_brut) if usage_brut else None
-        return fetch_par_usage(usage=usage_norm, mode=mode)
+        return _fetch(fetch_par_usage, usage=usage_norm, mode=mode)
     elif intent == "PAR_SERVICE":
-        return fetch_par_service(service=params.get("service"), mode=mode)
+        return _fetch(fetch_par_service, service=params.get("service"), mode=mode)
     elif intent == "ALERTES":
-        return fetch_alertes(mode=mode)
+        return _fetch(fetch_alertes, mode=mode)
     elif intent == "STATS_GENERALES":
-        return fetch_stats_generales(mode=mode, question=question)
+        return _fetch(fetch_stats_generales, mode=mode, question=question)
     elif intent == "EVOLUTION_MOIS":
-        return fetch_evolution_mois(mode=mode)
+        return _fetch(fetch_evolution_mois, mode=mode)
     elif intent == "SOMME_CONSO_MOIS":
         mois = params.get("mois", "")
         if not mois:
             return "Veuillez préciser le mois souhaité."
-        return fetch_somme_conso_mois(mois)
+        return _fetch(fetch_somme_conso_mois, mois)
     elif intent == "SOMME_MONTANT_MOIS":
         mois = params.get("mois", "")
         if not mois:
-            return fetch_stats_generales(mode="count", question="montant total")
-        return fetch_somme_montant_mois(mois)
+            return _fetch(fetch_stats_generales, mode="count", question="montant total")
+        return _fetch(fetch_somme_montant_mois, mois)
     else:
         print(f"  [FALLBACK] Intent non reconnu → Text-to-SQL")
-        return repondre_fallback_sql(question)
+        return repondre_fallback_sql(question, nom_fichier)
 
 
-def repondre_question_client(question: str, nom_client: str, historique_texte: str) -> str:
-        # ── PORTAIL 1 : validation concept universel ──
+# ════════════════════════════════════════════════════════════
+# QUESTION CLIENT
+# ════════════════════════════════════════════════════════════
+
+def repondre_question_client(question: str, nom_client: str, historique_texte: str, nom_fichier: str = "") -> str:
+
+    # ── PORTAIL 1 : validation concept universel ──
     msg_concept = valider_concept_question(question)
     if msg_concept:
         return msg_concept
-    # ── PORTAIL 2 : questions ambiguës ────────────── 
+
+    # ── PORTAIL 2 : questions ambiguës ──
     from rag.intent import detecter_question_ambigue
     msg_ambigue = detecter_question_ambigue(question)
     if msg_ambigue:
@@ -1158,28 +1171,34 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
                 f"- *Mois où {nom_client} a le plus consommé*"
             )
 
-    print(f"  [RAG CLIENT] Détection intent pour {nom_client}...")
+    # ── Helper local pour propager nom_fichier ──
+    def _fetch_client(fn, **kwargs):
+        try:
+            return fn(**kwargs, nom_fichier=nom_fichier)
+        except TypeError:
+            return fn(**kwargs)
+
+    print(f"  [RAG CLIENT] Détection intent pour {nom_client} | Fichier : {nom_fichier or 'tous'}")
     resultat = detecter_intent_client(question)
     intent = resultat.get("intent", "FACTURES_CLIENT")
     params = resultat.get("params", {})
     print(f"  [RAG CLIENT] Intent : {intent} | Params : {params}")
 
     if intent == "MAX_CONSOMMATION":
-        return fetch_client_max_consommation(nom_client)
+        return _fetch_client(fetch_client_max_consommation, nom_client=nom_client)
     elif intent == "MIN_CONSOMMATION":
-        return fetch_client_min_consommation(nom_client)
+        return _fetch_client(fetch_client_min_consommation, nom_client=nom_client)
     elif intent == "MAX_MONTANT":
-        return fetch_client_max_montant(nom_client)
+        return _fetch_client(fetch_client_max_montant, nom_client=nom_client)
     elif intent == "MIN_MONTANT":
-        return fetch_client_min_montant(nom_client)
+        return _fetch_client(fetch_client_min_montant, nom_client=nom_client)
     elif intent == "EVOLUTION_CLIENT":
-        return fetch_client_evolution(nom_client)
+        return _fetch_client(fetch_client_evolution, nom_client=nom_client)
     elif intent == "MOYENNE_CLIENT":
-        return fetch_client_moyenne(nom_client)
+        return _fetch_client(fetch_client_moyenne, nom_client=nom_client)
     elif intent == "INFOS_CLIENT":
         champ = params.get("champ")
 
-        # ── Champs inexistants dans la base ──
         CHAMPS_INEXISTANTS = {
             "telephone", "tel", "phone", "mobile", "gsm",
             "email", "mail", "courriel",
@@ -1189,13 +1208,12 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
             "ville", "region", "pays", "rib", "iban",
             "cin", "carte", "identite", "categorie",
             "numero agence", "n agence", "num agence",
-           "code agence", "id agence","code postale"
+            "code agence", "id agence", "code postale"
         }
 
         q_norm_check = _normaliser_q(question)
         champ_inexistant = None
         for c in CHAMPS_INEXISTANTS:
-            # Utiliser \b pour éviter "age" dans "usage" ou "lusage"
             if re.search(r'\b' + re.escape(c) + r'\b', q_norm_check):
                 champ_inexistant = c
                 break
@@ -1210,14 +1228,14 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
                 f"- Adresse, Agence, Usage, Type de service"
             )
 
-        return fetch_client_infos(nom_client, champ=champ)
+        return _fetch_client(fetch_client_infos, nom_client=nom_client, champ=champ)
     elif intent == "MOIS_SPECIFIQUE":
         mois = params.get("mois", "")
         champ = params.get("champ")
-        return fetch_client_mois_specifique(nom_client, mois, champ=champ)
+        return _fetch_client(fetch_client_mois_specifique, nom_client=nom_client, mois=mois, champ=champ)
     elif intent == "SOMME_CONSO_CLIENT":
-        return fetch_client_somme_conso(nom_client)
+        return _fetch_client(fetch_client_somme_conso, nom_client=nom_client)
     elif intent == "SOMME_MONTANT_CLIENT":
-        return fetch_client_somme_montant(nom_client)
+        return _fetch_client(fetch_client_somme_montant, nom_client=nom_client)
     else:
-        return fetch_client_toutes_factures(nom_client)
+        return _fetch_client(fetch_client_toutes_factures, nom_client=nom_client)
