@@ -8,10 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from rag.mode import _normaliser_q
 from normalisation import normaliser_usage
-from rag.tokens_extra import (
-    EXTRA_MAX_CONSO_CLIENT, EXTRA_MIN_CONSO_CLIENT,
-    EXTRA_SOMME_CONSO_CLIENT, EXTRA_SOMME_MONTANT_CLIENT,
-)
+
 
 INTENTS_DISPONIBLES = """
 LISTE_CLIENTS        : liste des clients, qui existe, combien de clients, tous les clients
@@ -97,7 +94,6 @@ _TOKENS_SOMME_CLIENT = [
     "en tout", "cumul", "cumulee", "cumulees",
     "sur tous les mois", "sur l ensemble", "global", "globale",
 ]
-_TOKENS_SOMME_CLIENT = _TOKENS_SOMME_CLIENT + EXTRA_SOMME_CONSO_CLIENT  
 
 
 _TOKENS_SOMME_MONTANT_CLIENT = [
@@ -115,7 +111,6 @@ _TOKENS_SOMME_MONTANT_CLIENT = [
     "mantant total", "mantant global", "monton total", "montan total", "mntant total",
     "mantant cumule", "monton cumule",
 ]
-_TOKENS_SOMME_MONTANT_CLIENT = _TOKENS_SOMME_MONTANT_CLIENT + EXTRA_SOMME_MONTANT_CLIENT  
 
 _TOKENS_SOMME_MONTANT_MOIS = [
     "somme de montant", "somme des montant", "somme du montant", "somme montant",
@@ -147,7 +142,6 @@ _TOKENS_MAX_CONSO = [
     "plus elevee", "plus eleve", "la plus haute", "plus haute",
     "le plus grand", "la plus grande",
 ]
-_TOKENS_MAX_CONSO = _TOKENS_MAX_CONSO + EXTRA_MAX_CONSO_CLIENT  
 
 
 _TOKENS_MIN_CONSO = [
@@ -167,7 +161,6 @@ _TOKENS_MIN_CONSO = [
     "min consomme", "consomme min", "consomme minimale", "consomme minimum",
     "plus petite consomme",
 ]
-_TOKENS_MIN_CONSO = _TOKENS_MIN_CONSO + EXTRA_MIN_CONSO_CLIENT  
 
 
 _TOKENS_MAX_MONTANT = [

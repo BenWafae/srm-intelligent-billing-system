@@ -27,11 +27,6 @@ from rag.fetchers_client import (
     fetch_client_mois_specifique, fetch_client_toutes_factures,
     fetch_client_somme_conso, fetch_client_somme_montant
 )
-from rag.tokens_extra import (
-    EXTRA_CONSO_ELEVEE, EXTRA_CONSO_FAIBLE,
-    EXTRA_MONTANT_ELEVE, EXTRA_MONTANT_FAIBLE,
-    EXTRA_SOMME_MOIS, EXTRA_SOMME_MONTANT,
-)
 
 
 # ════════════════════════════════════════════════════════════
@@ -142,7 +137,7 @@ _TOKENS_CONSO_ELEVEE = [
     "ayant consomation eleve", "ayant consomation elevee",
     "ayant consommation eleve", "ayant consommation elevee",
 ]
-_TOKENS_CONSO_ELEVEE = _TOKENS_CONSO_ELEVEE + EXTRA_CONSO_ELEVEE  
+ 
 
 
 _TOKENS_CONSO_FAIBLE = [
@@ -175,7 +170,6 @@ _TOKENS_CONSO_FAIBLE = [
     "le moins faible", "moins faible",
     "ayant le moins", "ayant conso le moins"
 ]
-_TOKENS_CONSO_FAIBLE = _TOKENS_CONSO_FAIBLE + EXTRA_CONSO_FAIBLE  
 
 
 # ── Mapping mois local ──
@@ -273,7 +267,6 @@ _TOKENS_SOMME_MOIS = [
     "consome total", "consomation global", "consomation generale",
     "consommation global", "consommation generale", "consomtion total",
 ]
-_TOKENS_SOMME_MOIS = _TOKENS_SOMME_MOIS + EXTRA_SOMME_MOIS  # ← ici
 
 
 _TOKENS_SOMME_MONTANT = [
@@ -283,7 +276,6 @@ _TOKENS_SOMME_MONTANT = [
     "combien a-t-on paye", "combien ont paye",
     "mantant total", "mantant en ", "total mantant", "somme mantant",
 ]
-_TOKENS_SOMME_MONTANT = _TOKENS_SOMME_MONTANT + EXTRA_SOMME_MONTANT  # ← ici
 
 
 _TOKENS_MONTANT_ELEVE = [
@@ -297,7 +289,6 @@ _TOKENS_MONTANT_ELEVE = [
     "client qui paie le plus", "client qui paye le plus",
     "montant fort",
 ]
-_TOKENS_MONTANT_ELEVE = _TOKENS_MONTANT_ELEVE + EXTRA_MONTANT_ELEVE  # ← ici
 
 
 _TOKENS_MONTANT_FAIBLE = [
@@ -311,7 +302,6 @@ _TOKENS_MONTANT_FAIBLE = [
     "client qui paie le moins", "client qui paye le moins",
     "moins eleve montant", "moins cher montant",
 ]
-_TOKENS_MONTANT_FAIBLE = _TOKENS_MONTANT_FAIBLE + EXTRA_MONTANT_FAIBLE  # ← ici
 
 
 _CONCEPTS_CONNUS = {
