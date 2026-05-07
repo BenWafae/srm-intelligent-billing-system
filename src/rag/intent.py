@@ -388,16 +388,6 @@ _MOTS_SEULS_VAGUES = {
 }
  
 def detecter_question_ambigue(question: str):
-    """
-    Retourne un message de clarification contextuel si la question
-    est trop vague, sinon retourne None.
-
-    4 cas gérés :
-    Cas 1 — mot seul trop vague         : "liste" / "somme" / "montant"
-    Cas 2b — combo vague sans sujet     : "somme total" / "total somme"
-    Cas 2 — sujet sans mois             : "somme conso" / "total montant"
-    Cas 3 — action+montant sans contexte: "donne moi montant" / "donner moi somme"
-    """
     q = _normaliser_q(question)
     q = _normaliser_verbes(q)
     mots = [m for m in q.split() if len(m) > 1]
@@ -413,6 +403,52 @@ def detecter_question_ambigue(question: str):
     _a_mois   = bool(_extraire_mois(q))
     _a_client = any(t in q for t in ["client", "clients"])
     _a_nom    = any(len(m) >= 4 and m[0].isupper() for m in question.split())
+
+    # ── NOUVEAU : détecter un nom propre même après normalisation (minuscules) ──
+    _MOTS_CLES_CONNUS = {
+        "somme", "total", "montant", "consomme", "conso", "consommation",
+        "consomation", "consome", "mantant", "monton", "paye", "paie",
+        "depense", "client", "clients", "liste", "lister", "afficher",
+        "montrer", "donner", "voir", "quel", "quelle", "quels", "quelles",
+        "qui", "combien", "pour", "dans", "avec", "par", "les", "des",
+        "une", "eau", "elec", "electricite", "agence", "usage", "alerte",
+        "alertes", "service", "facture", "factures", "mois", "evolution",
+        "janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet",
+        "aout", "septembre", "octobre", "novembre", "decembre",
+        "jan", "fev", "avr", "jun", "jul", "sep", "oct", "nov", "dec",
+        "janv", "fevr", "juil", "aou", "sept",
+        "de", "du", "la", "le", "en", "sur", "et", "ou", "est", "son",
+        "tout", "tous", "toutes", "chaque", "global", "generale", "ttc",
+        "dhs", "kwh", "m3", "statistique", "stat", "moyen", "moyenne",
+        "moi", "me", "mon", "ma", "mes", "lui", "leur", "leurs",
+        "donner", "donne", "donnez", "montrer", "montrez", "montrons",
+        "afficher", "affichez", "voir", "lister", "listez",
+        "quel", "quelle", "quels", "quelles", "combien", "comment",
+        "somme", "total", "cumul", "cumulee", "cumules",
+        "tous", "toutes", "chaque", "ensemble", "global", "generale",
+        "max", "min", "plus", "moins", "eleve", "faible", "haut", "bas",
+        "top", "grand", "grande", "petit", "petite", "fort", "forte",
+        "eau", "elec", "electricite", "electricit", "electr",
+        "usage", "usages", "domestique", "professionnel", "agricole",
+        "pro", "dom", "agri",
+        "type", "types", "service", "services",
+        "agence", "agences", "inezgane", "taroudant", "tiznit",
+        "alerte", "alertes", "facture", "factures",
+        "periode", "periodes", "date", "limite", "paiement",
+        "numero", "contrat", "compteur", "adresse",
+        "evolution", "progression", "historique", "tendance",
+        "classement", "classements", "rang", "ranking",
+        "statistique", "statistiques", "stats",
+        "information", "informations", "infos", "fiche", "profil",
+    }
+    _mots_inconnus = [
+        m for m in q.split()
+        if len(m) >= 3 and m not in _MOTS_CLES_CONNUS
+    ]
+    # Un nom client est détecté si : majuscule dans la question originale
+    # OU mot(s) inconnu(s) des mots-clés présents après normalisation
+    _a_nom_client = _a_nom or len(_mots_inconnus) >= 1
+
     _detect_classement = any(t in q for t in [
         "grand", "grande", "gros", "grosse",
         "plus", "max", "eleve", "elevee", "top", "fort", "importante",
@@ -439,7 +475,6 @@ def detecter_question_ambigue(question: str):
                 "- *Liste des alertes*\n"
                 "- *Liste des clients par service (eau / électricité)*"
             )
-
         if mot == "somme":
             return (
                 "Vous demandez une somme, mais **somme de quoi ?**\n\n"
@@ -447,7 +482,6 @@ def detecter_question_ambigue(question: str):
                 "- *Somme de consommation en janvier*\n"
                 "- *Somme des montants en mars*"
             )
-
         if mot == "total":
             return (
                 "Vous demandez un total, mais **total de quoi ?**\n\n"
@@ -456,7 +490,6 @@ def detecter_question_ambigue(question: str):
                 "- *Total montant en mars*\n"
                 "- *Statistiques générales* (pour tout voir)"
             )
-
         if mot in ["montant", "mantant", "monton"]:
             return (
                 "Vous demandez un montant, mais **montant de qui ou de quel mois ?**\n\n"
@@ -465,7 +498,6 @@ def detecter_question_ambigue(question: str):
                 "- *Quel client a le montant le plus élevé ?*\n"
                 "- *Montant de Fatima*"
             )
-
         if mot in ["consomme", "conso", "consommation"]:
             return (
                 "Vous parlez de consommation, mais **consommation de qui ou de quel mois ?**\n\n"
@@ -474,7 +506,6 @@ def detecter_question_ambigue(question: str):
                 "- *Total consommation en janvier*\n"
                 "- *Consommation de Fatima*"
             )
-
         if mot == "agence":
             return (
                 "Vous parlez d'agence, mais **quelle information sur les agences ?**\n\n"
@@ -483,7 +514,6 @@ def detecter_question_ambigue(question: str):
                 "- *Clients de l'agence Agadir*\n"
                 "- *Agence de chaque client*"
             )
-
         if mot in ["client", "clients"]:
             return (
                 "Vous parlez de clients, mais **quelle information sur les clients ?**\n\n"
@@ -492,7 +522,6 @@ def detecter_question_ambigue(question: str):
                 "- *Combien de clients ?*\n"
                 "- *Clients de l'agence Agadir*"
             )
-
         if mot in ["alerte", "alertes"]:
             return (
                 "Vous parlez d'alertes, mais **quelle information sur les alertes ?**\n\n"
@@ -501,7 +530,6 @@ def detecter_question_ambigue(question: str):
                 "- *Combien de clients ont une alerte ?*\n"
                 "- *Liste des alertes*"
             )
-
         if mot == "evolution":
             return (
                 "Vous parlez d'évolution, mais **évolution de quoi ?**\n\n"
@@ -509,7 +537,6 @@ def detecter_question_ambigue(question: str):
                 "- *Évolution des consommations mois par mois*\n"
                 "- *Évolution des montants*"
             )
-
         if mot in ["usage", "usages"]:
             return (
                 "Vous parlez d'usage, mais **quelle information sur les usages ?**\n\n"
@@ -518,7 +545,6 @@ def detecter_question_ambigue(question: str):
                 "- *Clients usage professionnel*\n"
                 "- *Clients usage agricole*"
             )
-
         if mot in ["service", "services"]:
             return (
                 "Vous parlez de service, mais **quel service vous intéresse ?**\n\n"
@@ -527,7 +553,6 @@ def detecter_question_ambigue(question: str):
                 "- *Clients qui utilisent l'électricité*\n"
                 "- *Combien de clients par service ?*"
             )
-
         if mot in ["eau", "elec", "electricite"]:
             return (
                 "Vous parlez du service **eau/électricité**, "
@@ -537,7 +562,6 @@ def detecter_question_ambigue(question: str):
                 "- *Combien de clients électricité ?*\n"
                 "- *Consommation eau en janvier*"
             )
-
         if mot in ["facture", "factures"]:
             return (
                 "Vous parlez de factures, mais **factures de qui ou de quel mois ?**\n\n"
@@ -546,7 +570,6 @@ def detecter_question_ambigue(question: str):
                 "- *Facture de janvier*\n"
                 "- *Combien de factures ?*"
             )
-
         # Mot seul générique
         return (
             f"La question « **{question}** » est trop courte.\n\n"
@@ -562,9 +585,7 @@ def detecter_question_ambigue(question: str):
     # sans aucun sujet ni mois → trop vague
     # ════════════════════════════════════════════════════════
     _combos_doublement_vagues = [
-        # somme + total ensemble
         lambda: "somme" in q and "total" in q,
-        # "total global" / "somme global"
         lambda: ("total" in q or "somme" in q) and "global" in q,
     ]
     _a_sujet_reel = _demande_conso or _demande_montant or _a_mois or _a_client or _a_nom
@@ -582,10 +603,10 @@ def detecter_question_ambigue(question: str):
 
     # ════════════════════════════════════════════════════════
     # CAS 2 — sujet présent mais mois manquant
-    # "somme conso" / "total montant" sans mois ni client
+    # "somme conso" / "total montant" sans mois ni client ni nom
     # ════════════════════════════════════════════════════════
     if (_demande_somme and _demande_conso
-            and not _a_mois and not _a_client and not _a_nom
+            and not _a_mois and not _a_client and not _a_nom_client  # ← _a_nom_client
             and not _detect_classement):
         return (
             "Vous demandez une somme de consommation, "
@@ -596,7 +617,7 @@ def detecter_question_ambigue(question: str):
         )
 
     if (_demande_somme and _demande_montant
-            and not _a_mois and not _a_client and not _a_nom
+            and not _a_mois and not _a_client and not _a_nom_client  # ← _a_nom_client
             and not _detect_classement):
         return (
             "Vous demandez une somme de montants, "
@@ -608,16 +629,15 @@ def detecter_question_ambigue(question: str):
 
     # ════════════════════════════════════════════════════════
     # CAS 3 — verbe d'action + montant/somme sans contexte suffisant
-    # "donne moi montant" / "donner moi somme" / "afficher montant"
     # ════════════════════════════════════════════════════════
 
-    # Sous-cas 3a : verbe + montant seul (sans mois, sans client, sans classement)
+    # Sous-cas 3a : verbe + montant seul (sans mois, sans client, sans nom, sans classement)
     if (_a_verbe_action
             and _demande_montant
             and not _demande_conso
             and not _a_mois
             and not _a_client
-            and not _a_nom
+            and not _a_nom_client  # ← _a_nom_client
             and not _detect_classement):
         return (
             "Vous demandez un montant, mais **montant de qui ou de quel mois ?**\n\n"
@@ -627,7 +647,7 @@ def detecter_question_ambigue(question: str):
             "- *Montant de Fatima*"
         )
 
-    # Sous-cas 3b : verbe + somme/total seul (sans mois, sans classement)
+    # Sous-cas 3b : verbe + somme/total seul (sans mois, sans nom, sans classement)
     _demande_total_somme = any(t in q for t in ["total", "somme"])
     if (_a_verbe_action
             and _demande_total_somme
@@ -635,7 +655,7 @@ def detecter_question_ambigue(question: str):
             and not _demande_montant
             and not _a_mois
             and not _a_client
-            and not _a_nom
+            and not _a_nom_client  # ← _a_nom_client
             and not _detect_classement):
         return (
             "Vous demandez un total ou une somme, "

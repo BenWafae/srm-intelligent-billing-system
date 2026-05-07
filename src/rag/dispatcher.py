@@ -1023,7 +1023,7 @@ def repondre_question_generale(question: str, historique_texte: str, nom_fichier
     if demande_elec and not demande_eau and any(m in q_norm for m in ["combien", "liste", "quels", "client", "utilis"]):
         return _fetch(fetch_par_service, service="electricite", mode=mode)
 
-    # ════════════════════════════════════════════
+   # ════════════════════════════════════════════
     # SOMME CONSO MOIS
     # ════════════════════════════════════════════
     _detect_somme_mois = any(t in q_norm for t in _TOKENS_SOMME_MOIS)
@@ -1041,11 +1041,45 @@ def repondre_question_generale(question: str, historique_texte: str, nom_fichier
         "min", "moins", "faible", "bas", "petit"
     ])
 
+    # Détection nom client dans la question (pour ne pas bloquer "somme conso de Sanaa")
+    _MOTS_CLES_DISPATCHER = {
+        "somme", "total", "montant", "consomme", "conso", "consommation",
+        "consomation", "consome", "mantant", "monton", "paye", "paie",
+        "depense", "client", "clients", "liste", "lister", "afficher",
+        "montrer", "donner", "voir", "quel", "quelle", "quels", "quelles",
+        "qui", "combien", "pour", "dans", "avec", "par", "les", "des",
+        "une", "eau", "elec", "electricite", "agence", "usage", "alerte",
+        "alertes", "service", "facture", "factures", "mois", "evolution",
+        "janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet",
+        "aout", "septembre", "octobre", "novembre", "decembre",
+        "jan", "fev", "avr", "jun", "jul", "sep", "oct", "nov", "dec",
+        "janv", "fevr", "juil", "aou", "sept",
+        "de", "du", "la", "le", "en", "sur", "et", "ou", "est", "son",
+        "tout", "tous", "toutes", "chaque", "global", "generale", "ttc",
+        "dhs", "kwh", "m3", "max", "min", "plus", "moins", "eleve",
+        "faible", "haut", "bas", "top", "grand", "petit", "fort",
+        "moyenne", "moyen", "stat", "statistique", "classement",
+        "moi", "me", "mon", "ma", "mes",
+    }
+    _mots_inconnus_disp = [
+        m for m in q_norm.split()
+        if len(m) >= 3 and m not in _MOTS_CLES_DISPATCHER
+    ]
+    _a_nom_dans_question = (
+        any(len(m) >= 4 and m[0].isupper() for m in question.split())
+        or len(_mots_inconnus_disp) >= 1
+    )
+
     if (_detect_somme_mois or _pattern_somme_conso_mois) and not _detect_intention_classement and _extraire_n_limit(q_norm) is None:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
+            # Mois présent → somme générale du mois (comportement inchangé)
             print(f"  [RÈGLE] somme conso mois → fetch_somme_conso_mois(mois={mois_detecte})")
             return _fetch(fetch_somme_conso_mois, mois=mois_detecte)
+        elif _a_nom_dans_question:
+            # Pas de mois mais nom client détecté → laisser passer vers LLM/fallback
+            print(f"  [RÈGLE] somme conso sans mois + nom client détecté → fallback")
+            pass  # continue vers la suite du dispatcher
 
     # ════════════════════════════════════════════
     # SOMME MONTANT MOIS
@@ -1063,9 +1097,15 @@ def repondre_question_generale(question: str, historique_texte: str, nom_fichier
     if _detect_somme_montant or _pattern_somme_montant_mois:
         mois_detecte = _extraire_mois_disp(q_norm)
         if mois_detecte:
+            # Mois présent → somme générale du mois (comportement inchangé)
             print(f"  [RÈGLE] somme montant mois → fetch_somme_montant_mois(mois={mois_detecte})")
             return _fetch(fetch_somme_montant_mois, mois=mois_detecte)
+        elif _a_nom_dans_question:
+            # Pas de mois mais nom client détecté → laisser passer vers LLM/fallback
+            print(f"  [RÈGLE] somme montant sans mois + nom client détecté → fallback")
+            pass  # continue vers la suite du dispatcher
         else:
+            # Ni mois ni nom → stats générales (comportement inchangé)
             print(f"  [RÈGLE] somme montant global → fetch_stats_generales")
             return _fetch(fetch_stats_generales, mode="count", question="montant total")
 
