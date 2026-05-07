@@ -26,12 +26,13 @@ STATS_GENERALES      : total, moyenne, somme, montant global, statistiques gén�
 SOMME_MONTANT_MOIS   : somme des montants, total des montants, montant total en janvier, combien a-t-on payé en mars, montant global d'un mois
 SOMME_CONSO_MOIS     : somme de consommation en un mois précis, total consommé en janvier, combien a-t-on consommé en mars
 EVOLUTION_MOIS       : évolution, progression, mois par mois, historique général, tendance
+TOP_MOIS_CONSO       : les N mois les plus consommés, les N mois les moins consommés, top mois consommation
 QUESTION_LIBRE       : toute autre question qui ne rentre pas dans les catégories ci-dessus
 """
 
 INTENTS_CLIENT = """
-MAX_CONSOMMATION     : mois où le client a le plus consommé, consommation maximale, pic de consommation
-MIN_CONSOMMATION     : mois où le client a le moins consommé, consommation minimale
+MAX_CONSOMMATION     : mois où le client a le plus consommé, consommation maximale, pic de consommation,les N mois les plus consommés pour ce client
+MIN_CONSOMMATION     : mois où le client a le moins consommé, consommation minimale,les N mois les moins consommés pour ce client
 SOMME_MONTANT_CLIENT : somme totale des montants du client sur tous les mois, total payé, combien a-t-il payé en tout
 MAX_MONTANT          : mois où le client a payé le plus, montant maximum, facture la plus chère
 MIN_MONTANT          : mois où le client a payé le moins, montant minimum, facture la moins chère
@@ -742,7 +743,41 @@ def detecter_intent(question: str) -> dict:
     if any(t in q for t in _tokens_min_conso):
         mois = _extraire_mois(q)
         return {"intent": "MIN_CONSOMMATEURS", "params": {"mois": mois} if mois else {}}
-
+    # ── RÈGLE : TOP_MOIS_CONSO général ──
+    _TOKENS_TOP_MOIS_GENERAL = [
+        "les mois les plus consomme", "les mois les moins consomme",
+        "mois les plus consomme", "mois les moins consomme",
+        "top mois consomme", "mois avec le plus de consomme",
+        "mois avec le moins de consomme", "mois les plus eleve",
+        "mois les plus faible", "les mois plus consomme",
+        "les mois moins consomme", "mois qui a le plus consomme",
+        "mois qui a le moins consomme",
+    ]
+    if any(t in q for t in _TOKENS_TOP_MOIS_GENERAL):
+        _est_min = any(t in q for t in [
+            "moins", "faible", "min", "minimum", "petit", "bas"
+        ])
+        _n = None
+        _match_n = re.search(r'\b(\d+)\b', q)
+        if _match_n:
+            n = int(_match_n.group(1))
+            if 1 <= n <= 24:
+                _n = n
+        _LETTRES_N = {
+            "deux": 2, "trois": 3, "quatre": 4, "cinq": 5,
+            "six": 6, "sept": 7, "huit": 8, "neuf": 9, "dix": 10,
+        }
+        for mot, val in _LETTRES_N.items():
+            if re.search(r'\b' + mot + r'\b', q):
+                _n = val
+                break
+        return {
+            "intent": "TOP_MOIS_CONSO",
+            "params": {
+                "ordre": "asc" if _est_min else "desc",
+                "limit": _n if _n else 5
+            }
+        }
     # ── Fallback LLM ──
     prompt = f"""Tu es un classificateur de questions. Tu dois identifier l'intent de la question posée.
 
@@ -777,7 +812,7 @@ JSON :"""
                 "TOP_MONTANTS", "MIN_MONTANTS", "CLASSEMENT_PAR_MOIS",
                 "AGENCE_PAR_CLIENT", "PAR_AGENCE", "PAR_USAGE", "PAR_SERVICE",
                 "ALERTES", "STATS_GENERALES", "SOMME_MONTANT_MOIS",
-                "SOMME_CONSO_MOIS", "EVOLUTION_MOIS", "QUESTION_LIBRE"
+                "SOMME_CONSO_MOIS", "EVOLUTION_MOIS","TOP_MOIS_CONSO", "QUESTION_LIBRE"
             ]
             if intent_llm not in _intents_valides:
                 print(f"  [VALIDATION] Intent inconnu {intent_llm} → QUESTION_LIBRE")
@@ -797,9 +832,8 @@ JSON :"""
 
 
 # ════════════════════════════════════════════════════════════
-# DÉTECTION INTENT CLIENT  (inchangée)
+# DÉTECTION INTENT CLIENT  
 # ════════════════════════════════════════════════════════════
-
 def detecter_intent_client(question: str) -> dict:
     q = _normaliser_intent_q(question)
 
@@ -845,13 +879,50 @@ def detecter_intent_client(question: str) -> dict:
         if token in q:
             return {"intent": "SOMME_CONSO_CLIENT", "params": {}}
 
+    # ── Détection top N mois pour client ──
+    _TOKENS_TOP_MOIS_CLIENT = [
+        "les mois les plus consomme", "les mois les moins consomme",
+        "mois les plus consomme", "mois les moins consomme",
+        "top mois", "mois avec le plus", "mois avec le moins",
+        "mois les plus eleve", "mois les plus faible",
+        "les mois plus consomme", "les mois moins consomme",
+        "mois ou il a le plus consomme", "mois ou elle a le plus consomme",
+        "mois ou il a le moins consomme", "mois ou elle a le moins consomme",
+    ]
+    _est_top_mois_client = any(t in q for t in _TOKENS_TOP_MOIS_CLIENT)
+
+    # Détection N dans la question
+    _n_mois = None
+    _match_n = re.search(r'\b(\d+)\b', q)
+    if _match_n:
+        n = int(_match_n.group(1))
+        if 1 <= n <= 24:
+            _n_mois = n
+    _LETTRES_N = {
+        "deux": 2, "trois": 3, "quatre": 4, "cinq": 5,
+        "six": 6, "sept": 7, "huit": 8, "neuf": 9, "dix": 10,
+    }
+    for mot, val in _LETTRES_N.items():
+        if re.search(r'\b' + mot + r'\b', q):
+            _n_mois = val
+            break
+
+    if _est_top_mois_client:
+        _est_min = any(t in q for t in [
+            "moins", "faible", "min", "minimum", "petit", "bas"
+        ])
+        intent_top = "MIN_CONSOMMATION" if _est_min else "MAX_CONSOMMATION"
+        limit_top = _n_mois if _n_mois else 5
+        print(f"  [PRÉ-DÉTECTION CLIENT] {intent_top} top mois → limit={limit_top}")
+        return {"intent": intent_top, "params": {"limit": limit_top}}
+
     for token in _TOKENS_MAX_CONSO:
         if token in q:
-            return {"intent": "MAX_CONSOMMATION", "params": {}}
+            return {"intent": "MAX_CONSOMMATION", "params": {"limit": 1}}
 
     for token in _TOKENS_MIN_CONSO:
         if token in q:
-            return {"intent": "MIN_CONSOMMATION", "params": {}}
+            return {"intent": "MIN_CONSOMMATION", "params": {"limit": 1}}
 
     for token in _TOKENS_MAX_MONTANT:
         if token in q:
@@ -888,12 +959,15 @@ RÈGLES :
 - mois avec conso MAX → MAX_CONSOMMATION
 - mois avec conso MIN → MIN_CONSOMMATION
 - usage, adresse, agence, service, contrat → INFOS_CLIENT
+- "les N mois les plus consommés" → MAX_CONSOMMATION avec limit dans params
+- "les N mois les moins consommés" → MIN_CONSOMMATION avec limit dans params
 
 Question : {question}
 
 JSON uniquement :
 {{"intent": "NOM_INTENT", "params": {{}}}}
 Si mois précis ajoute : {{"mois": "Mars"}}
+Si N mois demandés ajoute : {{"limit": N}}
 """
     texte = _appeler_llm(prompt)
     match = re.search(r'\{.*\}', texte, re.DOTALL)

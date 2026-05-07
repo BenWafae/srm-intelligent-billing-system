@@ -29,7 +29,7 @@ def _filtre_fichier(nom_fichier: str) -> tuple[str, list]:
 # ════════════════════════════════════════════════════════════
 
 
-def fetch_client_max_consommation(nom_client: str, nom_fichier: str = "") -> str:
+def fetch_client_max_consommation(nom_client: str, limit: int = 1, nom_fichier: str = "") -> str:
     clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
@@ -43,15 +43,25 @@ def fetch_client_max_consommation(nom_client: str, nom_fichier: str = "") -> str
     conn.close()
     if not rows:
         return f"Aucune donnée trouvée pour « {nom_client} »."
-    max_val = rows[0][1]
-    tops = [r for r in rows if r[1] == max_val]
-    lignes = [f"📈 Consommation maximale de **{nom_client}** :\n"]
-    for r in tops:
-        lignes.append(f"🏆 **{r[0]}** : {r[1]:,} {r[2]}  ← MAXIMUM")
+
+    if limit == 1:
+        max_val = rows[0][1]
+        tops = [r for r in rows if r[1] == max_val]
+        lignes = [f"📈 Consommation maximale de **{nom_client}** :\n"]
+        for r in tops:
+            lignes.append(f"🏆 **{r[0]}** : {r[1]:,} {r[2]}  ← MAXIMUM")
+        return "\n".join(lignes)
+
+    # limit > 1 → top N mois
+    top_rows = rows[:limit]
+    lignes = [f"📈 Top {limit} mois — **{nom_client}** :\n"]
+    for i, r in enumerate(top_rows, 1):
+        marker = "🏆" if i == 1 else f"  {i}."
+        lignes.append(f"{marker} **{r[0]}** : {r[1]:,} {r[2]}")
     return "\n".join(lignes)
 
 
-def fetch_client_min_consommation(nom_client: str, nom_fichier: str = "") -> str:
+def fetch_client_min_consommation(nom_client: str, limit: int = 1, nom_fichier: str = "") -> str:
     clause, fparams = _filtre_fichier(nom_fichier)
     conn = _connexion()
     cursor = conn.cursor()
@@ -65,11 +75,21 @@ def fetch_client_min_consommation(nom_client: str, nom_fichier: str = "") -> str
     conn.close()
     if not rows:
         return f"Aucune donnée trouvée pour « {nom_client} »."
-    min_val = rows[0][1]
-    mins = [r for r in rows if r[1] == min_val]
-    lignes = [f"📉 Consommation minimale de **{nom_client}** :\n"]
-    for r in mins:
-        lignes.append(f"🔻 **{r[0]}** : {r[1]:,} {r[2]}  ← MINIMUM")
+
+    if limit == 1:
+        min_val = rows[0][1]
+        mins = [r for r in rows if r[1] == min_val]
+        lignes = [f"📉 Consommation minimale de **{nom_client}** :\n"]
+        for r in mins:
+            lignes.append(f"🔻 **{r[0]}** : {r[1]:,} {r[2]}  ← MINIMUM")
+        return "\n".join(lignes)
+
+    # limit > 1 → top N mois
+    top_rows = rows[:limit]
+    lignes = [f"📉 Top {limit} mois les moins consommés — **{nom_client}** :\n"]
+    for i, r in enumerate(top_rows, 1):
+        marker = "🔻" if i == 1 else f"  {i}."
+        lignes.append(f"{marker} **{r[0]}** : {r[1]:,} {r[2]}")
     return "\n".join(lignes)
 
 

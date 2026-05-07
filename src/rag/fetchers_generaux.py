@@ -1259,3 +1259,50 @@ def _formater_top_n_montant(rows, titre, emoji_top):
         else:
             lignes.append(f"{marker} **{r[0]}** — {r[1]:,.2f} Dhs")
     return "\n".join(lignes)
+def fetch_top_mois_conso(ordre: str = "desc", limit: int = 5, nom_fichier: str = "") -> str:
+    """
+    Retourne les N mois avec la consommation la plus élevée (ordre='desc')
+    ou la plus faible (ordre='asc'), séparés par service.
+    """
+    clause, fp = _filtre_fichier(nom_fichier)
+    conn = _connexion()
+    cursor = conn.cursor()
+
+    cursor.execute(f"""
+        SELECT mois_source, nom_client, consommation, unite
+        FROM factures_excel
+        WHERE 1=1 {clause}
+        ORDER BY consommation {'DESC' if ordre == 'desc' else 'ASC'}
+    """, fp)
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        return "Aucune donnée trouvée."
+
+    eau  = [r for r in rows if r[3] == "m³"]
+    elec = [r for r in rows if r[3] == "kWh"]
+
+    eau  = eau[:limit]
+    elec = elec[:limit]
+
+    emoji_top = "🏆" if ordre == "desc" else "🔻"
+    sens = "les plus consommés" if ordre == "desc" else "les moins consommés"
+    titre = f"Top {limit} mois {sens}"
+
+    lignes = [f"{emoji_top} **{titre}** :\n"]
+
+    if eau:
+        lignes.append("💧 **Eau (m³)** :")
+        for i, r in enumerate(eau, 1):
+            marker = emoji_top if i == 1 else f"  {i}."
+            lignes.append(f"{marker} **{r[0]}** — {r[2]:,} m³  ({r[1]})")
+
+    if elec:
+        lignes.append("\n⚡ **Électricité (kWh)** :")
+        for i, r in enumerate(elec, 1):
+            marker = emoji_top if i == 1 else f"  {i}."
+            lignes.append(f"{marker} **{r[0]}** — {r[2]:,} kWh  ({r[1]})")
+
+    lignes.append("\n⚠️ Classements séparés : eau (m³) ≠ électricité (kWh).")
+    return "\n".join(lignes)

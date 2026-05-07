@@ -19,6 +19,7 @@ from rag.fetchers_generaux import (
     fetch_somme_conso_mois,
     fetch_agence_par_client,
     fetch_somme_montant_mois,
+    fetch_top_mois_conso,
 )
 from rag.fetchers_client import (
     fetch_client_max_consommation, fetch_client_min_consommation,
@@ -861,6 +862,29 @@ def repondre_question_generale(question: str, historique_texte: str, nom_fichier
                 break
         print(f"  [RÈGLE] client + agence → fetch_par_agence(agence={agence_trouvee}, mode={mode})")
         return _fetch(fetch_par_agence, agence=agence_trouvee, mode=mode)
+    # ════════════════════════════════════════════
+    # RÈGLE TOP MOIS CONSO — avant RÈGLE 2.5
+    # ════════════════════════════════════════════
+    _TOKENS_TOP_MOIS_DISP = [
+        "les mois les plus consomme", "les mois les moins consomme",
+        "mois les plus consomme", "mois les moins consomme",
+        "top mois consomme", "mois avec le plus de consomme",
+        "mois avec le moins de consomme", "mois les plus eleve",
+        "mois les plus faible", "les mois plus consomme",
+        "les mois moins consomme", "mois qui a le plus consomme",
+        "mois qui a le moins consomme",
+        "les mois les plus consomme", "les mois les moins consomme",
+        "donner moi les mois", "montrer moi les mois",
+    ]
+    if any(t in q_norm for t in _TOKENS_TOP_MOIS_DISP):
+        _est_min_mois = any(t in q_norm for t in [
+            "moins", "faible", "min", "minimum", "petit", "bas"
+        ])
+        n_limit_mois = _extraire_n_limit(q_norm)
+        ordre_mois = "asc" if _est_min_mois else "desc"
+        limit_mois = n_limit_mois if n_limit_mois else 5
+        print(f"  [RÈGLE] top mois conso → fetch_top_mois_conso(ordre={ordre_mois}, limit={limit_mois})")
+        return _fetch(fetch_top_mois_conso, ordre=ordre_mois, limit=limit_mois)
 
     # ════════════════════════════════════════════
     # RÈGLE 2 — MONTANT élevé / faible
@@ -1150,6 +1174,10 @@ def repondre_question_generale(question: str, historique_texte: str, nom_fichier
         return _fetch(fetch_stats_generales, mode=mode, question=question)
     elif intent == "EVOLUTION_MOIS":
         return _fetch(fetch_evolution_mois, mode=mode)
+    elif intent == "TOP_MOIS_CONSO":                          
+        ordre = params.get("ordre", "desc")
+        limit = params.get("limit", 5)
+        return _fetch(fetch_top_mois_conso, ordre=ordre, limit=limit)
     elif intent == "SOMME_CONSO_MOIS":
         mois = params.get("mois", "")
         if not mois:
@@ -1232,9 +1260,11 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
     print(f"  [RAG CLIENT] Intent : {intent} | Params : {params}")
 
     if intent == "MAX_CONSOMMATION":
-        return _fetch_client(fetch_client_max_consommation, nom_client=nom_client)
+        limit = params.get("limit", 1)
+        return _fetch_client(fetch_client_max_consommation, nom_client=nom_client, limit=limit)
     elif intent == "MIN_CONSOMMATION":
-        return _fetch_client(fetch_client_min_consommation, nom_client=nom_client)
+        limit = params.get("limit", 1) 
+        return _fetch_client(fetch_client_min_consommation, nom_client=nom_client,  limit=limit)
     elif intent == "MAX_MONTANT":
         return _fetch_client(fetch_client_max_montant, nom_client=nom_client)
     elif intent == "MIN_MONTANT":
