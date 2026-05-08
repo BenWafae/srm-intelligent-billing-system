@@ -4,6 +4,8 @@ import json
 from rag.mode import _normaliser_q
 from rag.intent import _appeler_llm, _extraire_mois, _contient_mois
 from rag_client.intent import _detecter_champ_infos
+from src.database import get_statut_paiements_client
+
 
 from rag_client.fetchers import (
     get_infos, get_mois_specifique,
@@ -25,6 +27,7 @@ from rag_client.tokens import (
     _TOKENS_CHAMP_MONTANT, _TOKENS_CHAMP_CONSO,
     INTENTS_CLIENT_CONNECTE,
     _TOKENS_COMPARAISON, 
+    _TOKENS_RETARD_PAIEMENT,
 )
 
 # ════════════════════════════════════════════
@@ -357,7 +360,94 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
 
     q = _normaliser_q(question)
     q = re.sub(r'^(et|mais|aussi|donc|alors|puis)\s+', '', q)
+    
+    if any(t in q for t in _TOKENS_RETARD_PAIEMENT):
+        factures = get_statut_paiements_client(numero_contrat)
 
+        # ── Filtrer uniquement les mois déjà arrivés (jusqu'à aujourd'hui) ──
+        mois_actuel = now.strftime("%Y%m")
+        factures_passees = []
+        for f in factures:
+            try:
+                # periode_debut format : "01/10/2025"
+               
+                date_lim = datetime.strptime(f["date_limite"], "%d/%m/%Y")
+                # On garde uniquement si la date limite est <= aujourd'hui + 1 mois
+                # c'est-à-dire les factures déjà émises et dont l'échéance est passée ou ce mois
+                if date_lim <= datetime(now.year, now.month, 28):
+                    factures_passees.append(f)
+            except:
+                factures_passees.append(f)
+
+        # ── Cas mois explicite dans la question ──
+        mois_cible = None
+        mois_explicites = _extraire_tous_les_mois(q)
+
+        if any(t in q for t in _TOKENS_CE_MOIS):
+            mois_cible = _MOIS_FR[now.strftime("%B")]
+        elif any(t in q for t in _TOKENS_MOIS_PRECEDENT):
+            mois_cible = _MOIS_FR[(now - relativedelta(months=1)).strftime("%B")]
+        elif mois_explicites:
+            mois_cible = mois_explicites[0]
+
+        if mois_cible:
+            # Chercher dans TOUTES les factures (pas seulement passées)
+            facture_mois = next(
+                (f for f in factures if mois_cible in f["mois"]), None
+            )
+            if not facture_mois:
+                return f"Aucune facture trouvée pour **{mois_cible}**."
+
+            try:
+                date_lim = datetime.strptime(facture_mois["date_limite"], "%d/%m/%Y")
+                jours = (date_lim - now).days
+                if date_lim < now:
+                    msg_date = f"⚠️ Date limite dépassée depuis le {facture_mois['date_limite']} ({abs(jours)} jours de retard)"
+                    return (
+                        f"⚠️ Votre facture de **{facture_mois['mois']}** n'a pas été réglée dans les délais.\n"
+                        f"• Montant : {facture_mois['montant_ttc']:,.2f} Dhs\n"
+                        f"• {msg_date}\n\n"
+                        f"Contactez votre agence SRM pour régulariser."
+                    )
+                else:
+                    return (
+                        f"📅 Votre facture de **{facture_mois['mois']}** n'est pas encore dépassée.\n"
+
+                        f"• Montant : {facture_mois['montant_ttc']:,.2f} Dhs\n"
+                        f"• Vous avez jusqu'au **{facture_mois['date_limite']}** pour payer\n"
+                        f"• Il vous reste **{jours} jours**"
+                    )
+            except:
+                return f"Facture {facture_mois['mois']} — {facture_mois['montant_ttc']:,.2f} Dhs"
+
+        # ── Cas général : uniquement les factures déjà échues ──
+        if not factures_passees:
+            return "✅ Aucune facture échue pour le moment. Vous êtes à jour !"
+
+        lignes = []
+        for f in factures_passees:
+            try:
+                date_lim = datetime.strptime(f["date_limite"], "%d/%m/%Y")
+                jours = abs((date_lim - now).days)
+                if f["en_retard"]:
+                    statut = f"⚠️ En retard ({jours}j)"
+                else:
+                    statut = "✅ Dans les délais"
+            except:
+                statut = "⚠️ En retard" if f["en_retard"] else "✅ OK"
+
+            lignes.append(
+                f"{statut} | {f['mois']} — {f['montant_ttc']:,.2f} Dhs "
+                f"(date limite : {f['date_limite']})"
+            )
+
+        nb_retard = sum(1 for f in factures_passees if f["en_retard"])
+        if nb_retard == 0:
+            entete = f"✅ Toutes vos factures échues sont dans les délais.\n\n"
+        else:
+            entete = f"⚠️ {nb_retard} facture(s) non réglée(s) dans les délais :\n\n"
+
+        return entete + "\n\n".join(lignes)
     # ══════════════════════════════════════════
     # ÉTAPE 0 — CHAMP PRÉCIS (infos compte)
     # ══════════════════════════════════════════

@@ -214,3 +214,38 @@ _TOKENS_COMPARAISON = [
     "par rapport a", "par rapport au",
     "vs", "versus",
 ]
+_TOKENS_RETARD_PAIEMENT = [
+     # ── Retard direct ──
+    "en retard", "retard paiement", "retard de paiement",
+    "suis-je en retard", "suis je en retard",
+    "je suis en retard", "suis en retard",
+    "facture en retard", "factures en retard",
+    "mon retard", "retart", "en retart",
+    "impaye", "impayee", "non paye", "pas paye",
+    "facture impayee", "factures impayees",
+    "j ai pas paye", "j ai pas encore paye",
+    "pas encore paye", "toujours pas paye",
+    "j ai oublie de payer", "j ai oublier payer",
+    "limite depasse", "date limite depassee",
+    "j ai depasse la date", "date passee",
+    "date limitee", "date limite passe",
+    "j ai rate la date", "j ai loupe la date",
+    "la date est passe", "date est depassee",
+    "est ce que j ai depasse la date limite",
+    "jai attend date limitt", "date limitt",
+     # ── Formulations interrogatives simples ──
+    "je suis ok", "tout est ok", "je dois encore payer",
+    "est ce que je dois payer", "est ce que j ai paye",
+    "j ai paye ou pas", "paye ou pas",
+    "mon paiement est ok", "paiement ok",
+    "ma facture est regle", "est regle",
+     "retrad", "reetard", "en retar", "retaard",
+    "imapye", "impayee", "non paye", "inpaye",
+    "depassee", "depasse la date", "echeanse",
+    "date limte", "dat limite", "datte limite",
+     # ── Formulations mobiles / sans ponctuation ──
+    "jai retard", "jai pas paye", "jai oublie payer",
+    "jai depasse date", "jai rate paiement",
+    "jai pas encore regle", "jai toujours pas paye",
+    "ma facture impaye", "facture pas regle",
+]

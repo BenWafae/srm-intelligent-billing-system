@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "srm.db")
-
+from datetime import datetime
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -497,3 +497,39 @@ def get_fichiers_excel() -> list[str]:
     rows = cursor.fetchall()
     conn.close()
     return [r[0] for r in rows]
+# interface client new tokkens
+def get_statut_paiements_client(numero_contrat: str) -> list[dict]:
+    """
+    Retourne toutes les factures du client avec leur statut de paiement.
+    Calcule en Python si la date limite est dépassée.
+    Colonnes utilisées : date_limite_paiement, mois_source, montant_ttc
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT mois_source, date_limite_paiement, montant_ttc
+        FROM factures_excel
+        WHERE numero_contrat = ?
+        ORDER BY periode_debut
+    """, (numero_contrat,))
+    rows = cursor.fetchall()
+    conn.close()
+ 
+    aujourd_hui = datetime.now()
+    resultats = []
+    for mois, date_str, montant in rows:
+        en_retard = False
+        try:
+            date_limite = datetime.strptime(date_str, "%d/%m/%Y")
+            en_retard = date_limite < aujourd_hui
+        except Exception:
+            pass
+        resultats.append({
+            "mois": mois,
+            "date_limite": date_str,
+            "montant_ttc": montant,
+            "en_retard": en_retard,
+        })
+    return resultats
+ 
+ 
