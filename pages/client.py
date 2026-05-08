@@ -11,7 +11,9 @@ from src.database import (
     get_derniere_facture_client,
     get_historique_client,
     get_prochain_paiement_client,
+    get_statut_paiements_client,
 )
+from src.rag.intent import _appeler_llm
 from src.rag.client_connecte import repondre_client_connecte
 from src.rag_client.pdf_facture import generer_pdf_facture
 
@@ -27,6 +29,8 @@ def afficher_client():
         st.session_state["_client_email_courant"] = email_actuel
         st.session_state["historique_client"] = []
         st.session_state["nom_client_connecte"] = None
+        if "msg_accueil" in st.session_state:
+            del st.session_state["msg_accueil"]
 
     # SIDEBAR
     with st.sidebar:
@@ -55,6 +59,15 @@ def afficher_client():
     numero_contrat = st.session_state.user["numero_client"]
 
     # ══════════════════════════════════════════
+    # CHARGER LES DONNÉES EN PREMIER
+    # ══════════════════════════════════════════
+    derniere = get_derniere_facture_client(numero_contrat)
+    prochain = get_prochain_paiement_client(numero_contrat)
+    statuts  = get_statut_paiements_client(numero_contrat)
+    nb_retard = sum(1 for f in statuts if f["en_retard"])
+    prenom   = nom_client.split()[0]
+
+    # ══════════════════════════════════════════
     # TITRE
     # ══════════════════════════════════════════
     st.title(f"👤 Bonjour, **{nom_client}**")
@@ -62,11 +75,44 @@ def afficher_client():
     st.markdown("---")
 
     # ══════════════════════════════════════════
+    # MESSAGE PERSONNALISÉ (texte fixe, style humain)
+    # ══════════════════════════════════════════
+    if derniere:
+        # ── Phrase 3 : retard ou à jour ──
+        if nb_retard > 0:
+            phrase_3 = f"⚠️ {nb_retard} facture(s) non réglée(s) — pensez à contacter votre agence SRM pour régulariser votre situation."
+        else:
+            phrase_3 = "✅ Votre compte est à jour, continuez comme ça !"
+
+        # ── Phrase 2 : échéance avec urgence selon jours restants ──
+        if prochain:
+            if prochain["jours"] <= 5:
+                phrase_2 = f"Attention, votre échéance approche : vous avez jusqu'au **{prochain['date_limite']}** pour régler la facture de {prochain['mois']} (dans {prochain['jours']} jours seulement)."
+            elif prochain["jours"] <= 15:
+                phrase_2 = f"Votre prochaine échéance est le **{prochain['date_limite']}** pour la facture de {prochain['mois']} — il vous reste {prochain['jours']} jours."
+            else:
+                phrase_2 = f"Vous avez encore {prochain['jours']} jours pour régler votre facture de {prochain['mois']} (échéance le {prochain['date_limite']})."
+        else:
+            phrase_2 = "Aucune échéance à venir pour le moment."
+
+        # ── Message complet ──
+        msg_accueil = (
+            f"Bonjour {prenom} ! Votre dernière facture porte sur **{derniere['mois']}** "
+            f"pour un montant de **{derniere['montant']:,.0f} Dhs** "
+            f"({derniere['consommation']:,.0f} {derniere['unite']} consommés). "
+            f"{phrase_2} {phrase_3}"
+        )
+
+        if nb_retard > 0:
+            st.warning(msg_accueil)
+        else:
+            st.success(msg_accueil)
+
+        st.markdown("---")
+
+    # ══════════════════════════════════════════
     # MINI-DASHBOARD
     # ══════════════════════════════════════════
-    derniere = get_derniere_facture_client(numero_contrat)
-    prochain = get_prochain_paiement_client(numero_contrat)
-
     if derniere:
         col1, col2, col3 = st.columns(3)
 
@@ -82,7 +128,7 @@ def afficher_client():
                 st.metric(
                     label="📅 Prochaine échéance",
                     value=f"⏰ {prochain['date_limite']}",
-                    delta=f"dans {prochain['jours']} jours — {prochain['mois']}"
+                    delta=f"dans {prochain['jours']} jours — facture de {prochain['mois']}"
                 )
             else:
                 st.metric(
