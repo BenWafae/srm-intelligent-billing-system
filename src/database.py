@@ -531,5 +531,77 @@ def get_statut_paiements_client(numero_contrat: str) -> list[dict]:
             "en_retard": en_retard,
         })
     return resultats
+
+def get_derniere_facture_client(numero_contrat: str) -> dict | None:
+    from datetime import datetime
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT mois_source, montant_ttc, consommation, unite, periode_debut
+        FROM factures_excel
+        WHERE numero_contrat = ?
+        ORDER BY SUBSTR(periode_debut,7,4)||SUBSTR(periode_debut,4,2)||SUBSTR(periode_debut,1,2) DESC
+    """, (numero_contrat,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    aujourd_hui = datetime.now()
+    for row in rows:
+        try:
+            date_debut = datetime.strptime(row[4], "%d/%m/%Y")
+            if date_debut <= aujourd_hui:
+                return {
+                    "mois": row[0],
+                    "montant": row[1],
+                    "consommation": row[2],
+                    "unite": row[3]
+                }
+        except:
+            continue
+    return None
+def get_prochain_paiement_client(numero_contrat: str) -> dict | None:
+    from datetime import datetime
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT mois_source, date_limite_paiement, montant_ttc, periode_debut
+        FROM factures_excel
+        WHERE numero_contrat = ?
+        ORDER BY SUBSTR(periode_debut,7,4)||SUBSTR(periode_debut,4,2)||SUBSTR(periode_debut,1,2)
+    """, (numero_contrat,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    aujourd_hui = datetime.now()
+    for mois, date_str, montant, periode_debut in rows:
+        try:
+            # On prend le mois dont la PÉRIODE DE DÉBUT <= aujourd'hui
+            # et dont la DATE LIMITE est encore dans le futur
+            date_debut = datetime.strptime(periode_debut, "%d/%m/%Y")
+            date_limite = datetime.strptime(date_str, "%d/%m/%Y")
+            if date_debut <= aujourd_hui and date_limite >= aujourd_hui:
+                jours = (date_limite - aujourd_hui).days
+                return {
+                    "mois"       : mois,
+                    "date_limite": date_str,
+                    "montant_ttc": montant,
+                    "jours"      : jours
+                }
+        except:
+            continue
+    return None
+
+def get_historique_client(numero_contrat: str) -> list[dict]:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT mois_source, montant_ttc, consommation, unite
+        FROM factures_excel
+        WHERE numero_contrat = ?
+        ORDER BY SUBSTR(periode_debut,7,4)||SUBSTR(periode_debut,4,2)||SUBSTR(periode_debut,1,2)
+    """, (numero_contrat,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"mois": r[0], "montant": r[1], "consommation": r[2], "unite": r[3]} for r in rows]
  
  
