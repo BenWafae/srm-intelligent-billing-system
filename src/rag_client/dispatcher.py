@@ -15,7 +15,7 @@ from rag_client.fetchers import (
     get_evolution, get_par_annee,
     get_top_n_conso, get_top_n_montant,
     get_derniers_n_mois, get_premiers_n_mois,
-    get_comparaison  
+    get_comparaison
 )
 
 from rag_client.tokens import (
@@ -26,7 +26,7 @@ from rag_client.tokens import (
     _TOKENS_INFOS, _TOKENS_MOIS,
     _TOKENS_CHAMP_MONTANT, _TOKENS_CHAMP_CONSO,
     INTENTS_CLIENT_CONNECTE,
-    _TOKENS_COMPARAISON, 
+    _TOKENS_COMPARAISON,
     _TOKENS_RETARD_PAIEMENT,
 )
 
@@ -54,19 +54,19 @@ def _extraire_nombre(q: str) -> int:
     for mot, val in _MOTS_NOMBRES.items():
         if mot in q:
             return val
-    return 3  # valeur par défaut
+    return 3
+
 # ════════════════════════════════════════════
 # EXTRACTION TOUS LES MOIS
 # ════════════════════════════════════════════
 def _extraire_tous_les_mois(q: str) -> list:
-    """Extrait tous les mois mentionnés dans la question"""
     from rag.intent import _MAP_MOIS
     mois_trouves = []
     tokens_tries = sorted(_MAP_MOIS.keys(), key=len, reverse=True)
     for token in tokens_tries:
         if re.search(r'\b' + re.escape(token) + r'\b', q):
             mois_canon = _MAP_MOIS[token]
-            if mois_canon not in mois_trouves:  # éviter doublons
+            if mois_canon not in mois_trouves:
                 mois_trouves.append(mois_canon)
     return mois_trouves
 
@@ -87,18 +87,17 @@ def _extraire_annee(q: str) -> str:
 # TOKENS TOP N
 # ════════════════════════════════════════════
 _TOKENS_TOP_N_CONSO = [
-     "mois les plus consomme", "mois les moins consomme",
+    "mois les plus consomme", "mois les moins consomme",
     "plus consomme", "moins consomme",
     "consomme le plus", "consomme le moins",
     "top conso", "pic conso",
 ]
 
 _TOKENS_TOP_N_MONTANT = [
-     "mois les plus chers", "mois les moins chers",
+    "mois les plus chers", "mois les moins chers",
     "mois les plus eleves", "mois les moins eleves",
     "factures les plus cheres", "factures les moins cheres",
     "plus cher", "moins cher", "plus eleve",
-    
 ]
 
 _TOKENS_DERNIERS = [
@@ -111,6 +110,9 @@ _TOKENS_PREMIERS = [
     "debut", "premiere periode",
 ]
 
+# ════════════════════════════════════════════
+# FALLBACK LLM
+# ════════════════════════════════════════════
 def _fallback_llm(question: str, numero_contrat: str) -> str:
     prompt = f"""Tu es un assistant pour un client SRM (eau et électricité au Maroc).
 Les données couvrent : Octobre 2025 à Septembre 2026.
@@ -201,21 +203,36 @@ Ajoute selon l'intent :
                     "Posez-moi une question sur vos factures !"
                 )
 
-            
-
             # ── ANALYSE PERSONNALISÉE ──
-           # ── ANALYSE PERSONNALISÉE ──
             if intent == "ANALYSE":
+                from datetime import datetime
+                from dateutil.relativedelta import relativedelta
+
+                _MOIS_FR = {
+                    "January": "Janvier", "February": "Fevrier", "March": "Mars",
+                    "April": "Avril", "May": "Mai", "June": "Juin",
+                    "July": "Juillet", "August": "Aout", "September": "Septembre",
+                    "October": "Octobre", "November": "Novembre", "December": "Decembre"
+                }
+                now            = datetime.now()
+                mois_actuel    = _MOIS_FR[now.strftime("%B")]
+                mois_precedent = _MOIS_FR[(now - relativedelta(months=1)).strftime("%B")]
+
                 infos     = get_infos(numero_contrat)
                 evolution = get_evolution(numero_contrat)
                 moyenne   = get_moyenne(numero_contrat)
 
-                # ── Récupérer le prénom directement depuis la DB ──
+                donnees_mois_cles = (
+                    f"Mois actuel ({mois_actuel}) :\n"
+                    + get_mois_specifique(numero_contrat, mois_actuel)
+                    + f"\n\nMois précédent ({mois_precedent}) :\n"
+                    + get_mois_specifique(numero_contrat, mois_precedent)
+                )
+
                 from src.database import get_nom_client_par_contrat
                 nom_complet = get_nom_client_par_contrat(numero_contrat) or ""
                 prenom = nom_complet.split()[0] if nom_complet else "client"
 
-                # ── Injecter les données réelles des mois mentionnés ──
                 mois_mentionnes = _extraire_tous_les_mois(question)
                 donnees_mois = ""
                 if mois_mentionnes:
@@ -236,7 +253,17 @@ Voici son historique complet de consommation :
 Voici ses statistiques :
 {moyenne}
 
-{"Données réelles des mois mentionnés :" + chr(10) + donnees_mois if donnees_mois else ""}
+CONTEXTE TEMPOREL IMPORTANT :
+- Mois actuel : {mois_actuel}
+- Mois précédent : {mois_precedent}
+- Quand le client dit "ce mois" → il parle de {mois_actuel}
+- Quand le client dit "mois dernier" → il parle de {mois_precedent}
+- Comparer TOUJOURS {mois_actuel} vs {mois_precedent} pour les questions de hausse/baisse
+
+Données réelles des deux mois clés :
+{donnees_mois_cles}
+
+{"Données des mois mentionnés explicitement :" + chr(10) + donnees_mois if donnees_mois else ""}
 
 Question du client : {question}
 
@@ -244,7 +271,7 @@ RÈGLES STRICTES :
 - Ne jamais dire "heureuse de vous rencontrer", "ravi de vous aider" ou toute formule de politesse inutile
 - Commence TOUJOURS par "Bonjour {prenom},"
 - Va directement à l'explication après "Bonjour {prenom},"
-- Cite obligatoirement les chiffres réels (kWh, Dhs) des mois mentionnés
+- Cite obligatoirement les chiffres réels de {mois_actuel} ET {mois_precedent}
 - Cite la moyenne réelle du client pour comparer
 - Utilise UNIQUEMENT les chiffres présents ci-dessus, ne jamais inventer
 - Si un mois n'est pas dans l'historique, dis-le clairement sans inventer
@@ -340,6 +367,7 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
         "comprends pas", "je comprends", "conseil",
         "reduire", "economiser", "c est normal",
     ]
+   
 
     now = datetime.now()
 
@@ -537,11 +565,15 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
     # ÉTAPE 3.5 — CE MOIS / MOIS PRÉCÉDENT / PROCHAIN
     # ══════════════════════════════════════════
     if any(t in q for t in _TOKENS_CE_MOIS):
+        if any(t in q for t in _TOKENS_ANALYSE):
+            return _fallback_llm(question, numero_contrat)
         mois_fr  = _MOIS_FR[now.strftime("%B")]
         annee_fr = now.strftime("%Y")
         return get_mois_specifique(numero_contrat, mois_fr, _detecter_champ(q), annee_fr)
 
     if any(t in q for t in _TOKENS_MOIS_PRECEDENT):
+        if any(t in q for t in _TOKENS_ANALYSE):
+            return _fallback_llm(question, numero_contrat)
         date_prec = now - relativedelta(months=1)
         mois_fr   = _MOIS_FR[date_prec.strftime("%B")]
         annee_fr  = date_prec.strftime("%Y")
@@ -552,7 +584,6 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
         mois_fr   = _MOIS_FR[date_suiv.strftime("%B")]
         annee_fr  = date_suiv.strftime("%Y")
         return get_mois_specifique(numero_contrat, mois_fr, _detecter_champ(q), annee_fr)
-
     # ══════════════════════════════════════════
     # ÉTAPE 4 — RÈGLES EXACTES
     # ══════════════════════════════════════════

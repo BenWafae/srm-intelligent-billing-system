@@ -32,6 +32,74 @@ def afficher_client():
         if "msg_accueil" in st.session_state:
             del st.session_state["msg_accueil"]
 
+    # ══════════════════════════════════════════
+    # CSS PERSONNALISÉ
+    # ══════════════════════════════════════════
+    st.markdown("""
+    <style>
+    /* ── Boutons rapides ── */
+    div[data-testid="column"] .stButton > button {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #e2e8f0;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.82rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+    div[data-testid="column"] .stButton > button:hover {
+        background: linear-gradient(135deg, #0f3460 0%, #533483 100%);
+        border-color: #6366f1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+    }
+
+    /* ── Boutons LLM ── */
+    .llm-section .stButton > button {
+        background: linear-gradient(135deg, #0f3460 0%, #533483 100%) !important;
+        border-color: #818cf8 !important;
+    }
+
+    /* ── Card style pour section analyse ── */
+    .analyse-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        border: 1px solid #4338ca;
+        border-radius: 16px;
+        padding: 1.2rem 1.5rem;
+        margin: 0.5rem 0 1rem 0;
+    }
+    .analyse-card h4 {
+        color: #a5b4fc;
+        font-size: 0.95rem;
+        margin: 0 0 0.3rem 0;
+    }
+    .analyse-card p {
+        color: #64748b;
+        font-size: 0.78rem;
+        margin: 0;
+    }
+
+    /* ── Séparateur stylé ── */
+    .section-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #334155, transparent);
+        margin: 1.5rem 0;
+    }
+
+    /* ── Label section rapide ── */
+    .section-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.6rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     # SIDEBAR
     with st.sidebar:
         st.title("👤 Espace Client")
@@ -75,16 +143,14 @@ def afficher_client():
     st.markdown("---")
 
     # ══════════════════════════════════════════
-    # MESSAGE PERSONNALISÉ (texte fixe, style humain)
+    # MESSAGE PERSONNALISÉ
     # ══════════════════════════════════════════
     if derniere:
-        # ── Phrase 3 : retard ou à jour ──
         if nb_retard > 0:
             phrase_3 = f"⚠️ {nb_retard} facture(s) non réglée(s) — pensez à contacter votre agence SRM pour régulariser votre situation."
         else:
             phrase_3 = "✅ Votre compte est à jour, continuez comme ça !"
 
-        # ── Phrase 2 : échéance avec urgence selon jours restants ──
         if prochain:
             if prochain["jours"] <= 5:
                 phrase_2 = f"Attention, votre échéance approche : vous avez jusqu'au **{prochain['date_limite']}** pour régler la facture de {prochain['mois']} (dans {prochain['jours']} jours seulement)."
@@ -95,7 +161,6 @@ def afficher_client():
         else:
             phrase_2 = "Aucune échéance à venir pour le moment."
 
-        # ── Message complet ──
         msg_accueil = (
             f"Bonjour {prenom} ! Votre dernière facture porte sur **{derniere['mois']}** "
             f"pour un montant de **{derniere['montant']:,.0f} Dhs** "
@@ -168,33 +233,73 @@ def afficher_client():
     st.markdown("---")
 
     # ══════════════════════════════════════════
-    # SUGGESTIONS DE QUESTIONS
+    # INIT SUGGESTION
     # ══════════════════════════════════════════
     if "suggestion_choisie" not in st.session_state:
         st.session_state["suggestion_choisie"] = None
 
+    # ══════════════════════════════════════════
+    # SECTION 1 — QUESTIONS RAPIDES
+    # ══════════════════════════════════════════
+    st.markdown('<div class="section-label">⚡ Questions rapides</div>', unsafe_allow_html=True)
+
     suggestions = [
-        "Mon montant le plus élevé",
-        "Suis-je en retard ?",
-        "Ma moyenne mensuelle",
-        "Mon historique complet",
+        ("🏆", "Mon montant le plus élevé"),
+        ("⏰", "Suis-je en retard ?"),
+        ("📊", "Ma moyenne mensuelle"),
+        ("📋", "Mon historique complet"),
     ]
 
     cols = st.columns(len(suggestions))
-    for i, (col, sugg) in enumerate(zip(cols, suggestions)):
+    for i, (col, (emoji, texte)) in enumerate(zip(cols, suggestions)):
         with col:
-            if st.button(sugg, key=f"sugg_{i}", use_container_width=True):
-                st.session_state["suggestion_choisie"] = sugg
+            if st.button(f"{emoji} {texte}", key=f"sugg_{i}", use_container_width=True):
+                st.session_state["suggestion_choisie"] = texte
 
+    # ══════════════════════════════════════════
+    # SECTION 2 — ANALYSE INTELLIGENTE (LLM)
+    # ══════════════════════════════════════════
+    st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="analyse-card">
+        <h4>🤖 Analyse intelligente</h4>
+        <p>⏳ Ces analyses utilisent l'IA — la réponse peut prendre quelques secondes</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_llm1, col_llm2 = st.columns(2)
+    with col_llm1:
+        if st.button(
+            "📈 Pourquoi ma facture a augmenté ?",
+            key="btn_llm_hausse",
+            use_container_width=True,
+            help="Analyse comparative avec le mois précédent"
+        ):
+            st.session_state["suggestion_choisie"] = "Pourquoi ma facture a augmenté par rapport au mois dernier ?"
+    with col_llm2:
+        if st.button(
+            "💡 Comment réduire ma consommation ?",
+            key="btn_llm_conseil",
+            use_container_width=True,
+            help="Conseils personnalisés selon votre profil"
+        ):
+            st.session_state["suggestion_choisie"] = "Comment réduire ma consommation ?"
+
+    # ══════════════════════════════════════════
+    # TRAITEMENT SUGGESTION CHOISIE
+    # ══════════════════════════════════════════
     if st.session_state["suggestion_choisie"]:
         question_auto = st.session_state["suggestion_choisie"]
         st.session_state["suggestion_choisie"] = None
         st.session_state.historique_client.append({"role": "user", "content": question_auto})
+
         historique_texte = ""
         for msg in st.session_state.historique_client[:-1]:
             role = "Client" if msg["role"] == "user" else "Assistant"
             historique_texte += f"{role}: {msg['content']}\n"
-        with st.spinner("⏳ Recherche en cours..."):
+
+        with st.spinner("⏳ Analyse en cours..."):
             reponse = repondre_client_connecte(
                 question_auto,
                 numero_contrat,

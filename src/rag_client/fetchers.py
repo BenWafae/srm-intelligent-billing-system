@@ -231,14 +231,37 @@ def get_moyenne(numero_contrat: str) -> str:
     conn.close()
     if not row:
         return "Aucune donnée trouvée."
-    return f"""📊 **Vos statistiques sur {row[7]} mois :**
+    # barre visuelle simple (sur 10)
+    def _barre(val, min_val, max_val, longueur=8):
+        if max_val == min_val:
+            return "█" * longueur
+        ratio = (val - min_val) / (max_val - min_val)
+        plein = round(ratio * longueur)
+        return "█" * plein + "░" * (longueur - plein)
 
-- Consommation moyenne : **{row[0]:,} {row[3]}**
-- Consommation minimum : {row[1]:,} {row[3]}
-- Consommation maximum : {row[2]:,} {row[3]}
-- Montant moyen : **{row[4]:,.2f} Dhs**
-- Montant minimum : {row[5]:,.2f} Dhs
-- Montant maximum : {row[6]:,.2f} Dhs"""
+    barre_conso   = _barre(row[0], row[1], row[2])
+    barre_montant = _barre(row[4], row[5], row[6])
+    return f""" **Vos statistiques sur {row[7]} mois :**
+
+**⚡ Consommation**
+| | Valeur |
+|---|---|
+| Moyenne | **{row[0]:,} {row[3]}** |
+| Minimum | {row[1]:,} {row[3]} |
+| Maximum | {row[2]:,} {row[3]} |
+
+Min {_barre(row[1], row[1], row[2])} Max
+     {barre_conso} ← votre moyenne
+
+**💰 Montants**
+| | Valeur |
+|---|---|
+| Moyenne | **{row[4]:,.2f} Dhs** |
+| Minimum | {row[5]:,.2f} Dhs |
+| Maximum | {row[6]:,.2f} Dhs |
+
+Min {_barre(row[5], row[5], row[6])} Max
+     {barre_montant} ← votre moyenne"""
 
 
 # ════════════════════════════════════════════
@@ -258,9 +281,44 @@ def get_evolution(numero_contrat: str) -> str:
     conn.close()
     if not rows:
         return "Aucune donnée trouvée."
-    lignes = ["📈 **Votre historique complet :**\n"]
-    for r in rows:
-        lignes.append(f"- **{r[0]}** : {r[1]:,} {r[2]} | {r[3]:,.2f} Dhs")
+
+    total_montant = sum(r[3] for r in rows)
+    total_conso   = sum(r[1] for r in rows)
+    moy_montant   = total_montant / len(rows)
+    moy_conso     = total_conso   / len(rows)
+    unite         = rows[0][2]
+
+    # ── Tableau Markdown ──
+    lignes = [
+        " **Votre historique complet :**\n",
+        "| Mois | Consommation | Montant | Tendance |",
+        "|------|-------------|---------|----------|",
+    ]
+
+    for i, r in enumerate(rows):
+        # tendance par rapport au mois précédent
+        if i == 0:
+            tendance = "—"
+        elif r[3] > rows[i-1][3]:
+            tendance = "📈 ↑"
+        elif r[3] < rows[i-1][3]:
+            tendance = "📉 ↓"
+        else:
+            tendance = "➡️ ="
+
+        # marqueur si au-dessus de la moyenne
+        flag = " 🔴" if r[3] > moy_montant * 1.2 else (" 🟢" if r[3] < moy_montant * 0.8 else "")
+
+        lignes.append(
+            f"| **{r[0]}** | {r[1]:,} {r[2]} | {r[3]:,.2f} Dhs{flag} | {tendance} |"
+        )
+
+    lignes.append(f"\n **Résumé :** {len(rows)} mois | "
+                  f"Total : **{total_montant:,.2f} Dhs** | "
+                  f"Moyenne : **{moy_montant:,.2f} Dhs/mois** | "
+                  f"Conso totale : **{total_conso:,} {unite}**")
+    lignes.append("\n🔴 = mois élevé (+20% vs moyenne)  🟢 = mois économique (-20% vs moyenne)")
+
     return "\n".join(lignes)
 
 
@@ -410,15 +468,11 @@ def get_comparaison(numero_contrat: str, mois1: str, mois2: str) -> str:
     sens_montant = "↑ augmenté" if diff_montant > 0 else "↓ diminué"
     pct_conso    = round(abs(diff_conso)   / r1[1] * 100, 1) if r1[1] else 0
     pct_montant  = round(abs(diff_montant) / r1[3] * 100, 1) if r1[3] else 0
+    emoji_conso   = "📈" if diff_conso   > 0 else "📉"
+    emoji_montant = "📈" if diff_montant > 0 else "📉"
+    return f""" **Comparaison {r1[0]} vs {r2[0]} :**
 
-    return f"""📊 **Comparaison {r1[0]} vs {r2[0]} :**
-
-⚡ Consommation :
-  • {r1[0]} : {r1[1]:,} {r1[2]}
-  • {r2[0]} : {r2[1]:,} {r2[2]}
-  • {sens_conso} de {abs(diff_conso):,} {r1[2]} ({pct_conso}%)
-
-💰 Montant :
-  • {r1[0]} : {r1[3]:,.2f} Dhs
-  • {r2[0]} : {r2[3]:,.2f} Dhs
-  • {sens_montant} de {abs(diff_montant):,.2f} Dhs ({pct_montant}%)"""
+| | {r1[0]} | {r2[0]} | Évolution |
+|---|---|---|---|
+| ⚡ Consommation | {r1[1]:,} {r1[2]} | {r2[1]:,} {r2[2]} | {emoji_conso} {sens_conso} {pct_conso}% |
+| 💰 Montant | {r1[3]:,.2f} Dhs | {r2[3]:,.2f} Dhs | {emoji_montant} {sens_montant} {pct_montant}% |"""
