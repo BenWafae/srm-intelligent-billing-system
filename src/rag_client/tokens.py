@@ -213,6 +213,10 @@ _TOKENS_COMPARAISON = [
     "quelle est la diffirence", "quel est la diffirence",
     "par rapport a", "par rapport au",
     "vs", "versus",
+    "avec moi dernier",    # ← faute fréquente
+"avec mois dernier",
+"et mois dernier",
+"et moi dernier",
 ]
 _TOKENS_RETARD_PAIEMENT = [
      # ── Retard direct ──
@@ -248,4 +252,12 @@ _TOKENS_RETARD_PAIEMENT = [
     "jai depasse date", "jai rate paiement",
     "jai pas encore regle", "jai toujours pas paye",
     "ma facture impaye", "facture pas regle",
+]
+_TOKENS_CHAMP_DATE_LIMITE = [
+    "date limite", "date limite paiement",
+    "date de paiement", "date limit",
+    "echeance", "mon echeance",
+    "quand payer", "quand je dois payer",
+    "date pour payer", "limite paiement",
+    "dat limite", "date limte",
 ]

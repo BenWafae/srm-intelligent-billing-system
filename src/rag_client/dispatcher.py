@@ -346,7 +346,7 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
         "October": "Octobre", "November": "Novembre", "December": "Decembre"
     }
     _TOKENS_CE_MOIS        = ["ce mois", "ce mois ci", "mois actuel", "mois en cours", "mois courant"]
-    _TOKENS_MOIS_PRECEDENT = ["mois dernier", "mois precedent", "mois passe", "le mois d avant"]
+    _TOKENS_MOIS_PRECEDENT = ["mois dernier", "mois precedent", "mois passe", "le mois d avant", "moi dernier",    "mois denier", "mois dernir",     ]
     _TOKENS_MOIS_PROCHAIN  = ["mois prochain", "mois suivant", "mois d apres"]
     
     # ── Tokens comparaison (définis ici pour être disponibles partout dans la fonction) ──

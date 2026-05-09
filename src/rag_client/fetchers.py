@@ -14,12 +14,14 @@ def get_infos(numero_contrat: str, champ: str = None) -> str:
     conn = _connexion()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT nom_client, agence, usage, type_service,
-               adresse, numero_client, numero_contrat, numero_compteur
-        FROM factures_excel
-        WHERE numero_contrat = ?
-        LIMIT 1
-    """, (numero_contrat,))
+    SELECT nom_client, agence, usage, type_service,
+           adresse, numero_client, numero_contrat, numero_compteur,
+           date_limite_paiement
+    FROM factures_excel
+    WHERE numero_contrat = ?
+    ORDER BY SUBSTR(periode_debut,7,4)||SUBSTR(periode_debut,4,2)||SUBSTR(periode_debut,1,2) DESC
+    LIMIT 1
+""", (numero_contrat,))
     row = cursor.fetchone()
     conn.close()
 
@@ -34,6 +36,7 @@ def get_infos(numero_contrat: str, champ: str = None) -> str:
         "client"   : f"**N° Client :** {row[5]}",
         "contrat"  : f"**N° Contrat :** {row[6]}",
         "compteur" : f"**N° Compteur :** {row[7]}",
+        "date_limite" : f"📅 **Date limite de paiement :** {row[8]}",
     }
 
     if champ and champ in _MAP:

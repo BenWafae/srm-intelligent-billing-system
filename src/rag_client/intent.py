@@ -6,6 +6,7 @@ from rag_client.tokens import (
     _TOKENS_CHAMP_COMPTEUR,
     _TOKENS_CHAMP_CONTRAT,
     _TOKENS_CHAMP_CLIENT,
+    _TOKENS_CHAMP_DATE_LIMITE,
 )
 from rag_client.normalisation_client import _levenshtein
 
@@ -20,6 +21,7 @@ def _detecter_champ_infos(q: str):
         "service"  : _TOKENS_CHAMP_SERVICE,
         "agence"   : _TOKENS_CHAMP_AGENCE,
         "usage"    : _TOKENS_CHAMP_USAGE,
+        "date_limite" : _TOKENS_CHAMP_DATE_LIMITE,
     }
 
     # ── Matching exact d'abord ──
