@@ -5,6 +5,7 @@ from rag.mode import _normaliser_q
 from rag.intent import _appeler_llm, _extraire_mois, _contient_mois
 from rag_client.intent import _detecter_champ_infos
 from src.database import get_statut_paiements_client
+from rag_client.srm_knowledge import TOKENS_GENERAL_SRM, repondre_general
 
 
 from rag_client.fetchers import (
@@ -379,7 +380,29 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
              not any(t in q for t in _TOKENS_CHAMP_MONTANT):
             return "consommation"
         return None
+    # ══════════════════════════════════════════
+    # ÉTAPE -1 — QUESTION GÉNÉRALE SRM
+    # ══════════════════════════════════════════
+    q_brut = _normaliser_q(question)
 
+    _TOKENS_PRIORITE = [
+        "comment s abonner", "s abonner", "abonner",
+        "abonnement", "branchement", "comment brancher",
+        "documents pour", "pieces a fournir", "dossier abonnement",
+        "recrutement", "stage srm", "stagiaire",
+        "c est quoi srm", "qui est srm", "historique srm",
+        "economiser l eau", "economiser electricite",
+        "procedure abonnement", "demarche abonnement",
+        "comment faire abonnement", "comment ouvrir abonnement",
+    ]
+
+    _MOTS_PERSONNELS = ["mon", "ma", "mes", "j ai", "moi"]
+
+    _est_priorite_srm = any(t in q_brut for t in _TOKENS_PRIORITE)
+    _est_question_perso = any(m in q_brut for m in _MOTS_PERSONNELS)
+
+    if _est_priorite_srm and not _est_question_perso:
+        return repondre_general(question, _appeler_llm)
     # ── Détection anglais sur question brute ──
     question_lower = question.lower()
     mots_bruts = question_lower.split()
