@@ -384,6 +384,7 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
     # ÉTAPE -1 — QUESTION GÉNÉRALE SRM
     # ══════════════════════════════════════════
     q_brut = _normaliser_q(question)
+    
 
     _TOKENS_PRIORITE = [
         "comment s abonner", "s abonner", "abonner",
@@ -394,15 +395,25 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
         "economiser l eau", "economiser electricite",
         "procedure abonnement", "demarche abonnement",
         "comment faire abonnement", "comment ouvrir abonnement",
+        "stage","stage dans srm sm ","stage srm","srm sm"
     ]
 
-    _MOTS_PERSONNELS = ["mon", "ma", "mes", "j ai", "moi"]
+    _MOTS_PERSONNELS = [
+    "mon contrat", "ma facture", "mes factures",
+    "mon montant", "ma consommation", "mon historique",
+    "mon compte", "mon agence", "mon compteur",
+    "mon abonnement", "ma moyenne", "mon retard",
+]
 
     _est_priorite_srm = any(t in q_brut for t in _TOKENS_PRIORITE)
     _est_question_perso = any(m in q_brut for m in _MOTS_PERSONNELS)
+    print(f"DEBUG q_brut: '{q_brut}'")
+    print(f"DEBUG tokens match: {[t for t in _TOKENS_PRIORITE if t in q_brut]}")
+    print(f"DEBUG perso match: {[m for m in _MOTS_PERSONNELS if m in q_brut]}")
 
     if _est_priorite_srm and not _est_question_perso:
         return repondre_general(question, _appeler_llm)
+    
     # ── Détection anglais sur question brute ──
     question_lower = question.lower()
     mots_bruts = question_lower.split()
