@@ -75,30 +75,35 @@ un seul exemplaire des documents est requis.
 - Fonctions libérales : autorisations d'exercice selon la fonction (Autorités Compétentes)
 - Logements de fonction : l'attestation administrative remplace le titre de propriété et le permis d'habiter
 
-## RECRUTEMENT — CADRES ET INGÉNIEURS
-La SRM SM recrute des cadres et ingénieurs (Bac+5) dans les domaines suivants :
-Finance, Comptabilité, Ressources Humaines, Génie électrique, Génie Civil,
-Hydraulique, Génie logiciel, Réseaux informatiques, Sécurité informatique,
-Commerce/Marketing, SIG, Génie Industriel.
-Les candidatures se font en ligne sur : https://www.mafoamanagement.com/e-concours/srm-sm-2025/
+## RECRUTEMENT — TRAVAILLER À SRM (EMPLOI PERMANENT)
+Tu veux travailler à SRM SM en tant qu'employé permanent ?
+SRM SM recrute dans deux catégories :
 
-## RECRUTEMENT — AGENTS DE MAÎTRISE
-La SRM SM recrute des techniciens spécialisés (Bac+2) dans les domaines :
-Développement informatique, Gestion/Comptabilité, Hydraulique/Génie Civil,
-Électricité/Électromécanique, Ressources Humaines.
-Candidatures en ligne sur : https://econcours.brainman.ma/cmp/SRM_SM_2025
+Cadres et Ingénieurs (Bac+5) — domaines : Finance, Comptabilité, RH,
+Génie électrique, Génie Civil, Hydraulique, Génie logiciel, Réseaux,
+Sécurité informatique, Commerce/Marketing, SIG, Génie Industriel.
+Candidature en ligne : https://www.mafoamanagement.com/e-concours/srm-sm-2025/
 
-## STAGE À LA SRM
-La SRM accueille des stagiaires chaque année.
-Documents à fournir (à envoyer uniquement par email) :
+Agents de Maîtrise (Bac+2) — domaines : Développement informatique,
+Gestion/Comptabilité, Hydraulique/Génie Civil, Électricité/Électromécanique, RH.
+Candidature en ligne : https://econcours.brainman.ma/cmp/SRM_SM_2025
+
+IMPORTANT : Les candidatures emploi se font UNIQUEMENT en ligne via les liens ci-dessus.
+Ne pas envoyer de CV par email ni se présenter en agence pour un emploi.
+
+## STAGE À SRM (ÉTUDIANTS UNIQUEMENT)
+Tu es étudiant et tu cherches un stage académique dans le cadre de tes études ?
+C'est différent d'un emploi permanent.
+Documents à envoyer UNIQUEMENT par email à stages@srm-sm.ma :
 1. Copie CNI
 2. CV avec téléphone et email
 3. Convention de stage signée et cachetée par l'école
 4. Demande de stage sur en-tête de l'école avec période précisée
 5. Attestation d'assurance
 
-Email pour stage : stages@srm-sm.ma
-Aucune demande de stage ne sera acceptée sur place.
+IMPORTANT : Aucune demande de stage ne sera acceptée sur place.
+Le stage est réservé aux étudiants avec convention d'école.
+Ne pas confondre stage étudiant et offre d'emploi permanent.
 
 ## SENSIBILISATION — ÉCONOMISER L'EAU
 - Réparer immédiatement les fuites (un robinet qui goutte peut gaspiller énormément)
