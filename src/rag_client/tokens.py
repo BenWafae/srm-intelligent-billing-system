@@ -111,6 +111,11 @@ _TOKENS_CONSO_MAX = [
 "mois le plus consomme", 
 "le mois consomme le plus",
 "mois consomme le plus",
+"consomation la plus elevee",
+"consommation la plus eleve",
+"consomation la plus eleve",
+"ma consommation la plus",
+"la plus eleve",
 ]
 
 _TOKENS_CONSO_MIN = [
@@ -146,6 +151,11 @@ _TOKENS_SOMME_CONSO = [
     "combien j ai consomme en tout", "ma consommation totale",
     "somme de mes consommations", "total ma consommation",
     "cumul de ma consommation", "ma conso totale",
+    "somme de ma consommation", "somme consommation",
+    "somme de ma consomation", "somme consomation",
+    "somme conso", "total conso", "total consommation",
+    "total de ma consommation", "total de ma consomation",
+    "total de conso",
 ]
 
 _TOKENS_EVOLUTION = [

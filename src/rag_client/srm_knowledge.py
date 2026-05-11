@@ -134,7 +134,7 @@ TOKENS_GENERAL_SRM = [
     "multiservices", "souss massa", "srm souss massa ",
 
     # Abonnement général
-    "abonnement", "s abonner", "comment s abonner","commencer un abonnement "
+    "abonnement", "s abonner", "comment s abonner","commencer un abonnement ",
     "je veux m abonner", "je veux abonner",
     "new abonnement", "nouvel abonnement",
     "ouvrir un compte", "creer un abonnement",

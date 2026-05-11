@@ -387,10 +387,46 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
     # ÉTAPE -1 — ROUTEUR LLM : GÉNÉRAL SRM ou PERSONNEL ?
     # ══════════════════════════════════════════
     q_brut = _normaliser_q(question)
+    
 
     # Court-circuit : si la question contient un mot personnel
     # évident → on saute directement à la logique existante
-    _MOTS_PERSO_EVIDENTS = ["mon ", "ma ", "mes ", "j ai", "suis je"]
+    _MOTS_PERSO_EVIDENTS = [# Possessifs — étapes 0, 3, 4
+        "mon ", "ma ", "mes ",
+        # Retard — étape retard
+        "j ai", "suis je", "je suis",
+        "en retard", "impaye", "pas paye",
+        # Consommation personnelle — étape 4
+        "je consomme", "je paie", "je paye",
+        "jai paye", "jai consomme",
+        # Max/Min/Somme — étape 4
+        "montant le plus", "montant max", "montant min",
+        "montant eleve", "montant haut", "montant faible",
+        "consomme le plus", "consomme le moins",
+        "consommation max", "consommation min",
+        "consommation eleve", "consommation faible",
+        "somme", "total", "combien",
+        # Historique/Moyenne — étape 4
+        "historique", "evolution", "moyenne",
+        "toutes mes", "tout afficher", "voir tout",
+        "mois par mois",
+        # Mois relatifs — étape 3.5
+        "ce mois", "mois dernier", "mois prochain",
+        "mois precedent", "mois actuel",
+        # Comparaison — étape 2.5
+        "compare", "comparer", "difference entre",
+        "par rapport", "vs ", "versus",
+        # Mois explicites — étape 3
+        "janvier", "fevrier", "mars", "avril", "mai", "juin",
+        "juillet", "aout", "septembre", "octobre", "novembre", "decembre",
+        # Années — étape 1
+        "2025", "2026",
+        # Top N — étape 2
+        "derniers mois", "premiers mois", "dernier mois",
+        "plus cher", "moins cher", "plus eleve",
+        "plus consomme", "moins consomme",]
+    print(f"DEBUG q_brut: '{q_brut}'")
+    print(f"DEBUG perso match: {[t for t in _MOTS_PERSO_EVIDENTS if t in q_brut]}")
     
     if not any(t in q_brut for t in _MOTS_PERSO_EVIDENTS):
         intent_route = _appeler_llm(
