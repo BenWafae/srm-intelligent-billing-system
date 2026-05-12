@@ -4,6 +4,8 @@ import re
 import json
 import sys
 import os
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from rag.mode import _normaliser_q
@@ -60,6 +62,10 @@ _MAP_MOIS = {
 }
 
 _NOMS_MOIS = list(_MAP_MOIS.keys())
+_MOIS_FR_NOMS = [
+    "Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Aout", "Septembre", "Octobre", "Novembre", "Decembre"
+]
 
 # ════════════════════════════════════════════════════════════
 # TOKENS (tous inchangés)
@@ -215,9 +221,35 @@ def _normaliser_intent_q(question: str) -> str:
     return q
 
 def _contient_mois(q: str) -> bool:
-    return any(m in q for m in _NOMS_MOIS)
+    if any(m in q for m in _NOMS_MOIS):
+        return True
+    _TOKENS_RELATIFS = [
+        "ce mois", "mois actuel", "mois courant", "mois en cours",
+        "mois dernier", "le mois dernier", "mois passe", "mois precedent",
+        "dernier mois",
+    ]
+    return any(t in q for t in _TOKENS_RELATIFS)
+def _resoudre_mois_relatif(q: str) -> str:
+    maintenant = datetime.now()
+    _TOKENS_MOIS_ACTUEL = [
+        "ce mois", "mois actuel", "mois courant",
+        "mois en cours", "mois ci", "mois present",
+    ]
+    _TOKENS_MOIS_DERNIER = [
+        "mois dernier", "le mois dernier", "mois passe",
+        "mois precedent", "dernier mois",
+    ]
+    if any(t in q for t in _TOKENS_MOIS_ACTUEL):
+        return _MOIS_FR_NOMS[maintenant.month - 1]
+    if any(t in q for t in _TOKENS_MOIS_DERNIER):
+        mois_precedent = maintenant - relativedelta(months=1)
+        return _MOIS_FR_NOMS[mois_precedent.month - 1]
+    return ""
 
 def _extraire_mois(q: str) -> str:
+    mois_relatif = _resoudre_mois_relatif(q)
+    if mois_relatif:
+        return mois_relatif
     tokens_tries = sorted(_MAP_MOIS.keys(), key=len, reverse=True)
     for token in tokens_tries:
         if re.search(r'\b' + re.escape(token) + r'\b', q):
