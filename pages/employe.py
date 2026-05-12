@@ -11,6 +11,7 @@ from src.database import (init_db, enregistrer_facture, importer_excel_en_db,
                            get_resume_excel, get_clients_avec_pdf, get_texte_pdf_client,
                            get_fichiers_excel,get_client_par_numero_contrat)
 from src.excel_reader import lire_excel
+from src.llm import detecter_client, est_question_generale, normaliser
 
 
 def afficher_employe():
@@ -245,19 +246,45 @@ def afficher_employe():
                 # ── CAS 2 : question sur le client actif ──
                 elif st.session_state.client_contrat_actif:
                     client_actif = st.session_state.client_contrat_actif
+                    liste_clients = resume["clients"]
+
+                    # Vérifier si question sur autre client ou question générale
+                    autre_client, statut = detecter_client(question_excel, liste_clients)
 
                     st.session_state.historique_excel.append(
                         {"role": "user", "content": question_excel}
                     )
                     st.chat_message("user").write(question_excel)
 
-                    with st.spinner("⏳ Recherche en cours..."):
-                        reponse = poser_question_excel(
-                            question_excel,
-                            st.session_state.historique_excel,
-                            nom_fichier=nom_fichier_actif,
-                            nom_client_force=client_actif["nom_client"]
-                        )
+                    if statut == "exact" and normaliser(autre_client) != normaliser(client_actif["nom_client"]):
+                        # Autre client détecté → quitter contexte contrat
+                        st.session_state.client_contrat_actif = None
+                        with st.spinner("⏳ Recherche en cours..."):
+                            reponse = poser_question_excel(
+                                question_excel,
+                                st.session_state.historique_excel,
+                                nom_fichier=nom_fichier_actif
+                            )
+
+                    elif est_question_generale(question_excel):
+                        # Question générale → quitter contexte contrat
+                        st.session_state.client_contrat_actif = None
+                        with st.spinner("⏳ Recherche en cours..."):
+                            reponse = poser_question_excel(
+                                question_excel,
+                                st.session_state.historique_excel,
+                                nom_fichier=nom_fichier_actif
+                            )
+
+                    else:
+                        # Question sur le client actif → garder contexte
+                        with st.spinner("⏳ Recherche en cours..."):
+                            reponse = poser_question_excel(
+                                question_excel,
+                                st.session_state.historique_excel,
+                                nom_fichier=nom_fichier_actif,
+                                nom_client_force=client_actif["nom_client"]
+                            )
 
                     st.session_state.historique_excel.append(
                         {"role": "assistant", "content": reponse}
