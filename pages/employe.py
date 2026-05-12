@@ -9,7 +9,7 @@ from src.llm import poser_question, poser_question_excel
 from src.extractor import extraire_infos_facture
 from src.database import (init_db, enregistrer_facture, importer_excel_en_db,
                            get_resume_excel, get_clients_avec_pdf, get_texte_pdf_client,
-                           get_fichiers_excel)
+                           get_fichiers_excel,get_client_par_numero_contrat)
 from src.excel_reader import lire_excel
 
 
@@ -39,6 +39,9 @@ def afficher_employe():
     # SESSION STATE — Filtre fichier
     if "nom_fichier_selectionne" not in st.session_state:
         st.session_state.nom_fichier_selectionne = ""
+        # SESSION STATE — Client contrat actif
+    if "client_contrat_actif" not in st.session_state:
+        st.session_state.client_contrat_actif = None
 
     # TITRE + ONGLETS
     st.title("🤖 Assistant SRM — Gestion Intelligente des Factures")
@@ -184,15 +187,98 @@ def afficher_employe():
             question_excel = st.chat_input("Votre question sur la base clients...")
 
             if question_excel:
-                st.session_state.historique_excel.append({"role": "user", "content": question_excel})
-                st.chat_message("user").write(question_excel)
+                import re
+                _PATTERN_CONTRAT = r'\b\d{10}/\d{7}\b'
+                match_contrat = re.search(_PATTERN_CONTRAT, question_excel)
 
-                with st.spinner("⏳ Recherche en cours..."):
-                    reponse = poser_question_excel(
-                        question_excel,
-                        st.session_state.historique_excel,
-                        nom_fichier=nom_fichier_actif  # ← SEUL AJOUT PAR RAPPORT À L'ORIGINAL
+                # ── CAS 1 : numéro de contrat saisi ──
+                if match_contrat:
+                    numero_saisi = match_contrat.group()
+                    client_trouve = get_client_par_numero_contrat(numero_saisi)
+
+                    st.session_state.historique_excel.append(
+                        {"role": "user", "content": question_excel}
                     )
+                    st.chat_message("user").write(question_excel)
 
-                st.session_state.historique_excel.append({"role": "assistant", "content": reponse})
-                st.chat_message("assistant").write(reponse)
+                    if client_trouve:
+                        st.session_state.client_contrat_actif = client_trouve
+
+                        from src.rag.fetchers_client import fetch_client_mois_specifique
+                        from datetime import datetime
+                        _MOIS_FR = {
+                            "January": "Janvier", "February": "Fevrier",
+                            "March": "Mars", "April": "Avril", "May": "Mai",
+                            "June": "Juin", "July": "Juillet", "August": "Aout",
+                            "September": "Septembre", "October": "Octobre",
+                            "November": "Novembre", "December": "Decembre"
+                        }
+                        mois_actuel = _MOIS_FR[datetime.now().strftime("%B")]
+                        conso_mois = fetch_client_mois_specifique(
+                            client_trouve["nom_client"], mois_actuel
+                        )
+
+                        reponse = f"""✅ Client trouvé pour le contrat **{numero_saisi}** :
+
+- **Nom** : {client_trouve['nom_client']}
+- **Agence** : {client_trouve['agence']}
+- **Usage** : {client_trouve['usage']}
+- **Service** : {client_trouve['type_service']}
+- **Adresse** : {client_trouve['adresse']}
+- **N° Client** : {client_trouve['numero_client']}
+- **N° Compteur** : {client_trouve['numero_compteur']}
+
+📊 **Consommation {mois_actuel} :**
+{conso_mois}
+
+💬 Vous pouvez maintenant poser des questions sur ce client."""
+
+                    else:
+                        st.session_state.client_contrat_actif = None
+                        reponse = f"❌ Aucun client trouvé pour le numéro de contrat **{numero_saisi}**."
+
+                    st.session_state.historique_excel.append(
+                        {"role": "assistant", "content": reponse}
+                    )
+                    st.chat_message("assistant").write(reponse)
+
+                # ── CAS 2 : question sur le client actif ──
+                elif st.session_state.client_contrat_actif:
+                    client_actif = st.session_state.client_contrat_actif
+
+                    st.session_state.historique_excel.append(
+                        {"role": "user", "content": question_excel}
+                    )
+                    st.chat_message("user").write(question_excel)
+
+                    with st.spinner("⏳ Recherche en cours..."):
+                        reponse = poser_question_excel(
+                            question_excel,
+                            st.session_state.historique_excel,
+                            nom_fichier=nom_fichier_actif,
+                            nom_client_force=client_actif["nom_client"]
+                        )
+
+                    st.session_state.historique_excel.append(
+                        {"role": "assistant", "content": reponse}
+                    )
+                    st.chat_message("assistant").write(reponse)
+
+                # ── CAS 3 : question générale normale ──
+                else:
+                    st.session_state.historique_excel.append(
+                        {"role": "user", "content": question_excel}
+                    )
+                    st.chat_message("user").write(question_excel)
+
+                    with st.spinner("⏳ Recherche en cours..."):
+                        reponse = poser_question_excel(
+                            question_excel,
+                            st.session_state.historique_excel,
+                            nom_fichier=nom_fichier_actif
+                        )
+
+                    st.session_state.historique_excel.append(
+                        {"role": "assistant", "content": reponse}
+                    )
+                    st.chat_message("assistant").write(reponse)

@@ -474,13 +474,22 @@ Réponds en français de façon claire et précise.
 # qui est propagé jusqu'au dispatcher via
 # repondre_question_generale et repondre_question_client
 # ══════════════════════════════════════════════════════════════
-def poser_question_excel(question: str, historique: list = [], nom_fichier: str = "") -> str:
+def poser_question_excel(question: str, historique: list = [], nom_fichier: str = "", nom_client_force: str = "") -> str:
     resume = get_resume_excel()
 
     if resume["total"] == 0:
         return "Aucune donnée disponible. Veuillez d'abord importer un fichier Excel."
 
     liste_clients = resume["clients"]
+     # ── CAS SPÉCIAL : client forcé via numéro de contrat ──
+    if nom_client_force:
+        historique_texte = ""
+        for msg in historique[:-1]:
+            role = "Client" if msg["role"] == "user" else "Assistant"
+            historique_texte += f"{role}: {msg['content']}\n"
+        return repondre_question_client(
+            question, nom_client_force, historique_texte, nom_fichier=nom_fichier
+        )
 
     # ── ÉTAPE 0 — VÉRIFICATION NOM INCONNU ──
     nom_inconnu = _detecter_nom_inconnu(question, liste_clients)

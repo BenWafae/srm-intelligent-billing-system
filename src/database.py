@@ -604,4 +604,28 @@ def get_historique_client(numero_contrat: str) -> list[dict]:
     conn.close()
     return [{"mois": r[0], "montant": r[1], "consommation": r[2], "unite": r[3]} for r in rows]
  
- 
+def get_client_par_numero_contrat(numero_contrat: str) -> dict | None:
+    """Retourne les infos d'un client depuis son numéro de contrat."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT nom_client, numero_contrat, agence, usage, 
+                        type_service, adresse, numero_client, numero_compteur
+        FROM factures_excel
+        WHERE numero_contrat = ?
+        LIMIT 1
+    """, (numero_contrat,))
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        return None
+    return {
+        "nom_client": row[0],
+        "numero_contrat": row[1],
+        "agence": row[2],
+        "usage": row[3],
+        "type_service": row[4],
+        "adresse": row[5],
+        "numero_client": row[6],
+        "numero_compteur": row[7],
+    }
