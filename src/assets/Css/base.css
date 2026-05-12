@@ -1,0 +1,25 @@
+/* ═══════════════════════════════════════════════════════════
+   SRM — BASE STYLES
+   Configuration de base du thème violet
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+    --primary: #7c3aed;
+    --primary-light: #a78bfa;
+    --secondary: #d946ef;
+    --dark-bg: #0f0521;
+    --dark-surface: #1a0a2e;
+    --text-primary: #f0f0f0;
+    --text-secondary: rgba(240, 240, 240, 0.7);
+    --border-color: rgba(167, 139, 250, 0.3);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Outfit', sans-serif;
+}

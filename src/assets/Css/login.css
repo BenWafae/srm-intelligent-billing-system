@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* ── FOND ── */
+html, body,
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+.main {
+    background: linear-gradient(145deg, #0d0518 0%, #1a0a2e 40%, #12182b 100%) !important;
+    font-family: 'Outfit', sans-serif !important;
+    min-height: 100vh !important;
+}
+
+.block-container {
+    padding-top: 0 !important;
+    padding-bottom: 2rem !important;
+    max-width: 100% !important;
+}
+
+/* ── MASQUER STREAMLIT ── */
+[data-testid="stHeader"],
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+[data-testid="stSidebar"],
+[data-testid="collapsedControl"],
+#MainMenu, footer, header {
+    display: none !important;
+}
+
+/* ── CERCLES DÉCORATIFS ── */
+.bg-circles {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+.circle-top-right {
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,92,246,0.3) 0%, transparent 70%);
+    top: -150px; right: -150px;
+}
+.circle-bottom-left {
+    position: absolute;
+    width: 450px; height: 450px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.25) 0%, rgba(192,38,211,0.12) 40%, transparent 70%);
+    bottom: -150px; left: -150px;
+}
+
+/* ── CARD GLASSMORPHISM sur la colonne centrale ── */
+[data-testid="column"]:nth-child(2) > div:first-child {
+    background: rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(167, 139, 250, 0.2) !important;
+    border-radius: 24px !important;
+    padding: 32px 28px 36px !important;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── HEADER ── */
+.login-card-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.login-icon-circle {
+    width: 88px;
+    height: 88px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(217,70,239,0.15));
+    border: 2px solid rgba(167, 139, 250, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+    padding: 10px;
+    box-shadow: 0 0 24px rgba(124, 58, 237, 0.35);
+    overflow: hidden;
+}
+
+.login-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
+.login-title {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    color: #f0f0f0 !important;
+    margin: 0 0 6px 0 !important;
+    letter-spacing: 1px;
+    text-align: center !important;
+    font-family: 'Outfit', sans-serif !important;
+}
+
+.login-subtitle {
+    font-size: 11px;
+    color: rgba(167, 139, 250, 0.8);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 20px 0;
+    text-align: center;
+}
+
+.login-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(167,139,250,0.35), transparent);
+    margin-bottom: 4px;
+}
+
+/* ── LABELS ── */
+[data-testid="stTextInput"] label,
+[data-testid="stPasswordInput"] label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: rgba(200, 180, 255, 0.9) !important;
+    letter-spacing: 0.5px !important;
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* ── INPUTS ── */
+[data-testid="stTextInput"] input,
+[data-testid="stPasswordInput"] input {
+    background: rgba(255, 255, 255, 0.93) !important;
+    border: 1.5px solid rgba(167, 139, 250, 0.3) !important;
+    border-radius: 12px !important;
+    padding: 13px 16px !important;
+    font-size: 14px !important;
+    font-family: 'Outfit', sans-serif !important;
+    color: #1a1a1a !important;
+    transition: all 0.25s ease !important;
+}
+
+[data-testid="stTextInput"] input::placeholder,
+[data-testid="stPasswordInput"] input::placeholder {
+    color: #aaa !important;
+}
+
+[data-testid="stTextInput"] input:focus,
+[data-testid="stPasswordInput"] input:focus {
+    border-color: #a78bfa !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2) !important;
+    outline: none !important;
+}
+
+[data-testid="stTextInput"],
+[data-testid="stPasswordInput"] {
+    margin-bottom: 12px !important;
+}
+
+/* ── BOUTON ── */
+[data-testid="stButton"] > button {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #d946ef 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 14px 24px !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    font-family: 'Outfit', sans-serif !important;
+    width: 100% !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45) !important;
+    transition: all 0.25s ease !important;
+}
+
+[data-testid="stButton"] > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 28px rgba(124, 58, 237, 0.6) !important;
+}
+
+/* ── ALERTES ── */
+[data-testid="stAlert"] {
+    background: rgba(139, 92, 246, 0.12) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 10px !important;
+    color: #e0e0e0 !important;
+    margin-top: 12px !important;
+    font-family: 'Outfit', sans-serif !important;
+}
+
+/* ── FOOTER ── */
+.login-footer {
+    text-align: center !important;
+    font-size: 12px !important;
+    color: rgba(255, 255, 255, 0.32) !important;
+    margin-top: 20px !important;
+    letter-spacing: 0.3px;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(167,139,250,0.3); border-radius: 3px; }

@@ -1,7 +1,14 @@
 import streamlit as st
 import sys
 import os
-st.set_page_config(page_title="SRM Assistant", layout="wide")
+
+# ⚠️ set_page_config DOIT être le tout premier appel Streamlit
+st.set_page_config(
+    page_title="SRM Assistant",
+    page_icon="🔐",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 sys.path.insert(0, os.path.dirname(__file__))
 
