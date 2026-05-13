@@ -12,20 +12,13 @@ from src.database import (init_db, enregistrer_facture, importer_excel_en_db,
                            get_fichiers_excel,get_client_par_numero_contrat)
 from src.excel_reader import lire_excel
 from src.llm import detecter_client, est_question_generale, normaliser
+from components.navbar import afficher_navbar
 
 
 def afficher_employe():
+    afficher_navbar()
 
-    # SIDEBAR
-    with st.sidebar:
-        st.title("🤖 SRM Assistant")
-        st.markdown("---")
-        st.markdown(f"👤 Connecté : **{st.session_state.user['email']}**")
-        st.markdown(f"🔑 Rôle : **Employé SRM**")
-        st.markdown("---")
-        if st.button("🚪 Se déconnecter"):
-            del st.session_state.user
-            st.rerun()
+    # ← SIDEBAR SUPPRIMÉE ENTIÈREMENT
 
     # SESSION STATE — PDF
     if "texte_facture" not in st.session_state:
@@ -40,7 +33,6 @@ def afficher_employe():
     # SESSION STATE — Filtre fichier
     if "nom_fichier_selectionne" not in st.session_state:
         st.session_state.nom_fichier_selectionne = ""
-        # SESSION STATE — Client contrat actif
     if "client_contrat_actif" not in st.session_state:
         st.session_state.client_contrat_actif = None
 

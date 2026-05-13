@@ -1,0 +1,293 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* ══════════════════════════════════════════════════════════
+   NAVBAR — THÈME VIOLET DÉGRADATION + ORANGE
+   ══════════════════════════════════════════════════════════ */
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 75px;
+    background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 35%, #6d28d9 70%, #4c1d95 100%);
+    border-bottom: 2px solid transparent;
+    border-image: linear-gradient(90deg, rgba(249, 115, 22, 0.6) 0%, rgba(168, 85, 247, 0.6) 50%, rgba(249, 115, 22, 0.6) 100%) 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    z-index: 999;
+    font-family: 'Outfit', sans-serif;
+    box-shadow: 0 8px 32px rgba(124, 58, 237, 0.25), 0 0 20px rgba(249, 115, 22, 0.15);
+    box-sizing: border-box;
+}
+
+.navbar-spacer {
+    height: 95px;
+}
+
+/* ──────────────────────────────────────────────────────────
+   BRAND (Logo + Titre)
+   ────────────────────────────────────────────────────────── */
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.02);
+}
+
+.navbar-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+    position: relative;
+}
+
+.navbar-logo::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.4), rgba(168, 85, 247, 0.4));
+    z-index: -1;
+    filter: blur(8px);
+}
+
+.navbar-logo img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    background: #fff;
+    object-fit: contain;
+    padding: 4px;
+}
+
+.navbar-logo-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: #f97316;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -1px;
+}
+
+.navbar-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.navbar-title-main {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-title-sub {
+    font-size: 12px;
+    color: rgba(249, 115, 22, 0.9);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   AVATAR ET POPOVER — Z-INDEX ÉLEVÉ
+   ══════════════════════════════════════════════════════════ */
+
+/* Conteneur principal du popover */
+[data-testid="stPopover"] {
+    position: fixed !important;
+    top: 15px !important;
+    right: 40px !important;
+    z-index: 100000 !important;
+    width: auto !important;
+    flex: unset !important;
+    min-width: unset !important;
+}
+
+/* Bouton déclencheur avatar */
+[data-testid="stPopover"] > div > button {
+    width: 50px !important;
+    height: 50px !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    font-size: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.45) !important;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    min-height: unset !important;
+    line-height: 1 !important;
+    font-weight: 700 !important;
+}
+
+[data-testid="stPopover"] > div > button:hover {
+    transform: scale(1.12) rotate(5deg) !important;
+    box-shadow: 0 8px 28px rgba(249, 115, 22, 0.65) !important;
+}
+
+[data-testid="stPopover"] > div > button:active {
+    transform: scale(0.95) !important;
+}
+
+/* Contenu du popover (important pour affichage) */
+[data-testid="stPopoverBody"] {
+    font-family: 'Outfit', sans-serif !important;
+    padding: 16px 18px !important;
+    min-width: 260px !important;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%) !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(249, 115, 22, 0.2) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+    position: absolute !important;
+    z-index: 100001 !important;
+    top: 70px !important;
+    right: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Styles internes du popover */
+[data-testid="stPopoverBody"] > * {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+}
+
+.pop-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+}
+
+.pop-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.pop-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.pop-email {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1f2937;
+    font-family: 'Outfit', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 185px;
+}
+
+.pop-role {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: 'Outfit', sans-serif;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.pop-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.3), transparent);
+    margin: 11px 0 12px 0;
+}
+
+/* ── Bouton Déconnexion ── */
+[data-testid="stPopoverBody"] button {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(249, 115, 22, 0.05)) !important;
+    border: 1.5px solid rgba(249, 115, 22, 0.35) !important;
+    border-radius: 10px !important;
+    color: #dc2626 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    font-family: 'Outfit', sans-serif !important;
+    padding: 10px 14px !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+[data-testid="stPopoverBody"] button:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(249, 115, 22, 0.12)) !important;
+    border-color: rgba(249, 115, 22, 0.6) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25) !important;
+}
+
+[data-testid="stPopoverBody"] button:active {
+    transform: translateY(0) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESET STREAMLIT
+   ══════════════════════════════════════════════════════════ */
+
+[data-testid="stHeader"],
+[data-testid="stToolbar"],
+[data-testid="stDecoration"] {
+    display: none !important;
+}
+
+[data-testid="stSidebar"],
+[data-testid="collapsedControl"],
+section[data-testid="stSidebar"] {
+    display: none !important;
+    width: 0 !important;
+}
+
+.block-container {
+    padding-top: 0 !important;
+}
+
+* {
+    box-sizing: border-box;
+}
