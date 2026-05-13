@@ -453,7 +453,7 @@ div[data-testid="column"] .stButton > button:hover {
 }
 
 /* ══════════════════════════════════════════════════════════
-   CHAT MESSAGES - CLEAN BUBBLES
+   CHAT MESSAGES - CLEAN BUBBLES WITH PROPER SPACING
    ══════════════════════════════════════════════════════════ */
 
 [data-testid="stChatMessage"] { display: none !important; }
@@ -461,9 +461,9 @@ div[data-testid="column"] .stButton > button:hover {
 .chat-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
     margin: 1.25rem 0;
-    padding: 1rem;
+    padding: 1.25rem;
     background: rgba(255, 255, 255, 0.5);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-light);
@@ -476,17 +476,20 @@ div[data-testid="column"] .stButton > button:hover {
 
 .msg-row-user {
     justify-content: flex-end;
+    margin-bottom: 1rem;
 }
 
 .msg-row-assistant {
     justify-content: flex-start;
+    margin-top: 0.25rem;
+    margin-bottom: 1.5rem;
 }
 
 .msg-bubble {
     max-width: 80%;
-    padding: 0.9rem 1.2rem;
+    padding: 1rem 1.25rem;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
 }
 
 .msg-user {
@@ -496,8 +499,9 @@ div[data-testid="column"] .stButton > button:hover {
 
 .msg-user p {
     color: white !important;
-    font-size: 0.88rem;
-    line-height: 1.55;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.6;
     margin: 0;
 }
 
@@ -509,8 +513,9 @@ div[data-testid="column"] .stButton > button:hover {
 
 .msg-assistant p {
     color: var(--text-primary) !important;
-    font-size: 0.88rem;
-    line-height: 1.55;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.6;
     margin: 0;
 }
 
@@ -519,52 +524,74 @@ div[data-testid="column"] .stButton > button:hover {
     font-weight: 700;
 }
 
+/* Tables inside messages */
+.msg-assistant table {
+    margin: 0.75rem 0;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.msg-assistant th,
+.msg-assistant td {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-light);
+    font-size: 0.85rem;
+}
+
+.msg-assistant th {
+    background: var(--violet-50);
+    font-weight: 600;
+    color: var(--violet-800);
+}
+
 /* ══════════════════════════════════════════════════════════
-   CHAT INPUT
+   CHAT INPUT - FOND CLAIR, PLACEHOLDER VIOLET, BOUTON GRADIENT
    ══════════════════════════════════════════════════════════ */
 
 [data-testid="stChatInput"] {
     position: relative !important;
-    background: white !important;
-    border: 2px solid var(--border-medium) !important;
+    background: rgba(245, 243, 255, 0.8) !important;
+    border: 2px solid var(--violet-300) !important;
     border-radius: var(--radius-xl) !important;
     box-shadow: var(--shadow-md) !important;
     transition: all 0.25s ease !important;
-    margin-top: 0.75rem !important;
+    margin-top: 1rem !important;
 }
 
 [data-testid="stChatInput"]:focus-within {
     border-color: var(--violet-500) !important;
-    box-shadow: var(--shadow-lg), 0 0 0 4px rgba(139, 92, 246, 0.1) !important;
+    box-shadow: var(--shadow-lg), 0 0 0 4px rgba(139, 92, 246, 0.15) !important;
 }
 
 [data-testid="stChatInput"] textarea {
     background: transparent !important;
     color: var(--text-primary) !important;
     font-family: 'Inter', sans-serif !important;
-    font-size: 0.9rem !important;
-    padding: 0.9rem 1.2rem !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    padding: 1rem 1.25rem !important;
     caret-color: var(--violet-600) !important;
 }
 
 [data-testid="stChatInput"] textarea::placeholder {
-    color: var(--text-light) !important;
+    color: var(--violet-400) !important;
+    font-weight: 500 !important;
 }
 
 [data-testid="stChatInput"] button {
-    background: linear-gradient(135deg, var(--violet-600), var(--orange-500)) !important;
+    background: linear-gradient(135deg, var(--violet-500), var(--orange-500)) !important;
     border-radius: 50% !important;
-    width: 38px !important;
-    height: 38px !important;
-    margin: 5px !important;
+    width: 42px !important;
+    height: 42px !important;
+    margin: 6px !important;
     border: none !important;
-    box-shadow: var(--shadow-md) !important;
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4) !important;
     transition: all 0.2s ease !important;
 }
 
 [data-testid="stChatInput"] button:hover {
-    transform: scale(1.08) !important;
-    box-shadow: var(--shadow-lg) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5) !important;
 }
 
 [data-testid="stChatInput"] button svg {
@@ -760,6 +787,89 @@ hr {
 }
 
 /* ══════════════════════════════════════════════════════════
+   USER PROFILE DROPDOWN - COMPACT
+   ══════════════════════════════════════════════════════════ */
+
+.user-profile-dropdown {
+    background: white !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0.75rem 1rem !important;
+    box-shadow: var(--shadow-lg) !important;
+    min-width: 200px !important;
+    max-width: 280px !important;
+}
+
+.user-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 0.75rem;
+}
+
+.user-profile-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--violet-500), var(--violet-400));
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.user-profile-avatar svg,
+.user-profile-avatar img {
+    width: 20px;
+    height: 20px;
+    color: white;
+}
+
+.user-profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.user-profile-email {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-profile-role {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--violet-600);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.user-profile-logout {
+    background: linear-gradient(135deg, var(--violet-600), var(--violet-500)) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    cursor: pointer;
+    transition: all 0.2s ease !important;
+}
+
+.user-profile-logout:hover {
+    background: linear-gradient(135deg, var(--violet-700), var(--violet-600)) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
    HIDE STREAMLIT DEFAULTS
    ══════════════════════════════════════════════════════════ */
 
@@ -798,5 +908,10 @@ hr {
 
     .msg-bubble {
         max-width: 90%;
+    }
+    
+    .user-profile-dropdown {
+        min-width: 180px !important;
+        max-width: 240px !important;
     }
 }

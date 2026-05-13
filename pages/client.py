@@ -20,9 +20,24 @@ from src.rag_client.pdf_facture import generer_pdf_facture
 from components.navbar import afficher_navbar
 
 
+def nettoyer_reponse(text):
+    """Supprime toutes les balises HTML brutes générées par le LLM (ex: </div>, <div>, etc.)"""
+    allowed = {'strong', 'b', 'i', 'em', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'br'}
+    def keep_or_remove(m):
+        tag = re.match(r'</?(\w+)', m.group(0))
+        return m.group(0) if (tag and tag.group(1).lower() in allowed) else ''
+    # Supprimer vraies balises HTML non autorisées
+    text = re.sub(r'<[^>]+>', keep_or_remove, text)
+    # Supprimer aussi les patterns textuels littéraux genre </div> qui restent
+    text = re.sub(r'</?\s*(?:div|span|p|section|article|header|footer|main|nav|ul|li|ol)\s*/?>', '', text, flags=re.IGNORECASE)
+    return text.strip()
+
+
 def format_message(text):
     """Convertit les **texte** en <strong>texte</strong> pour le HTML"""
-    return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+    text = nettoyer_reponse(text)
+    text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+    return text.strip()
 
 
 def afficher_client():
@@ -251,33 +266,57 @@ def afficher_client():
                 numero_contrat,
                 historique_texte
             )
+        reponse = nettoyer_reponse(reponse)
         st.session_state.historique_client.append({"role": "assistant", "content": reponse})
         st.rerun()
 
     # ══════════════════════════════════════════
-    # HISTORIQUE CHAT - CUSTOM BUBBLES
+    # HISTORIQUE CHAT - CUSTOM BUBBLES (CORRIGE)
     # ══════════════════════════════════════════
     if st.session_state.historique_client:
-        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
         for msg in st.session_state.historique_client:
-            content_html = format_message(msg["content"])
             if msg["role"] == "user":
+                content_html = format_message(msg["content"])
+                content_html = content_html.strip()
                 st.markdown(f'''
                 <div class="msg-row msg-row-user">
-                    <div class="msg-bubble msg-user">
-                        <p>{content_html}</p>
-                    </div>
+                    <div class="msg-bubble msg-user">{content_html}</div>
                 </div>
                 ''', unsafe_allow_html=True)
             else:
+                contenu = msg["content"].strip()
+                # Supprimer TOUTES les balises indésirables (div, span, p, etc.)
+                contenu = re.sub(r'</?(?:div|span|p|section|article|header|footer|nav|ul|ol|li)[^>]*>', '', contenu, flags=re.IGNORECASE)
+                # Convertir **bold** en <strong>
+                contenu = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', contenu)
+                # Convertir les tableaux Markdown en HTML
+                def convertir_tableau(texte):
+                    lignes = texte.split('\n')
+                    resultat = []
+                    i = 0
+                    while i < len(lignes):
+                        ligne = lignes[i]
+                        if '|' in ligne and i + 1 < len(lignes) and re.match(r'[\s|:-]+$', lignes[i+1]):
+                            # Début d'un tableau
+                            cellules_header = [c.strip() for c in ligne.strip().strip('|').split('|')]
+                            header_html = '<tr>' + ''.join(f'<th>{c}</th>' for c in cellules_header) + '</tr>'
+                            i += 2  # Sauter la ligne de séparation
+                            rows_html = ''
+                            while i < len(lignes) and '|' in lignes[i]:
+                                cellules = [c.strip() for c in lignes[i].strip().strip('|').split('|')]
+                                rows_html += '<tr>' + ''.join(f'<td>{c}</td>' for c in cellules) + '</tr>'
+                                i += 1
+                            resultat.append(f'<table><thead>{header_html}</thead><tbody>{rows_html}</tbody></table>')
+                        else:
+                            resultat.append(ligne)
+                            i += 1
+                    return '\n'.join(resultat)
+                contenu = convertir_tableau(contenu)
                 st.markdown(f'''
                 <div class="msg-row msg-row-assistant">
-                    <div class="msg-bubble msg-assistant">
-                        <p>{content_html}</p>
-                    </div>
+                    <div class="msg-bubble msg-assistant">{contenu}</div>
                 </div>
                 ''', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
     # CHATBOT INPUT
@@ -298,7 +337,7 @@ def afficher_client():
                 numero_contrat,
                 historique_texte
             )
-
+        reponse = nettoyer_reponse(reponse)
         st.session_state.historique_client.append({"role": "assistant", "content": reponse})
         st.rerun()
 
