@@ -1,6 +1,7 @@
 import streamlit as st
 import sys
 import os
+import re
 import pandas as pd
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -17,6 +18,11 @@ from src.rag.intent import _appeler_llm
 from src.rag.client_connecte import repondre_client_connecte
 from src.rag_client.pdf_facture import generer_pdf_facture
 from components.navbar import afficher_navbar
+
+
+def format_message(text):
+    """Convertit les **texte** en <strong>texte</strong> pour le HTML"""
+    return re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
 
 
 def afficher_client():
@@ -72,6 +78,7 @@ def afficher_client():
     # ══════════════════════════════════════════
     st.markdown(f'''
     <div class="client-hero">
+        <div class="hero-glow"></div>
         <div class="hero-content">
             <div class="hero-avatar">
                 <span class="avatar-letter">{prenom[0].upper()}</span>
@@ -83,7 +90,6 @@ def afficher_client():
                 <p class="hero-subtitle">Bienvenue sur votre espace SRM</p>
             </div>
         </div>
-        <div class="hero-decoration"></div>
     </div>
     ''', unsafe_allow_html=True)
 
@@ -92,21 +98,16 @@ def afficher_client():
     # ══════════════════════════════════════════
     if derniere:
         if nb_retard > 0:
-            phrase_3 = f"{nb_retard} facture(s) non reglee(s) - pensez a contacter votre agence SRM pour regulariser votre situation."
+            phrase_3 = f"{nb_retard} facture(s) non reglee(s) - pensez a contacter votre agence SRM."
             status_class = "status-warning"
             status_icon = '''<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>'''
         else:
-            phrase_3 = "Votre compte est a jour, continuez comme ca !"
+            phrase_3 = "Votre compte est a jour !"
             status_class = "status-success"
             status_icon = '''<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'''
 
         if prochain:
-            if prochain["jours"] <= 5:
-                phrase_2 = f"Echeance proche : <strong>{prochain['date_limite']}</strong> pour {prochain['mois']} ({prochain['jours']} jours)"
-            elif prochain["jours"] <= 15:
-                phrase_2 = f"Prochaine echeance le <strong>{prochain['date_limite']}</strong> pour {prochain['mois']} ({prochain['jours']} jours)"
-            else:
-                phrase_2 = f"Echeance {prochain['mois']} le <strong>{prochain['date_limite']}</strong> ({prochain['jours']} jours)"
+            phrase_2 = f"Echeance: <strong>{prochain['date_limite']}</strong> ({prochain['jours']} jours)"
         else:
             phrase_2 = "Aucune echeance a venir"
 
@@ -117,14 +118,9 @@ def afficher_client():
                 <span class="status-title">{phrase_3}</span>
             </div>
             <div class="status-details">
-                <div class="status-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <span>{phrase_2}</span>
-                </div>
-                <div class="status-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                    <span>Derniere facture: <strong>{derniere['montant']:,.0f} Dhs</strong> ({derniere['mois']})</span>
-                </div>
+                <span class="status-item">{phrase_2}</span>
+                <span class="status-divider">|</span>
+                <span class="status-item">Derniere facture: <strong>{derniere['montant']:,.0f} Dhs</strong></span>
             </div>
         </div>
         ''', unsafe_allow_html=True)
@@ -133,14 +129,13 @@ def afficher_client():
     # MINI-DASHBOARD (METRICS CARDS)
     # ══════════════════════════════════════════
     if derniere:
-        st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
 
         with col1:
             st.markdown(f'''
             <div class="metric-card">
                 <div class="metric-icon metric-icon-violet">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                 </div>
                 <div class="metric-content">
                     <span class="metric-label">Derniere facture</span>
@@ -173,7 +168,7 @@ def afficher_client():
                     <div class="metric-content">
                         <span class="metric-label">Prochaine echeance</span>
                         <span class="metric-value">Aucune</span>
-                        <span class="metric-delta">Toutes factures passees</span>
+                        <span class="metric-delta">Tout est paye</span>
                     </div>
                 </div>
                 ''', unsafe_allow_html=True)
@@ -191,22 +186,16 @@ def afficher_client():
                 </div>
             </div>
             ''', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
-    # SECTION CHATBOT - HEADER AVEC NOM CLIENT
+    # SECTION CHATBOT - HEADER COMPACT
     # ══════════════════════════════════════════
     st.markdown(f'''
-    <div class="chat-section">
-        <div class="chat-header">
-            <div class="chat-header-icon">
-                <span class="chat-avatar-letter">{prenom[0].upper()}</span>
-            </div>
-            <div class="chat-header-text">
-                <span class="chat-header-title">{nom_client}</span>
-                <span class="chat-header-subtitle">Espace de discussion</span>
-            </div>
+    <div class="chat-section-header">
+        <div class="chat-icon-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
         </div>
+        <span class="chat-section-title">Discussion</span>
     </div>
     ''', unsafe_allow_html=True)
 
@@ -217,15 +206,13 @@ def afficher_client():
         st.session_state["suggestion_choisie"] = None
 
     # ══════════════════════════════════════════
-    # SECTION 1 — QUESTIONS RAPIDES
+    # QUESTIONS RAPIDES
     # ══════════════════════════════════════════
-    st.markdown('<div class="section-label">Questions rapides</div>', unsafe_allow_html=True)
-
     suggestions = [
-        ("Mon montant le plus eleve"),
-        ("Suis-je en retard ?"),
-        ("Ma moyenne mensuelle"),
-        ("Mon historique complet"),
+        "Mon montant le plus eleve",
+        "Suis-je en retard ?",
+        "Ma moyenne mensuelle",
+        "Mon historique",
     ]
 
     cols = st.columns(len(suggestions))
@@ -235,34 +222,14 @@ def afficher_client():
                 st.session_state["suggestion_choisie"] = texte
 
     # ══════════════════════════════════════════
-    # SECTION 2 — ANALYSE INTELLIGENTE (LLM)
+    # ANALYSE INTELLIGENTE
     # ══════════════════════════════════════════
-    st.markdown('''
-    <div class="analyse-card">
-        <div class="analyse-header">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            <h4>Analyse intelligente</h4>
-        </div>
-        <p>Ces analyses utilisent l&apos;IA - la reponse peut prendre quelques secondes</p>
-    </div>
-    ''', unsafe_allow_html=True)
-
     col_llm1, col_llm2 = st.columns(2)
     with col_llm1:
-        if st.button(
-            "Pourquoi ma facture a augmente ?",
-            key="btn_llm_hausse",
-            use_container_width=True,
-            help="Analyse comparative avec le mois precedent"
-        ):
+        if st.button("Pourquoi ma facture a augmente ?", key="btn_llm_hausse", use_container_width=True):
             st.session_state["suggestion_choisie"] = "Pourquoi ma facture a augmente par rapport au mois dernier ?"
     with col_llm2:
-        if st.button(
-            "Comment reduire ma consommation ?",
-            key="btn_llm_conseil",
-            use_container_width=True,
-            help="Conseils personnalises selon votre profil"
-        ):
+        if st.button("Comment reduire ma consommation ?", key="btn_llm_conseil", use_container_width=True):
             st.session_state["suggestion_choisie"] = "Comment reduire ma consommation ?"
 
     # ══════════════════════════════════════════
@@ -288,26 +255,32 @@ def afficher_client():
         st.rerun()
 
     # ══════════════════════════════════════════
-    # HISTORIQUE CHAT - MESSAGES AU DESSUS DU INPUT
+    # HISTORIQUE CHAT - CUSTOM BUBBLES
     # ══════════════════════════════════════════
-    st.markdown('<div class="chat-messages-container">', unsafe_allow_html=True)
-    for msg in st.session_state.historique_client:
-        if msg["role"] == "user":
-            st.markdown(f'''
-            <div class="chat-bubble chat-bubble-user">
-                <div class="bubble-content">{msg["content"]}</div>
-            </div>
-            ''', unsafe_allow_html=True)
-        else:
-            st.markdown(f'''
-            <div class="chat-bubble chat-bubble-assistant">
-                <div class="bubble-content">{msg["content"]}</div>
-            </div>
-            ''', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    if st.session_state.historique_client:
+        st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+        for msg in st.session_state.historique_client:
+            content_html = format_message(msg["content"])
+            if msg["role"] == "user":
+                st.markdown(f'''
+                <div class="msg-row msg-row-user">
+                    <div class="msg-bubble msg-user">
+                        <p>{content_html}</p>
+                    </div>
+                </div>
+                ''', unsafe_allow_html=True)
+            else:
+                st.markdown(f'''
+                <div class="msg-row msg-row-assistant">
+                    <div class="msg-bubble msg-assistant">
+                        <p>{content_html}</p>
+                    </div>
+                </div>
+                ''', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
-    # CHATBOT INPUT - DIRECTEMENT APRES LES MESSAGES
+    # CHATBOT INPUT
     # ══════════════════════════════════════════
     question = st.chat_input("Votre question sur vos factures...")
 
@@ -330,14 +303,12 @@ def afficher_client():
         st.rerun()
 
     # ══════════════════════════════════════════
-    # TELECHARGEMENT FACTURE - EN DERNIER
+    # TELECHARGEMENT FACTURE
     # ══════════════════════════════════════════
     st.markdown('''
     <div class="download-section">
-        <div class="download-header">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            <span>Telecharger une facture</span>
-        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>Telecharger une facture</span>
     </div>
     ''', unsafe_allow_html=True)
 
