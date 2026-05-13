@@ -262,7 +262,7 @@
     font-weight: 700 !important;
     font-family: 'Outfit', sans-serif !important;
     padding: 10px 14px !important;
-    width: 100% !important;
+    width: auto !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
     text-transform: uppercase !important;

@@ -81,6 +81,6 @@ def afficher_navbar():
         """, unsafe_allow_html=True)
 
         # ── Bouton Déconnexion
-        if st.button("Déconnexion", key="navbar_logout", use_container_width=True):
+        if st.button("Déconnexion", key="navbar_logout"):
             st.session_state.clear()
             st.rerun()

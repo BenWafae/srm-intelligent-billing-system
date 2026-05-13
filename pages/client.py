@@ -16,9 +16,14 @@ from src.database import (
 from src.rag.intent import _appeler_llm
 from src.rag.client_connecte import repondre_client_connecte
 from src.rag_client.pdf_facture import generer_pdf_facture
+from components.navbar import afficher_navbar
 
 
 def afficher_client():
+    # ══════════════════════════════════════════
+    # AFFICHER LE NAVBAR PERSONNALISÉ
+    # ══════════════════════════════════════════
+    afficher_navbar()
 
     # ══════════════════════════════════════════
     # RESET SESSION SI NOUVEAU UTILISATEUR
@@ -99,16 +104,6 @@ def afficher_client():
     }
     </style>
     """, unsafe_allow_html=True)
-
-    # SIDEBAR
-    with st.sidebar:
-        st.title("👤 Espace Client")
-        st.markdown("---")
-        st.markdown(f"📧 Connecté : **{st.session_state.user['email']}**")
-        st.markdown("---")
-        if st.button("🚪 Se déconnecter"):
-            del st.session_state.user
-            st.rerun()
 
     # SESSION STATE
     if not st.session_state.get("historique_client"):
