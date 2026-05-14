@@ -1,4 +1,3 @@
-# components/sidebar.py
 import streamlit as st
 import os
 from datetime import datetime
@@ -111,7 +110,6 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                     date_affichee = date_raw[:10] if date_raw else ""
                 
                 est_active = st.session_state.get("conversation_id_actuelle") == conv_id
-                classe_active = "conv-item-active" if est_active else ""
                 
                 # Mode édition
                 if st.session_state.get("titre_en_edition") == conv_id:
@@ -126,21 +124,24 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                         )
                         col_ok, col_annuler = st.columns(2)
                         with col_ok:
-                            if st.button("✓", key=f"ok_{conv_id}"):
+                            if st.button("✓ Valider", key=f"ok_{conv_id}"):
                                 modifier_titre_conversation(conv_id, nouveau_titre)
                                 st.session_state["titre_en_edition"] = None
                                 st.rerun()
                         with col_annuler:
-                            if st.button("✗", key=f"annuler_{conv_id}"):
+                            if st.button("✗ Annuler", key=f"annuler_{conv_id}"):
                                 st.session_state["titre_en_edition"] = None
                                 st.rerun()
                         st.markdown('</div>', unsafe_allow_html=True)
                 else:
-                    # Affichage normal avec boutons d'action
-                    col1, col2, col3 = st.sidebar.columns([5, 1, 1])
+                    # Afficher le titre et le menu 3 points
+                    col1, col2 = st.sidebar.columns([10, 1])
                     
                     with col1:
-                        if st.button(titre[:35], key=f"load_{conv_id}", use_container_width=True):
+                        # Bouton titre pour charger la conversation
+                        if st.button(titre[:40], key=f"load_{conv_id}", use_container_width=True):
+                            # Fermer le menu ouvert
+                            st.session_state["menu_open_for"] = None
                             messages = get_messages_conversation(conv_id)
                             st.session_state["historique_client"] = messages
                             st.session_state["conversation_id_actuelle"] = conv_id
@@ -148,17 +149,74 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                             st.rerun()
                     
                     with col2:
-                        if st.button("✎", key=f"rename_{conv_id}", help="Renommer"):
-                            st.session_state["titre_en_edition"] = conv_id
+                        # Bouton 3 points
+                        if st.button("⋯", key=f"menu_btn_{conv_id}"):
+                            # Toggle du menu
+                            if st.session_state.get("menu_open_for") == conv_id:
+                                st.session_state["menu_open_for"] = None
+                            else:
+                                st.session_state["menu_open_for"] = conv_id
                             st.rerun()
                     
-                    with col3:
-                        if st.button("🗑", key=f"del_{conv_id}", help="Supprimer"):
-                            supprimer_conversation(conv_id)
-                            if st.session_state.get("conversation_id_actuelle") == conv_id:
-                                st.session_state["historique_client"] = []
-                                st.session_state["conversation_id_actuelle"] = None
-                            st.rerun()
+                    # Afficher le menu contextuel si ouvert
+                    if st.session_state.get("menu_open_for") == conv_id:
+                        # Créer un conteneur pour le menu
+                        menu_container = st.sidebar.container()
+                        with menu_container:
+                            # CSS pour le menu
+                            st.markdown("""
+                            <style>
+                            .menu-contextuel {
+                                background: white;
+                                border: 1px solid rgba(139, 92, 246, 0.2);
+                                border-radius: 12px;
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                                margin-left: 40px;
+                                margin-bottom: 10px;
+                                overflow: hidden;
+                            }
+                            .menu-contextuel button {
+                                width: 100% !important;
+                                text-align: left !important;
+                                padding: 10px 15px !important;
+                                background: transparent !important;
+                                border: none !important;
+                                cursor: pointer !important;
+                                font-size: 13px !important;
+                                font-weight: 500 !important;
+                                color: #333 !important;
+                                border-radius: 0 !important;
+                            }
+                            .menu-contextuel button:hover {
+                                background: #f5f3ff !important;
+                            }
+                            .menu-contextuel .delete-option {
+                                color: #ef4444 !important;
+                            }
+                            .menu-contextuel .delete-option:hover {
+                                background: #fef2f2 !important;
+                            }
+                            </style>
+                            """, unsafe_allow_html=True)
+                            
+                            st.markdown('<div class="menu-contextuel">', unsafe_allow_html=True)
+                            
+                            # Option Renommer
+                            if st.button("✎ Renommer", key=f"rename_option_{conv_id}", use_container_width=True):
+                                st.session_state["titre_en_edition"] = conv_id
+                                st.session_state["menu_open_for"] = None
+                                st.rerun()
+                            
+                            # Option Supprimer
+                            if st.button("🗑 Supprimer", key=f"delete_option_{conv_id}", use_container_width=True):
+                                supprimer_conversation(conv_id)
+                                if st.session_state.get("conversation_id_actuelle") == conv_id:
+                                    st.session_state["historique_client"] = []
+                                    st.session_state["conversation_id_actuelle"] = None
+                                st.session_state["menu_open_for"] = None
+                                st.rerun()
+                            
+                            st.markdown('</div>', unsafe_allow_html=True)
     
     # Footer avec utilisateur
     prenom = nom_client.split()[0] if nom_client else "Client"
