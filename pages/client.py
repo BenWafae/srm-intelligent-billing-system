@@ -23,7 +23,7 @@ from src.database import (
 from src.rag.intent import _appeler_llm
 from src.rag.client_connecte import repondre_client_connecte
 from src.rag_client.pdf_facture import generer_pdf_facture
-from components.navbar import afficher_navbar
+from components.sidebar import afficher_sidebar_client  # IMPORT DE LA SIDEBAR
 
 
 def nettoyer_reponse(text):
@@ -47,124 +47,12 @@ def format_message(text):
 def afficher_client():
 
     # ══════════════════════════════════════════
-    # ÉTAPE 1 : FORCER LA SIDEBAR OUVERTE
-    # (avant tout autre st.* pour que Streamlit
-    #  crée le widget sidebar dès le premier rendu)
-    # ══════════════════════════════════════════
-    st.sidebar.markdown(
-        """
-        <style>
-        /* ── Réactiver la sidebar (cachée par client.css pour masquer
-              la nav par défaut de Streamlit) ── */
-        [data-testid="stSidebar"] {
-            display: flex !important;
-            visibility: visible !important;
-            width: 260px !important;
-            min-width: 260px !important;
-            background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%) !important;
-            border-right: 1px solid rgba(139, 92, 246, 0.15) !important;
-        }
-
-        /* Cacher la navigation automatique de Streamlit (pages) */
-        [data-testid="stSidebarNav"] {
-            display: none !important;
-        }
-
-        /* Padding interne de la sidebar */
-        [data-testid="stSidebarContent"] {
-            padding: 1rem 0.75rem !important;
-        }
-
-        /* ── Styles des éléments de conversation ── */
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: #6d28d9;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 0.75rem;
-            padding: 0 0.25rem;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .conv-item {
-            padding: 0.55rem 0.7rem;
-            border-radius: 10px;
-            margin-bottom: 0.25rem;
-            border: 1px solid transparent;
-            transition: background 0.2s;
-        }
-
-        .conv-item:hover {
-            background: rgba(139, 92, 246, 0.08);
-            border-color: rgba(139, 92, 246, 0.2);
-        }
-
-        .conv-item-active {
-            background: rgba(139, 92, 246, 0.12) !important;
-            border-color: rgba(139, 92, 246, 0.3) !important;
-        }
-
-        .conv-titre {
-            font-size: 0.78rem;
-            font-weight: 500;
-            color: #1e1b4b;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 155px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .conv-date {
-            font-size: 0.62rem;
-            color: #9ca3af;
-            margin-top: 2px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .sidebar-divider {
-            height: 1px;
-            background: rgba(139, 92, 246, 0.15);
-            margin: 0.75rem 0;
-        }
-
-        /* Réduire la taille des boutons dans la sidebar */
-        [data-testid="stSidebar"] .stButton > button {
-            font-size: 0.72rem !important;
-            padding: 0.3rem 0.5rem !important;
-            min-height: 0 !important;
-            height: auto !important;
-            line-height: 1.3 !important;
-        }
-
-        /* Bouton "Nouvelle conversation" spécifique */
-        [data-testid="stSidebar"] .stButton > button[kind="secondary"],
-        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] {
-            background: linear-gradient(135deg, #7c3aed, #8b5cf6) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 10px !important;
-            width: 100% !important;
-            font-weight: 600 !important;
-            margin-bottom: 0.5rem !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # ══════════════════════════════════════════
-    # ÉTAPE 2 : NAVBAR PERSONNALISÉE
-    # ══════════════════════════════════════════
-    afficher_navbar()
-
-    # ══════════════════════════════════════════
-    # ÉTAPE 3 : CSS GLOBAL DE LA PAGE CLIENT
+    # CHARGER LE CSS CLIENT
     # ══════════════════════════════════════════
     css_path = os.path.join(os.path.dirname(__file__), "..", "src", "assets", "Css", "client.css")
-    with open(css_path, "r", encoding="utf-8") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    if os.path.exists(css_path):
+        with open(css_path, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
     # RESET SESSION SI NOUVEAU UTILISATEUR
@@ -203,113 +91,25 @@ def afficher_client():
     numero_contrat = st.session_state.user["numero_client"]
 
     # ══════════════════════════════════════════
-    # SIDEBAR — CONVERSATIONS
+    # SIDEBAR — APPEL DE LA FONCTION SIDEBAR
     # ══════════════════════════════════════════
-    with st.sidebar:
-
-        # ── Bouton Nouvelle conversation ──
-        if st.button(
-            "＋  Nouvelle conversation",
-            key="btn_new_chat",
-            use_container_width=True,
-        ):
-            st.session_state["historique_client"] = []
-            st.session_state["conversation_id_actuelle"] = None
-            st.session_state["titre_en_edition"] = None
-            st.rerun()
-
-        st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
-        st.markdown(
-            '<div class="sidebar-title">Conversations précédentes</div>',
-            unsafe_allow_html=True,
-        )
-
-        # ── Charger conversations depuis SQLite ──
-        conversations = get_conversations_client(numero_contrat)
-
-        if not conversations:
-            st.markdown(
-                '<p style="font-size:0.72rem;color:#9ca3af;padding:0.4rem 0.25rem;">'
-                "Aucune conversation encore.</p>",
-                unsafe_allow_html=True,
-            )
-        else:
-            for conv in conversations:
-                conv_id  = conv["id"]
-                titre    = conv["titre"]
-                date_raw = conv["date_creation"]
-
-                # Formater la date
-                try:
-                    from datetime import datetime
-                    dt = datetime.strptime(date_raw[:19], "%Y-%m-%d %H:%M:%S")
-                    date_affichee = dt.strftime("%d/%m %H:%M")
-                except Exception:
-                    date_affichee = date_raw[:10] if date_raw else ""
-
-                est_active = st.session_state["conversation_id_actuelle"] == conv_id
-                classe = "conv-item conv-item-active" if est_active else "conv-item"
-
-                # ── Mode édition du titre ──
-                if st.session_state["titre_en_edition"] == conv_id:
-                    nouveau_titre = st.text_input(
-                        "Renommer",
-                        value=titre,
-                        key=f"edit_titre_{conv_id}",
-                        label_visibility="collapsed",
-                    )
-                    col_ok, col_annuler = st.columns(2)
-                    with col_ok:
-                        if st.button("✓", key=f"ok_{conv_id}"):
-                            modifier_titre_conversation(conv_id, nouveau_titre)
-                            st.session_state["titre_en_edition"] = None
-                            st.rerun()
-                    with col_annuler:
-                        if st.button("✗", key=f"annuler_{conv_id}"):
-                            st.session_state["titre_en_edition"] = None
-                            st.rerun()
-
-                else:
-                    # ── Affichage normal ──
-                    st.markdown(
-                        f'<div class="{classe}">'
-                        f'<div class="conv-titre">{titre}</div>'
-                        f'<div class="conv-date">{date_affichee}</div>'
-                        f"</div>",
-                        unsafe_allow_html=True,
-                    )
-
-                    col_charger, col_renommer, col_sup = st.columns([4, 1, 1])
-
-                    with col_charger:
-                        if st.button("↩ Ouvrir", key=f"load_{conv_id}"):
-                            messages = get_messages_conversation(conv_id)
-                            st.session_state["historique_client"] = messages
-                            st.session_state["conversation_id_actuelle"] = conv_id
-                            st.session_state["titre_en_edition"] = None
-                            st.rerun()
-
-                    with col_renommer:
-                        if st.button("✎", key=f"rename_{conv_id}", help="Renommer"):
-                            st.session_state["titre_en_edition"] = conv_id
-                            st.rerun()
-
-                    with col_sup:
-                        if st.button("🗑", key=f"del_{conv_id}", help="Supprimer"):
-                            supprimer_conversation(conv_id)
-                            if st.session_state["conversation_id_actuelle"] == conv_id:
-                                st.session_state["historique_client"] = []
-                                st.session_state["conversation_id_actuelle"] = None
-                            st.rerun()
+    action_sidebar = afficher_sidebar_client(numero_contrat, nom_client)
+    
+    # Gérer l'action de la sidebar (nouvelle conversation)
+    if action_sidebar == "new_chat":
+        st.session_state["historique_client"] = []
+        st.session_state["conversation_id_actuelle"] = None
+        st.session_state["titre_en_edition"] = None
+        st.rerun()
 
     # ══════════════════════════════════════════
     # DONNÉES CLIENT
     # ══════════════════════════════════════════
-    derniere  = get_derniere_facture_client(numero_contrat)
-    prochain  = get_prochain_paiement_client(numero_contrat)
-    statuts   = get_statut_paiements_client(numero_contrat)
+    derniere = get_derniere_facture_client(numero_contrat)
+    prochain = get_prochain_paiement_client(numero_contrat)
+    statuts = get_statut_paiements_client(numero_contrat)
     nb_retard = sum(1 for f in statuts if f["en_retard"])
-    prenom    = nom_client.split()[0]
+    prenom = nom_client.split()[0]
 
     # ══════════════════════════════════════════
     # HERO HEADER
@@ -478,7 +278,6 @@ def afficher_client():
         reponse = nettoyer_reponse(reponse)
         st.session_state.historique_client.append({"role": "assistant", "content": reponse})
 
-        # Sauvegarder dans SQLite
         if st.session_state["conversation_id_actuelle"] is None:
             conv_id = creer_conversation(numero_contrat, question_auto)
             st.session_state["conversation_id_actuelle"] = conv_id
@@ -555,7 +354,6 @@ def afficher_client():
         reponse = nettoyer_reponse(reponse)
         st.session_state.historique_client.append({"role": "assistant", "content": reponse})
 
-        # Sauvegarder dans SQLite
         if st.session_state["conversation_id_actuelle"] is None:
             conv_id = creer_conversation(numero_contrat, question)
             st.session_state["conversation_id_actuelle"] = conv_id
