@@ -13,6 +13,12 @@ from src.database import (
     get_historique_client,
     get_prochain_paiement_client,
     get_statut_paiements_client,
+    creer_conversation,
+    ajouter_message,
+    get_conversations_client,
+    get_messages_conversation,
+    modifier_titre_conversation,
+    supprimer_conversation,
 )
 from src.rag.intent import _appeler_llm
 from src.rag.client_connecte import repondre_client_connecte
@@ -21,14 +27,12 @@ from components.navbar import afficher_navbar
 
 
 def nettoyer_reponse(text):
-    """Supprime toutes les balises HTML brutes générées par le LLM (ex: </div>, <div>, etc.)"""
+    """Supprime toutes les balises HTML brutes générées par le LLM"""
     allowed = {'strong', 'b', 'i', 'em', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'br'}
     def keep_or_remove(m):
         tag = re.match(r'</?(\w+)', m.group(0))
         return m.group(0) if (tag and tag.group(1).lower() in allowed) else ''
-    # Supprimer vraies balises HTML non autorisées
     text = re.sub(r'<[^>]+>', keep_or_remove, text)
-    # Supprimer aussi les patterns textuels littéraux genre </div> qui restent
     text = re.sub(r'</?\s*(?:div|span|p|section|article|header|footer|main|nav|ul|li|ol)\s*/?>', '', text, flags=re.IGNORECASE)
     return text.strip()
 
@@ -41,12 +45,123 @@ def format_message(text):
 
 
 def afficher_client():
+
     # ══════════════════════════════════════════
-    # AFFICHER LE NAVBAR PERSONNALISE
+    # ÉTAPE 1 : FORCER LA SIDEBAR OUVERTE
+    # (avant tout autre st.* pour que Streamlit
+    #  crée le widget sidebar dès le premier rendu)
+    # ══════════════════════════════════════════
+    st.sidebar.markdown(
+        """
+        <style>
+        /* ── Réactiver la sidebar (cachée par client.css pour masquer
+              la nav par défaut de Streamlit) ── */
+        [data-testid="stSidebar"] {
+            display: flex !important;
+            visibility: visible !important;
+            width: 260px !important;
+            min-width: 260px !important;
+            background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%) !important;
+            border-right: 1px solid rgba(139, 92, 246, 0.15) !important;
+        }
+
+        /* Cacher la navigation automatique de Streamlit (pages) */
+        [data-testid="stSidebarNav"] {
+            display: none !important;
+        }
+
+        /* Padding interne de la sidebar */
+        [data-testid="stSidebarContent"] {
+            padding: 1rem 0.75rem !important;
+        }
+
+        /* ── Styles des éléments de conversation ── */
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #6d28d9;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.75rem;
+            padding: 0 0.25rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .conv-item {
+            padding: 0.55rem 0.7rem;
+            border-radius: 10px;
+            margin-bottom: 0.25rem;
+            border: 1px solid transparent;
+            transition: background 0.2s;
+        }
+
+        .conv-item:hover {
+            background: rgba(139, 92, 246, 0.08);
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        .conv-item-active {
+            background: rgba(139, 92, 246, 0.12) !important;
+            border-color: rgba(139, 92, 246, 0.3) !important;
+        }
+
+        .conv-titre {
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: #1e1b4b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 155px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .conv-date {
+            font-size: 0.62rem;
+            color: #9ca3af;
+            margin-top: 2px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(139, 92, 246, 0.15);
+            margin: 0.75rem 0;
+        }
+
+        /* Réduire la taille des boutons dans la sidebar */
+        [data-testid="stSidebar"] .stButton > button {
+            font-size: 0.72rem !important;
+            padding: 0.3rem 0.5rem !important;
+            min-height: 0 !important;
+            height: auto !important;
+            line-height: 1.3 !important;
+        }
+
+        /* Bouton "Nouvelle conversation" spécifique */
+        [data-testid="stSidebar"] .stButton > button[kind="secondary"],
+        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] {
+            background: linear-gradient(135deg, #7c3aed, #8b5cf6) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 10px !important;
+            width: 100% !important;
+            font-weight: 600 !important;
+            margin-bottom: 0.5rem !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 2 : NAVBAR PERSONNALISÉE
     # ══════════════════════════════════════════
     afficher_navbar()
-    
-    # 2. Charger le CSS client juste apres la navbar
+
+    # ══════════════════════════════════════════
+    # ÉTAPE 3 : CSS GLOBAL DE LA PAGE CLIENT
+    # ══════════════════════════════════════════
     css_path = os.path.join(os.path.dirname(__file__), "..", "src", "assets", "Css", "client.css")
     with open(css_path, "r", encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -60,12 +175,20 @@ def afficher_client():
         st.session_state["_client_email_courant"] = email_actuel
         st.session_state["historique_client"] = []
         st.session_state["nom_client_connecte"] = None
+        st.session_state["conversation_id_actuelle"] = None
+        st.session_state["titre_en_edition"] = None
         if "msg_accueil" in st.session_state:
             del st.session_state["msg_accueil"]
 
-    # SESSION STATE
+    # ── SESSION STATE ──
     if not st.session_state.get("historique_client"):
         st.session_state.historique_client = []
+
+    if "conversation_id_actuelle" not in st.session_state:
+        st.session_state["conversation_id_actuelle"] = None
+
+    if "titre_en_edition" not in st.session_state:
+        st.session_state["titre_en_edition"] = None
 
     if not st.session_state.get("nom_client_connecte"):
         numero_contrat = st.session_state.user.get("numero_client")
@@ -80,16 +203,116 @@ def afficher_client():
     numero_contrat = st.session_state.user["numero_client"]
 
     # ══════════════════════════════════════════
-    # CHARGER LES DONNEES EN PREMIER
+    # SIDEBAR — CONVERSATIONS
     # ══════════════════════════════════════════
-    derniere = get_derniere_facture_client(numero_contrat)
-    prochain = get_prochain_paiement_client(numero_contrat)
-    statuts  = get_statut_paiements_client(numero_contrat)
-    nb_retard = sum(1 for f in statuts if f["en_retard"])
-    prenom   = nom_client.split()[0]
+    with st.sidebar:
+
+        # ── Bouton Nouvelle conversation ──
+        if st.button(
+            "＋  Nouvelle conversation",
+            key="btn_new_chat",
+            use_container_width=True,
+        ):
+            st.session_state["historique_client"] = []
+            st.session_state["conversation_id_actuelle"] = None
+            st.session_state["titre_en_edition"] = None
+            st.rerun()
+
+        st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="sidebar-title">Conversations précédentes</div>',
+            unsafe_allow_html=True,
+        )
+
+        # ── Charger conversations depuis SQLite ──
+        conversations = get_conversations_client(numero_contrat)
+
+        if not conversations:
+            st.markdown(
+                '<p style="font-size:0.72rem;color:#9ca3af;padding:0.4rem 0.25rem;">'
+                "Aucune conversation encore.</p>",
+                unsafe_allow_html=True,
+            )
+        else:
+            for conv in conversations:
+                conv_id  = conv["id"]
+                titre    = conv["titre"]
+                date_raw = conv["date_creation"]
+
+                # Formater la date
+                try:
+                    from datetime import datetime
+                    dt = datetime.strptime(date_raw[:19], "%Y-%m-%d %H:%M:%S")
+                    date_affichee = dt.strftime("%d/%m %H:%M")
+                except Exception:
+                    date_affichee = date_raw[:10] if date_raw else ""
+
+                est_active = st.session_state["conversation_id_actuelle"] == conv_id
+                classe = "conv-item conv-item-active" if est_active else "conv-item"
+
+                # ── Mode édition du titre ──
+                if st.session_state["titre_en_edition"] == conv_id:
+                    nouveau_titre = st.text_input(
+                        "Renommer",
+                        value=titre,
+                        key=f"edit_titre_{conv_id}",
+                        label_visibility="collapsed",
+                    )
+                    col_ok, col_annuler = st.columns(2)
+                    with col_ok:
+                        if st.button("✓", key=f"ok_{conv_id}"):
+                            modifier_titre_conversation(conv_id, nouveau_titre)
+                            st.session_state["titre_en_edition"] = None
+                            st.rerun()
+                    with col_annuler:
+                        if st.button("✗", key=f"annuler_{conv_id}"):
+                            st.session_state["titre_en_edition"] = None
+                            st.rerun()
+
+                else:
+                    # ── Affichage normal ──
+                    st.markdown(
+                        f'<div class="{classe}">'
+                        f'<div class="conv-titre">{titre}</div>'
+                        f'<div class="conv-date">{date_affichee}</div>'
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
+
+                    col_charger, col_renommer, col_sup = st.columns([4, 1, 1])
+
+                    with col_charger:
+                        if st.button("↩ Ouvrir", key=f"load_{conv_id}"):
+                            messages = get_messages_conversation(conv_id)
+                            st.session_state["historique_client"] = messages
+                            st.session_state["conversation_id_actuelle"] = conv_id
+                            st.session_state["titre_en_edition"] = None
+                            st.rerun()
+
+                    with col_renommer:
+                        if st.button("✎", key=f"rename_{conv_id}", help="Renommer"):
+                            st.session_state["titre_en_edition"] = conv_id
+                            st.rerun()
+
+                    with col_sup:
+                        if st.button("🗑", key=f"del_{conv_id}", help="Supprimer"):
+                            supprimer_conversation(conv_id)
+                            if st.session_state["conversation_id_actuelle"] == conv_id:
+                                st.session_state["historique_client"] = []
+                                st.session_state["conversation_id_actuelle"] = None
+                            st.rerun()
 
     # ══════════════════════════════════════════
-    # HEADER HERO PREMIUM
+    # DONNÉES CLIENT
+    # ══════════════════════════════════════════
+    derniere  = get_derniere_facture_client(numero_contrat)
+    prochain  = get_prochain_paiement_client(numero_contrat)
+    statuts   = get_statut_paiements_client(numero_contrat)
+    nb_retard = sum(1 for f in statuts if f["en_retard"])
+    prenom    = nom_client.split()[0]
+
+    # ══════════════════════════════════════════
+    # HERO HEADER
     # ══════════════════════════════════════════
     st.markdown(f'''
     <div class="client-hero">
@@ -109,7 +332,7 @@ def afficher_client():
     ''', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
-    # MESSAGE PERSONNALISE (BANNIERE STATUS)
+    # STATUS BANNER
     # ══════════════════════════════════════════
     if derniere:
         if nb_retard > 0:
@@ -141,11 +364,10 @@ def afficher_client():
         ''', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
-    # MINI-DASHBOARD (METRICS CARDS)
+    # MINI-DASHBOARD
     # ══════════════════════════════════════════
     if derniere:
         col1, col2, col3 = st.columns(3)
-
         with col1:
             st.markdown(f'''
             <div class="metric-card">
@@ -159,7 +381,6 @@ def afficher_client():
                 </div>
             </div>
             ''', unsafe_allow_html=True)
-
         with col2:
             if prochain:
                 st.markdown(f'''
@@ -187,7 +408,6 @@ def afficher_client():
                     </div>
                 </div>
                 ''', unsafe_allow_html=True)
-
         with col3:
             st.markdown(f'''
             <div class="metric-card">
@@ -203,9 +423,9 @@ def afficher_client():
             ''', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
-    # SECTION CHATBOT - HEADER COMPACT
+    # CHATBOT HEADER
     # ══════════════════════════════════════════
-    st.markdown(f'''
+    st.markdown('''
     <div class="chat-section-header">
         <div class="chat-icon-wrapper">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -215,30 +435,23 @@ def afficher_client():
     ''', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
-    # INIT SUGGESTION
+    # QUESTIONS RAPIDES
     # ══════════════════════════════════════════
     if "suggestion_choisie" not in st.session_state:
         st.session_state["suggestion_choisie"] = None
 
-    # ══════════════════════════════════════════
-    # QUESTIONS RAPIDES
-    # ══════════════════════════════════════════
     suggestions = [
         "Mon montant le plus eleve",
         "Suis-je en retard ?",
         "Ma moyenne mensuelle",
         "Mon historique",
     ]
-
     cols = st.columns(len(suggestions))
     for i, (col, texte) in enumerate(zip(cols, suggestions)):
         with col:
             if st.button(texte, key=f"sugg_{i}", use_container_width=True):
                 st.session_state["suggestion_choisie"] = texte
 
-    # ══════════════════════════════════════════
-    # ANALYSE INTELLIGENTE
-    # ══════════════════════════════════════════
     col_llm1, col_llm2 = st.columns(2)
     with col_llm1:
         if st.button("Pourquoi ma facture a augmente ?", key="btn_llm_hausse", use_container_width=True):
@@ -261,23 +474,26 @@ def afficher_client():
             historique_texte += f"{role}: {msg['content']}\n"
 
         with st.spinner("Analyse en cours..."):
-            reponse = repondre_client_connecte(
-                question_auto,
-                numero_contrat,
-                historique_texte
-            )
+            reponse = repondre_client_connecte(question_auto, numero_contrat, historique_texte)
         reponse = nettoyer_reponse(reponse)
         st.session_state.historique_client.append({"role": "assistant", "content": reponse})
+
+        # Sauvegarder dans SQLite
+        if st.session_state["conversation_id_actuelle"] is None:
+            conv_id = creer_conversation(numero_contrat, question_auto)
+            st.session_state["conversation_id_actuelle"] = conv_id
+        ajouter_message(st.session_state["conversation_id_actuelle"], "user", question_auto)
+        ajouter_message(st.session_state["conversation_id_actuelle"], "assistant", reponse)
+
         st.rerun()
 
     # ══════════════════════════════════════════
-    # HISTORIQUE CHAT - CUSTOM BUBBLES (CORRIGE)
+    # HISTORIQUE CHAT — BULLES
     # ══════════════════════════════════════════
     if st.session_state.historique_client:
         for msg in st.session_state.historique_client:
             if msg["role"] == "user":
                 content_html = format_message(msg["content"])
-                content_html = content_html.strip()
                 st.markdown(f'''
                 <div class="msg-row msg-row-user">
                     <div class="msg-bubble msg-user">{content_html}</div>
@@ -285,22 +501,24 @@ def afficher_client():
                 ''', unsafe_allow_html=True)
             else:
                 contenu = msg["content"].strip()
-                # Supprimer TOUTES les balises indésirables (div, span, p, etc.)
-                contenu = re.sub(r'</?(?:div|span|p|section|article|header|footer|nav|ul|ol|li)[^>]*>', '', contenu, flags=re.IGNORECASE)
-                # Convertir **bold** en <strong>
+                contenu = re.sub(
+                    r'</?(?:div|span|p|section|article|header|footer|nav|ul|ol|li)[^>]*>',
+                    '',
+                    contenu,
+                    flags=re.IGNORECASE,
+                )
                 contenu = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', contenu)
-                # Convertir les tableaux Markdown en HTML
+
                 def convertir_tableau(texte):
                     lignes = texte.split('\n')
                     resultat = []
                     i = 0
                     while i < len(lignes):
                         ligne = lignes[i]
-                        if '|' in ligne and i + 1 < len(lignes) and re.match(r'[\s|:-]+$', lignes[i+1]):
-                            # Début d'un tableau
+                        if '|' in ligne and i + 1 < len(lignes) and re.match(r'[\s|:-]+$', lignes[i + 1]):
                             cellules_header = [c.strip() for c in ligne.strip().strip('|').split('|')]
                             header_html = '<tr>' + ''.join(f'<th>{c}</th>' for c in cellules_header) + '</tr>'
-                            i += 2  # Sauter la ligne de séparation
+                            i += 2
                             rows_html = ''
                             while i < len(lignes) and '|' in lignes[i]:
                                 cellules = [c.strip() for c in lignes[i].strip().strip('|').split('|')]
@@ -311,6 +529,7 @@ def afficher_client():
                             resultat.append(ligne)
                             i += 1
                     return '\n'.join(resultat)
+
                 contenu = convertir_tableau(contenu)
                 st.markdown(f'''
                 <div class="msg-row msg-row-assistant">
@@ -319,7 +538,7 @@ def afficher_client():
                 ''', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
-    # CHATBOT INPUT
+    # CHAT INPUT
     # ══════════════════════════════════════════
     question = st.chat_input("Votre question sur vos factures...")
 
@@ -332,17 +551,21 @@ def afficher_client():
             historique_texte += f"{role}: {msg['content']}\n"
 
         with st.spinner("Recherche en cours..."):
-            reponse = repondre_client_connecte(
-                question,
-                numero_contrat,
-                historique_texte
-            )
+            reponse = repondre_client_connecte(question, numero_contrat, historique_texte)
         reponse = nettoyer_reponse(reponse)
         st.session_state.historique_client.append({"role": "assistant", "content": reponse})
+
+        # Sauvegarder dans SQLite
+        if st.session_state["conversation_id_actuelle"] is None:
+            conv_id = creer_conversation(numero_contrat, question)
+            st.session_state["conversation_id_actuelle"] = conv_id
+        ajouter_message(st.session_state["conversation_id_actuelle"], "user", question)
+        ajouter_message(st.session_state["conversation_id_actuelle"], "assistant", reponse)
+
         st.rerun()
 
     # ══════════════════════════════════════════
-    # TELECHARGEMENT FACTURE
+    # TÉLÉCHARGEMENT FACTURE
     # ══════════════════════════════════════════
     st.markdown('''
     <div class="download-section">
@@ -357,7 +580,7 @@ def afficher_client():
         mois_choisi = st.selectbox(
             "Choisir un mois",
             options=mois_disponibles,
-            key="mois_telechargement"
+            key="mois_telechargement",
         )
         if st.button("Generer la facture", key="btn_generate_pdf"):
             pdf = generer_pdf_facture(numero_contrat, mois_choisi)
@@ -366,7 +589,7 @@ def afficher_client():
                     label="Sauvegarder le PDF",
                     data=pdf,
                     file_name=f"facture_{mois_choisi}.pdf",
-                    mime="application/pdf"
+                    mime="application/pdf",
                 )
             else:
                 st.error("Facture introuvable pour ce mois.")

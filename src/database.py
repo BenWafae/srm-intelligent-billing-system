@@ -76,7 +76,25 @@ def init_db():
         numero_client TEXT
     )
 """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS conversations_client (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        numero_contrat TEXT NOT NULL,
+        titre TEXT NOT NULL,
+        date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+""")
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS messages_client (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        conversation_id INTEGER NOT NULL,
+        role TEXT NOT NULL,
+        contenu TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (conversation_id) REFERENCES conversations_client(id)
+    )
+""")
     conn.commit()
     conn.close()
 
@@ -629,3 +647,116 @@ def get_client_par_numero_contrat(numero_contrat: str) -> dict | None:
         "numero_client": row[6],
         "numero_compteur": row[7],
     }
+# ════════════════════════════════════════════
+# PERSISTANCE CONVERSATIONNELLE — CLIENT
+# ════════════════════════════════════════════
+
+def creer_conversation(numero_contrat: str, premiere_question: str) -> int:
+    """
+    Crée une nouvelle conversation et retourne son id.
+    Le titre est généré automatiquement depuis les 5 premiers mots
+    de la première question du client.
+    """
+    mots = premiere_question.strip().split()
+    titre = " ".join(mots[:5])
+    if len(mots) > 5:
+        titre += "..."
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO conversations_client (numero_contrat, titre)
+        VALUES (?, ?)
+    """, (numero_contrat, titre))
+    conversation_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return conversation_id
+
+
+def ajouter_message(conversation_id: int, role: str, contenu: str) -> None:
+    """
+    Sauvegarde un message dans une conversation.
+    role = 'user' (message du client) ou 'assistant' (réponse du chatbot)
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO messages_client (conversation_id, role, contenu)
+        VALUES (?, ?, ?)
+    """, (conversation_id, role, contenu))
+    conn.commit()
+    conn.close()
+
+
+def get_conversations_client(numero_contrat: str) -> list[dict]:
+    """
+    Retourne toutes les conversations d'un client,
+    triées de la plus récente à la plus ancienne.
+    Pour affichage dans la sidebar.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, titre, date_creation
+        FROM conversations_client
+        WHERE numero_contrat = ?
+        ORDER BY date_creation DESC
+    """, (numero_contrat,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [
+        {"id": r[0], "titre": r[1], "date_creation": r[2]}
+        for r in rows
+    ]
+
+
+def get_messages_conversation(conversation_id: int) -> list[dict]:
+    """
+    Retourne tous les messages d'une conversation dans l'ordre chronologique.
+    Pour recharger une ancienne conversation.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT role, contenu
+        FROM messages_client
+        WHERE conversation_id = ?
+        ORDER BY timestamp ASC
+    """, (conversation_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"role": r[0], "content": r[1]} for r in rows]
+
+
+def modifier_titre_conversation(conversation_id: int, nouveau_titre: str) -> None:
+    """
+    Permet au client de renommer une conversation depuis la sidebar.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE conversations_client
+        SET titre = ?
+        WHERE id = ?
+    """, (nouveau_titre.strip(), conversation_id))
+    conn.commit()
+    conn.close()
+
+
+def supprimer_conversation(conversation_id: int) -> None:
+    """
+    Supprime une conversation et tous ses messages.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        DELETE FROM messages_client
+        WHERE conversation_id = ?
+    """, (conversation_id,))
+    cursor.execute("""
+        DELETE FROM conversations_client
+        WHERE id = ?
+    """, (conversation_id,))
+    conn.commit()
+    conn.close()
