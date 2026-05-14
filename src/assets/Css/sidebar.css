@@ -546,3 +546,38 @@
 [data-testid="stSidebar"] .stHorizontalBlock {
     gap: 0 !important;
 }
+/* ──────────────────────────────────────────────────────────
+   CACHE LE BOUTON DE FERMETURE SIDEBAR (flèche «)
+   ────────────────────────────────────────────────────────── */
+
+[data-testid="collapsedControl"],
+button[kind="header"][aria-label="Close sidebar"],
+button[data-testid="baseButton-header"] {
+    display: none !important;
+}
+
+/* Force la sidebar à rester toujours ouverte */
+[data-testid="stSidebar"][aria-expanded="false"] {
+    display: flex !important;
+    transform: none !important;
+    visibility: visible !important;
+    width: 280px !important;
+    min-width: 280px !important;
+}
+
+section[data-testid="stSidebarCollapsedControl"] {
+    display: none !important;
+}
+button[data-testid="baseButton-headerNoPadding"],
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="collapsedControl"],
+.st-emotion-cache-1dp5vir,
+section[tabindex="0"] > div > button {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
