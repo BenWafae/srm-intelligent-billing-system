@@ -131,6 +131,9 @@ def afficher_sidebar_client(numero_contrat, nom_client):
         </div>
         """, unsafe_allow_html=True)
     else:
+        # OUVERTURE DU CONTENEUR SCROLLABLE
+        st.sidebar.markdown('<div class="conversations-scrollable">', unsafe_allow_html=True)
+        
         # Grouper par date
         grouped = group_conversations_by_date(conversations)
         
@@ -323,6 +326,9 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                                 st.rerun()
                             
                             st.markdown('</div>', unsafe_allow_html=True)
+        
+        # FERMETURE DU CONTENEUR SCROLLABLE
+        st.sidebar.markdown('</div>', unsafe_allow_html=True)
     
     # Footer avec utilisateur
     prenom = nom_client.split()[0] if nom_client else "Client"
