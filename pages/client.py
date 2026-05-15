@@ -234,57 +234,7 @@ def afficher_client():
     </div>
     ''', unsafe_allow_html=True)
 
-    # ══════════════════════════════════════════
-    # QUESTIONS RAPIDES
-    # ══════════════════════════════════════════
-    if "suggestion_choisie" not in st.session_state:
-        st.session_state["suggestion_choisie"] = None
-
-    suggestions = [
-        "Mon montant le plus eleve",
-        "Suis-je en retard ?",
-        "Ma moyenne mensuelle",
-        "Mon historique",
-    ]
-    cols = st.columns(len(suggestions))
-    for i, (col, texte) in enumerate(zip(cols, suggestions)):
-        with col:
-            if st.button(texte, key=f"sugg_{i}", use_container_width=True):
-                st.session_state["suggestion_choisie"] = texte
-
-    col_llm1, col_llm2 = st.columns(2)
-    with col_llm1:
-        if st.button("Pourquoi ma facture a augmente ?", key="btn_llm_hausse", use_container_width=True):
-            st.session_state["suggestion_choisie"] = "Pourquoi ma facture a augmente par rapport au mois dernier ?"
-    with col_llm2:
-        if st.button("Comment reduire ma consommation ?", key="btn_llm_conseil", use_container_width=True):
-            st.session_state["suggestion_choisie"] = "Comment reduire ma consommation ?"
-
-    # ══════════════════════════════════════════
-    # TRAITEMENT SUGGESTION CHOISIE
-    # ══════════════════════════════════════════
-    if st.session_state["suggestion_choisie"]:
-        question_auto = st.session_state["suggestion_choisie"]
-        st.session_state["suggestion_choisie"] = None
-        st.session_state.historique_client.append({"role": "user", "content": question_auto})
-
-        historique_texte = ""
-        for msg in st.session_state.historique_client[:-1]:
-            role = "Client" if msg["role"] == "user" else "Assistant"
-            historique_texte += f"{role}: {msg['content']}\n"
-
-        with st.spinner("Analyse en cours..."):
-            reponse = repondre_client_connecte(question_auto, numero_contrat, historique_texte)
-        reponse = nettoyer_reponse(reponse)
-        st.session_state.historique_client.append({"role": "assistant", "content": reponse})
-
-        if st.session_state["conversation_id_actuelle"] is None:
-            conv_id = creer_conversation(numero_contrat, question_auto)
-            st.session_state["conversation_id_actuelle"] = conv_id
-        ajouter_message(st.session_state["conversation_id_actuelle"], "user", question_auto)
-        ajouter_message(st.session_state["conversation_id_actuelle"], "assistant", reponse)
-
-        st.rerun()
+    
 
     # ══════════════════════════════════════════
     # HISTORIQUE CHAT — BULLES
