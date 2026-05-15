@@ -8,7 +8,6 @@ from src.database import (
     supprimer_conversation,
 )
 
-
 def group_conversations_by_date(conversations):
     """Groupe les conversations par catégories de dates"""
     today = datetime.now().date()
@@ -26,6 +25,8 @@ def group_conversations_by_date(conversations):
                 group = "Hier"
             elif days_diff <= 7:
                 group = "Cette semaine"
+            elif days_diff <= 30:
+                group = "Ce mois"
             else:
                 group = conv_date.strftime("%B %Y")
             
@@ -39,30 +40,67 @@ def group_conversations_by_date(conversations):
     
     return groups
 
-
 def afficher_sidebar_client(numero_contrat, nom_client):
     """
-    Affiche une sidebar moderne inspirée de DeepSeek/ChatGPT
+    Affiche une sidebar ultra-premium avec logique Streamlit intacte
     """
     
-    # Charger le CSS de la sidebar
+    # Charger le CSS
     css_path = os.path.join(os.path.dirname(__file__), "..", "src", "assets", "Css", "sidebar.css")
     if os.path.exists(css_path):
         with open(css_path, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     
-    # Header avec logo SRM
+    # CSS supplémentaire pour supprimer les bordures et backgrounds des colonnes
+    st.markdown("""
+    <style>
+    /* Supprimer tous les backgrounds et bordures des colonnes dans la sidebar */
+    [data-testid="stSidebar"] .stHorizontalBlock,
+    [data-testid="stSidebar"] [data-testid="column"] {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        gap: 0 !important;
+    }
+    
+    /* Supprimer les paddings par défaut des colonnes */
+    [data-testid="stSidebar"] [data-testid="column"] {
+        padding: 0 !important;
+    }
+    
+    /* S'assurer que les boutons n'ont pas de bordures */
+    [data-testid="stSidebar"] .stButton button {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    [data-testid="stSidebar"] .stButton button:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* Ajuster l'espacement entre les colonnes */
+    .stHorizontalBlock {
+        gap: 0px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Header avec logo
     st.sidebar.markdown("""
     <div class="sidebar-header">
         <div class="sidebar-logo-wrapper">
             <div class="sidebar-logo-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    <path d="M12 2v20"/>
                 </svg>
             </div>
             <div class="sidebar-logo-text">
                 <h1>SRM Intelligence</h1>
-                <p>Espace Client</p>
+                <p>Platform Premium</p>
             </div>
         </div>
     </div>
@@ -84,11 +122,12 @@ def afficher_sidebar_client(numero_contrat, nom_client):
     if not conversations:
         st.sidebar.markdown("""
         <div class="empty-conv-state">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <path d="M8 10h.01M12 10h.01M16 10h.01"/>
             </svg>
             <p>Aucune conversation</p>
-            <p style="font-size: 11px;">Cliquez sur "Nouvelle conversation"</p>
+            <p style="font-size: 12px;">Démarrez une nouvelle discussion ✨</p>
         </div>
         """, unsafe_allow_html=True)
     else:
@@ -124,24 +163,48 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                         )
                         col_ok, col_annuler = st.columns(2)
                         with col_ok:
-                            if st.button("✓ Valider", key=f"ok_{conv_id}"):
+                            if st.button("✓ Valider", key=f"ok_{conv_id}", use_container_width=True):
                                 modifier_titre_conversation(conv_id, nouveau_titre)
                                 st.session_state["titre_en_edition"] = None
                                 st.rerun()
                         with col_annuler:
-                            if st.button("✗ Annuler", key=f"annuler_{conv_id}"):
+                            if st.button("✗ Annuler", key=f"annuler_{conv_id}", use_container_width=True):
                                 st.session_state["titre_en_edition"] = None
                                 st.rerun()
                         st.markdown('</div>', unsafe_allow_html=True)
                 else:
-                    # Afficher le titre et le menu 3 points
+                    # Utilisation des colonnes Streamlit (logique originale qui fonctionne)
                     col1, col2 = st.sidebar.columns([10, 1])
                     
                     with col1:
+                        # Style pour le bouton titre
+                        st.markdown(f"""
+                        <style>
+                        div[data-testid="column"]:first-child button {{
+                            text-align: left !important;
+                            justify-content: flex-start !important;
+                            background: transparent !important;
+                            border: none !important;
+                            padding: 10px 0 !important;
+                            font-weight: {"700" if est_active else "500"} !important;
+                            color: {"#667eea" if est_active else "#1e293b"} !important;
+                            width: 100% !important;
+                            cursor: pointer !important;
+                            border-radius: 8px !important;
+                            transition: all 0.2s ease !important;
+                        }}
+                        div[data-testid="column"]:first-child button:hover {{
+                            background: rgba(102, 126, 234, 0.08) !important;
+                            padding-left: 8px !important;
+                        }}
+                        </style>
+                        """, unsafe_allow_html=True)
+                        
                         # Bouton titre pour charger la conversation
                         if st.button(titre[:40], key=f"load_{conv_id}", use_container_width=True):
                             # Fermer le menu ouvert
                             st.session_state["menu_open_for"] = None
+                            # Charger les messages
                             messages = get_messages_conversation(conv_id)
                             st.session_state["historique_client"] = messages
                             st.session_state["conversation_id_actuelle"] = conv_id
@@ -149,6 +212,35 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                             st.rerun()
                     
                     with col2:
+                        # Style pour le bouton 3 points
+                        st.markdown(f"""
+                        <style>
+                        div[data-testid="column"]:last-child {{
+                            display: flex !important;
+                            justify-content: flex-end !important;
+                            background: transparent !important;
+                            border: none !important;
+                        }}
+                        div[data-testid="column"]:last-child button {{
+                            background: transparent !important;
+                            border: none !important;
+                            color: #94a3b8 !important;
+                            font-size: 18px !important;
+                            font-weight: 600 !important;
+                            cursor: pointer !important;
+                            padding: 8px 0 !important;
+                            border-radius: 8px !important;
+                            transition: all 0.2s ease !important;
+                            width: auto !important;
+                            min-width: 30px !important;
+                        }}
+                        div[data-testid="column"]:last-child button:hover {{
+                            background: rgba(102, 126, 234, 0.1) !important;
+                            color: #667eea !important;
+                        }}
+                        </style>
+                        """, unsafe_allow_html=True)
+                        
                         # Bouton 3 points
                         if st.button("⋯", key=f"menu_btn_{conv_id}"):
                             # Toggle du menu
@@ -163,43 +255,57 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                         # Créer un conteneur pour le menu
                         menu_container = st.sidebar.container()
                         with menu_container:
-                            # CSS pour le menu
+                            # CSS pour le menu premium
                             st.markdown("""
                             <style>
-                            .menu-contextuel {
+                            .menu-contextuel-premium {
                                 background: white;
-                                border: 1px solid rgba(139, 92, 246, 0.2);
-                                border-radius: 12px;
-                                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                                border: 1px solid #e2e8f0;
+                                border-radius: 14px;
+                                box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
                                 margin-left: 40px;
                                 margin-bottom: 10px;
+                                margin-top: 4px;
                                 overflow: hidden;
+                                animation: dropdownSlide 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                             }
-                            .menu-contextuel button {
+                            .menu-contextuel-premium button {
                                 width: 100% !important;
                                 text-align: left !important;
-                                padding: 10px 15px !important;
+                                padding: 12px 16px !important;
                                 background: transparent !important;
                                 border: none !important;
                                 cursor: pointer !important;
                                 font-size: 13px !important;
                                 font-weight: 500 !important;
-                                color: #333 !important;
+                                color: #1e293b !important;
                                 border-radius: 0 !important;
+                                transition: all 0.2s ease !important;
                             }
-                            .menu-contextuel button:hover {
-                                background: #f5f3ff !important;
+                            .menu-contextuel-premium button:hover {
+                                background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%) !important;
+                                padding-left: 20px !important;
                             }
-                            .menu-contextuel .delete-option {
+                            .menu-contextuel-premium .delete-option {
                                 color: #ef4444 !important;
                             }
-                            .menu-contextuel .delete-option:hover {
-                                background: #fef2f2 !important;
+                            .menu-contextuel-premium .delete-option:hover {
+                                background: rgba(239, 68, 68, 0.08) !important;
+                            }
+                            @keyframes dropdownSlide {
+                                from {
+                                    opacity: 0;
+                                    transform: translateY(-10px);
+                                }
+                                to {
+                                    opacity: 1;
+                                    transform: translateY(0);
+                                }
                             }
                             </style>
                             """, unsafe_allow_html=True)
                             
-                            st.markdown('<div class="menu-contextuel">', unsafe_allow_html=True)
+                            st.markdown('<div class="menu-contextuel-premium">', unsafe_allow_html=True)
                             
                             # Option Renommer
                             if st.button("✎ Renommer", key=f"rename_option_{conv_id}", use_container_width=True):
@@ -220,16 +326,19 @@ def afficher_sidebar_client(numero_contrat, nom_client):
     
     # Footer avec utilisateur
     prenom = nom_client.split()[0] if nom_client else "Client"
+    initiales = ''.join([word[0].upper() for word in nom_client.split()[:2]]) if nom_client else "C"
+    
     st.sidebar.markdown(f"""
     <div class="sidebar-footer">
         <div class="sidebar-user">
             <div class="sidebar-user-avatar">
-                <span>{prenom[0].upper()}</span>
+                <span>{initiales}</span>
             </div>
             <div class="sidebar-user-info">
                 <div class="sidebar-user-name">{nom_client}</div>
-                <div class="sidebar-user-role">Client SRM</div>
+                <div class="sidebar-user-role">Client Premium</div>
             </div>
+            <button class="user-menu-btn" id="userMenuBtn">⚙️</button>
         </div>
     </div>
     """, unsafe_allow_html=True)
