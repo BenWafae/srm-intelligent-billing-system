@@ -51,7 +51,7 @@ def afficher_sidebar_client(numero_contrat, nom_client):
         with open(css_path, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     
-    # CSS supplémentaire pour supprimer les bordures et backgrounds des colonnes
+    # CSS supplémentaire pour supprimer les espaces entre les conversations et aligner à gauche
     st.markdown("""
     <style>
     /* Supprimer tous les backgrounds et bordures des colonnes dans la sidebar */
@@ -84,6 +84,34 @@ def afficher_sidebar_client(numero_contrat, nom_client):
     /* Ajuster l'espacement entre les colonnes */
     .stHorizontalBlock {
         gap: 0px !important;
+    }
+    
+    /* NOUVEAU : Supprimer les espaces entre les conversations */
+    .element-container:has(.stButton) {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* NOUVEAU : Aligner les titres des sections à gauche */
+    .sidebar-section-title {
+        text-align: left !important;
+        padding-left: 0 !important;
+    }
+    
+    /* NOUVEAU : Aligner les boutons de conversation à gauche */
+    div[data-testid="column"]:first-child button {
+        text-align: left !important;
+        justify-content: flex-start !important;
+    }
+    
+    /* Réduire l'espace entre les lignes de conversation */
+    .stHorizontalBlock {
+        margin-bottom: -10px !important;
+    }
+    
+    /* Supprimer l'espace supplémentaire dans la zone scrollable */
+    .conversations-scrollable {
+        margin-top: -10px !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -138,7 +166,10 @@ def afficher_sidebar_client(numero_contrat, nom_client):
         grouped = group_conversations_by_date(conversations)
         
         for group_name, convs in grouped.items():
-            st.sidebar.markdown(f'<div class="sidebar-section-title">{group_name}</div>', unsafe_allow_html=True)
+            st.sidebar.markdown(
+    f'<div class="sidebar-section-title" style="padding: 10px 0 2px 4px; margin: 0;">{group_name}</div>',
+    unsafe_allow_html=True
+)
             
             for conv in convs:
                 conv_id = conv["id"]
@@ -180,7 +211,7 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                     col1, col2 = st.sidebar.columns([10, 1])
                     
                     with col1:
-                        # Style pour le bouton titre
+                        # Style pour le bouton titre - MODIFIÉ: aligné à gauche
                         st.markdown(f"""
                         <style>
                         div[data-testid="column"]:first-child button {{
@@ -188,17 +219,27 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                             justify-content: flex-start !important;
                             background: transparent !important;
                             border: none !important;
-                            padding: 10px 0 !important;
+                            padding: 8px 0 !important;
+                            margin: 0 !important;
                             font-weight: {"700" if est_active else "500"} !important;
                             color: {"#667eea" if est_active else "#1e293b"} !important;
                             width: 100% !important;
                             cursor: pointer !important;
                             border-radius: 8px !important;
                             transition: all 0.2s ease !important;
+                            white-space: nowrap !important;
+                            overflow: hidden !important;
+                            text-overflow: ellipsis !important;
+                            display: block !important;
                         }}
                         div[data-testid="column"]:first-child button:hover {{
                             background: rgba(102, 126, 234, 0.08) !important;
                             padding-left: 8px !important;
+                        }}
+                        /* Supprimer l'espace entre les colonnes */
+                        div[data-testid="column"] {{
+                            margin: 0 !important;
+                            padding: 0 !important;
                         }}
                         </style>
                         """, unsafe_allow_html=True)
@@ -223,6 +264,8 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                             justify-content: flex-end !important;
                             background: transparent !important;
                             border: none !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
                         }}
                         div[data-testid="column"]:last-child button {{
                             background: transparent !important;
@@ -231,11 +274,12 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                             font-size: 18px !important;
                             font-weight: 600 !important;
                             cursor: pointer !important;
-                            padding: 8px 0 !important;
+                            padding: 6px 0 !important;
                             border-radius: 8px !important;
                             transition: all 0.2s ease !important;
                             width: auto !important;
                             min-width: 30px !important;
+                            margin: 0 !important;
                         }}
                         div[data-testid="column"]:last-child button:hover {{
                             background: rgba(102, 126, 234, 0.1) !important;
@@ -267,15 +311,15 @@ def afficher_sidebar_client(numero_contrat, nom_client):
                                 border-radius: 14px;
                                 box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
                                 margin-left: 40px;
-                                margin-bottom: 10px;
-                                margin-top: 4px;
+                                margin-bottom: 4px;
+                                margin-top: 2px;
                                 overflow: hidden;
                                 animation: dropdownSlide 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                             }
                             .menu-contextuel-premium button {
                                 width: 100% !important;
                                 text-align: left !important;
-                                padding: 12px 16px !important;
+                                padding: 10px 16px !important;
                                 background: transparent !important;
                                 border: none !important;
                                 cursor: pointer !important;

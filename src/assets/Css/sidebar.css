@@ -4,35 +4,96 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* SUPPRIMER L'ESPACE BLANC EN HAUT DE LA SIDEBAR */
-.st-emotion-cache-1dp5vir {
-    padding-top: 0rem !important;
-    margin-top: 0rem !important;
-}
+/* ══════════════════════════════════════════
+   FIX 1 — SUPPRIMER L'ESPACE BLANC EN HAUT
+   Streamlit ajoute un padding via plusieurs classes dynamiques.
+   On cible toutes les variantes connues + le sélecteur générique.
+   ══════════════════════════════════════════ */
 
-header[data-testid="stHeader"] {
-    display: none !important;
-}
-
+/* Cacher le header Streamlit complètement */
+header[data-testid="stHeader"],
 .stApp > header {
     display: none !important;
+    height: 0 !important;
 }
 
+/* Supprimer le padding-top injecté par Streamlit sur le contenu principal */
 .block-container {
     padding-top: 0rem !important;
 }
 
-/* Supprimer l'espace par défaut de Streamlit en haut de la sidebar */
-section[data-testid="stSidebar"] .block-container {
+/* Cibler TOUTES les variantes de la classe dynamique Streamlit */
+[class*="st-emotion-cache"] {
     padding-top: 0 !important;
-    padding-bottom: 0 !important;
+}
+
+/* Cibler directement le premier enfant de la sidebar */
+[data-testid="stSidebar"] > div:first-child {
+    padding-top: 0 !important;
     margin-top: 0 !important;
 }
 
-/* Forcer la suppression de tout padding/margin en haut */
-[data-testid="stSidebar"] .element-container:first-child {
+section[data-testid="stSidebar"] > div {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* Premier element-container dans la sidebar */
+[data-testid="stSidebar"] .element-container:first-child,
+[data-testid="stSidebarContent"] > div:first-child {
     margin-top: 0 !important;
     padding-top: 0 !important;
+}
+/* ══════════════════════════════════════════
+   FIX 2 — SUPPRIMER ESPACES ENTRE CONVERSATIONS
+   + ALIGNER LES TITRES À GAUCHE
+   ══════════════════════════════════════════ */
+
+/* Supprimer tous les margins/paddings des wrappers Streamlit dans la sidebar */
+[data-testid="stSidebar"] .element-container {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Supprimer les espaces entre les stButton */
+[data-testid="stSidebar"] .stButton {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Aligner le texte des boutons à gauche (Streamlit centre par défaut) */
+[data-testid="stSidebar"] .stButton > button {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    padding: 6px 8px !important;
+    margin: 0 !important;
+    min-height: unset !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+}
+
+/* Supprimer le gap entre les stHorizontalBlock (lignes de conversation) */
+[data-testid="stSidebar"] .stHorizontalBlock {
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: center !important;
+}
+
+/* Supprimer les espaces dans les colonnes */
+[data-testid="stSidebar"] [data-testid="column"] {
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
+}
+
+/* Supprimer l'espace entre les div wrappant chaque ligne de conversation */
+[data-testid="stSidebar"] .stVerticalBlock > .stVerticalBlockBorderWrapper,
+[data-testid="stSidebar"] .stVerticalBlock > div {
+    gap: 0 !important;
+    margin: 0 !important;
 }
 /* ═══════════════════════════════════════════════════════════════
    SIDEBAR PREMIUM - DESIGN TAILWIND MODERNE
@@ -561,59 +622,19 @@ section[tabindex="0"] > div > button {
     height: 0 !important;
 }
 
-/* ──────────────────────────────────────────────────────────────
-   SUPPRESSION DES BORDURES ET BACKGROUNDS DES COLONNES
-   ────────────────────────────────────────────────────────────── */
-
-/* Supprimer tous les backgrounds et bordures des colonnes dans la sidebar */
-[data-testid="stSidebar"] .stHorizontalBlock,
-[data-testid="stSidebar"] [data-testid="column"] {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    gap: 0 !important;
-}
-
-/* Supprimer les paddings par défaut des colonnes */
-[data-testid="stSidebar"] [data-testid="column"] {
-    padding: 0 !important;
-}
-
-/* S'assurer que les boutons n'ont pas de bordures */
-[data-testid="stSidebar"] .stButton button {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-[data-testid="stSidebar"] .stButton button:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* Ajuster l'espacement entre les colonnes */
-.stHorizontalBlock {
-    gap: 0px !important;
-}
 /* ============================================
-   FIXER LE HEADER ET LE FOOTER - SCROLL UNIQUEMENT CONVERSATIONS
+   FIXER LE HEADER ET LE FOOTER - APPROCHE NATIVE STREAMLIT
    ============================================ */
 
-/* Supprimer TOUS les paddings et margins par défaut en haut de la sidebar */
-[data-testid="stSidebar"] {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-
-[data-testid="stSidebar"] > div:first-child {
+/* Faire de la sidebar un conteneur flex colonne */
+[data-testid="stSidebarContent"] > div:first-child {
     display: flex !important;
     flex-direction: column !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+    height: 100% !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
 }
 
 [data-testid="stSidebarContent"] {
@@ -621,12 +642,56 @@ section[tabindex="0"] > div > button {
     flex-direction: column !important;
     height: 100% !important;
     overflow: hidden !important;
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
-/* Supprimer l'espace caché en haut de la sidebar */
-.st-emotion-cache-1cypcdb {
+/* Supprimer le padding Streamlit générique */
+[data-testid="stSidebarContent"] > div:first-child {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
+}
+
+/* ── Le 1er element-container = sidebar-header → fixé en haut ── */
+[data-testid="stSidebarContent"] .element-container:nth-child(1) {
+    flex-shrink: 0 !important;
+    position: relative !important;
+    z-index: 100 !important;
+}
+
+/* ── Le 2ème element-container = new-chat-btn → fixé sous le header ── */
+[data-testid="stSidebarContent"] .element-container:nth-child(2) {
+    flex-shrink: 0 !important;
+    z-index: 99 !important;
+}
+
+/* ── La zone scrollable des conversations ── */
+.conversations-scrollable {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+    padding: 0 8px !important;
+}
+
+/* ── Le dernier element-container = footer → poussé en bas ── */
+[data-testid="stSidebarContent"] .element-container:last-child {
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    z-index: 100 !important;
+}
+
+/* Supprimer TOUS les paddings Streamlit en haut */
+[class*="st-emotion-cache"] {
+    padding-top: 0 !important;
+}
+
+section[data-testid="stSidebar"] > div {
     padding-top: 0 !important;
     margin-top: 0 !important;
 }
@@ -635,79 +700,35 @@ section[tabindex="0"] > div > button {
     display: none !important;
 }
 
-/* Header fixe en haut - SANS AUCUN ESPACE */
-/* ──────────────────────────────────────────────────────────────
-   HEADER PREMIUM - COLLÉ EN HAUT SANS AUCUN ESPACE
-   ────────────────────────────────────────────────────────────── */
-
-/* Header fixe en haut - SANS AUCUN ESPACE */
-.sidebar-header {
-    flex-shrink: 0 !important;
-    position: sticky !important;
-    top: 0 !important;
-    background: rgba(255, 255, 255, 0.98) !important;
-    z-index: 100 !important;
-    padding: 0px 24px !important;
-    margin: 0 !important;
-    border-bottom: 1px solid rgba(203, 213, 225, 0.5);
+/* Scrollbar fine pour conversations-scrollable */
+.conversations-scrollable::-webkit-scrollbar {
+    width: 4px;
 }
 
-/* Ajuster le wrapper du logo pour avoir un padding uniquement à l'intérieur */
-.sidebar-logo-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 20px 0 16px 0 !important;
-    margin: 0 !important;
+.conversations-scrollable::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-/* Bouton nouvelle conversation fixe - collé au header */
-.new-chat-btn-container {
-    flex-shrink: 0 !important;
-    position: sticky !important;
-    top: 89px !important;
-    background: rgba(255, 255, 255, 0.98) !important;
-    z-index: 99 !important;
-    padding: 8px 20px 12px 20px !important;
-    margin: 0 !important;
+.conversations-scrollable::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
 }
 
-/* Zone scrollable pour les conversations */
-.conversations-scrollable {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    min-height: 0 !important;
-    padding: 0 12px !important;
+.conversations-scrollable::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
-
-/* Footer fixe en bas - bien visible */
-.sidebar-footer {
+/* ── Footer collé en bas ── */
+[data-testid="stSidebarContent"] .element-container:has(.sidebar-footer) {
+    margin-top: auto !important;
     flex-shrink: 0 !important;
     position: sticky !important;
     bottom: 0 !important;
     background: rgba(255, 255, 255, 0.98) !important;
     z-index: 100 !important;
-    margin-top: auto !important;
+}
+
+.sidebar-footer {
+    flex-shrink: 0 !important;
     padding: 16px 24px 20px 24px !important;
-    border-top: 1px solid #e2e8f0;
-}
-
-/* Scrollbar personnalisée pour la zone des conversations */
-.conversations-scrollable::-webkit-scrollbar {
-    width: 5px;
-}
-
-.conversations-scrollable::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 10px;
-}
-
-.conversations-scrollable::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-    border-radius: 10px;
-}
-
-.conversations-scrollable::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    border-top: 1px solid #e2e8f0 !important;
 }
