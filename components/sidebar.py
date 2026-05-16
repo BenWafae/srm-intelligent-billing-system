@@ -72,14 +72,19 @@ def _inject_css():
 
     [data-testid="stSidebarContent"] {
         background: transparent !important; padding: 0 !important;
-        display: flex; flex-direction: column; height: 100%;
+        display: flex; flex-direction: column;
+        height: 100vh !important;  /* Hauteur totale de l'écran */
+        overflow: hidden !important;  /* Empêche le scroll global */
     }
 
-    /* ── Header ── */
+    /* ── Header fixe ── */
     .sidebar-header {
         padding: 28px 24px 20px 24px !important;
         border-bottom: 1px solid rgba(203,213,225,0.5);
-        margin-bottom: 16px;
+        margin-bottom: 0px;
+        flex-shrink: 0;  /* Empêche le rétrécissement */
+        background: rgba(255,255,255,0.98);
+        z-index: 10;
     }
     .sidebar-logo-wrapper { display:flex; align-items:center; gap:14px; }
     .sidebar-logo-icon {
@@ -115,6 +120,7 @@ def _inject_css():
         margin:4px 16px 16px 16px !important;
         transition:all .3s ease !important;
         box-shadow: none !important;
+        flex-shrink: 0;
     }
     [data-testid="stSidebar"] .stButton > button:hover {
         transform:translateY(-2px) !important;
@@ -126,17 +132,25 @@ def _inject_css():
         font-size:11px !important; font-weight:700 !important;
         color:#64748b !important; padding:16px 24px 8px 24px !important;
         text-transform:uppercase; letter-spacing:.08em;
+        margin: 0;
     }
 
-    /* ── Zone scrollable ── */
+    /* ── Zone scrollable UNIQUEMENT pour les conversations ── */
     .conversations-scrollable {
-        flex:1; overflow-y:auto; overflow-x:hidden;
-        min-height:0; padding:0 8px;
+        flex: 1;  /* Prend tout l'espace restant */
+        overflow-y: auto;  /* Scroll uniquement ici */
+        overflow-x: hidden;
+        min-height: 0;  /* Important pour le flexbox */
+        padding: 0 8px;
+        margin: 0;
     }
-    .conversations-scrollable::-webkit-scrollbar { width:4px; }
-    .conversations-scrollable::-webkit-scrollbar-track { background:transparent; }
+    .conversations-scrollable::-webkit-scrollbar { width: 4px; }
+    .conversations-scrollable::-webkit-scrollbar-track { background: transparent; }
     .conversations-scrollable::-webkit-scrollbar-thumb {
-        background:#cbd5e1; border-radius:10px;
+        background: #cbd5e1; border-radius: 10px;
+    }
+    .conversations-scrollable::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
     }
 
     /* Style pour la ligne de conversation avec les boutons */
@@ -225,10 +239,14 @@ def _inject_css():
     .rename-cancel { background:#f1f5f9; color:#64748b; }
     .rename-confirm:hover, .rename-cancel:hover { transform:translateY(-1px); }
 
-    /* ── Footer ── */
+    /* ── Footer fixe ── */
     .sidebar-footer {
-        margin-top:auto; padding:16px 20px 20px 20px;
-        border-top:1px solid #e2e8f0; background:rgba(255,255,255,.95);
+        flex-shrink: 0;  /* Empêche le rétrécissement */
+        margin-top: auto;
+        padding: 16px 20px 20px 20px;
+        border-top: 1px solid #e2e8f0;
+        background: rgba(255,255,255,.95);
+        z-index: 10;
     }
     .sidebar-user {
         display:flex; align-items:center; gap:12px; cursor:pointer;
@@ -290,7 +308,7 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
     """
     _inject_css()
 
-    # ── Header ──────────────────────────────────────────────
+    # ── Header fixe ──────────────────────────────────────────────
     st.sidebar.markdown(
         """
     <div class="sidebar-header">
@@ -311,14 +329,16 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
         unsafe_allow_html=True,
     )
 
-    # ── Bouton Nouvelle conversation ────────────────────────
-    if st.sidebar.button("✨ Nouvelle conversation", key="btn_new_chat", use_container_width=True):
+    # ── Bouton Nouvelle conversation (fixe) ────────────────────────
+    new_chat_clicked = st.sidebar.button("✨ Nouvelle conversation", key="btn_new_chat", use_container_width=True)
+    
+    if new_chat_clicked:
         st.session_state["historique_client"] = []
         st.session_state["conversation_id_actuelle"] = None
         st.session_state["titre_en_edition"] = None
         return "new_chat"
 
-    # ── Charger les conversations ────────────────────────────
+    # ── Charger les conversations (zone scrollable) ────────────────────────────
     conversations = get_conversations_client(numero_contrat)
 
     if not conversations:
@@ -337,6 +357,7 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
             unsafe_allow_html=True,
         )
     else:
+        # Début de la zone scrollable
         st.sidebar.markdown('<div class="conversations-scrollable">', unsafe_allow_html=True)
 
         grouped = group_conversations_by_date(conversations)
@@ -415,9 +436,10 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
                     # Fermeture du HTML
                     st.sidebar.markdown('</div></div></div>', unsafe_allow_html=True)
 
+        # Fin de la zone scrollable
         st.sidebar.markdown('</div>', unsafe_allow_html=True)
 
-    # ── Footer utilisateur ───────────────────────────────────
+    # ── Footer utilisateur (fixe) ───────────────────────────────────
     initiales = (
         "".join([w[0].upper() for w in nom_client.split()[:2]]) if nom_client else "C"
     )
@@ -429,7 +451,7 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
             <div class="sidebar-user-avatar"><span>{initiales}</span></div>
             <div class="sidebar-user-info">
                 <div class="sidebar-user-name">{nom_client}</div>
-                <div class="sidebar-user-role">Client Premium</div>
+                <div class="sidebar-user-role">Espace Client</div>
             </div>
         </div>
     </div>
