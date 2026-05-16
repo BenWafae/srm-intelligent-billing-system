@@ -2,6 +2,7 @@ import streamlit as st
 import sys
 import os
 import re
+import time
 import pandas as pd
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -23,7 +24,7 @@ from src.database import (
 from src.rag.intent import _appeler_llm
 from src.rag.client_connecte import repondre_client_connecte
 from src.rag_client.pdf_facture import generer_pdf_facture
-from components.sidebar import afficher_sidebar_client  # IMPORT DE LA SIDEBAR
+from components.sidebar import afficher_sidebar_client
 
 
 def nettoyer_reponse(text):
@@ -44,15 +45,95 @@ def format_message(text):
     return text.strip()
 
 
+def afficher_typing_indicator():
+    """Affiche un indicateur de frappe animé (3 points qui s'animent)"""
+    typing_html = '''
+    <div class="msg-row msg-row-assistant typing-animation">
+        <div class="msg-bubble msg-assistant typing-bubble">
+            <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <span class="typing-text">SRM réfléchit</span>
+        </div>
+    </div>
+    '''
+    st.markdown(typing_html, unsafe_allow_html=True)
+
+
 def afficher_client():
 
     # ══════════════════════════════════════════
-    # CHARGER LE CSS CLIENT
+    # CHARGER LE CSS CLIENT + CSS TYPING INDICATOR
     # ══════════════════════════════════════════
     css_path = os.path.join(os.path.dirname(__file__), "..", "src", "assets", "Css", "client.css")
     if os.path.exists(css_path):
         with open(css_path, "r", encoding="utf-8") as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+            base_css = f.read()
+            # Ajouter le CSS pour l'indicateur de frappe
+            typing_css = '''
+            /* ══════════════════════════════════════════════════════════
+               TYPING INDICATOR - ANIMATION 3 POINTS
+               ══════════════════════════════════════════════════════════ */
+            .typing-animation {
+                animation: fadeInUp 0.3s ease-out;
+            }
+            
+            .typing-bubble {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 0.85rem 1.25rem !important;
+                background: linear-gradient(135deg, #f8fafc, #ffffff);
+            }
+            
+            .typing-indicator {
+                display: flex;
+                gap: 6px;
+                align-items: center;
+            }
+            
+            .typing-indicator span {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #8b5cf6, #f97316);
+                display: inline-block;
+                animation: typingDot 1.4s infinite ease-in-out both;
+            }
+            
+            .typing-indicator span:nth-child(1) {
+                animation-delay: -0.32s;
+            }
+            
+            .typing-indicator span:nth-child(2) {
+                animation-delay: -0.16s;
+            }
+            
+            .typing-indicator span:nth-child(3) {
+                animation-delay: 0s;
+            }
+            
+            @keyframes typingDot {
+                0%, 80%, 100% {
+                    transform: scale(0.6);
+                    opacity: 0.4;
+                }
+                40% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+            
+            .typing-text {
+                font-size: 0.8rem;
+                font-weight: 500;
+                color: #94a3b8;
+                letter-spacing: 0.3px;
+            }
+            '''
+            st.markdown(f"<style>{base_css}\n{typing_css}</style>", unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
     # RESET SESSION SI NOUVEAU UTILISATEUR
@@ -65,6 +146,7 @@ def afficher_client():
         st.session_state["nom_client_connecte"] = None
         st.session_state["conversation_id_actuelle"] = None
         st.session_state["titre_en_edition"] = None
+        st.session_state["typing_active"] = False
         if "msg_accueil" in st.session_state:
             del st.session_state["msg_accueil"]
 
@@ -77,6 +159,9 @@ def afficher_client():
 
     if "titre_en_edition" not in st.session_state:
         st.session_state["titre_en_edition"] = None
+
+    if "typing_active" not in st.session_state:
+        st.session_state["typing_active"] = False
 
     if not st.session_state.get("nom_client_connecte"):
         numero_contrat = st.session_state.user.get("numero_client")
@@ -100,6 +185,7 @@ def afficher_client():
         st.session_state["historique_client"] = []
         st.session_state["conversation_id_actuelle"] = None
         st.session_state["titre_en_edition"] = None
+        st.session_state["typing_active"] = False
         st.rerun()
 
     # ══════════════════════════════════════════
@@ -234,8 +320,6 @@ def afficher_client():
     </div>
     ''', unsafe_allow_html=True)
 
-    
-
     # ══════════════════════════════════════════
     # HISTORIQUE CHAT — BULLES
     # ══════════════════════════════════════════
@@ -287,27 +371,44 @@ def afficher_client():
                 ''', unsafe_allow_html=True)
 
     # ══════════════════════════════════════════
-    # CHAT INPUT
+    # CHAT INPUT AVEC INDICATEUR DE FRAPPE
     # ══════════════════════════════════════════
     question = st.chat_input("Votre question sur vos factures...")
 
     if question:
+        # Ajouter le message utilisateur
         st.session_state.historique_client.append({"role": "user", "content": question})
+        st.session_state["typing_active"] = True
+        st.rerun()
 
+    # Afficher l'indicateur de frappe si l'IA est en train de réfléchir
+    if st.session_state.get("typing_active", False):
+        afficher_typing_indicator()
+        
+        # Simuler un petit délai pour l'animation (optionnel)
+        time.sleep(0.3)
+        
+        # Traiter la question
         historique_texte = ""
+        # Exclure le dernier message (utilisateur) pour l'historique
         for msg in st.session_state.historique_client[:-1]:
             role = "Client" if msg["role"] == "user" else "Assistant"
             historique_texte += f"{role}: {msg['content']}\n"
-
-        with st.spinner("Recherche en cours..."):
-            reponse = repondre_client_connecte(question, numero_contrat, historique_texte)
+        
+        # Dernier message de l'utilisateur
+        derniere_question = st.session_state.historique_client[-1]["content"]
+        
+        with st.spinner(""):  # Spinner vide car on a déjà l'indicateur visuel
+            reponse = repondre_client_connecte(derniere_question, numero_contrat, historique_texte)
+        
         reponse = nettoyer_reponse(reponse)
         st.session_state.historique_client.append({"role": "assistant", "content": reponse})
+        st.session_state["typing_active"] = False
 
         if st.session_state["conversation_id_actuelle"] is None:
-            conv_id = creer_conversation(numero_contrat, question)
+            conv_id = creer_conversation(numero_contrat, derniere_question)
             st.session_state["conversation_id_actuelle"] = conv_id
-        ajouter_message(st.session_state["conversation_id_actuelle"], "user", question)
+        ajouter_message(st.session_state["conversation_id_actuelle"], "user", derniere_question)
         ajouter_message(st.session_state["conversation_id_actuelle"], "assistant", reponse)
 
         st.rerun()
