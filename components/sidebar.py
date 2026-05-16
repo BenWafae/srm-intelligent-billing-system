@@ -73,29 +73,86 @@ def _inject_css():
     [data-testid="stSidebarContent"] {
         background: transparent !important; padding: 0 !important;
         display: flex; flex-direction: column;
-        height: 100vh !important;  /* Hauteur totale de l'écran */
-        overflow: hidden !important;  /* Empêche le scroll global */
+        height: 100vh !important;
+        overflow: hidden !important;
     }
 
-    /* ── Header fixe ── */
+    /* ── Header fixe avec logo réel SRM et anneau pulsant ── */
     .sidebar-header {
         padding: 28px 24px 20px 24px !important;
         border-bottom: 1px solid rgba(203,213,225,0.5);
         margin-bottom: 0px;
-        flex-shrink: 0;  /* Empêche le rétrécissement */
+        flex-shrink: 0;
         background: rgba(255,255,255,0.98);
         z-index: 10;
     }
     .sidebar-logo-wrapper { display:flex; align-items:center; gap:14px; }
-    .sidebar-logo-icon {
-        width:44px; height:44px;
-        background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-        border-radius:14px; display:flex; align-items:center;
-        justify-content:center; box-shadow:0 8px 20px rgba(102,126,234,.25);
-        transition:transform .3s ease;
+    
+    /* Conteneur du logo avec le même effet d'anneau que l'avatar */
+    .sidebar-logo-container {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        flex-shrink: 0;
     }
-    .sidebar-logo-icon:hover { transform:scale(1.02); }
-    .sidebar-logo-icon svg { width:24px; height:24px; color:white; }
+    
+    /* Anneau pulsant autour du logo (exactement comme l'avatar) */
+    .logo-ring {
+        position: absolute;
+        inset: -3px;
+        border-radius: 14px;
+        border: 2px solid transparent;
+        background: linear-gradient(135deg, #8b5cf6, #f97316) border-box;
+        -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: destination-out;
+        mask-composite: exclude;
+        animation: pulse-ring 2.5s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 2;
+    }
+    
+    @keyframes pulse-ring {
+        0%, 100% { opacity: 0.4; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.08); }
+    }
+    
+    .sidebar-logo-icon {
+        width: 100%;
+        height: 100%;
+        background: white !important;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(102,126,234,.25);
+        transition: transform .3s ease, box-shadow .3s ease;
+        position: relative;
+        padding: 6px;
+        z-index: 1;
+        /* Bordure gradient permanente */
+        border: 2px solid transparent;
+        background: linear-gradient(white, white) padding-box,
+                    linear-gradient(135deg, #8b5cf6 0%, #f97316 50%, #8b5cf6 100%) border-box;
+        background-clip: padding-box, border-box;
+    }
+    
+    .sidebar-logo-icon:hover {
+        transform: scale(1.02);
+        box-shadow: 0 12px 28px rgba(249,115,22,.3);
+        background: linear-gradient(white, white) padding-box,
+                    linear-gradient(135deg, #f97316 0%, #8b5cf6 50%, #f97316 100%) border-box;
+        background-clip: padding-box, border-box;
+    }
+    
+    /* Style de l'image du logo */
+    .sidebar-logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 10px;
+    }
+    
     .sidebar-logo-text h1 {
         font-size:20px; font-weight:800;
         background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
@@ -107,10 +164,10 @@ def _inject_css():
         font-weight:600; text-transform:uppercase;
     }
 
-    /* Style du bouton Streamlit */
+    /* Style du bouton Nouvelle conversation avec + stylisé */
     [data-testid="stSidebar"] .stButton > button {
         width:calc(100% - 32px) !important;
-        background:linear-gradient(135deg,#667eea 0%,#764ba2 100%) !important;
+        background:linear-gradient(135deg,#667eea 0%,#f97316 100%) !important;
         border:none !important;
         border-radius:12px !important;
         padding:12px 16px !important;
@@ -119,12 +176,27 @@ def _inject_css():
         font-weight:600 !important;
         margin:4px 16px 16px 16px !important;
         transition:all .3s ease !important;
-        box-shadow: none !important;
+        box-shadow:0 4px 12px rgba(102,126,234,.25) !important;
         flex-shrink: 0;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        cursor: pointer !important;
     }
     [data-testid="stSidebar"] .stButton > button:hover {
         transform:translateY(-2px) !important;
-        box-shadow:0 8px 20px rgba(102,126,234,.3) !important;
+        box-shadow:0 8px 20px rgba(249,115,22,.4) !important;
+        background:linear-gradient(135deg,#764ba2 0%,#f97316 100%) !important;
+    }
+    
+    /* Style pour le symbole + dans le bouton */
+    [data-testid="stSidebar"] .stButton > button::before {
+        content: "+";
+        font-size: 20px;
+        font-weight: 700;
+        margin-right: 4px;
+        line-height: 1;
     }
 
     /* ── Section titles ── */
@@ -137,10 +209,10 @@ def _inject_css():
 
     /* ── Zone scrollable UNIQUEMENT pour les conversations ── */
     .conversations-scrollable {
-        flex: 1;  /* Prend tout l'espace restant */
-        overflow-y: auto;  /* Scroll uniquement ici */
+        flex: 1;
+        overflow-y: auto;
         overflow-x: hidden;
-        min-height: 0;  /* Important pour le flexbox */
+        min-height: 0;
         padding: 0 8px;
         margin: 0;
     }
@@ -165,7 +237,7 @@ def _inject_css():
     }
     .conv-wrapper-active {
         background: linear-gradient(135deg, rgba(102,126,234,.12) 0%, rgba(118,75,162,.12) 100%);
-        border-left: 3px solid #667eea;
+        border-left: 3px solid #f97316;
     }
     .conv-content {
         display: flex;
@@ -184,7 +256,7 @@ def _inject_css():
         text-overflow: ellipsis;
     }
     .conv-wrapper-active .conv-titre {
-        color: #667eea;
+        color: #f97316;
         font-weight: 700;
     }
     .conv-actions {
@@ -208,7 +280,7 @@ def _inject_css():
     }
     .conv-btn:hover {
         background: rgba(102,126,234,.1);
-        color: #667eea;
+        color: #f97316;
         transform: scale(1.05);
     }
     .conv-btn-delete:hover {
@@ -227,21 +299,21 @@ def _inject_css():
         border-radius:10px; padding:10px 12px; font-size:13px;
         font-family:'Inter',sans-serif; margin-bottom:10px;
     }
-    .rename-input:focus { outline:none; border-color:#667eea; }
+    .rename-input:focus { outline:none; border-color:#f97316; }
     .rename-actions { display:flex; gap:10px; }
     .rename-confirm, .rename-cancel {
         flex:1; padding:8px; border-radius:8px; border:none;
         font-size:12px; font-weight:600; cursor:pointer; transition:all .2s ease;
     }
     .rename-confirm {
-        background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white;
+        background:linear-gradient(135deg,#667eea 0%,#f97316 100%); color:white;
     }
     .rename-cancel { background:#f1f5f9; color:#64748b; }
     .rename-confirm:hover, .rename-cancel:hover { transform:translateY(-1px); }
 
-    /* ── Footer fixe ── */
+    /* ── Footer fixe avec avatar et anneau pulsant ── */
     .sidebar-footer {
-        flex-shrink: 0;  /* Empêche le rétrécissement */
+        flex-shrink: 0;
         margin-top: auto;
         padding: 16px 20px 20px 20px;
         border-top: 1px solid #e2e8f0;
@@ -249,22 +321,86 @@ def _inject_css():
         z-index: 10;
     }
     .sidebar-user {
-        display:flex; align-items:center; gap:12px; cursor:pointer;
-        padding:8px 0; border-radius:12px; transition:all .2s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        padding: 8px 0;
+        border-radius: 12px;
+        transition: all .2s ease;
     }
     .sidebar-user:hover {
-        background:linear-gradient(135deg,rgba(102,126,234,.06) 0%,rgba(118,75,162,.06) 100%);
-        padding-left:8px;
+        background: linear-gradient(135deg, rgba(102,126,234,.06) 0%, rgba(118,75,162,.06) 100%);
+        padding-left: 8px;
     }
+    
+    /* Conteneur de l'avatar footer avec anneau pulsant */
+    .sidebar-user-avatar-container {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+    }
+    
+    /* Anneau pulsant autour de l'avatar footer (exactement comme l'avatar principal) */
+    .avatar-footer-ring {
+        position: absolute;
+        inset: -3px;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        background: linear-gradient(135deg, #8b5cf6, #f97316) border-box;
+        -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: destination-out;
+        mask-composite: exclude;
+        animation: pulse-ring 2.5s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 2;
+    }
+    
     .sidebar-user-avatar {
-        width:40px; height:40px; border-radius:12px;
-        background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-        display:flex; align-items:center; justify-content:center;
-        flex-shrink:0; box-shadow:0 4px 12px rgba(102,126,234,.25);
+        width: 100%;
+        height: 100%;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #f97316 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(102,126,234,.25);
+        position: relative;
+        z-index: 1;
+        transition: transform .3s ease;
     }
-    .sidebar-user-avatar span { font-size:14px; font-weight:700; color:white; }
-    .sidebar-user-name { font-size:13px; font-weight:700; color:#1e293b; }
-    .sidebar-user-role { font-size:9px; font-weight:700; color:#667eea; text-transform:uppercase; }
+    
+    .sidebar-user:hover .sidebar-user-avatar {
+        transform: scale(1.05);
+    }
+    
+    .sidebar-user-avatar span {
+        font-size: 14px;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .sidebar-user-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .sidebar-user-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .sidebar-user-role {
+        font-size: 9px;
+        font-weight: 700;
+        color: #f97316;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
 
     /* ── État vide ── */
     .empty-conv-state { padding:48px 24px; text-align:center; }
@@ -308,16 +444,37 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
     """
     _inject_css()
 
-    # ── Header fixe ──────────────────────────────────────────────
-    st.sidebar.markdown(
+    # ── Chemin du logo réel SRM ──
+    logo_path = os.path.join(
+        os.path.dirname(__file__), "..", "src", "assets", "srm_logo.png"
+    )
+    
+    # Vérifier si le logo existe, sinon utiliser l'icône par défaut
+    if os.path.exists(logo_path):
+        # Lire l'image et la convertir en base64 pour l'afficher directement
+        import base64
+        with open(logo_path, "rb") as img_file:
+            img_data = base64.b64encode(img_file.read()).decode()
+        logo_html = f'<img src="data:image/png;base64,{img_data}" class="sidebar-logo-img" alt="SRM Logo">'
+    else:
+        # Fallback: icône SVG par défaut
+        logo_html = """
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            <path d="M12 2v20"/>
+        </svg>
         """
+
+    # ── Header fixe avec logo réel SRM et anneau pulsant ──────────────────────────────
+    st.sidebar.markdown(
+        f"""
     <div class="sidebar-header">
         <div class="sidebar-logo-wrapper">
-            <div class="sidebar-logo-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    <path d="M12 2v20"/>
-                </svg>
+            <div class="sidebar-logo-container">
+                <div class="logo-ring"></div>
+                <div class="sidebar-logo-icon">
+                    {logo_html}
+                </div>
             </div>
             <div class="sidebar-logo-text">
                 <h1>SRM</h1>
@@ -329,8 +486,8 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
         unsafe_allow_html=True,
     )
 
-    # ── Bouton Nouvelle conversation (fixe) ────────────────────────
-    new_chat_clicked = st.sidebar.button("✨ Nouvelle conversation", key="btn_new_chat", use_container_width=True)
+    # ── Bouton Nouvelle conversation avec + stylisé ────────────────────────
+    new_chat_clicked = st.sidebar.button("Nouvelle conversation", key="btn_new_chat", use_container_width=True)
     
     if new_chat_clicked:
         st.session_state["historique_client"] = []
@@ -439,7 +596,7 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
         # Fin de la zone scrollable
         st.sidebar.markdown('</div>', unsafe_allow_html=True)
 
-    # ── Footer utilisateur (fixe) ───────────────────────────────────
+    # ── Footer utilisateur avec avatar et anneau pulsant (assorti au logo) ──
     initiales = (
         "".join([w[0].upper() for w in nom_client.split()[:2]]) if nom_client else "C"
     )
@@ -448,7 +605,12 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
         f"""
     <div class="sidebar-footer">
         <div class="sidebar-user">
-            <div class="sidebar-user-avatar"><span>{initiales}</span></div>
+            <div class="sidebar-user-avatar-container">
+                <div class="avatar-footer-ring"></div>
+                <div class="sidebar-user-avatar">
+                    <span>{initiales}</span>
+                </div>
+            </div>
             <div class="sidebar-user-info">
                 <div class="sidebar-user-name">{nom_client}</div>
                 <div class="sidebar-user-role">Espace Client</div>
