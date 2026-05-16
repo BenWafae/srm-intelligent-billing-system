@@ -202,7 +202,7 @@ def _inject_css():
     /* ── Section titles ── */
     .sidebar-section-title {
         font-size:11px !important; font-weight:700 !important;
-        color:#64748b !important; padding:16px 24px 8px 24px !important;
+        color:#64748b !important; padding:12px 24px 4px 24px !important;
         text-transform:uppercase; letter-spacing:.08em;
         margin: 0;
     }
@@ -213,7 +213,7 @@ def _inject_css():
         overflow-y: auto;
         overflow-x: hidden;
         min-height: 0;
-        padding: 0 8px;
+        padding: 0;
         margin: 0;
     }
     .conversations-scrollable::-webkit-scrollbar { width: 4px; }
@@ -227,13 +227,13 @@ def _inject_css():
 
     /* Style pour la ligne de conversation avec les boutons */
     .conv-wrapper {
-        margin: 4px 0;
-        border-radius: 10px;
+        margin: 0;
+        padding: 0;
+        border-radius: 0;
         transition: all .2s ease;
     }
     .conv-wrapper:hover {
         background: linear-gradient(135deg, rgba(102,126,234,.08) 0%, rgba(118,75,162,.08) 100%);
-        transform: translateX(4px);
     }
     .conv-wrapper-active {
         background: linear-gradient(135deg, rgba(102,126,234,.12) 0%, rgba(118,75,162,.12) 100%);
@@ -243,7 +243,7 @@ def _inject_css():
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 8px 12px;
+        padding: 6px 12px;
         gap: 8px;
     }
     .conv-titre {
@@ -261,7 +261,7 @@ def _inject_css():
     }
     .conv-actions {
         display: flex;
-        gap: 6px;
+        gap: 4px;
         opacity: 0;
         transition: opacity .2s ease;
     }
@@ -271,8 +271,8 @@ def _inject_css():
     .conv-btn {
         background: transparent;
         border: none;
-        border-radius: 8px;
-        padding: 6px 8px;
+        border-radius: 6px;
+        padding: 4px 6px;
         cursor: pointer;
         font-size: 14px;
         transition: all .2s ease;
@@ -288,28 +288,41 @@ def _inject_css():
         color: #ef4444;
     }
 
-    /* ── Mode édition ── */
-    .rename-container {
-        padding:12px;
-        background:linear-gradient(135deg,rgba(102,126,234,.05) 0%,rgba(118,75,162,.05) 100%);
-        border-radius:12px; margin:8px 4px;
+    /* ── Mode édition en ligne ── */
+    .rename-inline {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
     }
-    .rename-input {
-        width:100%; background:white; border:2px solid #e2e8f0;
-        border-radius:10px; padding:10px 12px; font-size:13px;
-        font-family:'Inter',sans-serif; margin-bottom:10px;
+    .rename-input-inline {
+        flex: 1;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-size: 13px;
+        font-family: 'Inter', sans-serif;
     }
-    .rename-input:focus { outline:none; border-color:#f97316; }
-    .rename-actions { display:flex; gap:10px; }
-    .rename-confirm, .rename-cancel {
-        flex:1; padding:8px; border-radius:8px; border:none;
-        font-size:12px; font-weight:600; cursor:pointer; transition:all .2s ease;
+    .rename-input-inline:focus { 
+        outline: none; 
+        border-color: #f97316;
     }
-    .rename-confirm {
-        background:linear-gradient(135deg,#667eea 0%,#f97316 100%); color:white;
+    .rename-icon {
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all .2s ease;
+        color: #94a3b8;
     }
-    .rename-cancel { background:#f1f5f9; color:#64748b; }
-    .rename-confirm:hover, .rename-cancel:hover { transform:translateY(-1px); }
+    .rename-icon:hover {
+        background: rgba(102,126,234,.1);
+        color: #f97316;
+        transform: scale(1.05);
+    }
 
     /* ── Footer fixe avec avatar et anneau pulsant ── */
     .sidebar-footer {
@@ -530,10 +543,15 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
                 titre = conv["titre"]
                 est_active = st.session_state.get("conversation_id_actuelle") == conv_id
 
-                # ── Mode renommage ──────────────────────────
+                # ── Mode renommage en ligne ──────────────────────────
                 if st.session_state.get("titre_en_edition") == conv_id:
-                    st.sidebar.markdown('<div class="rename-container">', unsafe_allow_html=True)
+                    # Affichage du conteneur principal
+                    st.sidebar.markdown(
+                        f'<div class="conv-wrapper {active_class if est_active else ""}"><div class="conv-content">',
+                        unsafe_allow_html=True
+                    )
                     
+                    # Champ de texte inline
                     nouveau_titre = st.sidebar.text_input(
                         "Nouveau titre",
                         value=titre,
@@ -542,19 +560,20 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
                         placeholder="Nouveau titre..."
                     )
                     
-                    col_ok, col_cancel = st.sidebar.columns(2)
+                    # Conteneur inline pour les boutons icônes
+                    col_ok, col_cancel = st.sidebar.columns([1, 1])
                     with col_ok:
-                        if st.button("✓ Valider", key=f"confirm_rename_{conv_id}", use_container_width=True):
+                        if st.button("✓", key=f"confirm_rename_{conv_id}", help="Valider"):
                             if nouveau_titre.strip():
                                 modifier_titre_conversation(conv_id, nouveau_titre.strip())
                             st.session_state["titre_en_edition"] = None
                             st.rerun()
                     with col_cancel:
-                        if st.button("✗ Annuler", key=f"cancel_rename_{conv_id}", use_container_width=True):
+                        if st.button("✗", key=f"cancel_rename_{conv_id}", help="Annuler"):
                             st.session_state["titre_en_edition"] = None
                             st.rerun()
                     
-                    st.sidebar.markdown('</div>', unsafe_allow_html=True)
+                    st.sidebar.markdown('</div></div>', unsafe_allow_html=True)
                 
                 else:
                     # ── Ligne de conversation avec style moderne ──
@@ -566,7 +585,7 @@ def afficher_sidebar_client(numero_contrat: str, nom_client: str):
                         unsafe_allow_html=True
                     )
                     
-                    # Boutons d'action (load, rename, delete) en colonnes
+                    # Boutons d'action (load, rename, delete) en colonnes sans espace
                     col_load, col_rename, col_delete = st.sidebar.columns([1, 1, 1])
                     
                     with col_load:
