@@ -23,31 +23,24 @@ RENOMMAGE_COLONNES = {
 }
 
 def lire_excel(chemin_excel: str) -> list[dict]:
-
-    xl = pd.ExcelFile(chemin_excel)
     tous_les_mois = []
 
-    for nom_onglet in xl.sheet_names:
-
-        if nom_onglet == ONGLET_A_IGNORER:
-            print(f"  ⏭️  Onglet '{nom_onglet}' ignoré.")
-            continue
-
-        df = pd.read_excel(chemin_excel, sheet_name=nom_onglet)
-
-        # Renommer avec les noms propres AVANT de nettoyer
-        df = df.rename(columns=RENOMMAGE_COLONNES)
-
-        df = df.fillna("")
-        df["mois_source"] = nom_onglet
-
-        tous_les_mois.append(df)
-        print(f"  ✅ '{nom_onglet}' : {len(df)} lignes lues.")
+    with pd.ExcelFile(chemin_excel, engine='openpyxl') as xl:
+        for nom_onglet in xl.sheet_names:
+            if nom_onglet == ONGLET_A_IGNORER:
+                print(f"  ⏭️  Onglet '{nom_onglet}' ignoré.")
+                continue
+            df = pd.read_excel(xl, sheet_name=nom_onglet)
+            df = df.rename(columns=RENOMMAGE_COLONNES)
+            df = df.fillna("")
+            df["mois_source"] = nom_onglet
+            tous_les_mois.append(df)
+            print(f"  ✅ '{nom_onglet}' : {len(df)} lignes lues.")
 
     df_final = pd.concat(tous_les_mois, ignore_index=True)
-    print(f"\nTotal : {len(df_final)} lignes combinées.")
-
-    return df_final.to_dict(orient="records")
+    lignes = df_final.to_dict(orient="records")  # converti AVANT de fermer
+    print(f"\nTotal : {len(lignes)} lignes combinées.")
+    return lignes
 
 
 # -------- TEST --------

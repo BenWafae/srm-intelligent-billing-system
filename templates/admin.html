@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SRM — Interface Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+        <h1 class="text-lg font-bold text-blue-700">⚙️ Interface Administrateur SRM</h1>
+        <div class="flex items-center gap-4">
+            <span class="text-gray-600 text-sm">{{ email }}</span>
+            <a href="/logout" class="text-sm text-red-500 hover:text-red-700">Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto mt-6 px-4">
+
+        <!-- ONGLETS -->
+        <div class="flex gap-2 mb-4">
+            <button onclick="afficherOnglet('excel')" id="btn-excel"
+                class="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm">
+                📊 Import Excel
+            </button>
+            <button onclick="afficherOnglet('pdf')" id="btn-pdf"
+                class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm">
+                📄 Import PDF
+            </button>
+            <button onclick="afficherOnglet('users')" id="btn-users"
+                class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm">
+                👥 Utilisateurs
+            </button>
+        </div>
+
+        <!-- ════════════ ONGLET EXCEL ════════════ -->
+        <div id="onglet-excel" class="bg-white rounded-xl shadow p-6">
+
+            <!-- STATS BASE -->
+            {% if total_factures > 0 %}
+            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mb-4 text-sm text-green-700">
+                ✅ Base active — {{ total_factures }} factures | {{ nb_clients }} clients | {{ nb_periodes }} périodes
+            </div>
+            {% else %}
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 mb-4 text-sm text-yellow-700">
+                ℹ️ Base vide — importez un fichier Excel.
+            </div>
+            {% endif %}
+
+            <h2 class="text-base font-semibold text-gray-700 mb-3">📥 Importer un fichier Excel</h2>
+
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center mb-4">
+                <input type="file" id="input-excel" accept=".xlsx" class="hidden"
+                    onchange="previsualiserExcel()"/>
+                <label for="input-excel"
+                    class="cursor-pointer bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-blue-100">
+                    Choisir un fichier Excel (.xlsx)
+                </label>
+                <p id="nom-fichier-excel" class="text-gray-400 text-xs mt-2">Aucun fichier sélectionné</p>
+            </div>
+
+            <div id="apercu-excel" class="hidden mb-4"></div>
+            <div id="btn-import-excel" class="hidden mb-4"></div>
+            <div id="resultat-excel" class="hidden"></div>
+
+            <hr class="my-4"/>
+            <h2 class="text-base font-semibold text-gray-700 mb-3">🗑️ Gestion de la base</h2>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-gray-600 font-medium">Supprimer un client :</label>
+                    <select id="select-client-suppr"
+                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="">-- Choisir un client --</option>
+                        {% for c in clients %}
+                        <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                    <button onclick="supprimerClient()"
+                        class="mt-2 w-full bg-red-500 text-white py-2 rounded-lg text-sm hover:bg-red-600">
+                        🗑️ Supprimer ce client
+                    </button>
+                    <div id="msg-suppr-client" class="mt-2 text-sm"></div>
+                </div>
+                <div>
+                    <p class="text-sm text-orange-600 font-medium mb-1">⚠️ Zone dangereuse</p>
+                    <p class="text-xs text-gray-500 mb-2">Supprime toutes les factures Excel de la base.</p>
+                    <button onclick="resetBase()"
+                        class="w-full bg-red-700 text-white py-2 rounded-lg text-sm hover:bg-red-800">
+                        🔴 Reset complet de la base
+                    </button>
+                    <div id="msg-reset" class="mt-2 text-sm"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════ ONGLET PDF ════════════ -->
+        <div id="onglet-pdf" class="bg-white rounded-xl shadow p-6 hidden">
+
+            {% if nb_clients_pdf > 0 %}
+            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mb-4 text-sm text-green-700">
+                ✅ {{ nb_clients_pdf }} clients avec PDF importé
+            </div>
+            {% else %}
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 mb-4 text-sm text-yellow-700">
+                ℹ️ Aucun PDF importé pour le moment.
+            </div>
+            {% endif %}
+
+            <h2 class="text-base font-semibold text-gray-700 mb-3">📥 Importer des factures PDF</h2>
+
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center mb-4">
+                <input type="file" id="input-pdf" accept=".pdf" multiple class="hidden"/>
+                <label for="input-pdf"
+                    class="cursor-pointer bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-blue-100">
+                    Choisir un ou plusieurs PDFs
+                </label>
+                <p id="nom-fichier-pdf" class="text-gray-400 text-xs mt-2">Aucun fichier sélectionné</p>
+            </div>
+
+            <button onclick="importerPdf()"
+                class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 mb-4">
+                ✅ Importer les PDFs
+            </button>
+
+            <div id="progress-pdf" class="hidden">
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progress-text" class="text-xs text-gray-500 mt-1 text-center">Import en cours...</p>
+            </div>
+            <div id="resultat-pdf" class="hidden mt-4"></div>
+        </div>
+
+        <!-- ════════════ ONGLET USERS ════════════ -->
+        <div id="onglet-users" class="bg-white rounded-xl shadow p-6 hidden">
+
+            <h2 class="text-base font-semibold text-gray-700 mb-4">👥 Créer un compte utilisateur</h2>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="text-sm text-gray-600">Rôle</label>
+                    <select id="role-nouveau" onchange="toggleContrat()"
+                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="employe">Employé</option>
+                        <option value="client">Client</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600">Email</label>
+                    <input type="email" id="email-nouveau" placeholder="email@example.com"
+                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600">Mot de passe</label>
+                    <input type="password" id="password-nouveau" placeholder="Mot de passe"
+                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
+                </div>
+                <div id="div-contrat" class="hidden">
+                    <label class="text-sm text-gray-600">N° Contrat client</label>
+                    <input type="text" id="contrat-nouveau" placeholder="ex: 0005567200/2063200"
+                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
+                    <p class="text-xs text-gray-400 mt-1">Contrats disponibles :</p>
+                    <div class="text-xs text-gray-500 max-h-24 overflow-y-auto mt-1 border rounded p-1">
+                        {% for c in contrats %}
+                        <div>• {{ c.nom_client }} → {{ c.numero_contrat }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="creerUser()"
+                class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 mb-2">
+                ✅ Créer le compte
+            </button>
+            <div id="msg-creer-user" class="text-sm mb-4"></div>
+
+            <hr class="my-4"/>
+            <h2 class="text-base font-semibold text-gray-700 mb-3">📋 Utilisateurs existants</h2>
+
+            <div id="liste-users">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-600">
+                            <th class="text-left py-2 px-3">Email</th>
+                            <th class="text-left py-2 px-3">Rôle</th>
+                            <th class="text-left py-2 px-3">N° Contrat</th>
+                            <th class="py-2 px-3">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr class="border-t border-gray-100">
+                            <td class="py-2 px-3">{{ u.email }}</td>
+                            <td class="py-2 px-3">{{ u.role }}</td>
+                            <td class="py-2 px-3">{{ u.numero_client or '—' }}</td>
+                            <td class="py-2 px-3 text-center">
+                                <button onclick="supprimerUser({{ u.id }}, this)"
+                                    class="text-red-500 hover:text-red-700 text-xs">🗑️</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ── ONGLETS ──
+        function afficherOnglet(onglet) {
+            ['excel','pdf','users'].forEach(o => {
+                document.getElementById('onglet-' + o).classList.toggle('hidden', o !== onglet);
+                const btn = document.getElementById('btn-' + o);
+                btn.className = o === onglet
+                    ? 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm'
+                    : 'px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
+            });
+        }
+
+        // ── TOGGLE CONTRAT ──
+        function toggleContrat() {
+            const role = document.getElementById('role-nouveau').value;
+            document.getElementById('div-contrat').classList.toggle('hidden', role !== 'client');
+        }
+
+        // ── PRÉVISUALISER EXCEL ──
+        function previsualiserExcel() {
+            const input = document.getElementById('input-excel');
+            const file = input.files[0];
+            if (!file) return;
+            document.getElementById('nom-fichier-excel').textContent = file.name;
+
+            const apercu = document.getElementById('apercu-excel');
+            apercu.innerHTML = '<p class="text-sm text-gray-500">⏳ Analyse en cours...</p>';
+            apercu.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('fichier', file);
+
+            fetch('/api/admin/apercu-excel', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.erreur) {
+                        apercu.innerHTML = `<p class="text-red-500 text-sm">❌ ${data.erreur}</p>`;
+                        return;
+                    }
+                    apercu.innerHTML = `
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-700">
+                            📋 ${data.nouvelles} nouvelles lignes | ${data.existantes} déjà en base
+                        </div>`;
+
+                    if (data.nouvelles > 0) {
+                        document.getElementById('btn-import-excel').innerHTML = `
+                            <button onclick="importerExcel()"
+                                class="w-full bg-green-600 text-white py-2 rounded-lg text-sm hover:bg-green-700">
+                                ✅ Importer les ${data.nouvelles} nouvelles lignes
+                            </button>`;
+                        document.getElementById('btn-import-excel').classList.remove('hidden');
+                    }
+                });
+        }
+
+        // ── IMPORTER EXCEL ──
+        async function importerExcel() {
+            const input = document.getElementById('input-excel');
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('fichier', file);
+
+            document.getElementById('btn-import-excel').innerHTML =
+                '<p class="text-sm text-gray-500">⏳ Import en cours...</p>';
+
+            const res = await fetch('/api/admin/import-excel', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            const resultat = document.getElementById('resultat-excel');
+            resultat.innerHTML = `
+                <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-sm text-green-700">
+                    ✅ ${data.nouvelles} factures ajoutées.
+                </div>`;
+            resultat.classList.remove('hidden');
+            document.getElementById('btn-import-excel').classList.add('hidden');
+        }
+
+        // ── SUPPRIMER CLIENT ──
+        async function supprimerClient() {
+            const client = document.getElementById('select-client-suppr').value;
+            if (!client) return;
+            if (!confirm(`Supprimer toutes les factures de ${client} ?`)) return;
+
+            const res = await fetch('/api/admin/supprimer-client', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ client: client })
+            });
+            const data = await res.json();
+            const msg = document.getElementById('msg-suppr-client');
+            msg.className = 'mt-2 text-sm text-green-600';
+            msg.textContent = `✅ ${data.supprimees} factures supprimées pour ${client}`;
+        }
+
+        // ── RESET BASE ──
+        async function resetBase() {
+            if (!confirm('⚠️ Supprimer TOUTE la base Excel ? Cette action est irréversible.')) return;
+            const res = await fetch('/api/admin/reset-base', { method: 'POST' });
+            const data = await res.json();
+            const msg = document.getElementById('msg-reset');
+            msg.className = 'mt-2 text-sm text-green-600';
+            msg.textContent = `✅ ${data.supprimees} factures supprimées.`;
+        }
+
+        // ── IMPORTER PDF ──
+        async function importerPdf() {
+            const input = document.getElementById('input-pdf');
+            const files = input.files;
+            if (!files.length) return;
+
+            document.getElementById('progress-pdf').classList.remove('hidden');
+
+            let succes = 0, doublons = 0, erreurs = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const formData = new FormData();
+                formData.append('fichier', files[i]);
+
+                try {
+                    const res = await fetch('/api/admin/import-pdf', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.statut === 'succes') succes++;
+                    else if (data.statut === 'doublon') doublons++;
+                    else erreurs++;
+                } catch {
+                    erreurs++;
+                }
+
+                const pct = Math.round(((i + 1) / files.length) * 100);
+                document.getElementById('progress-bar').style.width = pct + '%';
+                document.getElementById('progress-text').textContent = `${i+1}/${files.length} fichiers traités...`;
+            }
+
+            const resultat = document.getElementById('resultat-pdf');
+            resultat.innerHTML = `
+                <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-sm text-green-700">
+                    ✅ Import terminé — ${succes} ajoutés | ${doublons} doublons | ${erreurs} erreurs
+                </div>`;
+            resultat.classList.remove('hidden');
+        }
+
+        // ── CRÉER USER ──
+        async function creerUser() {
+            const role = document.getElementById('role-nouveau').value;
+            const email = document.getElementById('email-nouveau').value;
+            const password = document.getElementById('password-nouveau').value;
+            const contrat = document.getElementById('contrat-nouveau').value;
+
+            if (!email || !password) {
+                document.getElementById('msg-creer-user').textContent = '⚠️ Remplissez email et mot de passe.';
+                return;
+            }
+            if (role === 'client' && !contrat) {
+                document.getElementById('msg-creer-user').textContent = '⚠️ Le numéro de contrat est obligatoire.';
+                return;
+            }
+
+            const res = await fetch('/api/admin/creer-user', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ role, email, password, numero_contrat: contrat || null })
+            });
+            const data = await res.json();
+            const msg = document.getElementById('msg-creer-user');
+            if (data.succes) {
+                msg.className = 'text-sm text-green-600';
+                msg.textContent = `✅ Compte ${email} créé — rôle : ${role}`;
+                document.getElementById('email-nouveau').value = '';
+                document.getElementById('password-nouveau').value = '';
+            } else {
+                msg.className = 'text-sm text-red-500';
+                msg.textContent = '❌ Cet email existe déjà.';
+            }
+        }
+
+        // ── SUPPRIMER USER ──
+        async function supprimerUser(userId, btn) {
+            if (!confirm('Supprimer cet utilisateur ?')) return;
+            const res = await fetch('/api/admin/supprimer-user', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ user_id: userId })
+            });
+            const data = await res.json();
+            if (data.succes) {
+                btn.closest('tr').remove();
+            }
+        }
+
+        // Afficher fichier PDF sélectionné
+        document.getElementById('input-pdf').addEventListener('change', function() {
+            const nb = this.files.length;
+            document.getElementById('nom-fichier-pdf').textContent =
+                nb > 0 ? `${nb} fichier(s) sélectionné(s)` : 'Aucun fichier sélectionné';
+        });
+    </script>
+
+</body>
+</html>

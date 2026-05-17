@@ -760,3 +760,13 @@ def supprimer_conversation(conversation_id: int) -> None:
     """, (conversation_id,))
     conn.commit()
     conn.close()
+def reset_fichier_excel(nom_fichier: str) -> int:
+    """Supprime toutes les factures d'un fichier Excel précis."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM factures_excel WHERE nom_fichier = ?", (nom_fichier,))
+    total = cursor.fetchone()[0]
+    cursor.execute("DELETE FROM factures_excel WHERE nom_fichier = ?", (nom_fichier,))
+    conn.commit()
+    conn.close()
+    return total
