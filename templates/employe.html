@@ -4,55 +4,132 @@
     <meta charset="UTF-8">
     <title>SRM — Interface Employé</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .conv-item { position: relative; }
+        .three-dots { opacity: 0; transition: opacity 0.15s; }
+        .conv-item:hover .three-dots { opacity: 1; }
+        .dropdown-menu { display: none; position: absolute; right: 4px; top: 32px;
+            background: white; border: 1px solid #e5e7eb; border-radius: 8px;
+            padding: 4px; z-index: 50; width: 150px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .dropdown-menu.open { display: block; }
+        .dd-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+            border-radius: 6px; font-size: 13px; cursor: pointer; color: #374151; }
+        .dd-item:hover { background: #f3f4f6; }
+        .dd-item.danger { color: #ef4444; }
+        .dd-item.danger:hover { background: #fef2f2; }
+        .rename-input { font-size: 13px; border: 1px solid #3b82f6; border-radius: 4px;
+            padding: 1px 6px; width: 100%; outline: none; background: white; }
+        #conv-list::-webkit-scrollbar { width: 4px; }
+        #conv-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        #chat-excel::-webkit-scrollbar, #chat-pdf::-webkit-scrollbar { width: 4px; }
+        #chat-excel::-webkit-scrollbar-thumb, #chat-pdf::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-50 h-screen flex flex-col overflow-hidden">
 
-    <!-- NAVBAR -->
-    <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <h1 class="text-lg font-bold text-blue-700">🤖 Assistant SRM — Interface Employé</h1>
-        <div class="flex items-center gap-4">
-            <span class="text-gray-600 text-sm">{{ email }}</span>
-            <a href="/logout" class="text-sm text-red-500 hover:text-red-700">Déconnexion</a>
-        </div>
-    </nav>
+<div class="flex h-screen overflow-hidden">
 
-    <div class="max-w-5xl mx-auto mt-6 px-4">
+    <!-- ══════════════ SIDEBAR ══════════════ -->
+    <div class="w-60 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
 
-        <!-- ONGLETS -->
-        <div class="flex gap-2 mb-4">
-            <button onclick="afficherOnglet('excel')"
-                id="btn-excel"
-                class="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm">
-                📊 Base clients Excel
-            </button>
-            <button onclick="afficherOnglet('pdf')"
-                id="btn-pdf"
-                class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm">
-                📄 Analyse facture PDF
+        <!-- Nouvelle conversation -->
+        <div class="p-3 border-b border-gray-100">
+            <button onclick="nouvelleConversation()"
+                class="flex items-center gap-2 w-full px-3 py-2 bg-gray-50 hover:bg-gray-100
+                       border border-gray-200 rounded-lg text-sm text-gray-700 transition-colors">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Nouvelle conversation
             </button>
         </div>
+
+        <!-- Filtre mode sidebar -->
+        <div class="px-3 pt-2 pb-1 flex gap-1">
+            <button onclick="filtrerSidebar('all')" id="sb-all"
+                class="flex-1 text-xs py-1 rounded-md bg-blue-600 text-white transition-colors">
+                Tout
+            </button>
+            <button onclick="filtrerSidebar('excel')" id="sb-excel"
+                class="flex-1 text-xs py-1 rounded-md bg-gray-100 text-gray-600 transition-colors">
+                Excel
+            </button>
+            <button onclick="filtrerSidebar('pdf')" id="sb-pdf"
+                class="flex-1 text-xs py-1 rounded-md bg-gray-100 text-gray-600 transition-colors">
+                PDF
+            </button>
+        </div>
+
+        <!-- Liste conversations -->
+        <div id="conv-list" class="flex-1 overflow-y-auto p-2">
+            <p class="text-xs text-gray-400 uppercase tracking-wide px-2 py-1 mb-1">Récentes</p>
+            <div id="conversations-container">
+                <p class="text-xs text-gray-400 text-center mt-4" id="empty-msg">Chargement...</p>
+            </div>
+        </div>
+
+        <!-- Utilisateur connecté -->
+        <div class="p-3 border-t border-gray-100 flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center
+                        text-blue-700 font-medium text-sm flex-shrink-0">
+                {{ email[0].upper() }}
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-medium text-gray-800 truncate">{{ email }}</p>
+                <p class="text-xs text-gray-400">Employé SRM</p>
+            </div>
+            <a href="/logout" class="text-gray-400 hover:text-red-500 flex-shrink-0" title="Déconnexion">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- ══════════════ MAIN ══════════════ -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- NAVBAR -->
+        <nav class="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center flex-shrink-0">
+            <h1 class="text-base font-semibold text-blue-700">Assistant SRM — Interface Employé</h1>
+            <div class="flex items-center gap-4">
+                <!-- ONGLETS -->
+                <div class="flex gap-1">
+                    <button onclick="afficherOnglet('excel')" id="btn-excel"
+                        class="px-3 py-1.5 rounded-lg bg-blue-600 text-white font-medium text-sm">
+                        📊 Base clients Excel
+                    </button>
+                    <button onclick="afficherOnglet('pdf')" id="btn-pdf"
+                        class="px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm">
+                        📄 Analyse facture PDF
+                    </button>
+                </div>
+            </div>
+        </nav>
 
         <!-- ════════════════════════════════════ -->
         <!-- ONGLET EXCEL -->
         <!-- ════════════════════════════════════ -->
-        <div id="onglet-excel" class="bg-white rounded-xl shadow p-4">
+        <div id="onglet-excel" class="flex-1 flex flex-col overflow-hidden p-4">
 
             <!-- INFO BASE -->
             {% if total_factures > 0 %}
-            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mb-4 text-sm text-green-700">
+            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mb-3 text-sm text-green-700 flex-shrink-0">
                 ✅ Base active — {{ total_factures }} factures | {{ nb_clients }} clients | {{ nb_periodes }} périodes
             </div>
             {% else %}
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 mb-4 text-sm text-yellow-700">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 mb-3 text-sm text-yellow-700 flex-shrink-0">
                 ⚠️ Aucune donnée en base. L'administrateur doit importer un fichier Excel.
             </div>
             {% endif %}
 
             <!-- FILTRE FICHIER -->
-            <div class="mb-4">
+            <div class="mb-3 flex-shrink-0">
                 <label class="text-sm text-gray-600 font-medium">🗂️ Filtrer par fichier Excel :</label>
-                <select id="select-fichier"
-                    onchange="changerFichier()"
+                <select id="select-fichier" onchange="changerFichier()"
                     class="ml-2 border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">📂 Tous les fichiers</option>
                     {% for f in fichiers %}
@@ -63,13 +140,13 @@
             </div>
 
             <!-- CHAT EXCEL -->
-            <div id="chat-excel" class="h-96 overflow-y-auto flex flex-col gap-3 mb-4 p-2 border border-gray-100 rounded-lg bg-gray-50">
-                <div class="text-center text-gray-400 text-sm mt-8">
+            <div id="chat-excel" class="flex-1 overflow-y-auto flex flex-col gap-3 mb-3 p-2 border border-gray-100 rounded-lg bg-gray-50">
+                <div class="text-center text-gray-400 text-sm mt-8" id="excel-empty">
                     Posez une question sur la base clients...
                 </div>
             </div>
 
-            <div class="flex gap-2">
+            <div class="flex gap-2 flex-shrink-0">
                 <input type="text" id="input-excel"
                     placeholder="Ex: Qui consomme le plus ? Liste des clients..."
                     class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
@@ -83,13 +160,12 @@
         <!-- ════════════════════════════════════ -->
         <!-- ONGLET PDF -->
         <!-- ════════════════════════════════════ -->
-        <div id="onglet-pdf" class="bg-white rounded-xl shadow p-4 hidden">
+        <div id="onglet-pdf" class="flex-1 flex flex-col overflow-hidden p-4 hidden">
 
             <!-- SÉLECTEUR CLIENT PDF -->
-            <div class="mb-4">
+            <div class="mb-3 flex-shrink-0">
                 <label class="text-sm text-gray-600 font-medium">👤 Sélectionner un client :</label>
-                <select id="select-client-pdf"
-                    onchange="changerClientPdf()"
+                <select id="select-client-pdf" onchange="changerClientPdf()"
                     class="ml-2 border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     {% if clients_pdf %}
                         {% for c in clients_pdf %}
@@ -102,13 +178,13 @@
             </div>
 
             <!-- CHAT PDF -->
-            <div id="chat-pdf" class="h-96 overflow-y-auto flex flex-col gap-3 mb-4 p-2 border border-gray-100 rounded-lg bg-gray-50">
-                <div class="text-center text-gray-400 text-sm mt-8">
+            <div id="chat-pdf" class="flex-1 overflow-y-auto flex flex-col gap-3 mb-3 p-2 border border-gray-100 rounded-lg bg-gray-50">
+                <div class="text-center text-gray-400 text-sm mt-8" id="pdf-empty">
                     Sélectionnez un client puis posez une question...
                 </div>
             </div>
 
-            <div class="flex gap-2">
+            <div class="flex gap-2 flex-shrink-0">
                 <input type="text" id="input-pdf"
                     placeholder="Ex: Quel est le montant ? Quelle est la période ?"
                     class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
@@ -120,127 +196,414 @@
         </div>
 
     </div>
+</div>
 
-    <script>
-        let nomFichierActif = "";
-        let clientPdfActif = "{{ clients_pdf[0] if clients_pdf else '' }}";
+<script>
+    // ══════════════════════════════════════════
+    // ÉTAT GLOBAL
+    // ══════════════════════════════════════════
+    let nomFichierActif = "";
+    let clientPdfActif = "{{ clients_pdf[0] if clients_pdf else '' }}";
+    let historiqueExcel = [];
+    let historiquePdf = [];
+    let convIdExcel = null;
+    let convIdPdf = null;
+    let modeActif = "excel";
+    let filtreSidebar = "all";
 
-        // ── ONGLETS ──
-        function afficherOnglet(onglet) {
-            document.getElementById('onglet-excel').classList.toggle('hidden', onglet !== 'excel');
-            document.getElementById('onglet-pdf').classList.toggle('hidden', onglet !== 'pdf');
-            document.getElementById('btn-excel').className = onglet === 'excel'
-                ? 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm'
-                : 'px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
-            document.getElementById('btn-pdf').className = onglet === 'pdf'
-                ? 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm'
-                : 'px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
+    // ══════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', () => {
+        chargerConversations();
+    });
+
+    // ══════════════════════════════════════════
+    // ONGLETS
+    // ══════════════════════════════════════════
+    function afficherOnglet(onglet) {
+        modeActif = onglet;
+        document.getElementById('onglet-excel').classList.toggle('hidden', onglet !== 'excel');
+        document.getElementById('onglet-pdf').classList.toggle('hidden', onglet !== 'pdf');
+        document.getElementById('btn-excel').className = onglet === 'excel'
+            ? 'px-3 py-1.5 rounded-lg bg-blue-600 text-white font-medium text-sm'
+            : 'px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
+        document.getElementById('btn-pdf').className = onglet === 'pdf'
+            ? 'px-3 py-1.5 rounded-lg bg-blue-600 text-white font-medium text-sm'
+            : 'px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
+    }
+
+    // ══════════════════════════════════════════
+    // FILTRE SIDEBAR
+    // ══════════════════════════════════════════
+    function filtrerSidebar(mode) {
+        filtreSidebar = mode;
+        ['all','excel','pdf'].forEach(m => {
+            const btn = document.getElementById('sb-' + m);
+            btn.className = m === mode
+                ? 'flex-1 text-xs py-1 rounded-md bg-blue-600 text-white transition-colors'
+                : 'flex-1 text-xs py-1 rounded-md bg-gray-100 text-gray-600 transition-colors';
+        });
+        chargerConversations();
+    }
+
+    // ══════════════════════════════════════════
+    // CHARGER CONVERSATIONS
+    // ══════════════════════════════════════════
+    async function chargerConversations() {
+        const url = filtreSidebar === 'all'
+            ? '/api/employe/conversations'
+            : `/api/employe/conversations?mode=${filtreSidebar}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const container = document.getElementById('conversations-container');
+        const empty = document.getElementById('empty-msg');
+
+        if (!data.conversations || data.conversations.length === 0) {
+            container.innerHTML = '<p class="text-xs text-gray-400 text-center mt-4">Aucune conversation</p>';
+            return;
+        }
+        if (empty) empty.remove();
+
+        container.innerHTML = '';
+        data.conversations.forEach(conv => {
+            container.appendChild(creerElementConversation(conv));
+        });
+    }
+
+    function creerElementConversation(conv) {
+        const div = document.createElement('div');
+        div.className = 'conv-item flex items-center gap-1 px-2 py-2 rounded-lg cursor-pointer hover:bg-gray-50 mb-0.5';
+        div.dataset.id = conv.id;
+        div.dataset.mode = conv.mode;
+
+        const badgeColor = conv.mode === 'excel'
+            ? 'bg-green-100 text-green-700'
+            : 'bg-purple-100 text-purple-700';
+        const badgeLabel = conv.mode === 'excel' ? 'XLS' : 'PDF';
+
+        div.innerHTML = `
+            <div class="flex-1 overflow-hidden" onclick="chargerConversation(${conv.id}, '${conv.mode}')">
+                <div class="flex items-center gap-1.5 mb-0.5">
+                    <span class="text-xs px-1.5 py-0.5 rounded ${badgeColor} font-medium">${badgeLabel}</span>
+                    <p class="text-sm text-gray-700 truncate" id="titre-${conv.id}">${conv.titre}</p>
+                </div>
+                <p class="text-xs text-gray-400 pl-0.5">${formaterDate(conv.date_creation)}</p>
+            </div>
+            <button class="three-dots w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 text-gray-400 flex-shrink-0"
+                onclick="toggleMenu(event, ${conv.id})" aria-label="Options">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                </svg>
+            </button>
+            <div class="dropdown-menu" id="menu-${conv.id}">
+                <div class="dd-item" onclick="demanderRenommage(${conv.id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Renommer
+                </div>
+                <div style="height:1px;background:#f3f4f6;margin:3px 0;"></div>
+                <div class="dd-item danger" onclick="supprimerConversation(${conv.id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                    Supprimer
+                </div>
+            </div>
+        `;
+        return div;
+    }
+
+    function formaterDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        const auj = new Date();
+        const diff = Math.floor((auj - d) / 86400000);
+        if (diff === 0) return "Aujourd'hui";
+        if (diff === 1) return "Hier";
+        if (diff < 7) return `Il y a ${diff} jours`;
+        return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    }
+
+    // ══════════════════════════════════════════
+    // MENU 3 POINTS
+    // ══════════════════════════════════════════
+    function toggleMenu(e, convId) {
+        e.stopPropagation();
+        document.querySelectorAll('.dropdown-menu').forEach(m => {
+            if (m.id !== `menu-${convId}`) m.classList.remove('open');
+        });
+        document.getElementById(`menu-${convId}`).classList.toggle('open');
+    }
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
+    });
+
+    // ══════════════════════════════════════════
+    // RENOMMER
+    // ══════════════════════════════════════════
+    function demanderRenommage(convId) {
+        document.getElementById(`menu-${convId}`).classList.remove('open');
+        const el = document.getElementById(`titre-${convId}`);
+        const ancienTitre = el.textContent;
+        el.innerHTML = `<input class="rename-input" id="ri-${convId}" value="${ancienTitre}" />`;
+        const inp = document.getElementById(`ri-${convId}`);
+        inp.focus(); inp.select();
+
+        const sauvegarder = async () => {
+            const nouveau = inp.value.trim() || ancienTitre;
+            el.textContent = nouveau;
+            await fetch('/api/employe/conversation/renommer', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ conversation_id: convId, nouveau_titre: nouveau })
+            });
+        };
+        inp.addEventListener('blur', sauvegarder);
+        inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') inp.blur();
+            if (e.key === 'Escape') { el.textContent = ancienTitre; }
+        });
+    }
+
+    // ══════════════════════════════════════════
+    // SUPPRIMER
+    // ══════════════════════════════════════════
+    async function supprimerConversation(convId) {
+        document.getElementById(`menu-${convId}`).classList.remove('open');
+        const convItem = document.querySelector(`[data-id="${convId}"]`);
+        if (convItem) convItem.remove();
+
+        await fetch('/api/employe/conversation/supprimer', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ conversation_id: convId })
+        });
+
+        if (convIdExcel === convId || convIdPdf === convId) {
+            nouvelleConversation();
+        }
+    }
+
+    // ══════════════════════════════════════════
+    // CHARGER UNE CONVERSATION
+    // ══════════════════════════════════════════
+    async function chargerConversation(convId, mode) {
+        const res = await fetch(`/api/employe/messages/${convId}`);
+        const data = await res.json();
+        const messages = data.messages || [];
+
+        // Switcher vers le bon onglet
+        afficherOnglet(mode);
+
+        const chatId = mode === 'excel' ? 'chat-excel' : 'chat-pdf';
+        const chatDiv = document.getElementById(chatId);
+        chatDiv.innerHTML = '';
+
+        if (mode === 'excel') {
+            convIdExcel = convId;
+            historiqueExcel = messages;
+        } else {
+            convIdPdf = convId;
+            historiquePdf = messages;
         }
 
-        // ── FILTRE FICHIER ──
-        function changerFichier() {
-            nomFichierActif = document.getElementById('select-fichier').value;
-            const label = document.getElementById('label-fichier');
-            label.textContent = nomFichierActif ? `🎯 ${nomFichierActif}` : '🌐 Toute la base';
-            document.getElementById('chat-excel').innerHTML =
-                '<div class="text-center text-gray-400 text-sm mt-8">Fichier changé — posez une question...</div>';
+        messages.forEach(msg => afficherBulle(chatId, msg.role, msg.content));
+
+        document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('bg-gray-100'));
+        document.querySelector(`[data-id="${convId}"]`)?.classList.add('bg-gray-100');
+    }
+
+    // ══════════════════════════════════════════
+    // NOUVELLE CONVERSATION
+    // ══════════════════════════════════════════
+    function nouvelleConversation() {
+        convIdExcel = null;
+        convIdPdf = null;
+        historiqueExcel = [];
+        historiquePdf = [];
+
+        document.getElementById('chat-excel').innerHTML =
+            '<div class="text-center text-gray-400 text-sm mt-8" id="excel-empty">Posez une question sur la base clients...</div>';
+        document.getElementById('chat-pdf').innerHTML =
+            '<div class="text-center text-gray-400 text-sm mt-8" id="pdf-empty">Sélectionnez un client puis posez une question...</div>';
+
+        document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('bg-gray-100'));
+    }
+
+    // ══════════════════════════════════════════
+    // FILTRE FICHIER EXCEL
+    // ══════════════════════════════════════════
+    function changerFichier() {
+        nomFichierActif = document.getElementById('select-fichier').value;
+        const label = document.getElementById('label-fichier');
+        label.textContent = nomFichierActif ? `🎯 ${nomFichierActif}` : '🌐 Toute la base';
+        document.getElementById('chat-excel').innerHTML =
+            '<div class="text-center text-gray-400 text-sm mt-8">Fichier changé — posez une question...</div>';
+        convIdExcel = null;
+        historiqueExcel = [];
+    }
+
+    // ══════════════════════════════════════════
+    // CHANGER CLIENT PDF
+    // ══════════════════════════════════════════
+    function changerClientPdf() {
+        clientPdfActif = document.getElementById('select-client-pdf').value;
+        document.getElementById('chat-pdf').innerHTML =
+            '<div class="text-center text-gray-400 text-sm mt-8">Client changé — posez une question...</div>';
+        convIdPdf = null;
+        historiquePdf = [];
+    }
+
+    // ══════════════════════════════════════════
+    // AFFICHER BULLE
+    // ══════════════════════════════════════════
+    function afficherBulle(chatId, role, texte) {
+        const chat = document.getElementById(chatId);
+        const empty = chat.querySelector('.text-center');
+        if (empty) empty.remove();
+
+        const div = document.createElement('div');
+        if (role === 'user') {
+            div.className = 'self-end ml-auto bg-blue-600 text-white rounded-xl px-4 py-2 max-w-xs text-sm';
+            div.textContent = texte;
+        } else if (role === 'loading') {
+            div.className = 'self-start bg-gray-100 text-gray-500 rounded-xl px-4 py-2 text-sm italic';
+            div.textContent = texte;
+        } else {
+            div.className = 'self-start bg-white border border-gray-200 text-gray-800 rounded-xl px-4 py-2 max-w-lg text-sm whitespace-pre-wrap';
+            div.innerHTML = texte.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+        return div;
+    }
 
-        // ── CHANGER CLIENT PDF ──
-        function changerClientPdf() {
-            clientPdfActif = document.getElementById('select-client-pdf').value;
-            document.getElementById('chat-pdf').innerHTML =
-                '<div class="text-center text-gray-400 text-sm mt-8">Client changé — posez une question...</div>';
-        }
+    // ══════════════════════════════════════════
+    // ENVOYER EXCEL
+    // ══════════════════════════════════════════
+    async function envoyerExcel() {
+        const input = document.getElementById('input-excel');
+        const question = input.value.trim();
+        if (!question) return;
 
-        // ── AJOUTER MESSAGE ──
-        function ajouterMessage(chatId, contenu, role) {
-            const chat = document.getElementById(chatId);
-            const premiers = chat.querySelector('.text-center');
-            if (premiers) premiers.remove();
+        historiqueExcel.push({ role: 'user', content: question });
+        afficherBulle('chat-excel', 'user', question);
+        input.value = '';
+        const loading = afficherBulle('chat-excel', 'loading', '⏳ Recherche en cours...');
 
-            const div = document.createElement('div');
-            div.className = role === 'user'
-                ? 'self-end bg-blue-600 text-white rounded-xl px-4 py-2 max-w-xs text-sm ml-auto'
-                : 'self-start bg-white border border-gray-200 text-gray-800 rounded-xl px-4 py-2 max-w-lg text-sm whitespace-pre-wrap';
-            div.textContent = contenu;
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
-        }
+        const res = await fetch('/api/chat/employe/excel', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                question: question,
+                nom_fichier: nomFichierActif,
+                historique: historiqueExcel.slice(0, -1)
+            })
+        });
+        const data = await res.json();
+        loading.remove();
 
-        function ajouterLoading(chatId) {
-            const chat = document.getElementById(chatId);
-            const div = document.createElement('div');
-            div.id = 'loading-' + chatId;
-            div.className = 'self-start bg-gray-100 text-gray-500 rounded-xl px-4 py-2 text-sm';
-            div.textContent = '⏳ Recherche en cours...';
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
-        }
+        historiqueExcel.push({ role: 'assistant', content: data.reponse });
+        afficherBulle('chat-excel', 'assistant', data.reponse);
 
-        function supprimerLoading(chatId) {
-            const el = document.getElementById('loading-' + chatId);
-            if (el) el.remove();
-        }
-
-        // ── ENVOYER EXCEL ──
-        async function envoyerExcel() {
-            const input = document.getElementById('input-excel');
-            const question = input.value.trim();
-            if (!question) return;
-
-            ajouterMessage('chat-excel', question, 'user');
-            input.value = '';
-            ajouterLoading('chat-excel');
-
-            const response = await fetch('/api/chat/employe/excel', {
+        // Persistance
+        if (convIdExcel === null) {
+            const r2 = await fetch('/api/employe/conversation/creer', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    question: question,
+                    premiere_question: question,
+                    mode: 'excel',
                     nom_fichier: nomFichierActif
                 })
             });
-            const data = await response.json();
-            supprimerLoading('chat-excel');
-            ajouterMessage('chat-excel', data.reponse, 'assistant');
+            const d2 = await r2.json();
+            convIdExcel = d2.conversation_id;
+            await chargerConversations();
         }
+        await fetch('/api/employe/conversation/ajouter-message', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                conversation_id: convIdExcel,
+                messages: [
+                    { role: 'user', content: question },
+                    { role: 'assistant', content: data.reponse }
+                ]
+            })
+        });
+    }
 
-        // ── ENVOYER PDF ──
-        async function envoyerPdf() {
-            const input = document.getElementById('input-pdf');
-            const question = input.value.trim();
-            if (!question) return;
-            if (!clientPdfActif) {
-                alert('Sélectionnez un client PDF d\'abord.');
-                return;
-            }
+    // ══════════════════════════════════════════
+    // ENVOYER PDF
+    // ══════════════════════════════════════════
+    async function envoyerPdf() {
+        const input = document.getElementById('input-pdf');
+        const question = input.value.trim();
+        if (!question) return;
+        if (!clientPdfActif) { alert("Sélectionnez un client PDF d'abord."); return; }
 
-            ajouterMessage('chat-pdf', question, 'user');
-            input.value = '';
-            ajouterLoading('chat-pdf');
+        historiquePdf.push({ role: 'user', content: question });
+        afficherBulle('chat-pdf', 'user', question);
+        input.value = '';
+        const loading = afficherBulle('chat-pdf', 'loading', '⏳ Analyse en cours...');
 
-            const response = await fetch('/api/chat/employe/pdf', {
+        const res = await fetch('/api/chat/employe/pdf', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                question: question,
+                client: clientPdfActif,
+                historique: historiquePdf.slice(0, -1)
+            })
+        });
+        const data = await res.json();
+        loading.remove();
+
+        historiquePdf.push({ role: 'assistant', content: data.reponse });
+        afficherBulle('chat-pdf', 'assistant', data.reponse);
+
+        // Persistance
+        if (convIdPdf === null) {
+            const r2 = await fetch('/api/employe/conversation/creer', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    question: question,
-                    client: clientPdfActif
+                    premiere_question: question,
+                    mode: 'pdf',
+                    nom_fichier: clientPdfActif
                 })
             });
-            const data = await response.json();
-            supprimerLoading('chat-pdf');
-            ajouterMessage('chat-pdf', data.reponse, 'assistant');
+            const d2 = await r2.json();
+            convIdPdf = d2.conversation_id;
+            await chargerConversations();
         }
+        await fetch('/api/employe/conversation/ajouter-message', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                conversation_id: convIdPdf,
+                messages: [
+                    { role: 'user', content: question },
+                    { role: 'assistant', content: data.reponse }
+                ]
+            })
+        });
+    }
 
-        // ── ENTER ──
-        document.getElementById('input-excel').addEventListener('keypress', e => {
-            if (e.key === 'Enter') envoyerExcel();
-        });
-        document.getElementById('input-pdf').addEventListener('keypress', e => {
-            if (e.key === 'Enter') envoyerPdf();
-        });
-    </script>
+    // ── ENTER ──
+    document.getElementById('input-excel').addEventListener('keypress', e => {
+        if (e.key === 'Enter') envoyerExcel();
+    });
+    document.getElementById('input-pdf').addEventListener('keypress', e => {
+        if (e.key === 'Enter') envoyerPdf();
+    });
+</script>
 
 </body>
 </html>

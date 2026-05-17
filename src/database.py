@@ -105,7 +105,7 @@ def init_db():
         mode TEXT NOT NULL,
         nom_fichier TEXT,
         date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    # la collonne mode stocke que ca soit ppdf orr excel
+   
     )
 """)
 

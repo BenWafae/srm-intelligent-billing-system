@@ -249,6 +249,7 @@ def page_employe(request: Request):
         }
     )
 
+
 @app.post("/api/chat/employe/excel")
 async def chat_employe_excel(request: Request):
     session_id = request.cookies.get("session_id")
@@ -258,10 +259,12 @@ async def chat_employe_excel(request: Request):
     data = await request.json()
     question = data.get("question", "")
     nom_fichier = data.get("nom_fichier", "")
+    historique = data.get("historique", [])
 
     from src.llm import poser_question_excel
-    reponse = poser_question_excel(question, [], nom_fichier=nom_fichier)
+    reponse = poser_question_excel(question, historique, nom_fichier=nom_fichier)
     return {"reponse": reponse}
+
 
 @app.post("/api/chat/employe/pdf")
 async def chat_employe_pdf(request: Request):
@@ -272,6 +275,7 @@ async def chat_employe_pdf(request: Request):
     data = await request.json()
     question = data.get("question", "")
     client = data.get("client", "")
+    historique = data.get("historique", [])
 
     from src.database import get_texte_pdf_client
     from src.llm import poser_question
@@ -280,8 +284,72 @@ async def chat_employe_pdf(request: Request):
     if not texte:
         return {"reponse": f"Aucun PDF trouvé pour {client}."}
 
-    reponse = poser_question(texte, question, [])
+    reponse = poser_question(texte, question, historique)
     return {"reponse": reponse}
+
+
+# ════════════════════════════════════════════════════════════
+# EMPLOYÉ — CONVERSATIONS PERSISTANTES
+# ════════════════════════════════════════════════════════════
+
+@app.get("/api/employe/conversations")
+def get_conversations_employe(request: Request, mode: str = None):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"conversations": []}
+    user = sessions[session_id]
+    from src.database import get_conversations_employe
+    convs = get_conversations_employe(user["email"], mode=mode)
+    return {"conversations": convs}
+
+
+@app.post("/api/employe/conversation/creer")
+async def creer_conv_employe(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"erreur": "Session expirée"}
+    user = sessions[session_id]
+    data = await request.json()
+    from src.database import creer_conversation_employe
+    conv_id = creer_conversation_employe(
+        email=user["email"],
+        premiere_question=data["premiere_question"],
+        mode=data["mode"],
+        nom_fichier=data.get("nom_fichier", "")
+    )
+    return {"conversation_id": conv_id}
+
+
+@app.post("/api/employe/conversation/ajouter-message")
+async def ajouter_message_employe_route(request: Request):
+    data = await request.json()
+    from src.database import ajouter_message_employe
+    for msg in data.get("messages", []):
+        ajouter_message_employe(data["conversation_id"], msg["role"], msg["content"])
+    return {"succes": True}
+
+
+@app.get("/api/employe/messages/{conv_id}")
+def get_messages_employe(conv_id: int, request: Request):
+    from src.database import get_messages_conversation_employe
+    messages = get_messages_conversation_employe(conv_id)
+    return {"messages": messages}
+
+
+@app.post("/api/employe/conversation/renommer")
+async def renommer_conv_employe(request: Request):
+    data = await request.json()
+    from src.database import modifier_titre_conversation_employe
+    modifier_titre_conversation_employe(data["conversation_id"], data["nouveau_titre"])
+    return {"succes": True}
+
+
+@app.post("/api/employe/conversation/supprimer")
+async def supprimer_conv_employe(request: Request):
+    data = await request.json()
+    from src.database import supprimer_conversation_employe
+    supprimer_conversation_employe(data["conversation_id"])
+    return {"succes": True}
 
 @app.get("/client", response_class=HTMLResponse)
 def page_client(request: Request):
