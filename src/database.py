@@ -95,6 +95,30 @@ def init_db():
         FOREIGN KEY (conversation_id) REFERENCES conversations_client(id)
     )
 """)
+# Dans init_db() — à ajouter après les tables existantes
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS conversations_employe (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email_employe TEXT NOT NULL,
+        titre TEXT NOT NULL,
+        mode TEXT NOT NULL,
+        nom_fichier TEXT,
+        date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    # la collonne mode stocke que ca soit ppdf orr excel
+    )
+""")
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS messages_employe (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        conversation_id INTEGER NOT NULL,
+        role TEXT NOT NULL,
+        contenu TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (conversation_id) REFERENCES conversations_employe(id)
+    )
+""")
     conn.commit()
     conn.close()
 
@@ -770,3 +794,105 @@ def reset_fichier_excel(nom_fichier: str) -> int:
     conn.commit()
     conn.close()
     return total
+# ════════════════════════════════════════════════════════════
+# PERSISTANCE CONVERSATIONNELLE — EMPLOYÉ
+# ════════════════════════════════════════════════════════════
+
+def creer_conversation_employe(email: str, premiere_question: str, 
+                                mode: str, nom_fichier: str = "") -> int:
+    mots = premiere_question.strip().split()
+    titre = " ".join(mots[:5])
+    if len(mots) > 5:
+        titre += "..."
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO conversations_employe (email_employe, titre, mode, nom_fichier)
+        VALUES (?, ?, ?, ?)
+    """, (email, titre, mode, nom_fichier))
+    conversation_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return conversation_id
+
+
+def ajouter_message_employe(conversation_id: int, role: str, contenu: str) -> None:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO messages_employe (conversation_id, role, contenu)
+        VALUES (?, ?, ?)
+    """, (conversation_id, role, contenu))
+    conn.commit()
+    conn.close()
+
+
+def get_conversations_employe(email: str, mode: str = None) -> list[dict]:
+    """
+    Retourne les conversations d'un employé.
+    Si mode précisé → filtre sur 'excel' ou 'pdf'.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    if mode:
+        cursor.execute("""
+            SELECT id, titre, mode, nom_fichier, date_creation
+            FROM conversations_employe
+            WHERE email_employe = ? AND mode = ?
+            ORDER BY date_creation DESC
+        """, (email, mode))
+    else:
+        cursor.execute("""
+            SELECT id, titre, mode, nom_fichier, date_creation
+            FROM conversations_employe
+            WHERE email_employe = ?
+            ORDER BY date_creation DESC
+        """, (email,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [
+        {"id": r[0], "titre": r[1], "mode": r[2], 
+         "nom_fichier": r[3], "date_creation": r[4]}
+        for r in rows
+    ]
+
+
+def get_messages_conversation_employe(conversation_id: int) -> list[dict]:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT role, contenu
+        FROM messages_employe
+        WHERE conversation_id = ?
+        ORDER BY timestamp ASC
+    """, (conversation_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"role": r[0], "content": r[1]} for r in rows]
+
+
+def modifier_titre_conversation_employe(conversation_id: int, 
+                                         nouveau_titre: str) -> None:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE conversations_employe SET titre = ? WHERE id = ?
+    """, (nouveau_titre.strip(), conversation_id))
+    conn.commit()
+    conn.close()
+
+
+def supprimer_conversation_employe(conversation_id: int) -> None:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "DELETE FROM messages_employe WHERE conversation_id = ?", 
+        (conversation_id,)
+    )
+    cursor.execute(
+        "DELETE FROM conversations_employe WHERE id = ?", 
+        (conversation_id,)
+    )
+    conn.commit()
+    conn.close()
