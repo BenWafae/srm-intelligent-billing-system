@@ -1,6 +1,14 @@
 import sys
 import os
-sys.path.insert(0, os.path.dirname(__file__))
+
+# ════════════════════════════════════════════
+# CHEMINS — tous les modules du projet
+# ════════════════════════════════════════════
+BASE_DIR = os.path.dirname(__file__)
+sys.path.insert(0, BASE_DIR)
+sys.path.insert(0, os.path.join(BASE_DIR, "src"))
+sys.path.insert(0, os.path.join(BASE_DIR, "src", "rag"))
+sys.path.insert(0, os.path.join(BASE_DIR, "src", "rag_client"))
 
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -9,12 +17,9 @@ from fastapi.templating import Jinja2Templates
 from src.database import init_db, verifier_login
 
 app = FastAPI()
-templates = Jinja2Templates(directory=str(os.path.join(os.path.dirname(__file__), "templates")))
+templates = Jinja2Templates(directory=str(os.path.join(BASE_DIR, "templates")))
 
-# Initialisation base de données
 init_db()
-
-# Stockage sessions simple
 sessions = {}
 
 # ════════════════════════════════════════════
@@ -71,9 +76,51 @@ def page_client(request: Request):
     session_id = request.cookies.get("session_id")
     if not session_id or session_id not in sessions:
         return RedirectResponse(url="/")
+    
     user = sessions[session_id]
-    return HTMLResponse(f"<h1>Bienvenue Client — {user['email']} ✓</h1>")
+    numero_contrat = user["numero_client"]
+    
+    from src.database import (
+        get_nom_client_par_contrat,
+        get_derniere_facture_client,
+        get_prochain_paiement_client
+    )
+    
+    nom_client = get_nom_client_par_contrat(numero_contrat) or "Client"
+    derniere = get_derniere_facture_client(numero_contrat)
+    prochain = get_prochain_paiement_client(numero_contrat)
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="client.html",
+        context={
+            "nom_client": nom_client,
+            "derniere_montant": f"{derniere['montant']:,.0f}" if derniere else "—",
+            "derniere_mois": derniere["mois"] if derniere else "—",
+            "derniere_conso": f"{derniere['consommation']:,.0f}" if derniere else "—",
+            "derniere_unite": derniere["unite"] if derniere else "—",
+            "prochain_date": prochain["date_limite"] if prochain else "Aucune",
+            "prochain_jours": prochain["jours"] if prochain else "—",
+            "historique": []
+        }
+    )
 
+@app.post("/api/chat/client")
+async def chat_client(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"reponse": "Session expirée."}
+    
+    user = sessions[session_id]
+    numero_contrat = user["numero_client"]
+    
+    data = await request.json()
+    question = data.get("question", "")
+    
+    from src.rag.client_connecte import repondre_client_connecte
+    reponse = repondre_client_connecte(question, numero_contrat, "")
+    
+    return {"reponse": reponse}
 # ════════════════════════════════════════════
 # DÉCONNEXION
 # ════════════════════════════════════════════

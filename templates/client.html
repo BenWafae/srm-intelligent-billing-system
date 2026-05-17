@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SRM — Espace Client</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- NAVBAR -->
+    <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+        <h1 class="text-lg font-bold text-blue-700">SRM — Espace Client</h1>
+        <div class="flex items-center gap-4">
+            <span class="text-gray-600 text-sm">{{ nom_client }}</span>
+            <a href="/logout" class="text-sm text-red-500 hover:text-red-700">Déconnexion</a>
+        </div>
+    </nav>
+
+    <!-- DASHBOARD -->
+    <div class="max-w-4xl mx-auto mt-6 px-4">
+
+        <!-- CARDS -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow p-4">
+                <p class="text-sm text-gray-500">Dernière facture</p>
+                <p class="text-xl font-bold text-gray-800">{{ derniere_montant }} Dhs</p>
+                <p class="text-xs text-gray-400">{{ derniere_mois }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-4">
+                <p class="text-sm text-gray-500">Prochaine échéance</p>
+                <p class="text-xl font-bold text-gray-800">{{ prochain_date }}</p>
+                <p class="text-xs text-gray-400">dans {{ prochain_jours }} jours</p>
+            </div>
+            <div class="bg-white rounded-xl shadow p-4">
+                <p class="text-sm text-gray-500">Consommation</p>
+                <p class="text-xl font-bold text-gray-800">{{ derniere_conso }} {{ derniere_unite }}</p>
+                <p class="text-xs text-gray-400">{{ derniere_mois }}</p>
+            </div>
+        </div>
+
+        <!-- CHATBOT -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">💬 Assistant SRM</h2>
+
+            <!-- HISTORIQUE MESSAGES -->
+            <div id="chat-messages" class="h-96 overflow-y-auto flex flex-col gap-3 mb-4 p-2">
+                {% for msg in historique %}
+                    {% if msg.role == "user" %}
+                    <div class="self-end bg-blue-600 text-white rounded-xl px-4 py-2 max-w-xs text-sm">
+                        {{ msg.content }}
+                    </div>
+                    {% else %}
+                    <div class="self-start bg-gray-100 text-gray-800 rounded-xl px-4 py-2 max-w-sm text-sm">
+                        {{ msg.content }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- INPUT -->
+            <div class="flex gap-2">
+                <input
+                    type="text"
+                    id="question-input"
+                    placeholder="Votre question sur vos factures..."
+                    class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                    onclick="envoyerQuestion()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
+                >
+                    Envoyer
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Scroll automatique vers le bas
+        const chatDiv = document.getElementById('chat-messages');
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+
+        async function envoyerQuestion() {
+            const input = document.getElementById('question-input');
+            const question = input.value.trim();
+            if (!question) return;
+
+            // Afficher message utilisateur
+            const userMsg = document.createElement('div');
+            userMsg.className = 'self-end bg-blue-600 text-white rounded-xl px-4 py-2 max-w-xs text-sm';
+            userMsg.textContent = question;
+            chatDiv.appendChild(userMsg);
+            input.value = '';
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            // Afficher indicateur chargement
+            const loading = document.createElement('div');
+            loading.className = 'self-start bg-gray-100 text-gray-500 rounded-xl px-4 py-2 max-w-xs text-sm';
+            loading.textContent = 'SRM réfléchit...';
+            chatDiv.appendChild(loading);
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            // Appel API
+            const response = await fetch('/api/chat/client', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ question: question })
+            });
+            const data = await response.json();
+
+            // Remplacer loading par la vraie réponse
+            loading.className = 'self-start bg-gray-100 text-gray-800 rounded-xl px-4 py-2 max-w-sm text-sm';
+            loading.textContent = data.reponse;
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        }
+
+        // Envoyer avec Enter
+        document.getElementById('question-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') envoyerQuestion();
+        });
+    </script>
+
+</body>
+</html>
