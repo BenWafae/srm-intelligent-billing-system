@@ -67,6 +67,7 @@
             <h2 class="text-base font-semibold text-gray-700 mb-3">🗑️ Gestion de la base</h2>
 
             <div class="grid grid-cols-2 gap-4">
+                <!-- Supprimer un client -->
                 <div>
                     <label class="text-sm text-gray-600 font-medium">Supprimer un client :</label>
                     <select id="select-client-suppr"
@@ -82,9 +83,28 @@
                     </button>
                     <div id="msg-suppr-client" class="mt-2 text-sm"></div>
                 </div>
+
+                <!-- Zone dangereuse -->
                 <div>
-                    <p class="text-sm text-orange-600 font-medium mb-1">⚠️ Zone dangereuse</p>
-                    <p class="text-xs text-gray-500 mb-2">Supprime toutes les factures Excel de la base.</p>
+                    <p class="text-sm text-orange-600 font-medium mb-2">⚠️ Zone dangereuse</p>
+
+                    <!-- Supprimer un fichier entier -->
+                    <p class="text-xs text-gray-500 mb-1">Supprimer un fichier entier :</p>
+                    <select id="select-fichier-suppr"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2">
+                        <option value="">-- Choisir un fichier --</option>
+                        {% for f in fichiers %}
+                        <option value="{{ f }}">{{ f }}</option>
+                        {% endfor %}
+                    </select>
+                    <button onclick="supprimerFichier()"
+                        class="w-full bg-orange-500 text-white py-2 rounded-lg text-sm hover:bg-orange-600 mb-1">
+                        🗑️ Supprimer ce fichier
+                    </button>
+                    <div id="msg-suppr-fichier" class="text-sm mb-3"></div>
+
+                    <!-- Reset complet -->
+                    <p class="text-xs text-gray-500 mb-1">Supprime toutes les factures Excel :</p>
                     <button onclick="resetBase()"
                         class="w-full bg-red-700 text-white py-2 rounded-lg text-sm hover:bg-red-800">
                         🔴 Reset complet de la base
@@ -258,6 +278,11 @@
                                 ✅ Importer les ${data.nouvelles} nouvelles lignes
                             </button>`;
                         document.getElementById('btn-import-excel').classList.remove('hidden');
+                    } else {
+                        apercu.innerHTML += `
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-sm text-yellow-700 mt-2">
+                                ⚠️ Ce fichier est déjà entièrement en base.
+                            </div>`;
                     }
                 });
         }
@@ -303,7 +328,33 @@
             msg.textContent = `✅ ${data.supprimees} factures supprimées pour ${client}`;
         }
 
-        // ── RESET BASE ──
+        // ── SUPPRIMER FICHIER ENTIER ──
+        async function supprimerFichier() {
+            const fichier = document.getElementById('select-fichier-suppr').value;
+            if (!fichier) return;
+            if (!confirm(`Supprimer toutes les factures du fichier "${fichier}" ? Cette action est irréversible.`)) return;
+
+            const res = await fetch('/api/admin/reset-fichier', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ nom_fichier: fichier })
+            });
+            const data = await res.json();
+            const msg = document.getElementById('msg-suppr-fichier');
+            msg.className = 'text-sm text-green-600';
+            msg.textContent = `✅ ${data.supprimees} factures supprimées pour "${fichier}"`;
+
+            // Retirer l'option du select
+            const select = document.getElementById('select-fichier-suppr');
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === fichier) {
+                    select.remove(i);
+                    break;
+                }
+            }
+        }
+
+        // ── RESET BASE COMPLÈTE ──
         async function resetBase() {
             if (!confirm('⚠️ Supprimer TOUTE la base Excel ? Cette action est irréversible.')) return;
             const res = await fetch('/api/admin/reset-base', { method: 'POST' });
@@ -398,7 +449,7 @@
             }
         }
 
-        // Afficher fichier PDF sélectionné
+        // ── AFFICHER FICHIER PDF SÉLECTIONNÉ ──
         document.getElementById('input-pdf').addEventListener('change', function() {
             const nb = this.files.length;
             document.getElementById('nom-fichier-pdf').textContent =
