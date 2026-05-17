@@ -4,122 +4,416 @@
     <meta charset="UTF-8">
     <title>SRM — Espace Client</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Sidebar conversations */
+        .conv-item { position: relative; }
+        .three-dots { opacity: 0; transition: opacity 0.15s; }
+        .conv-item:hover .three-dots { opacity: 1; }
+        .dropdown-menu { display: none; position: absolute; right: 4px; top: 32px;
+            background: white; border: 1px solid #e5e7eb; border-radius: 8px;
+            padding: 4px; z-index: 50; width: 150px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .dropdown-menu.open { display: block; }
+        .dd-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+            border-radius: 6px; font-size: 13px; cursor: pointer; color: #374151; }
+        .dd-item:hover { background: #f3f4f6; }
+        .dd-item.danger { color: #ef4444; }
+        .dd-item.danger:hover { background: #fef2f2; }
+        .rename-input { font-size: 13px; border: 1px solid #6366f1; border-radius: 4px;
+            padding: 1px 6px; width: 100%; outline: none; background: white; }
+        /* Scrollbar sidebar */
+        #conv-list::-webkit-scrollbar { width: 4px; }
+        #conv-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        /* Chat scrollbar */
+        #chat-messages::-webkit-scrollbar { width: 4px; }
+        #chat-messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-50 h-screen flex flex-col overflow-hidden">
 
-    <!-- NAVBAR -->
-    <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <h1 class="text-lg font-bold text-blue-700">SRM — Espace Client</h1>
-        <div class="flex items-center gap-4">
-            <span class="text-gray-600 text-sm">{{ nom_client }}</span>
-            <a href="/logout" class="text-sm text-red-500 hover:text-red-700">Déconnexion</a>
+<!-- LAYOUT PRINCIPAL : sidebar + main -->
+<div class="flex h-screen overflow-hidden">
+
+    <!-- ══════════════ SIDEBAR ══════════════ -->
+    <div class="w-60 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+
+        <!-- Nouvelle conversation -->
+        <div class="p-3 border-b border-gray-100">
+            <button onclick="nouvelleConversation()"
+                class="flex items-center gap-2 w-full px-3 py-2 bg-gray-50 hover:bg-gray-100
+                       border border-gray-200 rounded-lg text-sm text-gray-700 transition-colors">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Nouvelle conversation
+            </button>
         </div>
-    </nav>
 
-    <!-- DASHBOARD -->
-    <div class="max-w-4xl mx-auto mt-6 px-4">
-
-        <!-- CARDS -->
-        <div class="grid grid-cols-3 gap-4 mb-6">
-            <div class="bg-white rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500">Dernière facture</p>
-                <p class="text-xl font-bold text-gray-800">{{ derniere_montant }} Dhs</p>
-                <p class="text-xs text-gray-400">{{ derniere_mois }}</p>
-            </div>
-            <div class="bg-white rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500">Prochaine échéance</p>
-                <p class="text-xl font-bold text-gray-800">{{ prochain_date }}</p>
-                <p class="text-xs text-gray-400">dans {{ prochain_jours }} jours</p>
-            </div>
-            <div class="bg-white rounded-xl shadow p-4">
-                <p class="text-sm text-gray-500">Consommation</p>
-                <p class="text-xl font-bold text-gray-800">{{ derniere_conso }} {{ derniere_unite }}</p>
-                <p class="text-xs text-gray-400">{{ derniere_mois }}</p>
+        <!-- Liste conversations -->
+        <div id="conv-list" class="flex-1 overflow-y-auto p-2">
+            <p class="text-xs text-gray-400 uppercase tracking-wide px-2 py-1 mb-1">Récentes</p>
+            <div id="conversations-container">
+                <!-- Conversations injectées par JS -->
+                <p class="text-xs text-gray-400 text-center mt-4" id="empty-msg">Chargement...</p>
             </div>
         </div>
 
-        <!-- CHATBOT -->
-        <div class="bg-white rounded-xl shadow p-4">
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">💬 Assistant SRM</h2>
-
-            <!-- HISTORIQUE MESSAGES -->
-            <div id="chat-messages" class="h-96 overflow-y-auto flex flex-col gap-3 mb-4 p-2">
-                {% for msg in historique %}
-                    {% if msg.role == "user" %}
-                    <div class="self-end bg-blue-600 text-white rounded-xl px-4 py-2 max-w-xs text-sm">
-                        {{ msg.content }}
-                    </div>
-                    {% else %}
-                    <div class="self-start bg-gray-100 text-gray-800 rounded-xl px-4 py-2 max-w-sm text-sm">
-                        {{ msg.content }}
-                    </div>
-                    {% endif %}
-                {% endfor %}
+        <!-- Utilisateur connecté -->
+        <div class="p-3 border-t border-gray-100 flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center
+                        text-purple-700 font-medium text-sm flex-shrink-0">
+                {{ nom_client[0].upper() }}
             </div>
-
-            <!-- INPUT -->
-            <div class="flex gap-2">
-                <input
-                    type="text"
-                    id="question-input"
-                    placeholder="Votre question sur vos factures..."
-                    class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                    onclick="envoyerQuestion()"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
-                >
-                    Envoyer
-                </button>
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-medium text-gray-800 truncate">{{ nom_client }}</p>
+                <p class="text-xs text-gray-400 truncate">Client SRM</p>
             </div>
+            <a href="/logout" class="text-gray-400 hover:text-red-500 flex-shrink-0" title="Déconnexion">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+            </a>
         </div>
-
     </div>
 
-    <script>
-        // Scroll automatique vers le bas
-        const chatDiv = document.getElementById('chat-messages');
-        chatDiv.scrollTop = chatDiv.scrollHeight;
+    <!-- ══════════════ MAIN ══════════════ -->
+    <div class="flex-1 flex flex-col overflow-hidden">
 
-        async function envoyerQuestion() {
-            const input = document.getElementById('question-input');
-            const question = input.value.trim();
-            if (!question) return;
+        <!-- MINI DASHBOARD -->
+        <div class="bg-white border-b border-gray-200 px-6 py-3">
+            <div class="grid grid-cols-3 gap-4 max-w-2xl">
+                <div>
+                    <p class="text-xs text-gray-400">Dernière facture</p>
+                    <p class="text-base font-semibold text-gray-800">{{ derniere_montant }} Dhs</p>
+                    <p class="text-xs text-gray-400">{{ derniere_mois }}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400">Prochaine échéance</p>
+                    <p class="text-base font-semibold text-gray-800">{{ prochain_date }}</p>
+                    <p class="text-xs text-gray-400">{% if prochain_jours != '—' %}dans {{ prochain_jours }} jours{% endif %}</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400">Consommation</p>
+                    <p class="text-base font-semibold text-gray-800">{{ derniere_conso }} {{ derniere_unite }}</p>
+                    <p class="text-xs text-gray-400">{{ derniere_mois }}</p>
+                </div>
+            </div>
+        </div>
 
-            // Afficher message utilisateur
-            const userMsg = document.createElement('div');
-            userMsg.className = 'self-end bg-blue-600 text-white rounded-xl px-4 py-2 max-w-xs text-sm';
-            userMsg.textContent = question;
-            chatDiv.appendChild(userMsg);
-            input.value = '';
-            chatDiv.scrollTop = chatDiv.scrollHeight;
+        <!-- CHAT -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-3">
+            <p class="text-center text-gray-300 text-sm mt-8" id="chat-empty">
+                Bonjour {{ nom_client.split()[0] }} 👋 Posez une question sur vos factures.
+            </p>
+        </div>
 
-            // Afficher indicateur chargement
-            const loading = document.createElement('div');
-            loading.className = 'self-start bg-gray-100 text-gray-500 rounded-xl px-4 py-2 max-w-xs text-sm';
-            loading.textContent = 'SRM réfléchit...';
-            chatDiv.appendChild(loading);
-            chatDiv.scrollTop = chatDiv.scrollHeight;
+        <!-- TÉLÉCHARGEMENT -->
+        <div class="bg-white border-t border-gray-100 px-6 py-2 flex items-center gap-3">
+            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <select id="select-mois"
+                class="text-sm border border-gray-200 rounded-lg px-2 py-1 text-gray-600 bg-white focus:outline-none focus:ring-2 focus:ring-purple-400">
+                <option value="">Choisir un mois...</option>
+            </select>
+            <button onclick="telechargerFacture()"
+                class="text-sm px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                Télécharger PDF
+            </button>
+        </div>
 
-            // Appel API
-            const response = await fetch('/api/chat/client', {
+        <!-- INPUT -->
+        <div class="bg-white border-t border-gray-200 px-4 py-3 flex gap-2">
+            <input type="text" id="question-input"
+                placeholder="Votre question sur vos factures..."
+                class="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm
+                       focus:outline-none focus:ring-2 focus:ring-purple-400 bg-gray-50"/>
+            <button onclick="envoyerQuestion()"
+                class="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-purple-700 transition-colors">
+                Envoyer
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ══════════════════════════════════════════
+    // ÉTAT GLOBAL
+    // ══════════════════════════════════════════
+    let historiqueClient = [];
+    let conversationIdActuelle = null;
+    const chatDiv = document.getElementById('chat-messages');
+
+    // ══════════════════════════════════════════
+    // INIT — charger conversations + mois
+    // ══════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', () => {
+        chargerConversations();
+        chargerMoisDisponibles();
+    });
+
+    async function chargerConversations() {
+        const res = await fetch('/api/client/conversations');
+        const data = await res.json();
+        const container = document.getElementById('conversations-container');
+        const empty = document.getElementById('empty-msg');
+
+        if (!data.conversations || data.conversations.length === 0) {
+            empty.textContent = 'Aucune conversation';
+            return;
+        }
+        if (empty) empty.remove();
+
+        container.innerHTML = '';
+        data.conversations.forEach(conv => {
+            container.appendChild(creerElementConversation(conv));
+        });
+    }
+
+    function creerElementConversation(conv) {
+        const div = document.createElement('div');
+        div.className = 'conv-item flex items-center gap-1 px-2 py-2 rounded-lg cursor-pointer hover:bg-gray-50 mb-0.5';
+        div.dataset.id = conv.id;
+        div.dataset.titre = conv.titre;
+
+        div.innerHTML = `
+            <div class="flex-1 overflow-hidden" onclick="chargerConversation(${conv.id})">
+                <p class="text-sm text-gray-700 truncate conv-title-text" id="titre-${conv.id}">${conv.titre}</p>
+                <p class="text-xs text-gray-400">${formaterDate(conv.date_creation)}</p>
+            </div>
+            <button class="three-dots w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 text-gray-400 flex-shrink-0"
+                onclick="toggleMenu(event, ${conv.id})" aria-label="Options">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+                </svg>
+            </button>
+            <div class="dropdown-menu" id="menu-${conv.id}">
+                <div class="dd-item" onclick="demanderRenommage(${conv.id})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Renommer
+                </div>
+                <div style="height:1px;background:#f3f4f6;margin:3px 0;"></div>
+                <div class="dd-item danger" onclick="supprimerConversation(${conv.id}, this)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                    Supprimer
+                </div>
+            </div>
+        `;
+        return div;
+    }
+
+    function formaterDate(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        const auj = new Date();
+        const diff = Math.floor((auj - d) / 86400000);
+        if (diff === 0) return "Aujourd'hui";
+        if (diff === 1) return "Hier";
+        if (diff < 7) return `Il y a ${diff} jours`;
+        return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    }
+
+    // ══════════════════════════════════════════
+    // MENU 3 POINTS
+    // ══════════════════════════════════════════
+    function toggleMenu(e, convId) {
+        e.stopPropagation();
+        document.querySelectorAll('.dropdown-menu').forEach(m => {
+            if (m.id !== `menu-${convId}`) m.classList.remove('open');
+        });
+        document.getElementById(`menu-${convId}`).classList.toggle('open');
+    }
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
+    });
+
+    // ══════════════════════════════════════════
+    // RENOMMER
+    // ══════════════════════════════════════════
+    function demanderRenommage(convId) {
+        document.getElementById(`menu-${convId}`).classList.remove('open');
+        const el = document.getElementById(`titre-${convId}`);
+        const ancienTitre = el.textContent;
+        el.innerHTML = `<input class="rename-input" id="ri-${convId}" value="${ancienTitre}" />`;
+        const inp = document.getElementById(`ri-${convId}`);
+        inp.focus(); inp.select();
+
+        const sauvegarder = async () => {
+            const nouveau = inp.value.trim() || ancienTitre;
+            el.textContent = nouveau;
+            await fetch('/api/client/conversation/renommer', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ question: question })
+                body: JSON.stringify({ conversation_id: convId, nouveau_titre: nouveau })
             });
-            const data = await response.json();
-
-            // Remplacer loading par la vraie réponse
-            loading.className = 'self-start bg-gray-100 text-gray-800 rounded-xl px-4 py-2 max-w-sm text-sm';
-            loading.textContent = data.reponse;
-            chatDiv.scrollTop = chatDiv.scrollHeight;
-        }
-
-        // Envoyer avec Enter
-        document.getElementById('question-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') envoyerQuestion();
+        };
+        inp.addEventListener('blur', sauvegarder);
+        inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') inp.blur();
+            if (e.key === 'Escape') { el.textContent = ancienTitre; }
         });
-    </script>
+    }
+
+    // ══════════════════════════════════════════
+    // SUPPRIMER
+    // ══════════════════════════════════════════
+    async function supprimerConversation(convId, el) {
+        document.getElementById(`menu-${convId}`).classList.remove('open');
+        const convItem = document.querySelector(`[data-id="${convId}"]`);
+        if (convItem) convItem.remove();
+
+        await fetch('/api/client/conversation/supprimer', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ conversation_id: convId })
+        });
+
+        if (conversationIdActuelle === convId) {
+            nouvelleConversation();
+        }
+    }
+
+    // ══════════════════════════════════════════
+    // CHARGER UNE CONVERSATION
+    // ══════════════════════════════════════════
+    async function chargerConversation(convId) {
+        const res = await fetch(`/api/client/messages/${convId}`);
+        const data = await res.json();
+
+        conversationIdActuelle = convId;
+        historiqueClient = data.messages || [];
+        chatDiv.innerHTML = '';
+
+        historiqueClient.forEach(msg => afficherBulle(msg.role, msg.content));
+
+        document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('bg-gray-100'));
+        document.querySelector(`[data-id="${convId}"]`)?.classList.add('bg-gray-100');
+    }
+
+    // ══════════════════════════════════════════
+    // NOUVELLE CONVERSATION
+    // ══════════════════════════════════════════
+    function nouvelleConversation() {
+        conversationIdActuelle = null;
+        historiqueClient = [];
+        chatDiv.innerHTML = `
+            <p class="text-center text-gray-300 text-sm mt-8">
+                Nouvelle conversation — posez votre question.
+            </p>`;
+        document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('bg-gray-100'));
+    }
+
+    // ══════════════════════════════════════════
+    // ENVOYER QUESTION
+    // ══════════════════════════════════════════
+    async function envoyerQuestion() {
+        const input = document.getElementById('question-input');
+        const question = input.value.trim();
+        if (!question) return;
+
+        const emptyMsg = document.getElementById('chat-empty');
+        if (emptyMsg) emptyMsg.remove();
+
+        historiqueClient.push({ role: 'user', content: question });
+        afficherBulle('user', question);
+        input.value = '';
+
+        const loading = afficherBulle('loading', 'SRM réfléchit...');
+
+        let historiqueTexte = '';
+        historiqueClient.slice(0, -1).forEach(msg => {
+            historiqueTexte += `${msg.role === 'user' ? 'Client' : 'Assistant'}: ${msg.content}\n`;
+        });
+
+        const res = await fetch('/api/chat/client', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ question, historique_texte: historiqueTexte })
+        });
+        const data = await res.json();
+
+        loading.remove();
+        historiqueClient.push({ role: 'assistant', content: data.reponse });
+        afficherBulle('assistant', data.reponse);
+
+        // Sauvegarder en base
+        if (conversationIdActuelle === null) {
+            const res2 = await fetch('/api/client/conversation/creer', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ premiere_question: question })
+            });
+            const d2 = await res2.json();
+            conversationIdActuelle = d2.conversation_id;
+            await chargerConversations();
+        }
+        await fetch('/api/client/conversation/ajouter-message', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                conversation_id: conversationIdActuelle,
+                messages: [
+                    { role: 'user', content: question },
+                    { role: 'assistant', content: data.reponse }
+                ]
+            })
+        });
+    }
+
+    function afficherBulle(role, texte) {
+        const div = document.createElement('div');
+        if (role === 'user') {
+            div.className = 'self-end ml-auto bg-purple-600 text-white rounded-2xl rounded-br-sm px-4 py-2 max-w-xs text-sm';
+            div.textContent = texte;
+        } else if (role === 'loading') {
+            div.className = 'self-start bg-gray-100 text-gray-400 rounded-2xl rounded-bl-sm px-4 py-2 max-w-xs text-sm italic';
+            div.textContent = texte;
+        } else {
+            div.className = 'self-start bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-bl-sm px-4 py-2 max-w-sm text-sm whitespace-pre-wrap shadow-sm';
+            div.innerHTML = texte.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+        chatDiv.appendChild(div);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+        return div;
+    }
+
+    // ══════════════════════════════════════════
+    // TÉLÉCHARGEMENT FACTURE
+    // ══════════════════════════════════════════
+    async function chargerMoisDisponibles() {
+        const res = await fetch('/api/client/mois-disponibles');
+        const data = await res.json();
+        const select = document.getElementById('select-mois');
+        data.mois.forEach(mois => {
+            const opt = document.createElement('option');
+            opt.value = mois;
+            opt.textContent = mois;
+            select.appendChild(opt);
+        });
+    }
+
+    function telechargerFacture() {
+        const mois = document.getElementById('select-mois').value;
+        if (!mois) { alert('Choisissez un mois.'); return; }
+        window.open(`/api/client/telecharger-facture?mois=${encodeURIComponent(mois)}`, '_blank');
+    }
+
+    // Enter pour envoyer
+    document.getElementById('question-input').addEventListener('keypress', e => {
+        if (e.key === 'Enter') envoyerQuestion();
+    });
+</script>
 
 </body>
 </html>

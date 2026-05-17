@@ -317,6 +317,7 @@ def page_client(request: Request):
         }
     )
 
+
 @app.post("/api/chat/client")
 async def chat_client(request: Request):
     session_id = request.cookies.get("session_id")
@@ -328,11 +329,105 @@ async def chat_client(request: Request):
     
     data = await request.json()
     question = data.get("question", "")
+    historique_texte = data.get("historique_texte", "")
     
     from src.rag.client_connecte import repondre_client_connecte
-    reponse = repondre_client_connecte(question, numero_contrat, "")
+    reponse = repondre_client_connecte(question, numero_contrat, historique_texte)
     
     return {"reponse": reponse}
+
+
+# ════════════════════════════════════════════
+# CLIENT — CONVERSATIONS PERSISTANTES
+# ════════════════════════════════════════════
+
+@app.get("/api/client/conversations")
+def get_conversations(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"conversations": []}
+    user = sessions[session_id]
+    from src.database import get_conversations_client
+    convs = get_conversations_client(user["numero_client"])
+    return {"conversations": convs}
+
+
+@app.post("/api/client/conversation/creer")
+async def creer_conv(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"erreur": "Session expirée"}
+    user = sessions[session_id]
+    data = await request.json()
+    from src.database import creer_conversation
+    conv_id = creer_conversation(user["numero_client"], data["premiere_question"])
+    return {"conversation_id": conv_id}
+
+
+@app.post("/api/client/conversation/ajouter-message")
+async def ajouter_messages(request: Request):
+    data = await request.json()
+    from src.database import ajouter_message
+    for msg in data.get("messages", []):
+        ajouter_message(data["conversation_id"], msg["role"], msg["content"])
+    return {"succes": True}
+
+
+@app.get("/api/client/messages/{conv_id}")
+def get_messages(conv_id: int, request: Request):
+    from src.database import get_messages_conversation
+    messages = get_messages_conversation(conv_id)
+    return {"messages": messages}
+
+
+@app.post("/api/client/conversation/renommer")
+async def renommer_conversation(request: Request):
+    data = await request.json()
+    from src.database import modifier_titre_conversation
+    modifier_titre_conversation(data["conversation_id"], data["nouveau_titre"])
+    return {"succes": True}
+
+
+@app.post("/api/client/conversation/supprimer")
+async def supprimer_conv(request: Request):
+    data = await request.json()
+    from src.database import supprimer_conversation
+    supprimer_conversation(data["conversation_id"])
+    return {"succes": True}
+
+
+# ════════════════════════════════════════════
+# CLIENT — TÉLÉCHARGEMENT FACTURE PDF
+# ════════════════════════════════════════════
+
+@app.get("/api/client/mois-disponibles")
+def mois_disponibles(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"mois": []}
+    user = sessions[session_id]
+    from src.database import get_mois_client
+    return {"mois": get_mois_client(user["numero_client"])}
+
+
+@app.get("/api/client/telecharger-facture")
+def telecharger_facture(request: Request, mois: str):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return RedirectResponse(url="/")
+    user = sessions[session_id]
+    from src.rag_client.pdf_facture import generer_pdf_facture
+    from fastapi.responses import StreamingResponse
+    import io
+    pdf = generer_pdf_facture(user["numero_client"], mois)
+    if not pdf:
+        return {"erreur": "Facture introuvable"}
+    return StreamingResponse(
+        io.BytesIO(pdf),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=facture_{mois}.pdf"}
+    )
+
 # ════════════════════════════════════════════
 # DÉCONNEXION
 # ════════════════════════════════════════════
