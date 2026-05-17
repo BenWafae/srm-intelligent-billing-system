@@ -68,8 +68,60 @@ def page_employe(request: Request):
     session_id = request.cookies.get("session_id")
     if not session_id or session_id not in sessions:
         return RedirectResponse(url="/")
+
     user = sessions[session_id]
-    return HTMLResponse(f"<h1>Bienvenue Employé — {user['email']} ✓</h1>")
+
+    from src.database import get_resume_excel, get_fichiers_excel, get_clients_avec_pdf
+    resume = get_resume_excel()
+    fichiers = get_fichiers_excel()
+    clients_pdf = get_clients_avec_pdf()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="employe.html",
+        context={
+            "email": user["email"],
+            "total_factures": resume["total"],
+            "nb_clients": len(resume["clients"]),
+            "nb_periodes": len(resume["periodes"]),
+            "fichiers": fichiers,
+            "clients_pdf": clients_pdf,
+        }
+    )
+
+@app.post("/api/chat/employe/excel")
+async def chat_employe_excel(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"reponse": "Session expirée."}
+
+    data = await request.json()
+    question = data.get("question", "")
+    nom_fichier = data.get("nom_fichier", "")
+
+    from src.llm import poser_question_excel
+    reponse = poser_question_excel(question, [], nom_fichier=nom_fichier)
+    return {"reponse": reponse}
+
+@app.post("/api/chat/employe/pdf")
+async def chat_employe_pdf(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"reponse": "Session expirée."}
+
+    data = await request.json()
+    question = data.get("question", "")
+    client = data.get("client", "")
+
+    from src.database import get_texte_pdf_client
+    from src.llm import poser_question
+
+    texte = get_texte_pdf_client(client)
+    if not texte:
+        return {"reponse": f"Aucun PDF trouvé pour {client}."}
+
+    reponse = poser_question(texte, question, [])
+    return {"reponse": reponse}
 
 @app.get("/client", response_class=HTMLResponse)
 def page_client(request: Request):

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SRM — Interface Employé</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- NAVBAR -->
+    <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+        <h1 class="text-lg font-bold text-blue-700">🤖 Assistant SRM — Interface Employé</h1>
+        <div class="flex items-center gap-4">
+            <span class="text-gray-600 text-sm">{{ email }}</span>
+            <a href="/logout" class="text-sm text-red-500 hover:text-red-700">Déconnexion</a>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto mt-6 px-4">
+
+        <!-- ONGLETS -->
+        <div class="flex gap-2 mb-4">
+            <button onclick="afficherOnglet('excel')"
+                id="btn-excel"
+                class="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm">
+                📊 Base clients Excel
+            </button>
+            <button onclick="afficherOnglet('pdf')"
+                id="btn-pdf"
+                class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm">
+                📄 Analyse facture PDF
+            </button>
+        </div>
+
+        <!-- ════════════════════════════════════ -->
+        <!-- ONGLET EXCEL -->
+        <!-- ════════════════════════════════════ -->
+        <div id="onglet-excel" class="bg-white rounded-xl shadow p-4">
+
+            <!-- INFO BASE -->
+            {% if total_factures > 0 %}
+            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mb-4 text-sm text-green-700">
+                ✅ Base active — {{ total_factures }} factures | {{ nb_clients }} clients | {{ nb_periodes }} périodes
+            </div>
+            {% else %}
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 mb-4 text-sm text-yellow-700">
+                ⚠️ Aucune donnée en base. L'administrateur doit importer un fichier Excel.
+            </div>
+            {% endif %}
+
+            <!-- FILTRE FICHIER -->
+            <div class="mb-4">
+                <label class="text-sm text-gray-600 font-medium">🗂️ Filtrer par fichier Excel :</label>
+                <select id="select-fichier"
+                    onchange="changerFichier()"
+                    class="ml-2 border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">📂 Tous les fichiers</option>
+                    {% for f in fichiers %}
+                    <option value="{{ f }}">{{ f }}</option>
+                    {% endfor %}
+                </select>
+                <span id="label-fichier" class="ml-2 text-xs text-gray-400">🌐 Toute la base</span>
+            </div>
+
+            <!-- CHAT EXCEL -->
+            <div id="chat-excel" class="h-96 overflow-y-auto flex flex-col gap-3 mb-4 p-2 border border-gray-100 rounded-lg bg-gray-50">
+                <div class="text-center text-gray-400 text-sm mt-8">
+                    Posez une question sur la base clients...
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <input type="text" id="input-excel"
+                    placeholder="Ex: Qui consomme le plus ? Liste des clients..."
+                    class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                <button onclick="envoyerExcel()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
+                    Envoyer
+                </button>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════════ -->
+        <!-- ONGLET PDF -->
+        <!-- ════════════════════════════════════ -->
+        <div id="onglet-pdf" class="bg-white rounded-xl shadow p-4 hidden">
+
+            <!-- SÉLECTEUR CLIENT PDF -->
+            <div class="mb-4">
+                <label class="text-sm text-gray-600 font-medium">👤 Sélectionner un client :</label>
+                <select id="select-client-pdf"
+                    onchange="changerClientPdf()"
+                    class="ml-2 border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    {% if clients_pdf %}
+                        {% for c in clients_pdf %}
+                        <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">Aucun PDF disponible</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- CHAT PDF -->
+            <div id="chat-pdf" class="h-96 overflow-y-auto flex flex-col gap-3 mb-4 p-2 border border-gray-100 rounded-lg bg-gray-50">
+                <div class="text-center text-gray-400 text-sm mt-8">
+                    Sélectionnez un client puis posez une question...
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <input type="text" id="input-pdf"
+                    placeholder="Ex: Quel est le montant ? Quelle est la période ?"
+                    class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                <button onclick="envoyerPdf()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
+                    Envoyer
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let nomFichierActif = "";
+        let clientPdfActif = "{{ clients_pdf[0] if clients_pdf else '' }}";
+
+        // ── ONGLETS ──
+        function afficherOnglet(onglet) {
+            document.getElementById('onglet-excel').classList.toggle('hidden', onglet !== 'excel');
+            document.getElementById('onglet-pdf').classList.toggle('hidden', onglet !== 'pdf');
+            document.getElementById('btn-excel').className = onglet === 'excel'
+                ? 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm'
+                : 'px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
+            document.getElementById('btn-pdf').className = onglet === 'pdf'
+                ? 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm'
+                : 'px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
+        }
+
+        // ── FILTRE FICHIER ──
+        function changerFichier() {
+            nomFichierActif = document.getElementById('select-fichier').value;
+            const label = document.getElementById('label-fichier');
+            label.textContent = nomFichierActif ? `🎯 ${nomFichierActif}` : '🌐 Toute la base';
+            document.getElementById('chat-excel').innerHTML =
+                '<div class="text-center text-gray-400 text-sm mt-8">Fichier changé — posez une question...</div>';
+        }
+
+        // ── CHANGER CLIENT PDF ──
+        function changerClientPdf() {
+            clientPdfActif = document.getElementById('select-client-pdf').value;
+            document.getElementById('chat-pdf').innerHTML =
+                '<div class="text-center text-gray-400 text-sm mt-8">Client changé — posez une question...</div>';
+        }
+
+        // ── AJOUTER MESSAGE ──
+        function ajouterMessage(chatId, contenu, role) {
+            const chat = document.getElementById(chatId);
+            const premiers = chat.querySelector('.text-center');
+            if (premiers) premiers.remove();
+
+            const div = document.createElement('div');
+            div.className = role === 'user'
+                ? 'self-end bg-blue-600 text-white rounded-xl px-4 py-2 max-w-xs text-sm ml-auto'
+                : 'self-start bg-white border border-gray-200 text-gray-800 rounded-xl px-4 py-2 max-w-lg text-sm whitespace-pre-wrap';
+            div.textContent = contenu;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function ajouterLoading(chatId) {
+            const chat = document.getElementById(chatId);
+            const div = document.createElement('div');
+            div.id = 'loading-' + chatId;
+            div.className = 'self-start bg-gray-100 text-gray-500 rounded-xl px-4 py-2 text-sm';
+            div.textContent = '⏳ Recherche en cours...';
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function supprimerLoading(chatId) {
+            const el = document.getElementById('loading-' + chatId);
+            if (el) el.remove();
+        }
+
+        // ── ENVOYER EXCEL ──
+        async function envoyerExcel() {
+            const input = document.getElementById('input-excel');
+            const question = input.value.trim();
+            if (!question) return;
+
+            ajouterMessage('chat-excel', question, 'user');
+            input.value = '';
+            ajouterLoading('chat-excel');
+
+            const response = await fetch('/api/chat/employe/excel', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    question: question,
+                    nom_fichier: nomFichierActif
+                })
+            });
+            const data = await response.json();
+            supprimerLoading('chat-excel');
+            ajouterMessage('chat-excel', data.reponse, 'assistant');
+        }
+
+        // ── ENVOYER PDF ──
+        async function envoyerPdf() {
+            const input = document.getElementById('input-pdf');
+            const question = input.value.trim();
+            if (!question) return;
+            if (!clientPdfActif) {
+                alert('Sélectionnez un client PDF d\'abord.');
+                return;
+            }
+
+            ajouterMessage('chat-pdf', question, 'user');
+            input.value = '';
+            ajouterLoading('chat-pdf');
+
+            const response = await fetch('/api/chat/employe/pdf', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    question: question,
+                    client: clientPdfActif
+                })
+            });
+            const data = await response.json();
+            supprimerLoading('chat-pdf');
+            ajouterMessage('chat-pdf', data.reponse, 'assistant');
+        }
+
+        // ── ENTER ──
+        document.getElementById('input-excel').addEventListener('keypress', e => {
+            if (e.key === 'Enter') envoyerExcel();
+        });
+        document.getElementById('input-pdf').addEventListener('keypress', e => {
+            if (e.key === 'Enter') envoyerPdf();
+        });
+    </script>
+
+</body>
+</html>
