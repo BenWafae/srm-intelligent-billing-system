@@ -1,9 +1,6 @@
 import sys
 import os
 
-# ════════════════════════════════════════════
-# CHEMINS — tous les modules du projet
-# ════════════════════════════════════════════
 BASE_DIR = os.path.dirname(__file__)
 sys.path.insert(0, BASE_DIR)
 sys.path.insert(0, os.path.join(BASE_DIR, "src"))
@@ -13,15 +10,18 @@ sys.path.insert(0, os.path.join(BASE_DIR, "src", "rag_client"))
 from fastapi import FastAPI, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 
 from src.database import init_db, verifier_login
 
-app = FastAPI()
-templates = Jinja2Templates(directory=str(os.path.join(BASE_DIR, "templates")))
+app = FastAPI()  # 1. créer app
+
+app.mount("/static", StaticFiles(directory="src/assets"), name="static")  # 2. monter static
+
+templates = Jinja2Templates(directory=str(os.path.join(BASE_DIR, "templates")))  # 3. templates
 
 init_db()
 sessions = {}
-
 # ════════════════════════════════════════════
 # PAGE LOGIN — GET
 # ════════════════════════════════════════════
