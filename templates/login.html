@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>SRM - Connexion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+        
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">SRM</h1>
+        <p class="text-center text-gray-500 mb-6">Société Régionale Multiservices</p>
+
+        <!-- Message erreur -->
+        {% if erreur %}
+        <div class="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+            {{ erreur }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/login">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-medium mb-1">Email</label>
+                <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="votre.email@example.com"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                >
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-medium mb-1">Mot de passe</label>
+                <input 
+                    type="password" 
+                    name="password" 
+                    placeholder="Entrez votre mot de passe"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                >
+            </div>
+
+            <button 
+                type="submit"
+                class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+            >
+                Se Connecter
+            </button>
+        </form>
+
+        <p class="text-center text-gray-400 text-xs mt-6">🔒 Vos données sont sécurisées</p>
+    </div>
+
+</body>
+</html>
