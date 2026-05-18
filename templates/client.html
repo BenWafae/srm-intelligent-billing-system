@@ -30,7 +30,6 @@
             background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd);
         }
 
-        /* Style pour RTL (arabe) */
         body.rtl .sidebar {
             border-right: none;
             border-left: 1px solid #ede9fe;
@@ -254,13 +253,199 @@
         }
         .msg-avatar svg { width: 14px; height: 14px; stroke: #8b5cf6; }
         .msg-assistant {
-            padding: 12px 16px; background: white;
+            padding: 12px 16px;
+            background: white;
             border: 1px solid #ede9fe;
             border-radius: 4px 18px 18px 18px;
-            font-size: 14px; color: #374151; line-height: 1.65;
-            white-space: pre-wrap;
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.65;
             box-shadow: 0 2px 10px rgba(109,40,217,0.06);
         }
+
+        /* ========== STYLES POUR LES RÉPONSES STRUCTURÉES ========== */
+        
+        /* Paragraphes */
+        .assistant-paragraph {
+            margin: 0 0 10px 0;
+            line-height: 1.6;
+        }
+        .assistant-paragraph:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Listes à puces */
+        .assistant-ul {
+            margin: 8px 0;
+            padding-left: 20px;
+            list-style-type: disc;
+        }
+        .assistant-ul li {
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        /* Listes numérotées */
+        .assistant-ol {
+            margin: 8px 0;
+            padding-left: 20px;
+            list-style-type: decimal;
+        }
+        .assistant-ol li {
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        /* Titres */
+        .assistant-h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #5b21b6;
+            margin: 14px 0 8px 0;
+            font-family: 'Sora', sans-serif;
+        }
+        .assistant-h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #7c3aed;
+            margin: 10px 0 6px 0;
+        }
+        .assistant-h5 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #8b5cf6;
+            margin: 8px 0 4px 0;
+        }
+
+        /* Séparateur */
+        .assistant-hr {
+            margin: 12px 0;
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, #ede9fe, #c4b5fd, #ede9fe);
+        }
+
+        /* Champs clé-valeur (ex: "Montant : 100 Dhs") */
+        .assistant-field {
+            margin: 6px 0;
+            padding: 4px 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+        }
+        .field-label {
+            font-weight: 600;
+            color: #6d28d9;
+            min-width: 120px;
+        }
+        .field-value {
+            color: #374151;
+        }
+        body.rtl .field-label {
+            min-width: 120px;
+        }
+
+        /* Tableaux */
+        .assistant-table-wrapper {
+            overflow-x: auto;
+            margin: 12px 0;
+            border-radius: 12px;
+            border: 1px solid #ede9fe;
+        }
+        .assistant-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: white;
+        }
+        .assistant-table th {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #5b21b6;
+            border-bottom: 1px solid #ddd6fe;
+        }
+        .assistant-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f3f0ff;
+            color: #374151;
+        }
+        .assistant-table tr:last-child td {
+            border-bottom: none;
+        }
+        body.rtl .assistant-table th,
+        body.rtl .assistant-table td {
+            text-align: right;
+        }
+
+        /* Mise en valeur des montants */
+        .assistant-amount {
+            font-weight: 700;
+            color: #7c3aed;
+            background: linear-gradient(135deg, #faf5ff, #ffffff);
+            padding: 2px 6px;
+            border-radius: 6px;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        /* Unités (kWh, m³) */
+        .assistant-unit {
+            font-weight: 500;
+            color: #a78bfa;
+        }
+
+        /* Dates */
+        .assistant-date {
+            font-weight: 500;
+            color: #8b5cf6;
+            background: #f5f3ff;
+            padding: 1px 5px;
+            border-radius: 4px;
+            display: inline-block;
+            font-size: 12px;
+        }
+
+        /* Badges / tags */
+        .assistant-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #7c3aed;
+            margin: 0 2px;
+        }
+
+        /* Blockquote / informations importantes */
+        .assistant-blockquote {
+            border-left: 3px solid #a78bfa;
+            padding: 8px 12px;
+            margin: 10px 0;
+            background: #faf5ff;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: #4b5563;
+        }
+        body.rtl .assistant-blockquote {
+            border-left: none;
+            border-right: 3px solid #a78bfa;
+            border-radius: 8px 0 0 8px;
+        }
+
+        /* Code / informations techniques */
+        .assistant-code {
+            background: #f5f3ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #7c3aed;
+        }
+
+        /* Animation chargement */
         .msg-loading { display: flex; gap: 4px; align-items: center; padding: 14px 16px; }
         .dot-pulse { width: 7px; height: 7px; border-radius: 50%; background: #c4b5fd; animation: pulse-dot 1.4s ease-in-out infinite; }
         .dot-pulse:nth-child(2) { animation-delay: 0.2s; }
@@ -270,6 +455,7 @@
             40% { opacity: 1; transform: scale(1); }
         }
 
+        /* Pied de page téléchargement */
         .download-bar {
             padding: 8px 24px; border-top: 1px solid #f3f0ff;
             background: white; display: flex; align-items: center; gap: 10px;
@@ -293,6 +479,7 @@
         }
         .btn-download:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(109,40,217,0.35); }
 
+        /* Zone de saisie */
         .input-zone { padding: 10px 24px 14px; background: white; border-top: 1px solid #ede9fe; flex-shrink: 0; }
         .input-wrap {
             display: flex; align-items: center; gap: 10px;
@@ -318,13 +505,14 @@
         .btn-send:active { transform: scale(0.97); }
         .btn-send svg { width: 15px; height: 15px; stroke: white; }
 
+        /* Renommage conversation */
         .rename-input {
             font-size: 13px; font-family: 'DM Sans', sans-serif;
             background: white; border: 1px solid #a78bfa;
             border-radius: 5px; padding: 2px 6px; color: #374151; outline: none; width: 100%;
         }
 
-        /* Styles pour la modale compte */
+        /* Modale compte */
         .modal-panel {
             background: white;
             border-radius: 24px;
@@ -379,6 +567,37 @@
         .success-message {
             font-size: 12px; color: #10b981; margin-top: 6px;
             display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .msg-assistant-wrap {
+                max-width: 85%;
+            }
+            .assistant-amount, .assistant-unit, .assistant-date {
+                font-size: 12px;
+            }
+            .dashboard-band {
+                flex-direction: column;
+            }
+            .dash-card {
+                border-right: none;
+                border-bottom: 1px solid #f3f0ff;
+            }
+            body.rtl .dash-card {
+                border-left: none;
+            }
+            .dash-card:last-child {
+                border-bottom: none;
+            }
+            .field-label {
+                min-width: 100px;
+            }
+            .assistant-table th,
+            .assistant-table td {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -527,6 +746,155 @@
     let convIdActuelle = null;
     const chatDiv = document.getElementById('chat-messages');
 
+    // ==================== FORMATAGE AVANCÉ DES RÉPONSES ====================
+    
+    function formaterReponseAssistant(texte) {
+        if (!texte) return '';
+        
+        // Échapper le HTML pour éviter les injections
+        let formatted = texte
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        
+        // 1. Formatage du gras **texte**
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Formatage italique *texte*
+        formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        // 2. Formatage des tableaux (Markdown style)
+        // Détection d'un tableau: lignes avec | et au moins 2 colonnes
+        const tableRegex = /\n(\|.+\|)\n\|[-:\s|]+\|\n((?:\|.+\|\n?)+)/g;
+        formatted = formatted.replace(tableRegex, (match, headerRow, bodyRows) => {
+            const headers = headerRow.split('|').filter(cell => cell.trim());
+            const rows = bodyRows.trim().split('\n').filter(row => row.includes('|'));
+            
+            let tableHtml = '<div class="assistant-table-wrapper"><table class="assistant-table">';
+            tableHtml += '<thead><tr>';
+            headers.forEach(header => {
+                tableHtml += `<th>${header.trim()}</th>`;
+            });
+            tableHtml += '</tr></thead><tbody>';
+            
+            rows.forEach(row => {
+                const cells = row.split('|').filter(cell => cell.trim());
+                tableHtml += '<tr>';
+                cells.forEach(cell => {
+                    tableHtml += `<td>${cell.trim()}</td>`;
+                });
+                tableHtml += '</tr>';
+            });
+            
+            tableHtml += '</tbody></table></div>';
+            return tableHtml;
+        });
+        
+        // 3. Formatage des listes à puces (lignes commençant par - ou • ou * suivies d'espace)
+        let lines = formatted.split('\n');
+        let inList = false;
+        let listItems = [];
+        let newLines = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            // Détection d'élément de liste non numérotée
+            const ulMatch = line.match(/^[\-\•\*]\s+(.+)$/);
+            // Détection d'élément de liste numérotée
+            const olMatch = line.match(/^(\d+)\.\s+(.+)$/);
+            
+            if (ulMatch) {
+                if (!inList || listItems.type !== 'ul') {
+                    if (inList) {
+                        newLines.push(`<ul class="assistant-ul">${listItems.items.join('')}</ul>`);
+                    }
+                    inList = true;
+                    listItems = { type: 'ul', items: [] };
+                }
+                listItems.items.push(`<li>${ulMatch[1]}</li>`);
+            } 
+            else if (olMatch) {
+                if (!inList || listItems.type !== 'ol') {
+                    if (inList) {
+                        newLines.push(`<ol class="assistant-ol">${listItems.items.join('')}</ol>`);
+                    }
+                    inList = true;
+                    listItems = { type: 'ol', items: [] };
+                }
+                listItems.items.push(`<li>${olMatch[2]}</li>`);
+            }
+            else {
+                if (inList) {
+                    if (listItems.type === 'ul') {
+                        newLines.push(`<ul class="assistant-ul">${listItems.items.join('')}</ul>`);
+                    } else {
+                        newLines.push(`<ol class="assistant-ol">${listItems.items.join('')}</ol>`);
+                    }
+                    inList = false;
+                    listItems = { type: null, items: [] };
+                }
+                newLines.push(line);
+            }
+        }
+        
+        if (inList) {
+            if (listItems.type === 'ul') {
+                newLines.push(`<ul class="assistant-ul">${listItems.items.join('')}</ul>`);
+            } else {
+                newLines.push(`<ol class="assistant-ol">${listItems.items.join('')}</ol>`);
+            }
+        }
+        
+        formatted = newLines.join('\n');
+        
+        // 4. Formatage des titres (###, ##, #)
+        formatted = formatted.replace(/^####\s+(.+)$/gm, '<h5 class="assistant-h5">$1</h5>');
+        formatted = formatted.replace(/^###\s+(.+)$/gm, '<h4 class="assistant-h4">$1</h4>');
+        formatted = formatted.replace(/^##\s+(.+)$/gm, '<h3 class="assistant-h3">$1</h3>');
+        formatted = formatted.replace(/^#\s+(.+)$/gm, '<h3 class="assistant-h3">$1</h3>');
+        
+        // 5. Formatage des séparateurs (---)
+        formatted = formatted.replace(/^---+$/gm, '<hr class="assistant-hr">');
+        
+        // 6. Formatage des lignes avec deux-points (ex: "Montant : 100 Dhs")
+        formatted = formatted.replace(/^([^:\n]+):\s+(.+)$/gm, '<div class="assistant-field"><span class="field-label">$1</span> : <span class="field-value">$2</span></div>');
+        
+        // 7. Blockquotes (lignes commençant par >)
+        formatted = formatted.replace(/^>\s+(.+)$/gm, '<blockquote class="assistant-blockquote">$1</blockquote>');
+        
+        // 8. Formatage des montants en Dhs/MAD
+        formatted = formatted.replace(/(\d{1,3}(?:[\s]?\d{3})*[\d]?)\s*(?:Dhs|MAD|DH|dh|Dirhams?)/gi, '<span class="assistant-amount">$1 Dhs</span>');
+        formatted = formatted.replace(/(\d{1,3}(?:[\s]?\d{3})*[\d]?)\s*(?:kWh|m³|KWh)/gi, '<span class="assistant-unit">$1 $2</span>');
+        
+        // 9. Formatage des dates
+        formatted = formatted.replace(/(\d{1,2}\/\d{1,2}\/\d{4})/gi, '<span class="assistant-date">$1</span>');
+        formatted = formatted.replace(/(\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+\d{4})/gi, '<span class="assistant-date">$1</span>');
+        
+        // 10. Formatage des codes / valeurs techniques
+        formatted = formatted.replace(/`([^`]+)`/g, '<code class="assistant-code">$1</code>');
+        
+        // 11. Sauts de ligne → paragraphes (sauf si déjà dans des blocs HTML)
+        let paragraphs = formatted.split(/\n\s*\n/);
+        let processed = paragraphs.map(para => {
+            // Si le paragraphe contient déjà des balises HTML de structure, ne pas l'envelopper
+            if (para.includes('<ul') || para.includes('<ol') || para.includes('<h3') || 
+                para.includes('<h4') || para.includes('<h5') || para.includes('<hr') || 
+                para.includes('<div class="assistant-field') || para.includes('<table') ||
+                para.includes('<blockquote')) {
+                return para;
+            }
+            // Convertir les simples sauts de ligne en <br>
+            let withBreaks = para.replace(/\n/g, '<br>');
+            if (withBreaks.trim()) {
+                return `<p class="assistant-paragraph">${withBreaks}</p>`;
+            }
+            return '';
+        }).join('');
+        
+        return processed;
+    }
+    
+    // ==================== FIN FORMATAGE ====================
+
     function fixSidebarScroll() {
         const sidebar = document.querySelector('.sidebar');
         const convList = document.getElementById('conv-list');
@@ -615,7 +983,6 @@
         return div;
     }
     
-    // Fonction pour mettre à jour tous les textes rename/delete
     function updateRenameDeleteTexts() {
         if (typeof i18n === 'undefined' || !i18n) return;
         const renameText = i18n.t('rename');
@@ -641,6 +1008,7 @@
         });
         document.getElementById(`menu-${id}`).classList.toggle('open');
     }
+    
     document.addEventListener('click', () => {
         document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
     });
@@ -729,6 +1097,39 @@
         envoyerQuestion();
     }
 
+    function afficherBulle(role, texte) {
+        const wrap = document.createElement('div');
+        if (role === 'user') {
+            wrap.className = 'msg-user';
+            wrap.textContent = texte;
+        } else if (role === 'loading') {
+            wrap.className = 'msg-assistant-wrap';
+            wrap.innerHTML = `
+                <div class="msg-avatar">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="14" height="14">
+                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                </div>
+                <div class="msg-assistant msg-loading">
+                    <div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div>
+                </div>`;
+        } else {
+            wrap.className = 'msg-assistant-wrap';
+            // Application du formatage avancé
+            const formatted = formaterReponseAssistant(texte);
+            wrap.innerHTML = `
+                <div class="msg-avatar">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="14" height="14">
+                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                </div>
+                <div class="msg-assistant">${formatted}</div>`;
+        }
+        chatDiv.appendChild(wrap);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+        return wrap;
+    }
+
     async function envoyerQuestion() {
         const input = document.getElementById('question-input');
         const question = input.value.trim();
@@ -770,38 +1171,6 @@
                 ]
             })
         });
-    }
-
-    function afficherBulle(role, texte) {
-        const wrap = document.createElement('div');
-        if (role === 'user') {
-            wrap.className = 'msg-user';
-            wrap.textContent = texte;
-        } else if (role === 'loading') {
-            wrap.className = 'msg-assistant-wrap';
-            wrap.innerHTML = `
-                <div class="msg-avatar">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="14" height="14">
-                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                    </svg>
-                </div>
-                <div class="msg-assistant msg-loading">
-                    <div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div>
-                </div>`;
-        } else {
-            wrap.className = 'msg-assistant-wrap';
-            const formatted = texte.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            wrap.innerHTML = `
-                <div class="msg-avatar">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="14" height="14">
-                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                    </svg>
-                </div>
-                <div class="msg-assistant">${formatted}</div>`;
-        }
-        chatDiv.appendChild(wrap);
-        chatDiv.scrollTop = chatDiv.scrollHeight;
-        return wrap;
     }
 
     async function chargerMoisDisponibles() {
@@ -889,8 +1258,23 @@
         errorDiv.style.display = 'block';
     }
     
-    // Exposer updateRenameDeleteTexts globalement pour i18n.js
     window.updateRenameDeleteTexts = updateRenameDeleteTexts;
+    window.ouvrirCompte = ouvrirCompte;
+</script>
+
+<!-- Bouton pour ouvrir la modale compte (à ajouter dans le footer si souhaité) -->
+<script>
+    // Ajouter un bouton compte dans le footer
+    const footer = document.querySelector('.sidebar-footer');
+    if (footer) {
+        const compteBtn = document.createElement('button');
+        compteBtn.innerHTML = 'Mon compte';
+        compteBtn.onclick = ouvrirCompte;
+        compteBtn.style.cssText = 'margin-top: 8px; width: 100%; padding: 8px; background: linear-gradient(135deg, #f5f3ff, #ede9fe); border: 1px solid #ddd6fe; border-radius: 10px; font-size: 12px; color: #7c3aed; cursor: pointer; font-family: "DM Sans", sans-serif; transition: all 0.2s;';
+        compteBtn.onmouseenter = () => { compteBtn.style.background = '#ede9fe'; };
+        compteBtn.onmouseleave = () => { compteBtn.style.background = 'linear-gradient(135deg, #f5f3ff, #ede9fe)'; };
+        footer.appendChild(compteBtn);
+    }
 </script>
 
 </body>
