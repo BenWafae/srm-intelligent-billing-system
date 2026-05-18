@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SRM — Interface Employé</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/i18n.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
@@ -30,6 +31,26 @@
             background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd);
         }
 
+        body.rtl .sidebar {
+            border-right: none;
+            border-left: 1px solid #ede9fe;
+        }
+        body.rtl .sidebar::before {
+            left: auto;
+            right: 0;
+        }
+        body.rtl .conv-item {
+            flex-direction: row-reverse;
+        }
+        body.rtl .lang-submenu {
+            left: auto;
+            right: 100%;
+        }
+        body.rtl .user-menu-dropdown {
+            right: auto;
+            left: 0;
+        }
+
         /* Scrollbar personnalisée */
         .conv-list::-webkit-scrollbar,
         .chat-area::-webkit-scrollbar {
@@ -44,10 +65,6 @@
         .chat-area::-webkit-scrollbar-thumb {
             background: #c4b5fd;
             border-radius: 4px;
-        }
-        .conv-list::-webkit-scrollbar-thumb:hover,
-        .chat-area::-webkit-scrollbar-thumb:hover {
-            background: #a78bfa;
         }
 
         /* Conversation items */
@@ -83,6 +100,10 @@
             z-index: 100;
             width: 145px;
             box-shadow: 0 8px 24px rgba(109,40,217,0.1);
+        }
+        body.rtl .dropdown-menu {
+            right: auto;
+            left: 8px;
         }
         .dropdown-menu.open {
             display: block;
@@ -262,6 +283,245 @@
             border: 1px solid #ddd6fe;
             border-radius: 12px;
         }
+
+        /* Menu utilisateur */
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid #f3f0ff;
+            position: relative;
+            overflow: visible;
+        }
+        .sidebar {
+            overflow: visible;
+        }
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: linear-gradient(135deg, #faf5ff, #f5f3ff);
+            border: 1px solid #ede9fe;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .user-card:hover {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border-color: #c4b5fd;
+        }
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(109,40,217,0.25);
+        }
+        .user-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .user-role {
+            font-size: 10px;
+            color: #a78bfa;
+        }
+
+        .user-menu-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 12px;
+            right: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border: 1px solid #ede9fe;
+            border-radius: 12px;
+            padding: 6px;
+            z-index: 200;
+            box-shadow: 0 10px 25px -5px rgba(109,40,217,0.15);
+        }
+        body.rtl .user-menu-dropdown {
+            left: auto;
+            right: 12px;
+        }
+        .user-menu-dropdown.open {
+            display: block;
+            animation: menuFadeIn 0.15s ease-out;
+        }
+        @keyframes menuFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #4b5563;
+            transition: all 0.15s;
+        }
+        .user-menu-item:hover {
+            background: #f5f3ff;
+            color: #7c3aed;
+        }
+        .user-menu-item svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            fill: none;
+        }
+        .user-menu-item.danger {
+            color: #ef4444;
+        }
+        .user-menu-item.danger:hover {
+            background: #fef2f2;
+        }
+        .user-menu-divider {
+            height: 1px;
+            background: #f3f0ff;
+            margin: 6px 0;
+        }
+
+        .user-menu-item.lang-item {
+            position: relative;
+            justify-content: space-between;
+        }
+        .user-menu-item.lang-item .arrow {
+            margin-left: auto;
+            font-size: 12px;
+            color: #a78bfa;
+        }
+        .lang-submenu {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: -10px;
+            background: white;
+            border: 1px solid #ede9fe;
+            border-radius: 10px;
+            padding: 6px;
+            min-width: 140px;
+            box-shadow: 0 8px 24px rgba(109,40,217,0.15);
+            z-index: 1000;
+        }
+        body.rtl .lang-submenu {
+            left: auto;
+            right: 100%;
+        }
+        .lang-submenu.show {
+            display: block;
+        }
+        .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #4b5563;
+            transition: all 0.15s;
+        }
+        .lang-option:hover {
+            background: #f5f3ff;
+            color: #7c3aed;
+        }
+        .lang-option.active {
+            background: #ede9fe;
+            color: #7c3aed;
+            font-weight: 500;
+        }
+
+        /* Modal */
+        .modal-panel {
+            background: white;
+            border-radius: 24px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalFadeIn 0.2s ease-out;
+            overflow: hidden;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f3f0ff;
+            background: linear-gradient(135deg, #faf5ff, #ffffff);
+        }
+        .modal-body { padding: 24px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 3px rgba(167,139,250,0.1);
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(109,40,217,0.35);
+        }
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            color: #6b7280;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            border-color: #a78bfa;
+            color: #7c3aed;
+            background: #faf5ff;
+        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
@@ -269,20 +529,16 @@
 <div class="flex h-screen w-full overflow-hidden">
 
     <!-- ════════════════════════════════════════════════════════════ -->
-    <!-- SIDEBAR (même design que client) -->
+    <!-- SIDEBAR -->
     <!-- ════════════════════════════════════════════════════════════ -->
     <div class="sidebar">
         <!-- Logo -->
-        <div class="p-4 border-b border-purple-50">
-            <div class="flex items-center gap-3 px-2 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                    </svg>
-                </div>
+        <div class="sidebar-logo p-4 border-b border-purple-50">
+            <div class="logo-inner flex items-center gap-3 px-2 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
+                <img src="/static/srm_logo.png" alt="SRM" class="logo-img w-8 h-8 object-contain" onerror="this.style.display='none'">
                 <div>
-                    <div class="font-sora text-sm font-semibold text-purple-800">SRM Souss-Massa</div>
-                    <div class="text-xs text-purple-400">Espace Employé</div>
+                    <div class="logo-text font-sora text-sm font-semibold text-purple-800">SRM Souss-Massa</div>
+                    <div class="logo-sub text-xs text-purple-400">Espace Employé</div>
                 </div>
             </div>
         </div>
@@ -290,11 +546,11 @@
         <!-- Nouvelle conversation -->
         <div class="px-3 pt-3 pb-2">
             <button onclick="nouvelleConversation()"
-                class="flex items-center justify-center gap-2 w-full px-3 py-2.5 bg-white border border-gray-200 hover:border-purple-300 rounded-xl text-sm text-gray-600 hover:text-purple-700 hover:bg-purple-50 transition-all">
+                class="btn-new-conv flex items-center justify-center gap-2 w-full px-3 py-2.5 bg-white border border-gray-200 hover:border-purple-300 rounded-xl text-sm text-gray-600 hover:text-purple-700 hover:bg-purple-50 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path d="M12 5v14M5 12h14"/>
                 </svg>
-                Nouvelle conversation
+                <span data-i18n="new_conversation">Nouvelle conversation</span>
             </button>
         </div>
 
@@ -318,29 +574,63 @@
 
         <!-- Liste conversations -->
         <div class="conv-list flex-1 overflow-y-auto px-2 py-1">
-            <p class="text-[10px] font-medium uppercase tracking-wider text-purple-300 px-2 py-2 mb-1">Récentes</p>
+            <p class="text-[10px] font-medium uppercase tracking-wider text-purple-300 px-2 py-2 mb-1" data-i18n="recent">Récentes</p>
             <div id="conversations-container">
                 <p class="text-xs text-purple-300 text-center py-8" id="empty-msg">Chargement...</p>
             </div>
         </div>
 
-        <!-- Footer utilisateur -->
-        <div class="p-3 border-t border-purple-50">
-            <div class="flex items-center gap-3 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                    {{ email[0].upper() }}
+        <!-- Footer utilisateur avec menu -->
+        <div class="sidebar-footer">
+            <div class="user-card" onclick="toggleUserMenu(event)">
+                <div class="user-avatar">{{ email[0].upper() }}</div>
+                <div style="flex:1; overflow:hidden;">
+                    <div class="user-name">{{ email.split('@')[0] }}</div>
+                    <div class="user-role" data-i18n="employee_role">Employé SRM</div>
                 </div>
-                <div class="flex-1 overflow-hidden">
-                    <p class="text-sm font-medium text-gray-800 truncate">{{ email.split('@')[0] }}</p>
-                    <p class="text-xs text-purple-400">Employé SRM</p>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+            
+            <div class="user-menu-dropdown" id="userMenuDropdown">
+                <div class="user-menu-item" onclick="ouvrirCompte(); closeUserMenu();">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M12 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/>
+                        <path d="M3 21v-2a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v2"/>
+                    </svg>
+                    <span data-i18n="my_account">Mon compte</span>
                 </div>
-                <a href="/logout" class="text-purple-300 hover:text-red-500 transition-colors" title="Déconnexion">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                
+                <div class="user-menu-item lang-item" onclick="toggleLangSubmenu(event)">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 0 1 6.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+                    </svg>
+                    <span data-i18n="language">Langue</span>
+                    <span class="arrow">▶</span>
+                    <div class="lang-submenu" id="langSubmenu">
+                        <div class="lang-option" onclick="changerLangue('fr'); event.stopPropagation();">
+                            <span>🇫🇷</span> Français
+                        </div>
+                        <div class="lang-option" onclick="changerLangue('en'); event.stopPropagation();">
+                            <span>🇬🇧</span> English
+                        </div>
+                        <div class="lang-option" onclick="changerLangue('ar'); event.stopPropagation();">
+                            <span>🇲🇦</span> العربية
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-menu-divider"></div>
+                
+                <div class="user-menu-item danger" onclick="window.location.href='/logout'">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/>
                         <line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>
-                </a>
+                    <span data-i18n="logout">Déconnexion</span>
+                </div>
             </div>
         </div>
     </div>
@@ -348,7 +638,7 @@
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- MAIN CONTENT -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <div class="flex-1 flex flex-col overflow-hidden bg-purple-50/30">
+    <div class="main flex-1 flex flex-col overflow-hidden bg-purple-50/30">
 
         <!-- Navbar avec onglets -->
         <div class="bg-white border-b border-purple-100 px-6 py-3 flex justify-between items-center flex-shrink-0">
@@ -372,7 +662,6 @@
         <!-- ════════════════════════════════════════════════════════════ -->
         <div id="onglet-excel" class="flex-1 flex flex-col overflow-hidden p-5">
 
-            <!-- Banner info -->
             {% if total_factures > 0 %}
             <div class="info-banner px-4 py-2.5 mb-4 flex items-center gap-2 text-sm text-purple-700 flex-shrink-0">
                 <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -386,7 +675,6 @@
             </div>
             {% endif %}
 
-            <!-- Filtre fichier -->
             <div class="mb-4 flex-shrink-0">
                 <label class="text-sm font-medium text-gray-600">🗂️ Filtrer par fichier Excel :</label>
                 <select id="select-fichier" onchange="changerFichier()" class="custom-select ml-2">
@@ -398,7 +686,6 @@
                 <span id="label-fichier" class="ml-2 text-xs text-purple-400">🌐 Toute la base</span>
             </div>
 
-            <!-- Zone chat Excel -->
             <div id="chat-excel" class="chat-area flex-1 overflow-y-auto flex flex-col gap-3 mb-4 p-3 bg-white/50 rounded-xl border border-purple-100">
                 <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm" id="excel-empty">
                     <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -408,7 +695,6 @@
                 </div>
             </div>
 
-            <!-- Input Excel -->
             <div class="chat-input flex items-center gap-2 p-1.5 pl-4 bg-white flex-shrink-0">
                 <input type="text" id="input-excel"
                     placeholder="Ex: Qui consomme le plus ? Liste des clients..."
@@ -428,7 +714,6 @@
         <!-- ════════════════════════════════════════════════════════════ -->
         <div id="onglet-pdf" class="flex-1 flex flex-col overflow-hidden p-5 hidden">
 
-            <!-- Sélecteur client -->
             <div class="mb-4 flex-shrink-0">
                 <label class="text-sm font-medium text-gray-600">👤 Sélectionner un client :</label>
                 <select id="select-client-pdf" onchange="changerClientPdf()" class="custom-select ml-2">
@@ -442,7 +727,6 @@
                 </select>
             </div>
 
-            <!-- Zone chat PDF -->
             <div id="chat-pdf" class="chat-area flex-1 overflow-y-auto flex flex-col gap-3 mb-4 p-3 bg-white/50 rounded-xl border border-purple-100">
                 <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm" id="pdf-empty">
                     <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -452,7 +736,6 @@
                 </div>
             </div>
 
-            <!-- Input PDF -->
             <div class="chat-input flex items-center gap-2 p-1.5 pl-4 bg-white flex-shrink-0">
                 <input type="text" id="input-pdf"
                     placeholder="Ex: Quel est le montant ? Quelle est la période ?"
@@ -470,9 +753,33 @@
     </div>
 </div>
 
+<!-- MODALE COMPTE -->
+<div id="modal-compte" style="display:none;position:fixed;inset:0;background:rgba(109,40,217,0.15);backdrop-filter:blur(2px);z-index:1000;align-items:center;justify-content:center;">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <h3 class="font-sora text-lg font-semibold text-purple-800 m-0" data-i18n="my_account">Mon compte</h3>
+            <p class="text-sm text-gray-400 mt-1" data-i18n="account_subtitle">Modifier mon mot de passe</p>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label" data-i18n="current_password">Mot de passe actuel</label>
+                <input type="password" id="ancien-mdp" class="form-input" placeholder="Mot de passe actuel">
+                <label class="form-label mt-3" data-i18n="new_password">Nouveau mot de passe</label>
+                <input type="password" id="nouveau-mdp" class="form-input" placeholder="Nouveau mot de passe">
+                <label class="form-label mt-3" data-i18n="confirm_password">Confirmer le mot de passe</label>
+                <input type="password" id="confirmation-mdp" class="form-input" placeholder="Confirmer le mot de passe">
+                <div id="error-msg" class="text-red-500 text-xs mt-2 hidden"></div>
+                <div id="success-msg" class="text-green-500 text-xs mt-2 hidden" data-i18n="password_changed">Mot de passe modifié avec succès !</div>
+            </div>
+            <button class="btn-primary" onclick="changerMotDePasse()" data-i18n="save">Enregistrer</button>
+            <button class="btn-secondary mt-2" onclick="fermerCompte()" data-i18n="close">Fermer</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // ════════════════════════════════════════════════════════════════
-    // ÉTAT GLOBAL (inchangé)
+    // ÉTAT GLOBAL
     // ════════════════════════════════════════════════════════════════
     let nomFichierActif = "";
     let clientPdfActif = "{{ clients_pdf[0] if clients_pdf else '' }}";
@@ -484,17 +791,118 @@
     let filtreSidebar = "all";
 
     // ════════════════════════════════════════════════════════════════
+    // GESTION MENU UTILISATEUR
+    // ════════════════════════════════════════════════════════════════
+    function toggleUserMenu(event) {
+        event.stopPropagation();
+        const menu = document.getElementById('userMenuDropdown');
+        menu.classList.toggle('open');
+        document.getElementById('langSubmenu').classList.remove('show');
+    }
+    
+    function closeUserMenu() {
+        const menu = document.getElementById('userMenuDropdown');
+        menu.classList.remove('open');
+        document.getElementById('langSubmenu').classList.remove('show');
+    }
+    
+    function toggleLangSubmenu(event) {
+        event.stopPropagation();
+        const submenu = document.getElementById('langSubmenu');
+        submenu.classList.toggle('show');
+    }
+    
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('userMenuDropdown');
+        const userCard = document.querySelector('.user-card');
+        if (menu && !menu.contains(event.target) && userCard && !userCard.contains(event.target)) {
+            menu.classList.remove('open');
+            document.getElementById('langSubmenu').classList.remove('show');
+        }
+    });
+
+    function ouvrirCompte() {
+        closeUserMenu();
+        document.getElementById('modal-compte').style.display = 'flex';
+        document.getElementById('ancien-mdp').value = '';
+        document.getElementById('nouveau-mdp').value = '';
+        document.getElementById('confirmation-mdp').value = '';
+        document.getElementById('error-msg').classList.add('hidden');
+        document.getElementById('success-msg').classList.add('hidden');
+    }
+
+    function fermerCompte() {
+        document.getElementById('modal-compte').style.display = 'none';
+    }
+
+    async function changerMotDePasse() {
+        const ancien = document.getElementById('ancien-mdp').value;
+        const nouveau = document.getElementById('nouveau-mdp').value;
+        const confirmation = document.getElementById('confirmation-mdp').value;
+        
+        document.getElementById('error-msg').classList.add('hidden');
+        document.getElementById('success-msg').classList.add('hidden');
+        
+        if (!ancien || !nouveau || !confirmation) {
+            document.getElementById('error-msg').textContent = 'Tous les champs sont requis.';
+            document.getElementById('error-msg').classList.remove('hidden');
+            return;
+        }
+        if (nouveau !== confirmation) {
+            document.getElementById('error-msg').textContent = 'Les nouveaux mots de passe ne correspondent pas.';
+            document.getElementById('error-msg').classList.remove('hidden');
+            return;
+        }
+        if (nouveau.length < 4) {
+            document.getElementById('error-msg').textContent = 'Le mot de passe doit contenir au moins 4 caractères.';
+            document.getElementById('error-msg').classList.remove('hidden');
+            return;
+        }
+        
+        try {
+            const res = await fetch('/api/employe/changer-mot-de-passe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ancien_mdp: ancien, nouveau_mdp: nouveau })
+            });
+            const data = await res.json();
+            if (data.succes) {
+                document.getElementById('success-msg').classList.remove('hidden');
+                setTimeout(() => fermerCompte(), 1500);
+            } else {
+                document.getElementById('error-msg').textContent = data.erreur || 'Une erreur est survenue.';
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        } catch (err) {
+            document.getElementById('error-msg').textContent = 'Erreur de connexion au serveur.';
+            document.getElementById('error-msg').classList.remove('hidden');
+        }
+    }
+
+    function changerLangue(lang) {
+        if (typeof i18n !== 'undefined' && i18n) {
+            i18n.switchTo(lang);
+        }
+        document.querySelectorAll('.lang-option').forEach(opt => {
+            opt.classList.remove('active');
+            if ((lang === 'fr' && opt.textContent.includes('Français')) ||
+                (lang === 'en' && opt.textContent.includes('English')) ||
+                (lang === 'ar' && opt.textContent.includes('العربية'))) {
+                opt.classList.add('active');
+            }
+        });
+        document.getElementById('langSubmenu').classList.remove('show');
+        closeUserMenu();
+    }
+
+    // ════════════════════════════════════════════════════════════════
     // INIT
     // ════════════════════════════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', () => {
         chargerConversations();
-        // Activer le premier filtre par défaut
         document.getElementById('sb-all').classList.add('active');
     });
 
-    // ════════════════════════════════════════════════════════════════
-    // ONGLETS
-    // ════════════════════════════════════════════════════════════════
     function afficherOnglet(onglet) {
         modeActif = onglet;
         document.getElementById('onglet-excel').classList.toggle('hidden', onglet !== 'excel');
@@ -512,12 +920,8 @@
         }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // FILTRE SIDEBAR
-    // ════════════════════════════════════════════════════════════════
     function filtrerSidebar(mode) {
         filtreSidebar = mode;
-        
         ['all', 'excel', 'pdf'].forEach(m => {
             const btn = document.getElementById('sb-' + m);
             if (m === mode) {
@@ -529,9 +933,6 @@
         chargerConversations();
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // CHARGER CONVERSATIONS
-    // ════════════════════════════════════════════════════════════════
     async function chargerConversations() {
         const url = filtreSidebar === 'all'
             ? '/api/employe/conversations'
@@ -616,9 +1017,6 @@
         return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // MENU 3 POINTS
-    // ════════════════════════════════════════════════════════════════
     function toggleMenu(e, convId) {
         e.stopPropagation();
         document.querySelectorAll('.dropdown-menu').forEach(m => {
@@ -631,9 +1029,6 @@
         document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
     });
 
-    // ════════════════════════════════════════════════════════════════
-    // RENOMMER
-    // ════════════════════════════════════════════════════════════════
     function demanderRenommage(convId) {
         document.getElementById(`menu-${convId}`).classList.remove('open');
         const el = document.getElementById(`titre-${convId}`);
@@ -658,9 +1053,6 @@
         });
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // SUPPRIMER
-    // ════════════════════════════════════════════════════════════════
     async function supprimerConversation(convId) {
         document.getElementById(`menu-${convId}`).classList.remove('open');
         const convItem = document.querySelector(`[data-id="${convId}"]`);
@@ -677,9 +1069,6 @@
         }
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // CHARGER UNE CONVERSATION
-    // ════════════════════════════════════════════════════════════════
     async function chargerConversation(convId, mode) {
         const res = await fetch(`/api/employe/messages/${convId}`);
         const data = await res.json();
@@ -705,9 +1094,6 @@
         document.querySelector(`[data-id="${convId}"]`)?.classList.add('active');
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // NOUVELLE CONVERSATION
-    // ════════════════════════════════════════════════════════════════
     function nouvelleConversation() {
         convIdExcel = null;
         convIdPdf = null;
@@ -732,9 +1118,6 @@
         document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // FILTRE FICHIER EXCEL
-    // ════════════════════════════════════════════════════════════════
     function changerFichier() {
         nomFichierActif = document.getElementById('select-fichier').value;
         const label = document.getElementById('label-fichier');
@@ -750,9 +1133,6 @@
         historiqueExcel = [];
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // CHANGER CLIENT PDF
-    // ════════════════════════════════════════════════════════════════
     function changerClientPdf() {
         clientPdfActif = document.getElementById('select-client-pdf').value;
         document.getElementById('chat-pdf').innerHTML = `
@@ -766,9 +1146,6 @@
         historiquePdf = [];
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // AFFICHER BULLE (version stylisée)
-    // ════════════════════════════════════════════════════════════════
     function afficherBulle(chatId, role, texte) {
         const chat = document.getElementById(chatId);
         const empty = chat.querySelector('.flex-col.items-center.justify-center');
@@ -798,9 +1175,6 @@
         return div;
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // ENVOYER EXCEL (inchangé)
-    // ════════════════════════════════════════════════════════════════
     async function envoyerExcel() {
         const input = document.getElementById('input-excel');
         const question = input.value.trim();
@@ -853,9 +1227,6 @@
         });
     }
 
-    // ════════════════════════════════════════════════════════════════
-    // ENVOYER PDF (inchangé)
-    // ════════════════════════════════════════════════════════════════
     async function envoyerPdf() {
         const input = document.getElementById('input-pdf');
         const question = input.value.trim();
@@ -909,15 +1280,16 @@
         });
     }
 
-    // ────────────────────────────────────────────────────────────────
-    // ENTER
-    // ────────────────────────────────────────────────────────────────
     document.getElementById('input-excel').addEventListener('keypress', e => {
         if (e.key === 'Enter') envoyerExcel();
     });
     document.getElementById('input-pdf').addEventListener('keypress', e => {
         if (e.key === 'Enter') envoyerPdf();
     });
+
+    window.ouvrirCompte = ouvrirCompte;
+    window.changerLangue = changerLangue;
+    window.closeUserMenu = closeUserMenu;
 </script>
 
 </body>

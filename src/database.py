@@ -905,3 +905,13 @@ def changer_password_client(email: str, nouveau_mdp: str) -> None:
     )
     conn.commit()
     conn.close()
+def changer_password_employe(email: str, nouveau_mdp: str) -> None:
+    """Change le mot de passe d'un employé."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE users SET password = ? WHERE email = ?",
+        (hash_password(nouveau_mdp), email)
+    )
+    conn.commit()
+    conn.close()

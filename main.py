@@ -350,6 +350,20 @@ async def supprimer_conv_employe(request: Request):
     from src.database import supprimer_conversation_employe
     supprimer_conversation_employe(data["conversation_id"])
     return {"succes": True}
+# Ajoutez après les routes existantes de l'employé
+
+@app.post("/api/employe/changer-mot-de-passe")
+async def changer_mdp_employe(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"succes": False, "erreur": "Session expirée"}
+    user = sessions[session_id]
+    data = await request.json()
+    from src.database import verifier_login, changer_password_employe
+    if not verifier_login(user["email"], data["ancien_mdp"]):
+        return {"succes": False, "erreur": "Mot de passe actuel incorrect"}
+    changer_password_employe(user["email"], data["nouveau_mdp"])
+    return {"succes": True}
 
 @app.get("/client", response_class=HTMLResponse)
 def page_client(request: Request):
