@@ -2,171 +2,436 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SRM — Interface Employé</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        .conv-item { position: relative; }
-        .three-dots { opacity: 0; transition: opacity 0.15s; }
-        .conv-item:hover .three-dots { opacity: 1; }
-        .dropdown-menu { display: none; position: absolute; right: 4px; top: 32px;
-            background: white; border: 1px solid #e5e7eb; border-radius: 8px;
-            padding: 4px; z-index: 50; width: 150px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .dropdown-menu.open { display: block; }
-        .dd-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px;
-            border-radius: 6px; font-size: 13px; cursor: pointer; color: #374151; }
-        .dd-item:hover { background: #f3f4f6; }
-        .dd-item.danger { color: #ef4444; }
-        .dd-item.danger:hover { background: #fef2f2; }
-        .rename-input { font-size: 13px; border: 1px solid #3b82f6; border-radius: 4px;
-            padding: 1px 6px; width: 100%; outline: none; background: white; }
-        #conv-list::-webkit-scrollbar { width: 4px; }
-        #conv-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
-        #chat-excel::-webkit-scrollbar, #chat-pdf::-webkit-scrollbar { width: 4px; }
-        #chat-excel::-webkit-scrollbar-thumb, #chat-pdf::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        * { box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; margin: 0; background: #f8f7ff; }
+
+        /* SIDEBAR STYLES */
+        .sidebar {
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #ede9fe;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd);
+        }
+
+        /* Scrollbar personnalisée */
+        .conv-list::-webkit-scrollbar,
+        .chat-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        .conv-list::-webkit-scrollbar-track,
+        .chat-area::-webkit-scrollbar-track {
+            background: #f3f0ff;
+            border-radius: 4px;
+        }
+        .conv-list::-webkit-scrollbar-thumb,
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #c4b5fd;
+            border-radius: 4px;
+        }
+        .conv-list::-webkit-scrollbar-thumb:hover,
+        .chat-area::-webkit-scrollbar-thumb:hover {
+            background: #a78bfa;
+        }
+
+        /* Conversation items */
+        .conv-item {
+            position: relative;
+            transition: all 0.15s;
+        }
+        .conv-item:hover {
+            background: #faf5ff;
+        }
+        .conv-item.active {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border-left: 3px solid #7c3aed;
+        }
+        .three-dots {
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .conv-item:hover .three-dots {
+            opacity: 1;
+        }
+
+        /* Dropdown menu */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 8px;
+            top: 36px;
+            background: white;
+            border: 1px solid #ede9fe;
+            border-radius: 10px;
+            padding: 4px;
+            z-index: 100;
+            width: 145px;
+            box-shadow: 0 8px 24px rgba(109,40,217,0.1);
+        }
+        .dropdown-menu.open {
+            display: block;
+        }
+        .dd-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 7px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #4b5563;
+            transition: background 0.15s;
+        }
+        .dd-item:hover {
+            background: #f5f3ff;
+            color: #7c3aed;
+        }
+        .dd-item.danger {
+            color: #ef4444;
+        }
+        .dd-item.danger:hover {
+            background: #fef2f2;
+        }
+        .rename-input {
+            font-size: 12px;
+            font-family: 'DM Sans', sans-serif;
+            background: white;
+            border: 1px solid #a78bfa;
+            border-radius: 5px;
+            padding: 2px 6px;
+            color: #374151;
+            outline: none;
+            width: 100%;
+        }
+
+        /* Boutons de filtre */
+        .filter-btn {
+            transition: all 0.2s;
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            box-shadow: 0 2px 8px rgba(109,40,217,0.25);
+        }
+        .filter-btn:not(.active) {
+            background: #f5f3ff;
+            color: #6b7280;
+        }
+        .filter-btn:not(.active):hover {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+
+        /* Onglets */
+        .tab-btn {
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            box-shadow: 0 2px 8px rgba(109,40,217,0.25);
+        }
+        .tab-btn:not(.active) {
+            background: #f5f3ff;
+            color: #6b7280;
+        }
+        .tab-btn:not(.active):hover {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+
+        /* Messages */
+        .msg-user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            border-radius: 18px 18px 4px 18px;
+            box-shadow: 0 4px 16px rgba(109,40,217,0.25);
+        }
+        .msg-assistant {
+            background: white;
+            border: 1px solid #ede9fe;
+            border-radius: 4px 18px 18px 18px;
+            box-shadow: 0 2px 10px rgba(109,40,217,0.06);
+        }
+        .msg-loading {
+            background: white;
+            border: 1px solid #ede9fe;
+            border-radius: 18px;
+        }
+
+        /* Animation chargement */
+        .dot-pulse {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #c4b5fd;
+            animation: pulse-dot 1.4s ease-in-out infinite;
+        }
+        .dot-pulse:nth-child(2) { animation-delay: 0.2s; }
+        .dot-pulse:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse-dot {
+            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Badges */
+        .badge-excel {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+        .badge-pdf {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        /* Selects stylisés */
+        .custom-select {
+            background: #faf5ff;
+            border: 1px solid #ede9fe;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: #374151;
+            outline: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .custom-select:hover, .custom-select:focus {
+            border-color: #a78bfa;
+            box-shadow: 0 0 0 3px rgba(167,139,250,0.1);
+        }
+
+        /* Input stylisé */
+        .chat-input {
+            background: #faf5ff;
+            border: 1.5px solid #ede9fe;
+            border-radius: 16px;
+            transition: all 0.2s;
+        }
+        .chat-input:focus-within {
+            border-color: #a78bfa;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(167,139,250,0.12);
+        }
+        .chat-input input {
+            background: none;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            color: #374151;
+        }
+        .chat-input input::placeholder {
+            color: #d1d5db;
+        }
+
+        /* Bouton envoi */
+        .btn-send {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            border-radius: 12px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(109,40,217,0.3);
+        }
+        .btn-send:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(109,40,217,0.4);
+        }
+        .btn-send:active {
+            transform: scale(0.97);
+        }
+
+        /* Dashboard info */
+        .info-banner {
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 1px solid #ddd6fe;
+            border-radius: 12px;
+        }
     </style>
 </head>
-<body class="bg-gray-50 h-screen flex flex-col overflow-hidden">
+<body class="h-screen flex overflow-hidden">
 
-<div class="flex h-screen overflow-hidden">
+<div class="flex h-screen w-full overflow-hidden">
 
-    <!-- ══════════════ SIDEBAR ══════════════ -->
-    <div class="w-60 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- SIDEBAR (même design que client) -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <div class="sidebar">
+        <!-- Logo -->
+        <div class="p-4 border-b border-purple-50">
+            <div class="flex items-center gap-3 px-2 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="font-sora text-sm font-semibold text-purple-800">SRM Souss-Massa</div>
+                    <div class="text-xs text-purple-400">Espace Employé</div>
+                </div>
+            </div>
+        </div>
 
         <!-- Nouvelle conversation -->
-        <div class="p-3 border-b border-gray-100">
+        <div class="px-3 pt-3 pb-2">
             <button onclick="nouvelleConversation()"
-                class="flex items-center gap-2 w-full px-3 py-2 bg-gray-50 hover:bg-gray-100
-                       border border-gray-200 rounded-lg text-sm text-gray-700 transition-colors">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                class="flex items-center justify-center gap-2 w-full px-3 py-2.5 bg-white border border-gray-200 hover:border-purple-300 rounded-xl text-sm text-gray-600 hover:text-purple-700 hover:bg-purple-50 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path d="M12 5v14M5 12h14"/>
                 </svg>
                 Nouvelle conversation
             </button>
         </div>
 
-        <!-- Filtre mode sidebar -->
-        <div class="px-3 pt-2 pb-1 flex gap-1">
-            <button onclick="filtrerSidebar('all')" id="sb-all"
-                class="flex-1 text-xs py-1 rounded-md bg-blue-600 text-white transition-colors">
-                Tout
-            </button>
-            <button onclick="filtrerSidebar('excel')" id="sb-excel"
-                class="flex-1 text-xs py-1 rounded-md bg-gray-100 text-gray-600 transition-colors">
-                Excel
-            </button>
-            <button onclick="filtrerSidebar('pdf')" id="sb-pdf"
-                class="flex-1 text-xs py-1 rounded-md bg-gray-100 text-gray-600 transition-colors">
-                PDF
-            </button>
+        <!-- Filtres -->
+        <div class="px-3 pt-2 pb-1">
+            <div class="flex gap-1">
+                <button onclick="filtrerSidebar('all')" id="sb-all"
+                    class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all active">
+                    Tout
+                </button>
+                <button onclick="filtrerSidebar('excel')" id="sb-excel"
+                    class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all">
+                    Excel
+                </button>
+                <button onclick="filtrerSidebar('pdf')" id="sb-pdf"
+                    class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all">
+                    PDF
+                </button>
+            </div>
         </div>
 
         <!-- Liste conversations -->
-        <div id="conv-list" class="flex-1 overflow-y-auto p-2">
-            <p class="text-xs text-gray-400 uppercase tracking-wide px-2 py-1 mb-1">Récentes</p>
+        <div class="conv-list flex-1 overflow-y-auto px-2 py-1">
+            <p class="text-[10px] font-medium uppercase tracking-wider text-purple-300 px-2 py-2 mb-1">Récentes</p>
             <div id="conversations-container">
-                <p class="text-xs text-gray-400 text-center mt-4" id="empty-msg">Chargement...</p>
+                <p class="text-xs text-purple-300 text-center py-8" id="empty-msg">Chargement...</p>
             </div>
         </div>
 
-        <!-- Utilisateur connecté -->
-        <div class="p-3 border-t border-gray-100 flex items-center gap-2">
-            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center
-                        text-blue-700 font-medium text-sm flex-shrink-0">
-                {{ email[0].upper() }}
+        <!-- Footer utilisateur -->
+        <div class="p-3 border-t border-purple-50">
+            <div class="flex items-center gap-3 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                    {{ email[0].upper() }}
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-sm font-medium text-gray-800 truncate">{{ email.split('@')[0] }}</p>
+                    <p class="text-xs text-purple-400">Employé SRM</p>
+                </div>
+                <a href="/logout" class="text-purple-300 hover:text-red-500 transition-colors" title="Déconnexion">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </a>
             </div>
-            <div class="flex-1 overflow-hidden">
-                <p class="text-sm font-medium text-gray-800 truncate">{{ email }}</p>
-                <p class="text-xs text-gray-400">Employé SRM</p>
-            </div>
-            <a href="/logout" class="text-gray-400 hover:text-red-500 flex-shrink-0" title="Déconnexion">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-            </a>
         </div>
     </div>
 
-    <!-- ══════════════ MAIN ══════════════ -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <div class="flex-1 flex flex-col overflow-hidden bg-purple-50/30">
 
-        <!-- NAVBAR -->
-        <nav class="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center flex-shrink-0">
-            <h1 class="text-base font-semibold text-blue-700">Assistant SRM — Interface Employé</h1>
-            <div class="flex items-center gap-4">
-                <!-- ONGLETS -->
-                <div class="flex gap-1">
-                    <button onclick="afficherOnglet('excel')" id="btn-excel"
-                        class="px-3 py-1.5 rounded-lg bg-blue-600 text-white font-medium text-sm">
-                        📊 Base clients Excel
-                    </button>
-                    <button onclick="afficherOnglet('pdf')" id="btn-pdf"
-                        class="px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm">
-                        📄 Analyse facture PDF
-                    </button>
-                </div>
+        <!-- Navbar avec onglets -->
+        <div class="bg-white border-b border-purple-100 px-6 py-3 flex justify-between items-center flex-shrink-0">
+            <h1 class="font-sora text-base font-semibold bg-gradient-to-r from-purple-700 to-purple-500 bg-clip-text text-transparent">
+                Assistant SRM — Interface Employé
+            </h1>
+            <div class="flex gap-2">
+                <button onclick="afficherOnglet('excel')" id="btn-excel"
+                    class="tab-btn px-4 py-1.5 rounded-xl font-medium text-sm transition-all active">
+                    📊 Base clients Excel
+                </button>
+                <button onclick="afficherOnglet('pdf')" id="btn-pdf"
+                    class="tab-btn px-4 py-1.5 rounded-xl font-medium text-sm transition-all">
+                    📄 Analyse facture PDF
+                </button>
             </div>
-        </nav>
+        </div>
 
-        <!-- ════════════════════════════════════ -->
+        <!-- ════════════════════════════════════════════════════════════ -->
         <!-- ONGLET EXCEL -->
-        <!-- ════════════════════════════════════ -->
-        <div id="onglet-excel" class="flex-1 flex flex-col overflow-hidden p-4">
+        <!-- ════════════════════════════════════════════════════════════ -->
+        <div id="onglet-excel" class="flex-1 flex flex-col overflow-hidden p-5">
 
-            <!-- INFO BASE -->
+            <!-- Banner info -->
             {% if total_factures > 0 %}
-            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mb-3 text-sm text-green-700 flex-shrink-0">
-                ✅ Base active — {{ total_factures }} factures | {{ nb_clients }} clients | {{ nb_periodes }} périodes
+            <div class="info-banner px-4 py-2.5 mb-4 flex items-center gap-2 text-sm text-purple-700 flex-shrink-0">
+                <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                ✅ Base active — <strong>{{ total_factures }}</strong> factures | <strong>{{ nb_clients }}</strong> clients | <strong>{{ nb_periodes }}</strong> périodes
             </div>
             {% else %}
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 mb-3 text-sm text-yellow-700 flex-shrink-0">
+            <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 text-sm text-amber-700 flex-shrink-0">
                 ⚠️ Aucune donnée en base. L'administrateur doit importer un fichier Excel.
             </div>
             {% endif %}
 
-            <!-- FILTRE FICHIER -->
-            <div class="mb-3 flex-shrink-0">
-                <label class="text-sm text-gray-600 font-medium">🗂️ Filtrer par fichier Excel :</label>
-                <select id="select-fichier" onchange="changerFichier()"
-                    class="ml-2 border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <!-- Filtre fichier -->
+            <div class="mb-4 flex-shrink-0">
+                <label class="text-sm font-medium text-gray-600">🗂️ Filtrer par fichier Excel :</label>
+                <select id="select-fichier" onchange="changerFichier()" class="custom-select ml-2">
                     <option value="">📂 Tous les fichiers</option>
                     {% for f in fichiers %}
                     <option value="{{ f }}">{{ f }}</option>
                     {% endfor %}
                 </select>
-                <span id="label-fichier" class="ml-2 text-xs text-gray-400">🌐 Toute la base</span>
+                <span id="label-fichier" class="ml-2 text-xs text-purple-400">🌐 Toute la base</span>
             </div>
 
-            <!-- CHAT EXCEL -->
-            <div id="chat-excel" class="flex-1 overflow-y-auto flex flex-col gap-3 mb-3 p-2 border border-gray-100 rounded-lg bg-gray-50">
-                <div class="text-center text-gray-400 text-sm mt-8" id="excel-empty">
+            <!-- Zone chat Excel -->
+            <div id="chat-excel" class="chat-area flex-1 overflow-y-auto flex flex-col gap-3 mb-4 p-3 bg-white/50 rounded-xl border border-purple-100">
+                <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm" id="excel-empty">
+                    <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
                     Posez une question sur la base clients...
                 </div>
             </div>
 
-            <div class="flex gap-2 flex-shrink-0">
+            <!-- Input Excel -->
+            <div class="chat-input flex items-center gap-2 p-1.5 pl-4 bg-white flex-shrink-0">
                 <input type="text" id="input-excel"
                     placeholder="Ex: Qui consomme le plus ? Liste des clients..."
-                    class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-                <button onclick="envoyerExcel()"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
-                    Envoyer
+                    class="flex-1 py-2 text-sm bg-transparent outline-none"
+                    autocomplete="off"/>
+                <button onclick="envoyerExcel()" class="btn-send w-9 h-9 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
                 </button>
             </div>
         </div>
 
-        <!-- ════════════════════════════════════ -->
+        <!-- ════════════════════════════════════════════════════════════ -->
         <!-- ONGLET PDF -->
-        <!-- ════════════════════════════════════ -->
-        <div id="onglet-pdf" class="flex-1 flex flex-col overflow-hidden p-4 hidden">
+        <!-- ════════════════════════════════════════════════════════════ -->
+        <div id="onglet-pdf" class="flex-1 flex flex-col overflow-hidden p-5 hidden">
 
-            <!-- SÉLECTEUR CLIENT PDF -->
-            <div class="mb-3 flex-shrink-0">
-                <label class="text-sm text-gray-600 font-medium">👤 Sélectionner un client :</label>
-                <select id="select-client-pdf" onchange="changerClientPdf()"
-                    class="ml-2 border border-gray-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <!-- Sélecteur client -->
+            <div class="mb-4 flex-shrink-0">
+                <label class="text-sm font-medium text-gray-600">👤 Sélectionner un client :</label>
+                <select id="select-client-pdf" onchange="changerClientPdf()" class="custom-select ml-2">
                     {% if clients_pdf %}
                         {% for c in clients_pdf %}
                         <option value="{{ c }}">{{ c }}</option>
@@ -177,20 +442,27 @@
                 </select>
             </div>
 
-            <!-- CHAT PDF -->
-            <div id="chat-pdf" class="flex-1 overflow-y-auto flex flex-col gap-3 mb-3 p-2 border border-gray-100 rounded-lg bg-gray-50">
-                <div class="text-center text-gray-400 text-sm mt-8" id="pdf-empty">
+            <!-- Zone chat PDF -->
+            <div id="chat-pdf" class="chat-area flex-1 overflow-y-auto flex flex-col gap-3 mb-4 p-3 bg-white/50 rounded-xl border border-purple-100">
+                <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm" id="pdf-empty">
+                    <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
                     Sélectionnez un client puis posez une question...
                 </div>
             </div>
 
-            <div class="flex gap-2 flex-shrink-0">
+            <!-- Input PDF -->
+            <div class="chat-input flex items-center gap-2 p-1.5 pl-4 bg-white flex-shrink-0">
                 <input type="text" id="input-pdf"
                     placeholder="Ex: Quel est le montant ? Quelle est la période ?"
-                    class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-                <button onclick="envoyerPdf()"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
-                    Envoyer
+                    class="flex-1 py-2 text-sm bg-transparent outline-none"
+                    autocomplete="off"/>
+                <button onclick="envoyerPdf()" class="btn-send w-9 h-9 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
                 </button>
             </div>
         </div>
@@ -199,9 +471,9 @@
 </div>
 
 <script>
-    // ══════════════════════════════════════════
-    // ÉTAT GLOBAL
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
+    // ÉTAT GLOBAL (inchangé)
+    // ════════════════════════════════════════════════════════════════
     let nomFichierActif = "";
     let clientPdfActif = "{{ clients_pdf[0] if clients_pdf else '' }}";
     let historiqueExcel = [];
@@ -211,45 +483,55 @@
     let modeActif = "excel";
     let filtreSidebar = "all";
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // INIT
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', () => {
         chargerConversations();
+        // Activer le premier filtre par défaut
+        document.getElementById('sb-all').classList.add('active');
     });
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // ONGLETS
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     function afficherOnglet(onglet) {
         modeActif = onglet;
         document.getElementById('onglet-excel').classList.toggle('hidden', onglet !== 'excel');
         document.getElementById('onglet-pdf').classList.toggle('hidden', onglet !== 'pdf');
-        document.getElementById('btn-excel').className = onglet === 'excel'
-            ? 'px-3 py-1.5 rounded-lg bg-blue-600 text-white font-medium text-sm'
-            : 'px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
-        document.getElementById('btn-pdf').className = onglet === 'pdf'
-            ? 'px-3 py-1.5 rounded-lg bg-blue-600 text-white font-medium text-sm'
-            : 'px-3 py-1.5 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
+        
+        const btnExcel = document.getElementById('btn-excel');
+        const btnPdf = document.getElementById('btn-pdf');
+        
+        if (onglet === 'excel') {
+            btnExcel.classList.add('active');
+            btnPdf.classList.remove('active');
+        } else {
+            btnExcel.classList.remove('active');
+            btnPdf.classList.add('active');
+        }
     }
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // FILTRE SIDEBAR
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     function filtrerSidebar(mode) {
         filtreSidebar = mode;
-        ['all','excel','pdf'].forEach(m => {
+        
+        ['all', 'excel', 'pdf'].forEach(m => {
             const btn = document.getElementById('sb-' + m);
-            btn.className = m === mode
-                ? 'flex-1 text-xs py-1 rounded-md bg-blue-600 text-white transition-colors'
-                : 'flex-1 text-xs py-1 rounded-md bg-gray-100 text-gray-600 transition-colors';
+            if (m === mode) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
         });
         chargerConversations();
     }
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // CHARGER CONVERSATIONS
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     async function chargerConversations() {
         const url = filtreSidebar === 'all'
             ? '/api/employe/conversations'
@@ -257,13 +539,11 @@
         const res = await fetch(url);
         const data = await res.json();
         const container = document.getElementById('conversations-container');
-        const empty = document.getElementById('empty-msg');
 
         if (!data.conversations || data.conversations.length === 0) {
-            container.innerHTML = '<p class="text-xs text-gray-400 text-center mt-4">Aucune conversation</p>';
+            container.innerHTML = '<p class="text-xs text-purple-300 text-center py-8">Aucune conversation</p>';
             return;
         }
-        if (empty) empty.remove();
 
         container.innerHTML = '';
         data.conversations.forEach(conv => {
@@ -273,48 +553,56 @@
 
     function creerElementConversation(conv) {
         const div = document.createElement('div');
-        div.className = 'conv-item flex items-center gap-1 px-2 py-2 rounded-lg cursor-pointer hover:bg-gray-50 mb-0.5';
+        div.className = 'conv-item flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer mb-0.5';
         div.dataset.id = conv.id;
         div.dataset.mode = conv.mode;
 
-        const badgeColor = conv.mode === 'excel'
-            ? 'bg-green-100 text-green-700'
-            : 'bg-purple-100 text-purple-700';
+        const badgeClass = conv.mode === 'excel' ? 'badge-excel' : 'badge-pdf';
         const badgeLabel = conv.mode === 'excel' ? 'XLS' : 'PDF';
 
         div.innerHTML = `
             <div class="flex-1 overflow-hidden" onclick="chargerConversation(${conv.id}, '${conv.mode}')">
                 <div class="flex items-center gap-1.5 mb-0.5">
-                    <span class="text-xs px-1.5 py-0.5 rounded ${badgeColor} font-medium">${badgeLabel}</span>
-                    <p class="text-sm text-gray-700 truncate" id="titre-${conv.id}">${conv.titre}</p>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded ${badgeClass} font-medium">${badgeLabel}</span>
+                    <p class="text-sm text-gray-700 truncate" id="titre-${conv.id}">${escapeHtml(conv.titre)}</p>
                 </div>
-                <p class="text-xs text-gray-400 pl-0.5">${formaterDate(conv.date_creation)}</p>
+                <p class="text-xs text-purple-300 pl-0.5">${formaterDate(conv.date_creation)}</p>
             </div>
-            <button class="three-dots w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 text-gray-400 flex-shrink-0"
-                onclick="toggleMenu(event, ${conv.id})" aria-label="Options">
+            <button class="three-dots w-7 h-7 flex items-center justify-center rounded-lg hover:bg-purple-100 text-purple-300 flex-shrink-0 transition-all"
+                onclick="toggleMenu(event, ${conv.id})">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                     <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
                 </svg>
             </button>
             <div class="dropdown-menu" id="menu-${conv.id}">
                 <div class="dd-item" onclick="demanderRenommage(${conv.id})">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
                     Renommer
                 </div>
-                <div style="height:1px;background:#f3f4f6;margin:3px 0;"></div>
+                <div class="dd-divider" style="height:1px;background:#f3f0ff;margin:4px 0;"></div>
                 <div class="dd-item danger" onclick="supprimerConversation(${conv.id})">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                        <path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        <path d="M10 11v6M14 11v6"/>
                     </svg>
                     Supprimer
                 </div>
             </div>
         `;
         return div;
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
     }
 
     function formaterDate(dateStr) {
@@ -328,9 +616,9 @@
         return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
     }
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // MENU 3 POINTS
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     function toggleMenu(e, convId) {
         e.stopPropagation();
         document.querySelectorAll('.dropdown-menu').forEach(m => {
@@ -343,9 +631,9 @@
         document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
     });
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // RENOMMER
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     function demanderRenommage(convId) {
         document.getElementById(`menu-${convId}`).classList.remove('open');
         const el = document.getElementById(`titre-${convId}`);
@@ -370,9 +658,9 @@
         });
     }
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // SUPPRIMER
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     async function supprimerConversation(convId) {
         document.getElementById(`menu-${convId}`).classList.remove('open');
         const convItem = document.querySelector(`[data-id="${convId}"]`);
@@ -389,15 +677,14 @@
         }
     }
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // CHARGER UNE CONVERSATION
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     async function chargerConversation(convId, mode) {
         const res = await fetch(`/api/employe/messages/${convId}`);
         const data = await res.json();
         const messages = data.messages || [];
 
-        // Switcher vers le bon onglet
         afficherOnglet(mode);
 
         const chatId = mode === 'excel' ? 'chat-excel' : 'chat-pdf';
@@ -414,78 +701,106 @@
 
         messages.forEach(msg => afficherBulle(chatId, msg.role, msg.content));
 
-        document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('bg-gray-100'));
-        document.querySelector(`[data-id="${convId}"]`)?.classList.add('bg-gray-100');
+        document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
+        document.querySelector(`[data-id="${convId}"]`)?.classList.add('active');
     }
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // NOUVELLE CONVERSATION
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     function nouvelleConversation() {
         convIdExcel = null;
         convIdPdf = null;
         historiqueExcel = [];
         historiquePdf = [];
 
-        document.getElementById('chat-excel').innerHTML =
-            '<div class="text-center text-gray-400 text-sm mt-8" id="excel-empty">Posez une question sur la base clients...</div>';
-        document.getElementById('chat-pdf').innerHTML =
-            '<div class="text-center text-gray-400 text-sm mt-8" id="pdf-empty">Sélectionnez un client puis posez une question...</div>';
+        document.getElementById('chat-excel').innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm">
+                <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                </svg>
+                Posez une question sur la base clients...
+            </div>`;
+        document.getElementById('chat-pdf').innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm">
+                <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Sélectionnez un client puis posez une question...
+            </div>`;
 
-        document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('bg-gray-100'));
+        document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
     }
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // FILTRE FICHIER EXCEL
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     function changerFichier() {
         nomFichierActif = document.getElementById('select-fichier').value;
         const label = document.getElementById('label-fichier');
         label.textContent = nomFichierActif ? `🎯 ${nomFichierActif}` : '🌐 Toute la base';
-        document.getElementById('chat-excel').innerHTML =
-            '<div class="text-center text-gray-400 text-sm mt-8">Fichier changé — posez une question...</div>';
+        document.getElementById('chat-excel').innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm">
+                <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                </svg>
+                Fichier changé — posez une question...
+            </div>`;
         convIdExcel = null;
         historiqueExcel = [];
     }
 
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     // CHANGER CLIENT PDF
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
     function changerClientPdf() {
         clientPdfActif = document.getElementById('select-client-pdf').value;
-        document.getElementById('chat-pdf').innerHTML =
-            '<div class="text-center text-gray-400 text-sm mt-8">Client changé — posez une question...</div>';
+        document.getElementById('chat-pdf').innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm">
+                <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Client changé — posez une question...
+            </div>`;
         convIdPdf = null;
         historiquePdf = [];
     }
 
-    // ══════════════════════════════════════════
-    // AFFICHER BULLE
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
+    // AFFICHER BULLE (version stylisée)
+    // ════════════════════════════════════════════════════════════════
     function afficherBulle(chatId, role, texte) {
         const chat = document.getElementById(chatId);
-        const empty = chat.querySelector('.text-center');
+        const empty = chat.querySelector('.flex-col.items-center.justify-center');
         if (empty) empty.remove();
 
         const div = document.createElement('div');
+        
         if (role === 'user') {
-            div.className = 'self-end ml-auto bg-blue-600 text-white rounded-xl px-4 py-2 max-w-xs text-sm';
+            div.className = 'msg-user self-end max-w-[70%] px-4 py-2 text-white text-sm';
             div.textContent = texte;
         } else if (role === 'loading') {
-            div.className = 'self-start bg-gray-100 text-gray-500 rounded-xl px-4 py-2 text-sm italic';
-            div.textContent = texte;
+            div.className = 'msg-loading self-start px-4 py-2 text-purple-400 text-sm flex items-center gap-2';
+            div.innerHTML = `
+                <div class="dot-pulse"></div>
+                <div class="dot-pulse"></div>
+                <div class="dot-pulse"></div>
+                <span class="ml-1">Recherche en cours...</span>
+            `;
         } else {
-            div.className = 'self-start bg-white border border-gray-200 text-gray-800 rounded-xl px-4 py-2 max-w-lg text-sm whitespace-pre-wrap';
-            div.innerHTML = texte.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            div.className = 'msg-assistant self-start max-w-[75%] px-4 py-2 text-gray-700 text-sm leading-relaxed';
+            div.innerHTML = texte.replace(/\*\*(.*?)\*\*/g, '<strong class="text-purple-700">$1</strong>')
+                                 .replace(/\n/g, '<br>');
         }
+        
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
         return div;
     }
 
-    // ══════════════════════════════════════════
-    // ENVOYER EXCEL
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
+    // ENVOYER EXCEL (inchangé)
+    // ════════════════════════════════════════════════════════════════
     async function envoyerExcel() {
         const input = document.getElementById('input-excel');
         const question = input.value.trim();
@@ -494,7 +809,7 @@
         historiqueExcel.push({ role: 'user', content: question });
         afficherBulle('chat-excel', 'user', question);
         input.value = '';
-        const loading = afficherBulle('chat-excel', 'loading', '⏳ Recherche en cours...');
+        const loading = afficherBulle('chat-excel', 'loading', '');
 
         const res = await fetch('/api/chat/employe/excel', {
             method: 'POST',
@@ -511,7 +826,6 @@
         historiqueExcel.push({ role: 'assistant', content: data.reponse });
         afficherBulle('chat-excel', 'assistant', data.reponse);
 
-        // Persistance
         if (convIdExcel === null) {
             const r2 = await fetch('/api/employe/conversation/creer', {
                 method: 'POST',
@@ -539,9 +853,9 @@
         });
     }
 
-    // ══════════════════════════════════════════
-    // ENVOYER PDF
-    // ══════════════════════════════════════════
+    // ════════════════════════════════════════════════════════════════
+    // ENVOYER PDF (inchangé)
+    // ════════════════════════════════════════════════════════════════
     async function envoyerPdf() {
         const input = document.getElementById('input-pdf');
         const question = input.value.trim();
@@ -551,7 +865,7 @@
         historiquePdf.push({ role: 'user', content: question });
         afficherBulle('chat-pdf', 'user', question);
         input.value = '';
-        const loading = afficherBulle('chat-pdf', 'loading', '⏳ Analyse en cours...');
+        const loading = afficherBulle('chat-pdf', 'loading', '');
 
         const res = await fetch('/api/chat/employe/pdf', {
             method: 'POST',
@@ -568,7 +882,6 @@
         historiquePdf.push({ role: 'assistant', content: data.reponse });
         afficherBulle('chat-pdf', 'assistant', data.reponse);
 
-        // Persistance
         if (convIdPdf === null) {
             const r2 = await fetch('/api/employe/conversation/creer', {
                 method: 'POST',
@@ -596,7 +909,9 @@
         });
     }
 
-    // ── ENTER ──
+    // ────────────────────────────────────────────────────────────────
+    // ENTER
+    // ────────────────────────────────────────────────────────────────
     document.getElementById('input-excel').addEventListener('keypress', e => {
         if (e.key === 'Enter') envoyerExcel();
     });
