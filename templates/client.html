@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SRM — Espace Client</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/static/js/i18n.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
@@ -27,6 +28,29 @@
             top: 0; left: 0; right: 0;
             height: 3px;
             background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd);
+        }
+
+        /* Style pour RTL (arabe) */
+        body.rtl .sidebar {
+            border-right: none;
+            border-left: 1px solid #ede9fe;
+        }
+        body.rtl .sidebar::before {
+            left: auto;
+            right: 0;
+        }
+        body.rtl .conv-content {
+            text-align: right;
+        }
+        body.rtl .dd-item {
+            justify-content: flex-end;
+        }
+        body.rtl .user-card {
+            flex-direction: row-reverse;
+        }
+        body.rtl .lang-dropdown {
+            right: auto;
+            left: 0;
         }
 
         .sidebar-logo { padding: 20px 16px 14px; border-bottom: 1px solid #f3f0ff; }
@@ -110,6 +134,10 @@
             padding: 4px; z-index: 100; width: 145px;
             box-shadow: 0 8px 24px rgba(109,40,217,0.1);
         }
+        body.rtl .dropdown-menu {
+            right: auto;
+            left: 6px;
+        }
         .dropdown-menu.open { display: block; }
         .dd-item {
             display: flex; align-items: center; gap: 8px;
@@ -126,7 +154,8 @@
             display: flex; align-items: center; gap: 10px;
             padding: 10px 12px;
             background: linear-gradient(135deg, #faf5ff, #f5f3ff);
-            border: 1px solid #ede9fe; border-radius: 12px;
+            border: 1px solid #ede9fe;
+            border-radius: 12px;
         }
         .user-avatar {
             width: 34px; height: 34px; border-radius: 10px;
@@ -137,13 +166,6 @@
         }
         .user-name { font-size: 13px; font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .user-role { font-size: 10px; color: #a78bfa; }
-        .logout-btn {
-            margin-left: auto; width: 28px; height: 28px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 8px; background: none; border: none; cursor: pointer;
-            color: #c4b5fd; text-decoration: none; transition: all 0.15s; flex-shrink: 0;
-        }
-        .logout-btn:hover { background: #fef2f2; color: #ef4444; }
 
         .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f8f7ff; }
 
@@ -158,6 +180,11 @@
             position: relative; overflow: hidden;
         }
         .dash-card:last-child { border-right: none; }
+        body.rtl .dash-card {
+            border-right: none;
+            border-left: 1px solid #f3f0ff;
+        }
+        body.rtl .dash-card:last-child { border-left: none; }
         .dash-card::before {
             content: ''; position: absolute;
             top: 0; left: 16px; right: 16px; height: 2px;
@@ -180,7 +207,8 @@
         #chat-messages {
             flex: 1; overflow-y: auto; padding: 24px 32px;
             display: flex; flex-direction: column; gap: 14px;
-            scrollbar-width: thin; scrollbar-color: #ede9fe transparent;
+            scrollbar-width: thin;
+            scrollbar-color: #ede9fe transparent;
         }
         #chat-messages::-webkit-scrollbar { width: 4px; }
         #chat-messages::-webkit-scrollbar-thumb { background: #ede9fe; border-radius: 4px; }
@@ -368,14 +396,14 @@
         </div>
     </div>
 
-    <button class="btn-new-conv" onclick="nouvelleConversation()">
+    <button class="btn-new-conv" onclick="nouvelleConversation()" data-i18n="new_conversation">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M12 5v14M5 12h14"/>
         </svg>
         Nouvelle conversation
     </button>
 
-    <div class="conv-section-label">Récentes</div>
+    <div class="conv-section-label" data-i18n="recent">Récentes</div>
 
     <div id="conv-list">
         <p style="font-size:12px;color:#c4b5fd;text-align:center;padding:16px;" id="empty-msg">Chargement...</p>
@@ -386,25 +414,8 @@
             <div class="user-avatar">{{ nom_client[0].upper() }}</div>
             <div style="flex:1;overflow:hidden;">
                 <div class="user-name">{{ nom_client }}</div>
-                <div class="user-role">Client SRM</div>
+                <div class="user-role" data-i18n="client_role">Client SRM</div>
             </div>
-            <button onclick="ouvrirCompte()" title="Mon compte"
-                style="width:28px;height:28px;border-radius:8px;background:none;border:none;cursor:pointer;
-                       color:#c4b5fd;display:flex;align-items:center;justify-content:center;transition:all 0.15s;"
-                onmouseover="this.style.background='#f5f3ff';this.style.color='#7c3aed'"
-                onmouseout="this.style.background='none';this.style.color='#c4b5fd'">
-                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                </svg>
-            </button>
-            <a href="/logout" class="logout-btn" title="Déconnexion">
-                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-            </a>
         </div>
     </div>
 </div>
@@ -414,20 +425,20 @@
     <!-- Dashboard -->
     <div class="dashboard-band">
         <div class="dash-card">
-            <div class="dash-label">Dernière facture</div>
-            <div class="dash-value">{{ derniere_montant }} <span style="font-size:13px;font-weight:400;color:#c4b5fd;">Dhs</span></div>
+            <div class="dash-label" data-i18n="last_invoice">Dernière facture</div>
+            <div class="dash-value">{{ derniere_montant }} <span style="font-size:13px;font-weight:400;color:#c4b5fd;" data-i18n="currency">Dhs</span></div>
             <div class="dash-sub">{{ derniere_mois }}</div>
         </div>
         <div class="dash-card">
-            <div class="dash-label">Prochaine échéance</div>
+            <div class="dash-label" data-i18n="next_due">Prochaine échéance</div>
             <div class="dash-value" style="font-size:16px;margin-top:2px;">{{ prochain_date }}</div>
             <div class="dash-badge">
                 <div class="dot"></div>
-                {% if prochain_jours != '—' %}dans {{ prochain_jours }} jours{% else %}Aucune{% endif %}
+                {% if prochain_jours != '—' %}<span data-i18n="days_left" data-days="{{ prochain_jours }}">dans {{ prochain_jours }} jours</span>{% else %}<span data-i18n="none">Aucune</span>{% endif %}
             </div>
         </div>
         <div class="dash-card">
-            <div class="dash-label">Consommation</div>
+            <div class="dash-label" data-i18n="consumption">Consommation</div>
             <div class="dash-value">{{ derniere_conso }} <span style="font-size:13px;font-weight:400;color:#c4b5fd;">{{ derniere_unite }}</span></div>
             <div class="dash-sub">{{ derniere_mois }}</div>
         </div>
@@ -441,13 +452,13 @@
                     <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                 </svg>
             </div>
-            <div class="welcome-title">Bonjour {{ nom_client.split()[0] }} 👋</div>
-            <div class="welcome-sub">Posez une question sur vos factures, votre consommation ou vos démarches SRM.</div>
+            <div class="welcome-title" data-i18n="welcome_title" data-name="{{ nom_client.split()[0] }}">Bonjour {{ nom_client.split()[0] }} 👋</div>
+            <div class="welcome-sub" data-i18n="welcome_sub">Posez une question sur vos factures, votre consommation ou vos démarches SRM.</div>
             <div class="suggestions">
-                <div class="suggestion-chip" onclick="sendSuggestion('Quelle est ma dernière facture ?')">Dernière facture</div>
-                <div class="suggestion-chip" onclick="sendSuggestion('Ma consommation ce mois-ci ?')">Consommation du mois</div>
-                <div class="suggestion-chip" onclick="sendSuggestion('Ma consommation totale depuis le début ?')">Historique total</div>
-                <div class="suggestion-chip" onclick="sendSuggestion('Comment faire une réclamation ?')">Réclamation</div>
+                <div class="suggestion-chip" onclick="sendSuggestion('Quelle est ma dernière facture ?')" data-i18n="suggestion_invoice">Dernière facture</div>
+                <div class="suggestion-chip" onclick="sendSuggestion('Ma consommation ce mois-ci ?')" data-i18n="suggestion_consumption_month">Consommation du mois</div>
+                <div class="suggestion-chip" onclick="sendSuggestion('Ma consommation totale depuis le début ?')" data-i18n="suggestion_consumption_total">Historique total</div>
+                <div class="suggestion-chip" onclick="sendSuggestion('Comment faire une réclamation ?')" data-i18n="suggestion_complaint">Réclamation</div>
             </div>
         </div>
     </div>
@@ -460,9 +471,9 @@
             <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
         <select id="select-mois">
-            <option value="">Choisir un mois...</option>
+            <option value="" data-i18n="choose_month">Choisir un mois...</option>
         </select>
-        <button class="btn-download" onclick="telechargerFacture()">
+        <button class="btn-download" onclick="telechargerFacture()" data-i18n="download_pdf">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="12" height="12">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="7 10 12 15 17 10"/>
@@ -476,6 +487,7 @@
     <div class="input-zone">
         <div class="input-wrap">
             <input type="text" id="question-input"
+                data-i18n-placeholder="question_placeholder"
                 placeholder="Votre question sur vos factures..."
                 autocomplete="off"/>
             <button class="btn-send" onclick="envoyerQuestion()">
@@ -492,20 +504,20 @@
 <div id="modal-compte" style="display:none;position:fixed;inset:0;background:rgba(109,40,217,0.15);backdrop-filter:blur(2px);z-index:50;align-items:center;justify-content:center;">
     <div class="modal-panel">
         <div class="modal-header">
-            <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:600;color:#1f1535;margin:0;">Mon compte</h3>
-            <p style="font-size:13px;color:#9ca3af;margin:5px 0 0 0;">Modifier mes informations</p>
+            <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:600;color:#1f1535;margin:0;" data-i18n="my_account">Mon compte</h3>
+            <p style="font-size:13px;color:#9ca3af;margin:5px 0 0 0;" data-i18n="account_subtitle">Modifier mes informations</p>
         </div>
         <div class="modal-body">
             <div class="form-group">
-                <label class="form-label">Changer le mot de passe</label>
-                <input type="password" id="ancien-mdp" class="form-input" placeholder="Mot de passe actuel">
-                <input type="password" id="nouveau-mdp" class="form-input" style="margin-top:10px;" placeholder="Nouveau mot de passe">
-                <input type="password" id="confirmation-mdp" class="form-input" style="margin-top:10px;" placeholder="Confirmer le nouveau mot de passe">
+                <label class="form-label" data-i18n="change_password">Changer le mot de passe</label>
+                <input type="password" id="ancien-mdp" class="form-input" data-i18n-placeholder="current_password" placeholder="Mot de passe actuel">
+                <input type="password" id="nouveau-mdp" class="form-input" style="margin-top:10px;" data-i18n-placeholder="new_password" placeholder="Nouveau mot de passe">
+                <input type="password" id="confirmation-mdp" class="form-input" style="margin-top:10px;" data-i18n-placeholder="confirm_password" placeholder="Confirmer le nouveau mot de passe">
                 <div id="error-msg" class="error-message"></div>
-                <div id="success-msg" class="success-message">Mot de passe modifié avec succès !</div>
+                <div id="success-msg" class="success-message" data-i18n="password_changed">Mot de passe modifié avec succès !</div>
             </div>
-            <button class="btn-primary" onclick="changerMotDePasse()">Enregistrer</button>
-            <button class="btn-secondary" onclick="fermerCompte()">Fermer</button>
+            <button class="btn-primary" onclick="changerMotDePasse()" data-i18n="save">Enregistrer</button>
+            <button class="btn-secondary" onclick="fermerCompte()" data-i18n="close">Fermer</button>
         </div>
     </div>
 </div>
@@ -522,18 +534,6 @@
         const logo = document.querySelector('.sidebar-logo');
         const btnNew = document.querySelector('.btn-new-conv');
         const label = document.querySelector('.conv-section-label');
-
-        sidebar.style.cssText = `
-            width: 260px;
-            background: #ffffff;
-            border-right: 1px solid #ede9fe;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            position: relative;
-            height: 100vh;
-            overflow: hidden;
-        `;
 
         const hauteurPrise = logo.offsetHeight + btnNew.offsetHeight + label.offsetHeight + footer.offsetHeight;
         const hauteurDispo = window.innerHeight - hauteurPrise - 20;
@@ -575,6 +575,10 @@
         const div = document.createElement('div');
         div.className = 'conv-item';
         div.dataset.id = conv.id;
+        
+        const renameText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('rename') : 'Renommer';
+        const deleteText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('delete') : 'Supprimer';
+        
         div.innerHTML = `
             <div class="conv-icon">
                 <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -591,24 +595,33 @@
                 </svg>
             </button>
             <div class="dropdown-menu" id="menu-${conv.id}">
-                <div class="dd-item" onclick="demanderRenommage(${conv.id})">
+                <div class="dd-item rename-item-${conv.id}" onclick="demanderRenommage(${conv.id})">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
-                    Renommer
+                    <span class="rename-text">${renameText}</span>
                 </div>
                 <div class="dd-divider"></div>
-                <div class="dd-item danger" onclick="supprimerConversation(${conv.id})">
+                <div class="dd-item danger delete-item-${conv.id}" onclick="supprimerConversation(${conv.id})">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <polyline points="3 6 5 6 21 6"/>
                         <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
                         <path d="M10 11v6M14 11v6"/>
                     </svg>
-                    Supprimer
+                    <span class="delete-text">${deleteText}</span>
                 </div>
             </div>`;
         return div;
+    }
+    
+    // Fonction pour mettre à jour tous les textes rename/delete
+    function updateRenameDeleteTexts() {
+        if (typeof i18n === 'undefined' || !i18n) return;
+        const renameText = i18n.t('rename');
+        const deleteText = i18n.t('delete');
+        document.querySelectorAll('.rename-text').forEach(el => el.textContent = renameText);
+        document.querySelectorAll('.delete-text').forEach(el => el.textContent = deleteText);
     }
 
     function formaterDate(d) {
@@ -678,6 +691,20 @@
     function nouvelleConversation() {
         convIdActuelle = null;
         historique = [];
+        
+        let name = '';
+        const userNameSpan = document.querySelector('.user-name');
+        if (userNameSpan) {
+            name = userNameSpan.textContent.split(' ')[0];
+        }
+        
+        const welcomeTitleText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('welcome_title', { name: name }) : 'Nouvelle conversation';
+        const welcomeSubText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('welcome_sub') : 'Posez votre question sur vos factures ou vos démarches SRM.';
+        const suggestionInvoiceText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('suggestion_invoice') : 'Dernière facture';
+        const suggestionMonthText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('suggestion_consumption_month') : 'Consommation du mois';
+        const suggestionTotalText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('suggestion_consumption_total') : 'Historique total';
+        const suggestionComplaintText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('suggestion_complaint') : 'Réclamation';
+        
         chatDiv.innerHTML = `
             <div class="welcome-state">
                 <div class="welcome-orb">
@@ -685,8 +712,14 @@
                         <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                     </svg>
                 </div>
-                <div class="welcome-title">Nouvelle conversation</div>
-                <div class="welcome-sub">Posez votre question sur vos factures ou vos démarches SRM.</div>
+                <div class="welcome-title">${welcomeTitleText}</div>
+                <div class="welcome-sub">${welcomeSubText}</div>
+                <div class="suggestions">
+                    <div class="suggestion-chip" onclick="sendSuggestion('Quelle est ma dernière facture ?')">${suggestionInvoiceText}</div>
+                    <div class="suggestion-chip" onclick="sendSuggestion('Ma consommation ce mois-ci ?')">${suggestionMonthText}</div>
+                    <div class="suggestion-chip" onclick="sendSuggestion('Ma consommation totale depuis le début ?')">${suggestionTotalText}</div>
+                    <div class="suggestion-chip" onclick="sendSuggestion('Comment faire une réclamation ?')">${suggestionComplaintText}</div>
+                </div>
             </div>`;
         document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
     }
@@ -855,6 +888,9 @@
         errorDiv.textContent = msg;
         errorDiv.style.display = 'block';
     }
+    
+    // Exposer updateRenameDeleteTexts globalement pour i18n.js
+    window.updateRenameDeleteTexts = updateRenameDeleteTexts;
 </script>
 
 </body>
