@@ -14,7 +14,30 @@ const i18n = {
         
         await this.loadLanguage(lang);
         this.applyTranslations();
-        this.setupLanguageSwitcher();
+        // SUPPRIME LE MENU AUTOMATIQUE S'IL EXISTE DANS LE HTML
+        this.supprimerMenuAutomatique();
+    },
+    
+    // NOUVELLE FONCTION : Supprime le menu ajouté automatiquement
+    supprimerMenuAutomatique() {
+        // Supprimer le menu avec l'icône globe qui est ajouté par l'ancien script
+        const oldMenu = document.querySelector('.lang-menu-btn');
+        if (oldMenu) {
+            const parent = oldMenu.closest('div');
+            if (parent) parent.remove();
+        }
+        
+        // Supprimer tout élément qui pourrait être un menu de langue flottant
+        const langDropdown = document.getElementById('lang-dropdown');
+        if (langDropdown) langDropdown.remove();
+        
+        // Supprimer les conteneurs de menu supplémentaires
+        const menuContainers = document.querySelectorAll('.sidebar-footer > div:not(.user-card):not(#userMenuDropdown)');
+        menuContainers.forEach(container => {
+            if (container.innerHTML.includes('lang') || container.innerHTML.includes('globe')) {
+                container.remove();
+            }
+        });
     },
     
     // Charger un fichier de langue
@@ -189,7 +212,7 @@ const i18n = {
         if (successMsg) successMsg.innerHTML = this.t('password_changed');
     },
     
-    // Changer de langue
+    // Changer de langue (appelé par votre menu HTML)
     async switchTo(lang) {
         if (lang === this.currentLang) return;
         await this.loadLanguage(lang);
@@ -198,75 +221,17 @@ const i18n = {
         if (typeof window.updateRenameDeleteTexts === 'function') {
             window.updateRenameDeleteTexts();
         }
-    },
-    
-    // Configurer le sélecteur de langue
-    setupLanguageSwitcher() {
-        const userCard = document.querySelector('.user-card');
-        if (!userCard) return;
-        if (document.querySelector('.lang-menu-btn')) return;
-        
-        const menuContainer = document.createElement('div');
-        menuContainer.style.position = 'relative';
-        menuContainer.style.marginLeft = 'auto';
-        
-        menuContainer.innerHTML = `
-            <button class="lang-menu-btn" onclick="toggleLangMenu(event)" 
-                style="width:28px;height:28px;border-radius:8px;background:none;border:none;cursor:pointer;
-                       color:#c4b5fd;display:flex;align-items:center;justify-content:center;transition:all 0.15s;"
-                onmouseover="this.style.background='#f5f3ff';this.style.color='#7c3aed'"
-                onmouseout="this.style.background='none';this.style.color='#c4b5fd'">
-                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M3 12h18M12 3v18M12 3a9 9 0 0 0 9 9M12 3a9 9 0 0 1 9 9M12 21a9 9 0 0 1-9-9M12 21a9 9 0 0 0 9-9"/>
-                </svg>
-            </button>
-            <div id="lang-dropdown" class="lang-dropdown" style="display:none;position:absolute;bottom:45px;right:0;background:white;border:1px solid #ede9fe;border-radius:12px;padding:6px;z-index:100;min-width:140px;box-shadow:0 8px 24px rgba(109,40,217,0.12);">
-                <div class="lang-option" data-lang="fr" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:#374151;">
-                    <span>🇫🇷</span> Français
-                </div>
-                <div class="lang-option" data-lang="en" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:#374151;">
-                    <span>🇬🇧</span> English
-                </div>
-                <div class="lang-option" data-lang="ar" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:#374151;">
-                    <span>🇲🇦</span> العربية
-                </div>
-                <div style="height:1px;background:#f3f0ff;margin:4px 0;"></div>
-                <div class="lang-option" onclick="ouvrirCompte()" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:#374151;">
-                    <span>👤</span> <span>Mon compte</span>
-                </div>
-                <div class="lang-option" onclick="window.location.href='/logout'" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:#ef4444;">
-                    <span>🚪</span> <span>Déconnexion</span>
-                </div>
-            </div>
-        `;
-        
-        userCard.appendChild(menuContainer);
-        
-        document.querySelectorAll('.lang-option[data-lang]').forEach(opt => {
-            opt.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const lang = opt.getAttribute('data-lang');
-                i18n.switchTo(lang);
-                document.getElementById('lang-dropdown').style.display = 'none';
-            });
+        // Mettre à jour la classe active dans le sous-menu
+        document.querySelectorAll('.lang-option').forEach(opt => {
+            opt.classList.remove('active');
+            if ((lang === 'fr' && opt.textContent.includes('Français')) ||
+                (lang === 'en' && opt.textContent.includes('English')) ||
+                (lang === 'ar' && opt.textContent.includes('العربية'))) {
+                opt.classList.add('active');
+            }
         });
     }
 };
 
-// Toggle menu langue
-function toggleLangMenu(event) {
-    event.stopPropagation();
-    const dropdown = document.getElementById('lang-dropdown');
-    if (dropdown) {
-        const isOpen = dropdown.style.display === 'flex';
-        dropdown.style.display = isOpen ? 'none' : 'flex';
-        dropdown.style.flexDirection = 'column';
-    }
-}
-
-document.addEventListener('click', () => {
-    const dropdown = document.getElementById('lang-dropdown');
-    if (dropdown) dropdown.style.display = 'none';
-});
-
+// Initialisation au chargement
 document.addEventListener('DOMContentLoaded', () => i18n.init());
