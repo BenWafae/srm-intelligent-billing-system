@@ -11,17 +11,17 @@
         body { font-family: 'DM Sans', sans-serif; margin: 0; background: #f8f7ff; }
 
         .sidebar {
-    width: 260px;
-    background: #ffffff;
-    border-right: 1px solid #ede9fe;
-    display: flex !important;
-    flex-direction: column !important;
-    flex-shrink: 0;
-    position: relative;
-    height: 100vh !important;
-    overflow: hidden !important;
-}      
-       .sidebar::before {
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #ede9fe;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }      
+        .sidebar::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
@@ -63,14 +63,14 @@
         }
 
         #conv-list {
-    flex: 1 1 0 !important;
-    overflow-y: auto !important;
-    min-height: 0 !important;
-    max-height: 100% !important;
-    padding: 4px 8px;
-    scrollbar-width: thin;
-    scrollbar-color: #ede9fe transparent;
-}
+            flex: 1 1 0;
+            overflow-y: auto;
+            min-height: 0;
+            max-height: 100%;
+            padding: 4px 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #ede9fe transparent;
+        }
         
         #conv-list::-webkit-scrollbar { width: 3px; }
         #conv-list::-webkit-scrollbar-thumb { background: #ede9fe; border-radius: 3px; }
@@ -295,6 +295,63 @@
             background: white; border: 1px solid #a78bfa;
             border-radius: 5px; padding: 2px 6px; color: #374151; outline: none; width: 100%;
         }
+
+        /* Styles pour la modale compte */
+        .modal-panel {
+            background: white;
+            border-radius: 24px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalFadeIn 0.2s ease-out;
+            overflow: hidden;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f3f0ff;
+            background: linear-gradient(135deg, #faf5ff, #ffffff);
+        }
+        .modal-body { padding: 24px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            display: block; font-size: 13px; font-weight: 500;
+            color: #374151; margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%; padding: 10px 14px;
+            border: 1.5px solid #e5e7eb; border-radius: 12px;
+            font-size: 14px; font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s; outline: none;
+        }
+        .form-input:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(167,139,250,0.1); }
+        .btn-primary {
+            width: 100%; padding: 12px;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white; border: none; border-radius: 12px;
+            font-weight: 500; font-size: 14px; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(109,40,217,0.35); }
+        .btn-secondary {
+            width: 100%; padding: 12px;
+            background: white; color: #6b7280;
+            border: 1.5px solid #e5e7eb; border-radius: 12px;
+            font-weight: 500; font-size: 14px; cursor: pointer;
+            margin-top: 10px; transition: all 0.2s;
+        }
+        .btn-secondary:hover { border-color: #a78bfa; color: #7c3aed; background: #faf5ff; }
+        .error-message {
+            font-size: 12px; color: #ef4444; margin-top: 6px;
+            display: none;
+        }
+        .success-message {
+            font-size: 12px; color: #10b981; margin-top: 6px;
+            display: none;
+        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
@@ -331,6 +388,16 @@
                 <div class="user-name">{{ nom_client }}</div>
                 <div class="user-role">Client SRM</div>
             </div>
+            <button onclick="ouvrirCompte()" title="Mon compte"
+                style="width:28px;height:28px;border-radius:8px;background:none;border:none;cursor:pointer;
+                       color:#c4b5fd;display:flex;align-items:center;justify-content:center;transition:all 0.15s;"
+                onmouseover="this.style.background='#f5f3ff';this.style.color='#7c3aed'"
+                onmouseout="this.style.background='none';this.style.color='#c4b5fd'">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </button>
             <a href="/logout" class="logout-btn" title="Déconnexion">
                 <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -344,7 +411,6 @@
 
 <!-- MAIN -->
 <div class="main">
-
     <!-- Dashboard -->
     <div class="dashboard-band">
         <div class="dash-card">
@@ -422,52 +488,74 @@
     </div>
 </div>
 
+<!-- MODALE COMPTE -->
+<div id="modal-compte" style="display:none;position:fixed;inset:0;background:rgba(109,40,217,0.15);backdrop-filter:blur(2px);z-index:50;align-items:center;justify-content:center;">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:600;color:#1f1535;margin:0;">Mon compte</h3>
+            <p style="font-size:13px;color:#9ca3af;margin:5px 0 0 0;">Modifier mes informations</p>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Changer le mot de passe</label>
+                <input type="password" id="ancien-mdp" class="form-input" placeholder="Mot de passe actuel">
+                <input type="password" id="nouveau-mdp" class="form-input" style="margin-top:10px;" placeholder="Nouveau mot de passe">
+                <input type="password" id="confirmation-mdp" class="form-input" style="margin-top:10px;" placeholder="Confirmer le nouveau mot de passe">
+                <div id="error-msg" class="error-message"></div>
+                <div id="success-msg" class="success-message">Mot de passe modifié avec succès !</div>
+            </div>
+            <button class="btn-primary" onclick="changerMotDePasse()">Enregistrer</button>
+            <button class="btn-secondary" onclick="fermerCompte()">Fermer</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let historique = [];
     let convIdActuelle = null;
     const chatDiv = document.getElementById('chat-messages');
 
     function fixSidebarScroll() {
-    const sidebar = document.querySelector('.sidebar');
-    const convList = document.getElementById('conv-list');
-    const footer = document.querySelector('.sidebar-footer');
-    const logo = document.querySelector('.sidebar-logo');
-    const btnNew = document.querySelector('.btn-new-conv');
-    const label = document.querySelector('.conv-section-label');
+        const sidebar = document.querySelector('.sidebar');
+        const convList = document.getElementById('conv-list');
+        const footer = document.querySelector('.sidebar-footer');
+        const logo = document.querySelector('.sidebar-logo');
+        const btnNew = document.querySelector('.btn-new-conv');
+        const label = document.querySelector('.conv-section-label');
 
-    sidebar.style.cssText = `
-        width: 260px;
-        background: #ffffff;
-        border-right: 1px solid #ede9fe;
-        display: flex;
-        flex-direction: column;
-        flex-shrink: 0;
-        position: relative;
-        height: 100vh;
-        overflow: hidden;
-    `;
+        sidebar.style.cssText = `
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #ede9fe;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        `;
 
-    const hauteurPrise = logo.offsetHeight + btnNew.offsetHeight + label.offsetHeight + footer.offsetHeight;
-    const hauteurDispo = window.innerHeight - hauteurPrise - 20;
+        const hauteurPrise = logo.offsetHeight + btnNew.offsetHeight + label.offsetHeight + footer.offsetHeight;
+        const hauteurDispo = window.innerHeight - hauteurPrise - 20;
 
-    convList.style.cssText = `
-        overflow-y: auto;
-        height: ${hauteurDispo}px;
-        max-height: ${hauteurDispo}px;
-        min-height: 0;
-        padding: 4px 8px;
-        scrollbar-width: thin;
-        scrollbar-color: #ede9fe transparent;
-    `;
-}
+        convList.style.cssText = `
+            overflow-y: auto;
+            height: ${hauteurDispo}px;
+            max-height: ${hauteurDispo}px;
+            min-height: 0;
+            padding: 4px 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #ede9fe transparent;
+        `;
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-    fixSidebarScroll();
-    chargerConversations();
-    chargerMoisDisponibles();
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        fixSidebarScroll();
+        chargerConversations();
+        chargerMoisDisponibles();
+    });
 
-window.addEventListener('resize', fixSidebarScroll);
+    window.addEventListener('resize', fixSidebarScroll);
 
     async function chargerConversations() {
         const res = await fetch('/api/client/conversations');
@@ -703,6 +791,71 @@ window.addEventListener('resize', fixSidebarScroll);
     document.getElementById('question-input').addEventListener('keypress', e => {
         if (e.key === 'Enter') envoyerQuestion();
     });
+
+    // ==================== FONCTIONS COMPTE ====================
+    function ouvrirCompte() {
+        document.getElementById('modal-compte').style.display = 'flex';
+        document.getElementById('ancien-mdp').value = '';
+        document.getElementById('nouveau-mdp').value = '';
+        document.getElementById('confirmation-mdp').value = '';
+        document.getElementById('error-msg').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'none';
+    }
+
+    function fermerCompte() {
+        document.getElementById('modal-compte').style.display = 'none';
+    }
+
+    async function changerMotDePasse() {
+        const ancien = document.getElementById('ancien-mdp').value;
+        const nouveau = document.getElementById('nouveau-mdp').value;
+        const confirmation = document.getElementById('confirmation-mdp').value;
+        
+        document.getElementById('error-msg').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'none';
+        
+        if (!ancien || !nouveau || !confirmation) {
+            showError('Tous les champs sont requis.');
+            return;
+        }
+        
+        if (nouveau !== confirmation) {
+            showError('Les nouveaux mots de passe ne correspondent pas.');
+            return;
+        }
+        
+        if (nouveau.length < 4) {
+            showError('Le mot de passe doit contenir au moins 4 caractères.');
+            return;
+        }
+        
+        try {
+            const res = await fetch('/api/client/changer-mot-de-passe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ancien_mdp: ancien, nouveau_mdp: nouveau })
+            });
+            const data = await res.json();
+            
+            if (data.succes) {
+                document.getElementById('success-msg').style.display = 'block';
+                setTimeout(() => {
+                    fermerCompte();
+                }, 1500);
+            } else {
+                showError(data.erreur || 'Une erreur est survenue.');
+            }
+        } catch (err) {
+            showError('Erreur de connexion au serveur.');
+        }
+    }
+    
+    function showError(msg) {
+        const errorDiv = document.getElementById('error-msg');
+        errorDiv.textContent = msg;
+        errorDiv.style.display = 'block';
+    }
 </script>
+
 </body>
 </html>

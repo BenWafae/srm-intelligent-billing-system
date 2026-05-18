@@ -495,6 +495,18 @@ def telecharger_facture(request: Request, mois: str):
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=facture_{mois}.pdf"}
     )
+@app.post("/api/client/changer-mot-de-passe")
+async def changer_mdp(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return {"succes": False, "erreur": "Session expirée"}
+    user = sessions[session_id]
+    data = await request.json()
+    from src.database import verifier_login, changer_password_client
+    if not verifier_login(user["email"], data["ancien_mdp"]):
+        return {"succes": False, "erreur": "Mot de passe actuel incorrect"}
+    changer_password_client(user["email"], data["nouveau_mdp"])
+    return {"succes": True}
 
 # ════════════════════════════════════════════
 # DÉCONNEXION

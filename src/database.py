@@ -896,3 +896,12 @@ def supprimer_conversation_employe(conversation_id: int) -> None:
     )
     conn.commit()
     conn.close()
+def changer_password_client(email: str, nouveau_mdp: str) -> None:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE users SET password = ? WHERE email = ?",
+        (hash_password(nouveau_mdp), email)
+    )
+    conn.commit()
+    conn.close()
