@@ -1,9 +1,8 @@
-// Gestionnaire de traductions SRM Client
+// Gestionnaire de traductions SRM (Client + Employé)
 const i18n = {
     currentLang: 'fr',
     translations: {},
     
-    // Initialiser le système
     async init() {
         const savedLang = localStorage.getItem('srm_lang');
         const browserLang = navigator.language.split('-')[0];
@@ -14,33 +13,19 @@ const i18n = {
         
         await this.loadLanguage(lang);
         this.applyTranslations();
-        // SUPPRIME LE MENU AUTOMATIQUE S'IL EXISTE DANS LE HTML
         this.supprimerMenuAutomatique();
     },
     
-    // NOUVELLE FONCTION : Supprime le menu ajouté automatiquement
     supprimerMenuAutomatique() {
-        // Supprimer le menu avec l'icône globe qui est ajouté par l'ancien script
         const oldMenu = document.querySelector('.lang-menu-btn');
         if (oldMenu) {
             const parent = oldMenu.closest('div');
             if (parent) parent.remove();
         }
-        
-        // Supprimer tout élément qui pourrait être un menu de langue flottant
         const langDropdown = document.getElementById('lang-dropdown');
         if (langDropdown) langDropdown.remove();
-        
-        // Supprimer les conteneurs de menu supplémentaires
-        const menuContainers = document.querySelectorAll('.sidebar-footer > div:not(.user-card):not(#userMenuDropdown)');
-        menuContainers.forEach(container => {
-            if (container.innerHTML.includes('lang') || container.innerHTML.includes('globe')) {
-                container.remove();
-            }
-        });
     },
     
-    // Charger un fichier de langue
     async loadLanguage(lang) {
         try {
             const response = await fetch(`/static/locales/${lang}.js`);
@@ -68,7 +53,6 @@ const i18n = {
         }
     },
     
-    // Traduire un texte par sa clé
     t(key, params = {}) {
         let text = this.translations[key] || key;
         for (const [k, v] of Object.entries(params)) {
@@ -77,7 +61,6 @@ const i18n = {
         return text;
     },
     
-    // Appliquer toutes les traductions dans la page
     applyTranslations() {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
@@ -109,11 +92,120 @@ const i18n = {
             el.placeholder = this.t(key);
         });
         
+        this.translateEmployeeInterface();
         this.translateConversationDates();
         this.translateDaysBadge();
+        this.translateSidebarFilters();
     },
     
-    // Traduire les dates des conversations
+    translateSidebarFilters() {
+        const allBtn = document.getElementById('sb-all');
+        if (allBtn && allBtn.textContent === 'Tout') allBtn.textContent = this.t('filter_all');
+        
+        const excelBtn = document.getElementById('sb-excel');
+        if (excelBtn && excelBtn.textContent === 'Excel') excelBtn.textContent = this.t('filter_excel');
+        
+        const pdfBtn = document.getElementById('sb-pdf');
+        if (pdfBtn && pdfBtn.textContent === 'PDF') pdfBtn.textContent = this.t('filter_pdf');
+        
+        const recentLabel = document.querySelector('.conv-list > p:first-child');
+        if (recentLabel && recentLabel.textContent === 'Récentes') {
+            recentLabel.innerHTML = this.t('recent');
+        }
+    },
+    
+    translateEmployeeInterface() {
+        const btnExcel = document.getElementById('btn-excel');
+        if (btnExcel && btnExcel.textContent.includes('Base clients Excel')) {
+            btnExcel.innerHTML = `📊 ${this.t('excel_tab')}`;
+        }
+        
+        const btnPdf = document.getElementById('btn-pdf');
+        if (btnPdf && btnPdf.textContent.includes('Analyse facture PDF')) {
+            btnPdf.innerHTML = `📄 ${this.t('pdf_tab')}`;
+        }
+        
+        document.querySelectorAll('.badge-excel').forEach(badge => {
+            if (badge.textContent === 'XLS') badge.textContent = this.t('badge_excel');
+        });
+        document.querySelectorAll('.badge-pdf').forEach(badge => {
+            if (badge.textContent === 'PDF') badge.textContent = this.t('badge_pdf');
+        });
+        
+        const excelWelcomeTitle = document.querySelector('#chat-excel .welcome-title');
+        if (excelWelcomeTitle && excelWelcomeTitle.textContent.includes('Bonjour')) {
+            const name = document.querySelector('.user-name')?.textContent.split(' ')[0] || 'Employé';
+            excelWelcomeTitle.innerHTML = this.t('welcome_title_employee', { name: name });
+        }
+        
+        const excelWelcomeSub = document.querySelector('#chat-excel .welcome-sub');
+        if (excelWelcomeSub && excelWelcomeSub.textContent.includes('Posez une question')) {
+            excelWelcomeSub.innerHTML = this.t('welcome_sub_excel');
+        }
+        
+        const pdfWelcomeTitle = document.querySelector('#chat-pdf .welcome-title');
+        if (pdfWelcomeTitle && pdfWelcomeTitle.textContent === 'Analyse PDF') {
+            pdfWelcomeTitle.innerHTML = this.t('pdf_welcome_title');
+        }
+        
+        const pdfWelcomeSub = document.querySelector('#chat-pdf .welcome-sub');
+        if (pdfWelcomeSub && pdfWelcomeSub.textContent.includes('Sélectionnez un client')) {
+            pdfWelcomeSub.innerHTML = this.t('pdf_welcome_sub');
+        }
+        
+        const filterLabel = document.querySelector('.filter-label');
+        if (filterLabel && filterLabel.textContent === 'Fichier source') {
+            filterLabel.innerHTML = this.t('filter_label');
+        }
+        
+        const clientLabel = document.querySelector('#onglet-pdf .filter-label');
+        if (clientLabel && clientLabel.textContent === 'Client concerné') {
+            clientLabel.innerHTML = this.t('client_label');
+        }
+        
+        const inputExcel = document.getElementById('input-excel');
+        if (inputExcel && inputExcel.placeholder === 'Ex: Qui consomme le plus ? Liste des clients...') {
+            inputExcel.placeholder = this.t('excel_placeholder');
+        }
+        
+        const inputPdf = document.getElementById('input-pdf');
+        if (inputPdf && inputPdf.placeholder === 'Ex: Quel est le montant ? Quelle est la période ?') {
+            inputPdf.placeholder = this.t('pdf_placeholder');
+        }
+        
+        const selectFichier = document.getElementById('select-fichier');
+        if (selectFichier && selectFichier.options[0] && selectFichier.options[0].text === '📂 Tous les fichiers') {
+            selectFichier.options[0].text = `📂 ${this.t('all_files')}`;
+        }
+        
+        const labelFichier = document.getElementById('label-fichier');
+        if (labelFichier && labelFichier.innerHTML === '🌐 Toute la base') {
+            labelFichier.innerHTML = `🌐 ${this.t('all_database')}`;
+        }
+        
+        const userRole = document.querySelector('.user-role');
+        if (userRole && userRole.textContent === 'Employé SRM') {
+            userRole.innerHTML = this.t('employee_role');
+        }
+        
+        const bannerText = document.querySelector('.info-banner span:first-child');
+        if (bannerText && bannerText.textContent === 'Base de données active') {
+            bannerText.innerHTML = this.t('database_active');
+        }
+        
+        const statLabels = document.querySelectorAll('.info-banner-stat');
+        statLabels.forEach(stat => {
+            let text = stat.textContent;
+            if (text.includes('factures') && !text.includes(this.t('invoices'))) {
+                stat.innerHTML = text.replace('factures', this.t('invoices'));
+            } else if (text.includes('clients') && !text.includes(this.t('clients'))) {
+                stat.innerHTML = text.replace('clients', this.t('clients'));
+            } else if (text.includes('périodes') && !text.includes(this.t('periods'))) {
+                stat.innerHTML = text.replace('périodes', this.t('periods'));
+            }
+        });
+    },
+    
     translateConversationDates() {
         const dateElements = document.querySelectorAll('.conv-date');
         dateElements.forEach(el => {
@@ -138,7 +230,6 @@ const i18n = {
         });
     },
     
-    // Traduire le badge
     translateDaysBadge() {
         const badgeSpan = document.querySelector('.dash-badge span[data-i18n="days_left"]');
         if (badgeSpan) {
@@ -155,7 +246,6 @@ const i18n = {
         }
     },
     
-    // Mettre à jour le contenu dynamique
     updateDynamicContent() {
         const welcomeTitle = document.querySelector('.welcome-title');
         if (welcomeTitle) {
@@ -212,7 +302,6 @@ const i18n = {
         if (successMsg) successMsg.innerHTML = this.t('password_changed');
     },
     
-    // Changer de langue (appelé par votre menu HTML)
     async switchTo(lang) {
         if (lang === this.currentLang) return;
         await this.loadLanguage(lang);
@@ -221,7 +310,9 @@ const i18n = {
         if (typeof window.updateRenameDeleteTexts === 'function') {
             window.updateRenameDeleteTexts();
         }
-        // Mettre à jour la classe active dans le sous-menu
+        // ✅ Rafraîchir les dates
+        this.refreshAllDates();
+        
         document.querySelectorAll('.lang-option').forEach(opt => {
             opt.classList.remove('active');
             if ((lang === 'fr' && opt.textContent.includes('Français')) ||
@@ -230,8 +321,22 @@ const i18n = {
                 opt.classList.add('active');
             }
         });
+    },
+    
+    // ✅ FONCTION pour rafraîchir toutes les dates (à l'intérieur de l'objet)
+    refreshAllDates() {
+        const dateElements = document.querySelectorAll('.conv-date');
+        dateElements.forEach(el => {
+            const originalDate = el.getAttribute('data-original-date');
+            if (originalDate && typeof window.formaterDate === 'function') {
+                const newFormatted = window.formaterDate(originalDate);
+                if (newFormatted !== el.textContent) {
+                    el.textContent = newFormatted;
+                }
+            }
+        });
     }
 };
 
-// Initialisation au chargement
+// ✅ Initialisation
 document.addEventListener('DOMContentLoaded', () => i18n.init());

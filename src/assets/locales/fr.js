@@ -61,6 +61,30 @@ const translations = {
     // Logout
     "logout": "Déconnexion",
     "days_left": "dans {{days}} jours",
-    "none": "Aucune"
+    "none": "Aucune",
     
+    // À ajouter dans fr.js
+"employee_role": "Employé SRM",
+"excel_tab": "Base clients Excel",
+"pdf_tab": "Analyse facture PDF",
+"badge_excel": "XLS",
+"badge_pdf": "PDF",
+"welcome_title_employee": "Bonjour {{name}} 👋",
+"welcome_sub_excel": "Posez une question sur la base clients Excel, les consommations ou les factures.",
+"pdf_welcome_title": "Analyse PDF",
+"pdf_welcome_sub": "Sélectionnez un client ci-dessus puis posez une question sur sa facture.",
+"filter_label": "Fichier source",
+"excel_placeholder": "Ex: Qui consomme le plus ? Liste des clients...",
+"pdf_placeholder": "Ex: Quel est le montant ? Quelle est la période ?",
+"all_files": "Tous les fichiers",
+"all_database": "Toute la base",
+"client_label": "Client concerné",
+"database_active": "Base de données active",
+// Ajouter dans fr.js
+"filter_all": "Tout",
+"filter_excel": "Excel", 
+"filter_pdf": "PDF",
+"invoices": "factures",
+"clients": "clients",
+"periods": "périodes"
 };

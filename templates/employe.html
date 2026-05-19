@@ -11,7 +11,6 @@
         * { box-sizing: border-box; }
         body { font-family: 'DM Sans', sans-serif; margin: 0; background: #f8f7ff; }
 
-        /* SIDEBAR STYLES */
         .sidebar {
             width: 260px;
             background: #ffffff;
@@ -50,8 +49,11 @@
             right: auto;
             left: 0;
         }
+        body.rtl .filter-bar,
+        body.rtl .info-banner {
+            text-align: right;
+        }
 
-        /* Scrollbar personnalisée */
         .conv-list::-webkit-scrollbar,
         .chat-area::-webkit-scrollbar {
             width: 4px;
@@ -67,7 +69,6 @@
             border-radius: 4px;
         }
 
-        /* Conversation items */
         .conv-item {
             position: relative;
             transition: all 0.15s;
@@ -87,7 +88,6 @@
             opacity: 1;
         }
 
-        /* Dropdown menu */
         .dropdown-menu {
             display: none;
             position: absolute;
@@ -141,7 +141,6 @@
             width: 100%;
         }
 
-        /* Boutons de filtre */
         .filter-btn {
             transition: all 0.2s;
         }
@@ -159,7 +158,6 @@
             color: #7c3aed;
         }
 
-        /* Onglets */
         .tab-btn {
             transition: all 0.2s;
         }
@@ -177,7 +175,6 @@
             color: #7c3aed;
         }
 
-        /* Messages */
         .msg-user {
             align-self: flex-end;
             background: linear-gradient(135deg, #7c3aed, #6d28d9);
@@ -196,7 +193,6 @@
             border-radius: 18px;
         }
 
-        /* Animation chargement */
         .dot-pulse {
             width: 7px;
             height: 7px;
@@ -211,7 +207,6 @@
             40% { opacity: 1; transform: scale(1); }
         }
 
-        /* Badges */
         .badge-excel {
             background: #ede9fe;
             color: #7c3aed;
@@ -221,10 +216,22 @@
             color: #d97706;
         }
 
-        /* Selects stylisés */
-        .custom-select {
-            background: #faf5ff;
+        .filter-bar {
+            background: linear-gradient(135deg, #faf5ff, #ffffff);
             border: 1px solid #ede9fe;
+            border-radius: 14px;
+            padding: 12px 16px;
+        }
+        .filter-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #7c3aed;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .custom-select {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
             border-radius: 10px;
             padding: 8px 12px;
             font-size: 13px;
@@ -238,7 +245,6 @@
             box-shadow: 0 0 0 3px rgba(167,139,250,0.1);
         }
 
-        /* Input stylisé */
         .chat-input {
             background: #faf5ff;
             border: 1.5px solid #ede9fe;
@@ -262,7 +268,6 @@
             color: #d1d5db;
         }
 
-        /* Bouton envoi */
         .btn-send {
             background: linear-gradient(135deg, #7c3aed, #6d28d9);
             border-radius: 12px;
@@ -277,14 +282,63 @@
             transform: scale(0.97);
         }
 
-        /* Dashboard info */
         .info-banner {
             background: linear-gradient(135deg, #f5f3ff, #ede9fe);
             border: 1px solid #ddd6fe;
-            border-radius: 12px;
+            border-radius: 14px;
+            padding: 12px 16px;
+        }
+        .info-banner-stat {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 4px;
+            background: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #7c3aed;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .welcome-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 20px;
+        }
+        .welcome-orb {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+            border: 1.5px solid #ddd6fe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .welcome-orb svg {
+            width: 24px;
+            height: 24px;
+            stroke: #8b5cf6;
+        }
+        .welcome-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f1535;
+            margin-bottom: 6px;
+        }
+        .welcome-sub {
+            font-size: 13px;
+            color: #9ca3af;
+            max-width: 280px;
+            line-height: 1.5;
         }
 
-        /* Menu utilisateur */
         .sidebar-footer {
             padding: 12px;
             border-top: 1px solid #f3f0ff;
@@ -446,7 +500,6 @@
             font-weight: 500;
         }
 
-        /* Modal */
         .modal-panel {
             background: white;
             border-radius: 24px;
@@ -528,11 +581,8 @@
 
 <div class="flex h-screen w-full overflow-hidden">
 
-    <!-- ════════════════════════════════════════════════════════════ -->
     <!-- SIDEBAR -->
-    <!-- ════════════════════════════════════════════════════════════ -->
     <div class="sidebar">
-        <!-- Logo -->
         <div class="sidebar-logo p-4 border-b border-purple-50">
             <div class="logo-inner flex items-center gap-3 px-2 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
                 <img src="/static/srm_logo.png" alt="SRM" class="logo-img w-8 h-8 object-contain" onerror="this.style.display='none'">
@@ -543,7 +593,6 @@
             </div>
         </div>
 
-        <!-- Nouvelle conversation -->
         <div class="px-3 pt-3 pb-2">
             <button onclick="nouvelleConversation()"
                 class="btn-new-conv flex items-center justify-center gap-2 w-full px-3 py-2.5 bg-white border border-gray-200 hover:border-purple-300 rounded-xl text-sm text-gray-600 hover:text-purple-700 hover:bg-purple-50 transition-all">
@@ -554,25 +603,14 @@
             </button>
         </div>
 
-        <!-- Filtres -->
         <div class="px-3 pt-2 pb-1">
             <div class="flex gap-1">
-                <button onclick="filtrerSidebar('all')" id="sb-all"
-                    class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all active">
-                    Tout
-                </button>
-                <button onclick="filtrerSidebar('excel')" id="sb-excel"
-                    class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all">
-                    Excel
-                </button>
-                <button onclick="filtrerSidebar('pdf')" id="sb-pdf"
-                    class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all">
-                    PDF
-                </button>
+                <button onclick="filtrerSidebar('all')" id="sb-all" class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all active">Tout</button>
+                <button onclick="filtrerSidebar('excel')" id="sb-excel" class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all">Excel</button>
+                <button onclick="filtrerSidebar('pdf')" id="sb-pdf" class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all">PDF</button>
             </div>
         </div>
 
-        <!-- Liste conversations -->
         <div class="conv-list flex-1 overflow-y-auto px-2 py-1">
             <p class="text-[10px] font-medium uppercase tracking-wider text-purple-300 px-2 py-2 mb-1" data-i18n="recent">Récentes</p>
             <div id="conversations-container">
@@ -580,7 +618,6 @@
             </div>
         </div>
 
-        <!-- Footer utilisateur avec menu -->
         <div class="sidebar-footer">
             <div class="user-card" onclick="toggleUserMenu(event)">
                 <div class="user-avatar">{{ email[0].upper() }}</div>
@@ -609,15 +646,9 @@
                     <span data-i18n="language">Langue</span>
                     <span class="arrow">▶</span>
                     <div class="lang-submenu" id="langSubmenu">
-                        <div class="lang-option" onclick="changerLangue('fr'); event.stopPropagation();">
-                            <span>🇫🇷</span> Français
-                        </div>
-                        <div class="lang-option" onclick="changerLangue('en'); event.stopPropagation();">
-                            <span>🇬🇧</span> English
-                        </div>
-                        <div class="lang-option" onclick="changerLangue('ar'); event.stopPropagation();">
-                            <span>🇲🇦</span> العربية
-                        </div>
+                        <div class="lang-option" onclick="changerLangue('fr'); event.stopPropagation();"><span>🇫🇷</span> Français</div>
+                        <div class="lang-option" onclick="changerLangue('en'); event.stopPropagation();"><span>🇬🇧</span> English</div>
+                        <div class="lang-option" onclick="changerLangue('ar'); event.stopPropagation();"><span>🇲🇦</span> العربية</div>
                     </div>
                 </div>
                 
@@ -635,63 +666,67 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════════════════════════ -->
     <!-- MAIN CONTENT -->
-    <!-- ════════════════════════════════════════════════════════════ -->
     <div class="main flex-1 flex flex-col overflow-hidden bg-purple-50/30">
 
-        <!-- Navbar avec onglets -->
         <div class="bg-white border-b border-purple-100 px-6 py-3 flex justify-between items-center flex-shrink-0">
             <h1 class="font-sora text-base font-semibold bg-gradient-to-r from-purple-700 to-purple-500 bg-clip-text text-transparent">
                 Assistant SRM — Interface Employé
             </h1>
             <div class="flex gap-2">
-                <button onclick="afficherOnglet('excel')" id="btn-excel"
-                    class="tab-btn px-4 py-1.5 rounded-xl font-medium text-sm transition-all active">
-                    📊 Base clients Excel
-                </button>
-                <button onclick="afficherOnglet('pdf')" id="btn-pdf"
-                    class="tab-btn px-4 py-1.5 rounded-xl font-medium text-sm transition-all">
-                    📄 Analyse facture PDF
-                </button>
+                <button onclick="afficherOnglet('excel')" id="btn-excel" class="tab-btn px-4 py-1.5 rounded-xl font-medium text-sm transition-all active">Base clients Excel</button>
+                <button onclick="afficherOnglet('pdf')" id="btn-pdf" class="tab-btn px-4 py-1.5 rounded-xl font-medium text-sm transition-all">Analyse facture PDF</button>
             </div>
         </div>
 
-        <!-- ════════════════════════════════════════════════════════════ -->
         <!-- ONGLET EXCEL -->
-        <!-- ════════════════════════════════════════════════════════════ -->
         <div id="onglet-excel" class="flex-1 flex flex-col overflow-hidden p-5">
 
             {% if total_factures > 0 %}
-            <div class="info-banner px-4 py-2.5 mb-4 flex items-center gap-2 text-sm text-purple-700 flex-shrink-0">
-                <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                ✅ Base active — <strong>{{ total_factures }}</strong> factures | <strong>{{ nb_clients }}</strong> clients | <strong>{{ nb_periodes }}</strong> périodes
+            <div class="info-banner mb-4 flex items-center justify-between flex-wrap gap-2 flex-shrink-0">
+                <div class="flex items-center gap-2 text-sm text-purple-700">
+                    <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Base de données active</span>
+                </div>
+                <div class="flex gap-2">
+                    <span class="info-banner-stat">{{ total_factures }} factures</span>
+                    <span class="info-banner-stat">{{ nb_clients }} clients</span>
+                    <span class="info-banner-stat">{{ nb_periodes }} périodes</span>
+                </div>
             </div>
             {% else %}
-            <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-4 text-sm text-amber-700 flex-shrink-0">
+            <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 text-sm text-amber-700 flex-shrink-0">
                 ⚠️ Aucune donnée en base. L'administrateur doit importer un fichier Excel.
             </div>
             {% endif %}
 
-            <div class="mb-4 flex-shrink-0">
-                <label class="text-sm font-medium text-gray-600">🗂️ Filtrer par fichier Excel :</label>
-                <select id="select-fichier" onchange="changerFichier()" class="custom-select ml-2">
-                    <option value="">📂 Tous les fichiers</option>
-                    {% for f in fichiers %}
-                    <option value="{{ f }}">{{ f }}</option>
-                    {% endfor %}
-                </select>
-                <span id="label-fichier" class="ml-2 text-xs text-purple-400">🌐 Toute la base</span>
+            <!-- Barre de filtre stylisée -->
+            <div class="filter-bar mb-4 flex items-center justify-between flex-wrap gap-3 flex-shrink-0">
+                <div class="filter-label">Fichier source</div>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <select id="select-fichier" onchange="changerFichier()" class="custom-select">
+                        <option value=""><span>📂</span> Tous les fichiers</option>
+                        {% for f in fichiers %}
+                        <option value="{{ f }}">{{ f }}</option>
+                        {% endfor %}
+                    </select>
+                    <span id="label-fichier" class="text-xs text-purple-400 bg-white px-3 py-1.5 rounded-full border border-purple-100">
+                        🌐 Toute la base
+                    </span>
+                </div>
             </div>
 
             <div id="chat-excel" class="chat-area flex-1 overflow-y-auto flex flex-col gap-3 mb-4 p-3 bg-white/50 rounded-xl border border-purple-100">
-                <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm" id="excel-empty">
-                    <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                    </svg>
-                    Posez une question sur la base clients...
+                <div class="welcome-state" id="excel-empty">
+                    <div class="welcome-orb">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                        </svg>
+                    </div>
+                    <div class="welcome-title" data-name="{{ email.split('@')[0] }}">Bonjour {{ email.split('@')[0] }} 👋</div>
+                    <div class="welcome-sub">Posez une question sur la base clients Excel, les consommations ou les factures.</div>
                 </div>
             </div>
 
@@ -709,30 +744,33 @@
             </div>
         </div>
 
-        <!-- ════════════════════════════════════════════════════════════ -->
         <!-- ONGLET PDF -->
-        <!-- ════════════════════════════════════════════════════════════ -->
         <div id="onglet-pdf" class="flex-1 flex flex-col overflow-hidden p-5 hidden">
 
-            <div class="mb-4 flex-shrink-0">
-                <label class="text-sm font-medium text-gray-600">👤 Sélectionner un client :</label>
-                <select id="select-client-pdf" onchange="changerClientPdf()" class="custom-select ml-2">
-                    {% if clients_pdf %}
-                        {% for c in clients_pdf %}
-                        <option value="{{ c }}">{{ c }}</option>
-                        {% endfor %}
-                    {% else %}
-                        <option value="">Aucun PDF disponible</option>
-                    {% endif %}
-                </select>
+            <div class="filter-bar mb-4 flex items-center justify-between flex-wrap gap-3 flex-shrink-0">
+                <div class="filter-label">Client concerné</div>
+                <div class="flex items-center gap-3">
+                    <select id="select-client-pdf" onchange="changerClientPdf()" class="custom-select">
+                        {% if clients_pdf %}
+                            {% for c in clients_pdf %}
+                            <option value="{{ c }}">{{ c }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="">Aucun PDF disponible</option>
+                        {% endif %}
+                    </select>
+                </div>
             </div>
 
             <div id="chat-pdf" class="chat-area flex-1 overflow-y-auto flex flex-col gap-3 mb-4 p-3 bg-white/50 rounded-xl border border-purple-100">
-                <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm" id="pdf-empty">
-                    <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Sélectionnez un client puis posez une question...
+                <div class="welcome-state" id="pdf-empty">
+                    <div class="welcome-orb">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="welcome-title">Analyse PDF</div>
+                    <div class="welcome-sub">Sélectionnez un client ci-dessus puis posez une question sur sa facture.</div>
                 </div>
             </div>
 
@@ -1006,17 +1044,37 @@
         });
     }
 
-    function formaterDate(dateStr) {
-        if (!dateStr) return '';
-        const d = new Date(dateStr);
-        const auj = new Date();
-        const diff = Math.floor((auj - d) / 86400000);
-        if (diff === 0) return "Aujourd'hui";
-        if (diff === 1) return "Hier";
-        if (diff < 7) return `Il y a ${diff} jours`;
-        return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    function formaterDate(dateStr, forceLang = null) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const auj = new Date();
+    const diff = Math.floor((auj - d) / 86400000);
+    
+    // Utiliser la langue forcée ou celle de i18n
+    let currentLang = forceLang;
+    if (!currentLang && typeof i18n !== 'undefined' && i18n) {
+        currentLang = i18n.currentLang;
     }
-
+    if (!currentLang) currentLang = 'fr';
+    
+    if (diff === 0) {
+        if (currentLang === 'en') return 'Today';
+        if (currentLang === 'ar') return 'اليوم';
+        return "Aujourd'hui";
+    }
+    if (diff === 1) {
+        if (currentLang === 'en') return 'Yesterday';
+        if (currentLang === 'ar') return 'أمس';
+        return "Hier";
+    }
+    if (diff < 7) {
+        if (currentLang === 'en') return `${diff} days ago`;
+        if (currentLang === 'ar') return `قبل ${diff} أيام`;
+        return `Il y a ${diff} jours`;
+    }
+    return d.toLocaleDateString(currentLang === 'ar' ? 'ar-MA' : (currentLang === 'en' ? 'en-US' : 'fr-FR'), 
+        { day: 'numeric', month: 'short' });
+}
     function toggleMenu(e, convId) {
         e.stopPropagation();
         document.querySelectorAll('.dropdown-menu').forEach(m => {
@@ -1101,18 +1159,24 @@
         historiquePdf = [];
 
         document.getElementById('chat-excel').innerHTML = `
-            <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm">
-                <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                </svg>
-                Posez une question sur la base clients...
+            <div class="welcome-state">
+                <div class="welcome-orb">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                </div>
+                <div class="welcome-title">Bonjour {{ email.split('@')[0] }} 👋</div>
+                <div class="welcome-sub">Posez une question sur la base clients Excel, les consommations ou les factures.</div>
             </div>`;
         document.getElementById('chat-pdf').innerHTML = `
-            <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm">
-                <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Sélectionnez un client puis posez une question...
+            <div class="welcome-state">
+                <div class="welcome-orb">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div class="welcome-title">Analyse PDF</div>
+                <div class="welcome-sub">Sélectionnez un client ci-dessus puis posez une question sur sa facture.</div>
             </div>`;
 
         document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
@@ -1121,13 +1185,16 @@
     function changerFichier() {
         nomFichierActif = document.getElementById('select-fichier').value;
         const label = document.getElementById('label-fichier');
-        label.textContent = nomFichierActif ? `🎯 ${nomFichierActif}` : '🌐 Toute la base';
+        label.innerHTML = nomFichierActif ? `📁 ${nomFichierActif}` : '🌐 Toute la base';
         document.getElementById('chat-excel').innerHTML = `
-            <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm">
-                <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                </svg>
-                Fichier changé — posez une question...
+            <div class="welcome-state">
+                <div class="welcome-orb">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                </div>
+                <div class="welcome-title">Fichier modifié</div>
+                <div class="welcome-sub">Posez une question sur le fichier sélectionné.</div>
             </div>`;
         convIdExcel = null;
         historiqueExcel = [];
@@ -1136,11 +1203,14 @@
     function changerClientPdf() {
         clientPdfActif = document.getElementById('select-client-pdf').value;
         document.getElementById('chat-pdf').innerHTML = `
-            <div class="flex flex-col items-center justify-center h-full text-center text-purple-300 text-sm">
-                <svg class="w-12 h-12 mb-3 text-purple-200" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Client changé — posez une question...
+            <div class="welcome-state">
+                <div class="welcome-orb">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <div class="welcome-title">Client sélectionné</div>
+                <div class="welcome-sub">Posez une question sur la facture de ${clientPdfActif}.</div>
             </div>`;
         convIdPdf = null;
         historiquePdf = [];
@@ -1148,7 +1218,7 @@
 
     function afficherBulle(chatId, role, texte) {
         const chat = document.getElementById(chatId);
-        const empty = chat.querySelector('.flex-col.items-center.justify-center');
+        const empty = chat.querySelector('.welcome-state');
         if (empty) empty.remove();
 
         const div = document.createElement('div');
@@ -1290,6 +1360,7 @@
     window.ouvrirCompte = ouvrirCompte;
     window.changerLangue = changerLangue;
     window.closeUserMenu = closeUserMenu;
+    window.formaterDate = formaterDate;
 </script>
 
 </body>

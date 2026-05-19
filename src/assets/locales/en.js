@@ -61,5 +61,29 @@ const translations = {
     // Logout
     "logout": "Logout",
      "days_left": "in {{days}} days",
-    "none": "None"
+    "none": "None",
+    // À ajouter dans en.js
+"employee_role": "SRM Employee",
+"excel_tab": "Excel Client Database",
+"pdf_tab": "PDF Invoice Analysis",
+"badge_excel": "XLS",
+"badge_pdf": "PDF",
+"welcome_title_employee": "Hello {{name}} 👋",
+"welcome_sub_excel": "Ask a question about the Excel client database, consumption or invoices.",
+"pdf_welcome_title": "PDF Analysis",
+"pdf_welcome_sub": "Select a client above then ask a question about their invoice.",
+"filter_label": "Source file",
+"excel_placeholder": "Ex: Who consumes the most? List of clients...",
+"pdf_placeholder": "Ex: What is the amount? What is the period?",
+"all_files": "All files",
+"all_database": "All database",
+"client_label": "Select client",
+"database_active": "Database active",
+// Ajouter dans en.js
+"filter_all": "All",
+"filter_excel": "Excel",
+"filter_pdf": "PDF", 
+"invoices": "invoices",
+"clients": "clients",
+"periods": "periods"
 };

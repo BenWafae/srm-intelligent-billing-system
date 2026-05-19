@@ -61,5 +61,30 @@ const translations = {
     // Logout
     "logout": "تسجيل الخروج",
     "days_left": "خلال {{days}} أيام",
-    "none": "لا يوجد"
+    "none": "لا يوجد",
+    // À ajouter dans ar.js
+"employee_role": "موظف SRM",
+"excel_tab": "قاعدة عملاء Excel",
+"pdf_tab": "تحليل فواتير PDF",
+"badge_excel": "XLS",
+"badge_pdf": "PDF",
+"welcome_title_employee": "مرحباً {{name}} 👋",
+"welcome_sub_excel": "اسأل سؤالاً عن قاعدة عملاء Excel أو الاستهلاك أو الفواتير.",
+"pdf_welcome_title": "تحليل PDF",
+"pdf_welcome_sub": "اختر عميلاً أعلاه ثم اسأل سؤالاً عن فاتورته.",
+"filter_label": "ملف المصدر",
+"excel_placeholder": "مثال: من يستهلك أكثر؟ قائمة العملاء...",
+"pdf_placeholder": "مثال: ما هو المبلغ؟ ما هي الفترة؟",
+"all_files": "جميع الملفات",
+"all_database": "قاعدة البيانات بأكملها",
+"client_label": "اختر العميل",
+"database_active": "قاعدة البيانات نشطة",
+// Ajouter dans ar.js
+"filter_all": "الكل",
+"filter_excel": "إكسل",
+"filter_pdf": "بي دي إف",
+"invoices": "فواتير",
+"clients": "عملاء", 
+"periods": "فترات"
+
 };
