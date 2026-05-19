@@ -2,460 +2,1283 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>SRM — Interface Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRM — Interface Administrateur | Souss-Massa</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --srm-navy:       #1e3155;
+            --srm-navy-light: #334867;
+            --srm-navy-soft:  #4a6080;
+            --srm-gold:       #eaba62;
+            --srm-gold-dark:  #d4a44a;
+            --srm-gold-light: #f5e4be;
+            --srm-gold-pale:  #fef8ee;
+            --srm-green:      #79ad66;
+            --srm-green-dark: #5e8a4f;
+            --srm-cream:      #faf7f0;
+            --srm-white:      #ffffff;
+            --srm-gray:       #8a9ab5;
+            --srm-gray-light: #c5cfdd;
+            --srm-border:     rgba(234,186,98,0.18);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--srm-cream);
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 95% 5%,  rgba(212,164,74,.08)  0%, transparent 55%),
+                radial-gradient(ellipse 60% 60% at 5%  95%, rgba(121,173,102,.07) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(30,49,85,.04)    0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Floating particles */
+        .bg-particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatUp linear infinite;
+            opacity: 0;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-80px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Topbar */
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(255,255,255,.92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--srm-border);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 16px rgba(30,49,85,.06);
+        }
+        .topbar::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--srm-navy), var(--srm-gold), var(--srm-green));
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 16px; }
+        .logo-badge-top {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            background: var(--srm-white);
+            border: 1.5px solid var(--srm-border);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(30,49,85,.1);
+            overflow: hidden;
+            transition: all .3s ease;
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+        .logo-badge-top:hover { transform: scale(1.05); border-color: var(--srm-gold); }
+        .logo-badge-top img { width: 30px; height: 30px; object-fit: contain; }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 2px 8px rgba(30,49,85,.1); }
+            50% { box-shadow: 0 4px 14px rgba(234,186,98,.3); }
+        }
+
+        .topbar-brand { font-family: 'Sora', sans-serif; }
+        .topbar-brand-name { font-size: 15px; font-weight: 700; color: var(--srm-navy); line-height: 1.2; }
+        .topbar-brand-sub  { font-size: 10px; font-weight: 500; color: var(--srm-gold-dark); letter-spacing: .05em; text-transform: uppercase; }
+
+        .topbar-divider { width: 1px; height: 28px; background: var(--srm-border); }
+
+        .admin-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 5px 14px;
+            background: linear-gradient(135deg, rgba(30,49,85,.08), rgba(234,186,98,.1));
+            border: 1px solid var(--srm-border);
+            border-radius: 30px;
+            font-size: 11px; font-weight: 600;
+            color: var(--srm-navy-light);
+            letter-spacing: .04em;
+        }
+        .admin-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--srm-green); animation: livePulse 2s infinite; }
+        @keyframes livePulse { 0%,100%{box-shadow:0 0 0 0 rgba(121,173,102,.5)} 50%{box-shadow:0 0 0 5px rgba(121,173,102,0)} }
+
+        .topbar-right { display: flex; align-items: center; gap: 16px; }
+        .topbar-email {
+            font-size: 12px; color: var(--srm-gray);
+            background: var(--srm-cream);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--srm-border);
+        }
+        .btn-logout {
+            display: flex; align-items: center; gap: 7px;
+            padding: 7px 16px;
+            background: rgba(30,49,85,.08);
+            border: 1px solid var(--srm-border);
+            border-radius: 10px;
+            font-size: 12px; font-weight: 500; color: var(--srm-navy-light);
+            cursor: pointer; text-decoration: none;
+            transition: all .2s;
+        }
+        .btn-logout:hover { background: rgba(30,49,85,.12); transform: translateY(-1px); color: var(--srm-navy); }
+        .btn-logout svg { width: 13px; height: 13px; stroke: currentColor; }
+
+        /* Page wrap */
+        .page-wrap {
+            position: relative; z-index: 1;
+            max-width: 1060px;
+            margin: 0 auto;
+            padding: 28px 24px 48px;
+        }
+
+        /* Page header */
+        .page-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 28px;
+            animation: fadeUp .5s ease;
+        }
+        .page-title { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; color: var(--srm-navy); }
+        .page-sub { font-size: 13px; color: var(--srm-gray); margin-top: 3px; }
+
+        /* Stats row - 3 cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--srm-white);
+            border: 1px solid var(--srm-border);
+            border-radius: 18px;
+            padding: 18px 22px;
+            position: relative; overflow: hidden;
+            transition: all .3s cubic-bezier(.34,1.56,.64,1);
+            box-shadow: 0 2px 10px rgba(30,49,85,.04);
+            animation: fadeUp .5s ease backwards;
+        }
+        .stat-card:nth-child(1) { animation-delay: .05s; }
+        .stat-card:nth-child(2) { animation-delay: .1s; }
+        .stat-card:nth-child(3) { animation-delay: .15s; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(30,49,85,.12); }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 20px; right: 20px;
+            height: 3px; border-radius: 0 0 4px 4px;
+        }
+        .stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--srm-navy), var(--srm-gold)); }
+        .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--srm-gold), var(--srm-green)); }
+        .stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--srm-green), var(--srm-navy-light)); }
+        .stat-ico {
+            width: 38px; height: 38px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 12px;
+            transition: transform .3s ease;
+        }
+        .stat-card:hover .stat-ico { transform: scale(1.05) rotate(5deg); }
+        .stat-ico svg { width: 18px; height: 18px; stroke: currentColor; }
+        .si-gold  { background: rgba(234,186,98,.12);  color: var(--srm-gold-dark); }
+        .si-green { background: rgba(121,173,102,.12); color: var(--srm-green-dark); }
+        .si-navy  { background: rgba(30,49,85,.08);    color: var(--srm-navy-light); }
+        .stat-num { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: var(--srm-navy); }
+        .stat-lbl { font-size: 11px; color: var(--srm-gray); font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
+
+        /* Tabs nav */
+        .tabs-nav {
+            display: flex; gap: 6px;
+            background: var(--srm-white);
+            border: 1px solid var(--srm-border);
+            border-radius: 16px;
+            padding: 6px;
+            margin-bottom: 24px;
+            animation: fadeUp .5s .2s ease both;
+            box-shadow: 0 2px 10px rgba(30,49,85,.04);
+        }
+        .tab-pill {
+            flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer;
+            transition: all .25s cubic-bezier(.34,1.56,.64,1);
+            color: var(--srm-gray);
+            border: 1px solid transparent;
+            user-select: none;
+        }
+        .tab-pill:hover:not(.active) { background: rgba(234,186,98,.08); color: var(--srm-navy-light); }
+        .tab-pill.active {
+            background: linear-gradient(135deg, var(--srm-navy), #2a456e);
+            color: var(--srm-white);
+            box-shadow: 0 4px 14px rgba(30,49,85,.25);
+            border-color: transparent;
+        }
+        .tab-pill .tab-ico { font-size: 15px; }
+
+        /* Tab panel */
+        .tab-panel { display: none; animation: fadeUp .4s ease; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+        /* Section card */
+        .section-card {
+            background: var(--srm-white);
+            border: 1px solid var(--srm-border);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(30,49,85,.04);
+            transition: all .3s ease;
+            animation: fadeUp .5s ease backwards;
+        }
+        .section-card:hover { box-shadow: 0 8px 28px rgba(30,49,85,.1); }
+
+        .section-head {
+            display: flex; align-items: center; gap: 14px;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--srm-border);
+            background: linear-gradient(135deg, #fefcf8, var(--srm-white));
+        }
+        .section-head-ico {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: transform .3s ease;
+        }
+        .section-card:hover .section-head-ico { transform: scale(1.05); }
+        .section-head-ico svg { width: 17px; height: 17px; stroke: currentColor; }
+        .section-head h3 { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: var(--srm-navy); }
+        .section-head p  { font-size: 11px; color: var(--srm-gray); margin-top: 1px; }
+
+        .section-body { padding: 24px; }
+
+        /* Alert banners - CORRIGÉ */
+        .alert {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            border: 1px solid;
+            animation: fadeUp .3s ease;
+        }
+        .alert-success { 
+            background: rgba(121,173,102,.1); 
+            border-color: rgba(121,173,102,.3); 
+            color: var(--srm-green-dark); 
+        }
+        .alert-warn { 
+            background: rgba(234,186,98,.1); 
+            border-color: rgba(234,186,98,.3); 
+            color: #8a6010; 
+        }
+        .alert svg { 
+            width: 18px; 
+            height: 18px; 
+            stroke: currentColor; 
+            flex-shrink: 0; 
+        }
+        .alert strong { font-weight: 700; color: currentColor; }
+
+        /* Drop zone */
+        .dropzone {
+            border: 2px dashed rgba(234,186,98,.35);
+            border-radius: 16px;
+            padding: 36px 24px;
+            text-align: center;
+            transition: all .25s ease;
+            background: rgba(234,186,98,.02);
+            margin-bottom: 16px;
+            cursor: pointer;
+            position: relative;
+        }
+        .dropzone:hover, .dropzone.drag-over {
+            border-color: var(--srm-gold);
+            background: rgba(234,186,98,.06);
+            transform: scale(1.01);
+        }
+        .dropzone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .dz-icon {
+            width: 52px; height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(234,186,98,.12), rgba(234,186,98,.06));
+            border: 1px solid rgba(234,186,98,.2);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 14px;
+            transition: all .3s ease;
+        }
+        .dropzone:hover .dz-icon { transform: scale(1.05) rotate(5deg); }
+        .dz-icon svg { width: 24px; height: 24px; stroke: var(--srm-gold-dark); }
+        .dz-title { font-size: 14px; font-weight: 600; color: var(--srm-navy); margin-bottom: 4px; }
+        .dz-sub   { font-size: 12px; color: var(--srm-gray); }
+        .dz-badge {
+            display: inline-block; margin-top: 12px;
+            padding: 4px 12px;
+            background: rgba(234,186,98,.1);
+            border: 1px solid rgba(234,186,98,.25);
+            border-radius: 20px;
+            font-size: 11px; color: var(--srm-gold-dark); font-weight: 500;
+        }
+
+        .apercu-box {
+            background: rgba(30,49,85,.04);
+            border: 1px solid rgba(30,49,85,.1);
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-size: 13px; color: var(--srm-navy-light);
+            margin-bottom: 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .apercu-box svg { width: 15px; height: 15px; stroke: var(--srm-gold-dark); flex-shrink: 0; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 11px 22px;
+            border-radius: 12px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer; border: none;
+            transition: all .25s cubic-bezier(.34,1.56,.64,1);
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn svg { width: 14px; height: 14px; stroke: currentColor; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--srm-navy), #2a456e);
+            color: white;
+            box-shadow: 0 4px 14px rgba(30,49,85,.22);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(30,49,85,.3); }
+        .btn-success {
+            background: linear-gradient(135deg, var(--srm-green-dark), var(--srm-green));
+            color: white;
+            box-shadow: 0 4px 14px rgba(94,138,79,.22);
+        }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(94,138,79,.3); }
+        .btn-danger {
+            background: linear-gradient(135deg, var(--srm-navy-light), var(--srm-navy-soft));
+            color: white;
+            box-shadow: 0 4px 14px rgba(48,67,97,.22);
+        }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(48,67,97,.3); }
+        .btn-warn {
+            background: linear-gradient(135deg, var(--srm-gold-dark), var(--srm-gold));
+            color: var(--srm-navy);
+            box-shadow: 0 4px 14px rgba(212,164,74,.22);
+        }
+        .btn-warn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(212,164,74,.3); }
+        .btn-ghost {
+            background: rgba(30,49,85,.06);
+            color: var(--srm-navy-light);
+            border: 1px solid var(--srm-border);
+        }
+        .btn-ghost:hover { background: rgba(30,49,85,.1); transform: translateY(-1px); }
+        .btn-full { width: 100%; }
+        .btn-icon {
+            width: 32px; height: 32px; padding: 0;
+            border-radius: 10px;
+            background: rgba(234,186,98,.1);
+            border: 1px solid var(--srm-border);
+            color: var(--srm-gold-dark);
+            cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            transition: all .2s;
+        }
+        .btn-icon:hover { background: rgba(234,186,98,.2); transform: scale(1.05); }
+        .btn-icon-del {
+            width: 32px; height: 32px; border-radius: 10px;
+            background: rgba(30,49,85,.08);
+            border: 1px solid var(--srm-border);
+            color: var(--srm-navy-soft);
+            cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            transition: all .2s;
+        }
+        .btn-icon-del:hover { background: rgba(30,49,85,.15); transform: scale(1.1); color: #c0392b; }
+
+        /* Password wrapper */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper input {
+            flex: 1;
+            padding-right: 45px;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--srm-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all .2s;
+        }
+        .toggle-password:hover {
+            background: rgba(234,186,98,.1);
+            color: var(--srm-gold-dark);
+        }
+        .toggle-password svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+        }
+
+        /* Form elements */
+        .form-label {
+            display: block; font-size: 12px; font-weight: 600;
+            color: var(--srm-navy); margin-bottom: 7px;
+            letter-spacing: .02em;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 11px 16px;
+            border: 1.5px solid rgba(234,186,98,.25);
+            border-radius: 12px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--srm-navy);
+            background: var(--srm-cream);
+            outline: none;
+            transition: all .2s;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: var(--srm-gold);
+            background: var(--srm-white);
+            box-shadow: 0 0 0 3px rgba(234,186,98,.12);
+        }
+
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+
+        /* Danger zone */
+        .danger-zone {
+            background: linear-gradient(135deg, rgba(30,49,85,.04), rgba(234,186,98,.04));
+            border: 1px solid var(--srm-border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .danger-zone-title {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 12px; font-weight: 700;
+            color: var(--srm-navy);
+            text-transform: uppercase; letter-spacing: .08em;
+            margin-bottom: 16px;
+        }
+        .danger-zone-title svg { width: 14px; height: 14px; stroke: var(--srm-gold-dark); }
+
+        /* Progress bar */
+        .progress-wrap { margin: 14px 0; }
+        .progress-track {
+            width: 100%; height: 6px;
+            background: rgba(30,49,85,.08);
+            border-radius: 10px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--srm-navy), var(--srm-gold));
+            border-radius: 10px;
+            width: 0%;
+            transition: width .3s ease;
+        }
+
+        /* Users table */
+        .users-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .users-table thead tr th {
+            padding: 10px 16px;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em;
+            color: var(--srm-gold-dark);
+            background: rgba(234,186,98,.06);
+            border-bottom: 1px solid var(--srm-border);
+            text-align: left;
+        }
+        .users-table tbody tr {
+            border-bottom: 1px solid rgba(234,186,98,.1);
+            transition: background .15s;
+        }
+        .users-table tbody tr:hover { background: rgba(234,186,98,.04); }
+        .users-table tbody tr td {
+            padding: 12px 16px;
+            font-size: 13px; color: var(--srm-navy-light);
+            vertical-align: middle;
+        }
+        .role-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px; font-weight: 600;
+        }
+        .role-chip-dot { width: 5px; height: 5px; border-radius: 50%; }
+        .rc-admin   { background: rgba(30,49,85,.08);    color: var(--srm-navy);       }
+        .rc-admin   .role-chip-dot { background: var(--srm-navy);       }
+        .rc-employe { background: rgba(234,186,98,.12);  color: var(--srm-gold-dark);  }
+        .rc-employe .role-chip-dot { background: var(--srm-gold-dark);  }
+        .rc-client  { background: rgba(121,173,102,.12); color: var(--srm-green-dark); }
+        .rc-client  .role-chip-dot { background: var(--srm-green-dark); }
+
+        .actions-cell {
+            display: flex; gap: 6px; justify-content: center;
+        }
+
+        .contrats-list {
+            max-height: 100px;
+            overflow-y: auto;
+            border: 1px solid var(--srm-border);
+            border-radius: 10px;
+            padding: 8px;
+            margin-top: 8px;
+            background: var(--srm-cream);
+            scrollbar-width: thin;
+        }
+        .contrats-list div { font-size: 11px; color: var(--srm-gray); padding: 2px 4px; }
+
+        /* Feedback */
+        .feedback {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 12px; font-weight: 500;
+            margin-top: 10px;
+            display: none;
+        }
+        .feedback.ok  { background: rgba(121,173,102,.1); color: var(--srm-green-dark); border: 1px solid rgba(121,173,102,.25); }
+        .feedback.err { background: rgba(30,49,85,.06);  color: var(--srm-navy-light); border: 1px solid var(--srm-border);   }
+        .feedback.show { display: block; animation: fadeUp .3s ease; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(30,49,85,.4);
+            backdrop-filter: blur(6px);
+            z-index: 200;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; animation: fadeUp .2s ease; }
+        .modal-box {
+            background: var(--srm-white);
+            border-radius: 24px;
+            max-width: 420px; width: 90%;
+            overflow: hidden;
+            box-shadow: 0 24px 48px rgba(30,49,85,.25);
+            animation: modalIn .2s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes modalIn { from{opacity:0;transform:scale(.92)} to{opacity:1;transform:scale(1)} }
+        .modal-head {
+            padding: 24px 28px;
+            background: linear-gradient(135deg, #fefcf8, var(--srm-white));
+            border-bottom: 1px solid var(--srm-border);
+        }
+        .modal-icon {
+            width: 46px; height: 46px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 14px;
+        }
+        .modal-head h3 { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; color: var(--srm-navy); margin-bottom: 4px; }
+        .modal-head p  { font-size: 13px; color: var(--srm-gray); line-height: 1.5; }
+        .modal-foot {
+            padding: 18px 28px 22px;
+            display: flex; gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .page-wrap { padding: 16px; }
+            .stats-row { grid-template-columns: 1fr; }
+            .form-grid-2 { grid-template-columns: 1fr; }
+            .tab-pill .tab-lbl { display: none; }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body>
 
-    <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <h1 class="text-lg font-bold text-blue-700">⚙️ Interface Administrateur SRM</h1>
-        <div class="flex items-center gap-4">
-            <span class="text-gray-600 text-sm">{{ email }}</span>
-            <a href="/logout" class="text-sm text-red-500 hover:text-red-700">Déconnexion</a>
+<div class="bg-particles" id="particles"></div>
+
+<!-- Topbar -->
+<nav class="topbar">
+    <div class="topbar-left">
+        <div class="logo-badge-top">
+            <img src="/static/srm_logo.jpeg" alt="SRM" onerror="this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' width=\'22\' height=\'22\'><circle cx=\'12\' cy=\'12\' r=\'10\' fill=\'#1e3155\'/><text x=\'12\' y=\'16\' font-size=\'7\' text-anchor=\'middle\' fill=\'#eaba62\' font-weight=\'bold\'>SRM</text></svg>'">
         </div>
-    </nav>
-
-    <div class="max-w-4xl mx-auto mt-6 px-4">
-
-        <!-- ONGLETS -->
-        <div class="flex gap-2 mb-4">
-            <button onclick="afficherOnglet('excel')" id="btn-excel"
-                class="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm">
-                📊 Import Excel
-            </button>
-            <button onclick="afficherOnglet('pdf')" id="btn-pdf"
-                class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm">
-                📄 Import PDF
-            </button>
-            <button onclick="afficherOnglet('users')" id="btn-users"
-                class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm">
-                👥 Utilisateurs
-            </button>
+        <div class="topbar-brand">
+            <div class="topbar-brand-name">SRM Souss-Massa</div>
+            <div class="topbar-brand-sub">Société Régionale Multiservices</div>
         </div>
+        <div class="topbar-divider"></div>
+        <div class="admin-badge">
+            <div class="admin-dot"></div>
+            Administration
+        </div>
+    </div>
+    <div class="topbar-right">
+        <div class="topbar-email">{{ email }}</div>
+        <a href="/logout" class="btn-logout">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Déconnexion
+        </a>
+    </div>
+</nav>
 
-        <!-- ════════════ ONGLET EXCEL ════════════ -->
-        <div id="onglet-excel" class="bg-white rounded-xl shadow p-6">
+<div class="page-wrap">
 
-            <!-- STATS BASE -->
-            {% if total_factures > 0 %}
-            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mb-4 text-sm text-green-700">
-                ✅ Base active — {{ total_factures }} factures | {{ nb_clients }} clients | {{ nb_periodes }} périodes
+    <!-- Page header -->
+    <div class="page-header">
+        <div>
+            <div class="page-title">Tableau de bord Admin</div>
+            <div class="page-sub">Gérez les données, les fichiers et les accès utilisateurs</div>
+        </div>
+    </div>
+
+    <!-- Stats - 3 cartes -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-ico si-gold">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M9 17H5A2 2 0 0 1 3 15V5A2 2 0 0 1 5 3H19A2 2 0 0 1 21 5V15A2 2 0 0 1 19 17H15L12 20L9 17Z"/>
+                </svg>
             </div>
-            {% else %}
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 mb-4 text-sm text-yellow-700">
-                ℹ️ Base vide — importez un fichier Excel.
+            <div class="stat-num" id="stat-factures">{{ total_factures or 0 }}</div>
+            <div class="stat-lbl">Factures en base</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-ico si-green">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
             </div>
-            {% endif %}
-
-            <h2 class="text-base font-semibold text-gray-700 mb-3">📥 Importer un fichier Excel</h2>
-
-            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center mb-4">
-                <input type="file" id="input-excel" accept=".xlsx" class="hidden"
-                    onchange="previsualiserExcel()"/>
-                <label for="input-excel"
-                    class="cursor-pointer bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-blue-100">
-                    Choisir un fichier Excel (.xlsx)
-                </label>
-                <p id="nom-fichier-excel" class="text-gray-400 text-xs mt-2">Aucun fichier sélectionné</p>
+            <div class="stat-num" id="stat-clients">{{ nb_clients or 0 }}</div>
+            <div class="stat-lbl">Clients actifs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-ico si-navy">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8"  y1="2" x2="8"  y2="6"/>
+                    <line x1="3"  y1="10" x2="21" y2="10"/>
+                </svg>
             </div>
+            <div class="stat-num" id="stat-periodes">{{ nb_periodes or 0 }}</div>
+            <div class="stat-lbl">Périodes couvertes</div>
+        </div>
+    </div>
 
-            <div id="apercu-excel" class="hidden mb-4"></div>
-            <div id="btn-import-excel" class="hidden mb-4"></div>
-            <div id="resultat-excel" class="hidden"></div>
+    <!-- Tabs -->
+    <div class="tabs-nav">
+        <div class="tab-pill active" onclick="afficherOnglet('excel')" id="pill-excel">
+            <span class="tab-ico">📊</span>
+            <span class="tab-lbl">Import Excel</span>
+        </div>
+        <div class="tab-pill" onclick="afficherOnglet('pdf')" id="pill-pdf">
+            <span class="tab-ico">📄</span>
+            <span class="tab-lbl">Import PDF</span>
+        </div>
+        <div class="tab-pill" onclick="afficherOnglet('users')" id="pill-users">
+            <span class="tab-ico">👥</span>
+            <span class="tab-lbl">Utilisateurs</span>
+        </div>
+    </div>
 
-            <hr class="my-4"/>
-            <h2 class="text-base font-semibold text-gray-700 mb-3">🗑️ Gestion de la base</h2>
+    <!-- Onglet Excel -->
+    <div id="onglet-excel" class="tab-panel active">
+        {% if total_factures > 0 %}
+        <div class="alert alert-success">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>Base active — <strong>{{ total_factures }}</strong> factures · <strong>{{ nb_clients }}</strong> clients · <strong>{{ nb_periodes }}</strong> périodes</span>
+        </div>
+        {% else %}
+        <div class="alert alert-warn">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>Base vide — importez un fichier Excel pour démarrer.</span>
+        </div>
+        {% endif %}
 
-            <div class="grid grid-cols-2 gap-4">
-                <!-- Supprimer un client -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-ico si-gold">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </div>
                 <div>
-                    <label class="text-sm text-gray-600 font-medium">Supprimer un client :</label>
-                    <select id="select-client-suppr"
-                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <option value="">-- Choisir un client --</option>
-                        {% for c in clients %}
-                        <option value="{{ c }}">{{ c }}</option>
-                        {% endfor %}
-                    </select>
-                    <button onclick="supprimerClient()"
-                        class="mt-2 w-full bg-red-500 text-white py-2 rounded-lg text-sm hover:bg-red-600">
-                        🗑️ Supprimer ce client
+                    <h3>Importer un fichier Excel</h3>
+                    <p>Formats acceptés : .xlsx — les doublons sont automatiquement détectés</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="dropzone" id="dz-excel">
+                    <input type="file" id="input-excel" accept=".xlsx" onchange="previsualiserExcel()"/>
+                    <div class="dz-icon">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="dz-title">Glissez votre fichier Excel ici</div>
+                    <div class="dz-sub">ou cliquez pour parcourir</div>
+                    <div class="dz-badge">.xlsx uniquement</div>
+                    <div class="dz-filename" id="nom-fichier-excel"></div>
+                </div>
+                <div id="apercu-excel" style="display:none;" class="apercu-box">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span id="apercu-texte">Analyse en cours…</span>
+                </div>
+                <div id="btn-import-excel" style="display:none;">
+                    <button class="btn btn-success btn-full" onclick="importerExcel()">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Importer les nouvelles lignes
                     </button>
-                    <div id="msg-suppr-client" class="mt-2 text-sm"></div>
                 </div>
-
-                <!-- Zone dangereuse -->
-                <div>
-                    <p class="text-sm text-orange-600 font-medium mb-2">⚠️ Zone dangereuse</p>
-
-                    <!-- Supprimer un fichier entier -->
-                    <p class="text-xs text-gray-500 mb-1">Supprimer un fichier entier :</p>
-                    <select id="select-fichier-suppr"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2">
-                        <option value="">-- Choisir un fichier --</option>
-                        {% for f in fichiers %}
-                        <option value="{{ f }}">{{ f }}</option>
-                        {% endfor %}
-                    </select>
-                    <button onclick="supprimerFichier()"
-                        class="w-full bg-orange-500 text-white py-2 rounded-lg text-sm hover:bg-orange-600 mb-1">
-                        🗑️ Supprimer ce fichier
-                    </button>
-                    <div id="msg-suppr-fichier" class="text-sm mb-3"></div>
-
-                    <!-- Reset complet -->
-                    <p class="text-xs text-gray-500 mb-1">Supprime toutes les factures Excel :</p>
-                    <button onclick="resetBase()"
-                        class="w-full bg-red-700 text-white py-2 rounded-lg text-sm hover:bg-red-800">
-                        🔴 Reset complet de la base
-                    </button>
-                    <div id="msg-reset" class="mt-2 text-sm"></div>
-                </div>
+                <div class="feedback" id="fb-excel"></div>
             </div>
         </div>
 
-        <!-- ════════════ ONGLET PDF ════════════ -->
-        <div id="onglet-pdf" class="bg-white rounded-xl shadow p-6 hidden">
-
-            {% if nb_clients_pdf > 0 %}
-            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 mb-4 text-sm text-green-700">
-                ✅ {{ nb_clients_pdf }} clients avec PDF importé
-            </div>
-            {% else %}
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 mb-4 text-sm text-yellow-700">
-                ℹ️ Aucun PDF importé pour le moment.
-            </div>
-            {% endif %}
-
-            <h2 class="text-base font-semibold text-gray-700 mb-3">📥 Importer des factures PDF</h2>
-
-            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center mb-4">
-                <input type="file" id="input-pdf" accept=".pdf" multiple class="hidden"/>
-                <label for="input-pdf"
-                    class="cursor-pointer bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm hover:bg-blue-100">
-                    Choisir un ou plusieurs PDFs
-                </label>
-                <p id="nom-fichier-pdf" class="text-gray-400 text-xs mt-2">Aucun fichier sélectionné</p>
-            </div>
-
-            <button onclick="importerPdf()"
-                class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 mb-4">
-                ✅ Importer les PDFs
-            </button>
-
-            <div id="progress-pdf" class="hidden">
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div id="progress-bar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
-                </div>
-                <p id="progress-text" class="text-xs text-gray-500 mt-1 text-center">Import en cours...</p>
-            </div>
-            <div id="resultat-pdf" class="hidden mt-4"></div>
-        </div>
-
-        <!-- ════════════ ONGLET USERS ════════════ -->
-        <div id="onglet-users" class="bg-white rounded-xl shadow p-6 hidden">
-
-            <h2 class="text-base font-semibold text-gray-700 mb-4">👥 Créer un compte utilisateur</h2>
-
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label class="text-sm text-gray-600">Rôle</label>
-                    <select id="role-nouveau" onchange="toggleContrat()"
-                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <option value="employe">Employé</option>
-                        <option value="client">Client</option>
-                    </select>
+        <!-- Gestion base -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-ico" style="background:rgba(30,49,85,.08);color:var(--srm-navy-light);">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6M14 11v6"/>
+                    </svg>
                 </div>
                 <div>
-                    <label class="text-sm text-gray-600">Email</label>
-                    <input type="email" id="email-nouveau" placeholder="email@example.com"
-                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
+                    <h3>Gestion de la base de données</h3>
+                    <p>Suppression ciblée par client, par fichier, ou réinitialisation complète</p>
                 </div>
-                <div>
-                    <label class="text-sm text-gray-600">Mot de passe</label>
-                    <input type="password" id="password-nouveau" placeholder="Mot de passe"
-                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
-                </div>
-                <div id="div-contrat" class="hidden">
-                    <label class="text-sm text-gray-600">N° Contrat client</label>
-                    <input type="text" id="contrat-nouveau" placeholder="ex: 0005567200/2063200"
-                        class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"/>
-                    <p class="text-xs text-gray-400 mt-1">Contrats disponibles :</p>
-                    <div class="text-xs text-gray-500 max-h-24 overflow-y-auto mt-1 border rounded p-1">
-                        {% for c in contrats %}
-                        <div>• {{ c.nom_client }} → {{ c.numero_contrat }}</div>
-                        {% endfor %}
+            </div>
+            <div class="section-body">
+                <div class="form-grid-2">
+                    <div>
+                        <label class="form-label">Supprimer un client</label>
+                        <select id="select-client-suppr" class="form-select" style="margin-bottom:12px;">
+                            <option value="">— Choisir un client —</option>
+                            {% for c in clients %}
+                            <option value="{{ c }}">{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-danger btn-full" onclick="demanderConfirm('client')">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                            Supprimer ce client
+                        </button>
+                        <div class="feedback" id="fb-client"></div>
+                    </div>
+
+                    <div class="danger-zone">
+                        <div class="danger-zone-title">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            Zone dangereuse
+                        </div>
+                        <div class="danger-item" style="margin-bottom:16px;">
+                            <label class="form-label">Supprimer un fichier entier</label>
+                            <select id="select-fichier-suppr" class="form-select" style="margin-bottom:10px;">
+                                <option value="">— Choisir un fichier —</option>
+                                {% for f in fichiers %}
+                                <option value="{{ f }}">{{ f }}</option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-warn btn-full" onclick="demanderConfirm('fichier')">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                                Supprimer ce fichier
+                            </button>
+                            <div class="feedback" id="fb-fichier"></div>
+                        </div>
+                        <div>
+                            <label class="form-label">Réinitialisation complète</label>
+                            <button class="btn btn-danger btn-full" onclick="demanderConfirm('reset')">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                Reset complet de la base
+                            </button>
+                            <div class="feedback" id="fb-reset"></div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <button onclick="creerUser()"
-                class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 mb-2">
-                ✅ Créer le compte
-            </button>
-            <div id="msg-creer-user" class="text-sm mb-4"></div>
+    <!-- Onglet PDF -->
+    <div id="onglet-pdf" class="tab-panel">
+        {% if nb_clients_pdf > 0 %}
+        <div class="alert alert-success">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <strong>{{ nb_clients_pdf }}</strong> clients avec PDF importé
+        </div>
+        {% else %}
+        <div class="alert alert-warn">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Aucun PDF importé pour le moment.
+        </div>
+        {% endif %}
 
-            <hr class="my-4"/>
-            <h2 class="text-base font-semibold text-gray-700 mb-3">📋 Utilisateurs existants</h2>
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-ico si-gold">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <path d="M9 15l2 2 4-4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>Importer des factures PDF</h3>
+                    <p>Sélection multiple possible — les doublons sont détectés automatiquement</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="dropzone" id="dz-pdf">
+                    <input type="file" id="input-pdf" accept=".pdf" multiple onchange="document.getElementById('nom-fichier-pdf').textContent = this.files.length + ' fichier(s) sélectionné(s)'"/>
+                    <div class="dz-icon">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="dz-title">Glissez vos fichiers PDF ici</div>
+                    <div class="dz-sub">Sélection multiple acceptée</div>
+                    <div class="dz-badge">.pdf — multiple</div>
+                    <div class="dz-filename" id="nom-fichier-pdf"></div>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="importerPdf()" style="margin-bottom:16px;">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Importer les PDFs
+                </button>
+                <div id="progress-pdf" style="display:none;" class="progress-wrap">
+                    <div class="progress-track"><div class="progress-fill" id="progress-bar"></div></div>
+                    <div class="progress-label" id="progress-text">Import en cours…</div>
+                </div>
+                <div class="feedback" id="fb-pdf"></div>
+            </div>
+        </div>
+    </div>
 
-            <div id="liste-users">
-                <table class="w-full text-sm">
+    <!-- Onglet Users -->
+    <div id="onglet-users" class="tab-panel">
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-ico si-green">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <line x1="19" y1="8" x2="19" y2="14"/>
+                        <line x1="22" y1="11" x2="16" y2="11"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>Créer un compte utilisateur</h3>
+                    <p>Employé ou client — le numéro de contrat est requis pour les clients</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="form-grid-2">
+                    <div>
+                        <label class="form-label">Rôle</label>
+                        <select id="role-nouveau" onchange="toggleContrat()" class="form-select">
+                            <option value="employe">Employé</option>
+                            <option value="client">Client</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Adresse email</label>
+                        <input type="email" id="email-nouveau" placeholder="email@srm.ma" class="form-input"/>
+                    </div>
+                    <div>
+                        <label class="form-label">Mot de passe</label>
+                        <input type="password" id="password-nouveau" placeholder="••••••••" class="form-input"/>
+                    </div>
+                    <div id="div-contrat" style="display:none;">
+                        <label class="form-label">N° Contrat client</label>
+                        <input type="text" id="contrat-nouveau" placeholder="ex: 0005567200/2063200" class="form-input"/>
+                        <div class="contrats-list">
+                            <div style="font-size:10px;color:var(--srm-gold-dark);font-weight:600;margin-bottom:4px;">CONTRATS DISPONIBLES</div>
+                            {% for c in contrats %}
+                            <div>• {{ c.nom_client }} → {{ c.numero_contrat }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-success btn-full" onclick="creerUser()">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Créer le compte
+                </button>
+                <div class="feedback" id="fb-user"></div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-ico si-navy">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>Utilisateurs existants</h3>
+                    <p>{{ users | length }} compte(s) enregistré(s)</p>
+                </div>
+            </div>
+            <div class="section-body" style="padding:0; overflow-x:auto;">
+                <table class="users-table">
                     <thead>
-                        <tr class="bg-gray-50 text-gray-600">
-                            <th class="text-left py-2 px-3">Email</th>
-                            <th class="text-left py-2 px-3">Rôle</th>
-                            <th class="text-left py-2 px-3">N° Contrat</th>
-                            <th class="py-2 px-3">Action</th>
-                        </tr>
+                        <tr><th>Email</th><th>Rôle</th><th>N° Contrat</th><th>Actions</th></tr>
                     </thead>
-                    <tbody>
+                    <tbody id="tbody-users">
                         {% for u in users %}
-                        <tr class="border-t border-gray-100">
-                            <td class="py-2 px-3">{{ u.email }}</td>
-                            <td class="py-2 px-3">{{ u.role }}</td>
-                            <td class="py-2 px-3">{{ u.numero_client or '—' }}</td>
-                            <td class="py-2 px-3 text-center">
-                                <button onclick="supprimerUser({{ u.id }}, this)"
-                                    class="text-red-500 hover:text-red-700 text-xs">🗑️</button>
-                            </td>
+                        <tr data-user-id="{{ u.id }}" data-user-email="{{ u.email }}">
+                            <td style="font-weight:500;color:var(--srm-navy);">{{ u.email }}</td>
+                            <td><span class="role-chip rc-{{ u.role }}"><span class="role-chip-dot"></span>{{ u.role | capitalize }}</span></td>
+                            <td style="font-size:12px;font-family:monospace;color:var(--srm-navy-soft);">{{ u.numero_client or '—' }}</td>
+                            <td><div class="actions-cell">
+                                <button class="btn-icon" onclick="editPassword('{{ u.id }}', this)" title="Modifier mot de passe">
+                                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                </button>
+                                <button class="btn-icon-del" onclick="demanderConfirmUser({{ u.id }}, this)" title="Supprimer">
+                                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                                </button>
+                            </div></td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
-
     </div>
+</div>
 
-    <script>
-        // ── ONGLETS ──
-        function afficherOnglet(onglet) {
-            ['excel','pdf','users'].forEach(o => {
-                document.getElementById('onglet-' + o).classList.toggle('hidden', o !== onglet);
-                const btn = document.getElementById('btn-' + o);
-                btn.className = o === onglet
-                    ? 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium text-sm'
-                    : 'px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-medium text-sm';
-            });
+<!-- Modal confirmation -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div class="modal-icon" style="background:rgba(30,49,85,.08);">
+                <svg fill="none" stroke="var(--srm-gold-dark)" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <h3 id="modal-title">Confirmer la suppression</h3>
+            <p id="modal-msg">Cette action est irréversible.</p>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" style="flex:1;" onclick="fermerModal()">Annuler</button>
+            <button class="btn btn-danger" style="flex:1;" id="btn-confirm-ok" onclick="executerAction()">Supprimer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal edit password -->
+<div class="modal-overlay" id="editPwdModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div class="modal-icon" style="background:rgba(121,173,102,.1);">
+                <svg fill="none" stroke="var(--srm-green-dark)" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+            <h3>Modifier le mot de passe</h3>
+            <p>Pour l'utilisateur <strong id="edit-user-email"></strong></p>
+        </div>
+        <div class="modal-body" style="padding: 24px;">
+            <label class="form-label">Nouveau mot de passe</label>
+            <div class="password-wrapper">
+                <input type="password" id="new-password-input" class="form-input" placeholder="••••••••" autocomplete="off" style="padding-right: 45px;">
+                <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="feedback" id="fb-edit-pwd" style="margin-top: 12px;"></div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" style="flex:1;" onclick="fermerModalPwd()">Annuler</button>
+            <button class="btn btn-success" style="flex:1;" onclick="saveNewPassword()">Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Particles
+    const pc = document.getElementById('particles');
+    const cols = ['rgba(212,164,74,', 'rgba(121,173,102,', 'rgba(30,49,85,'];
+    for(let i=0;i<30;i++){
+        const d = document.createElement('div');
+        d.className = 'particle';
+        const sz = Math.random()*5+2;
+        const c = cols[Math.floor(Math.random()*cols.length)];
+        const op = (Math.random()*.28+.06).toFixed(2);
+        d.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${c}${op});animation-duration:${Math.random()*14+10}s;animation-delay:${Math.random()*14}s;`;
+        pc.appendChild(d);
+    }
+
+    let currentUserId = null;
+    let currentRow = null;
+
+    function togglePasswordVisibility() {
+        const input = document.getElementById('new-password-input');
+        const btn = document.querySelector('#editPwdModal .toggle-password');
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+        } else {
+            input.type = 'password';
+            btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
         }
+    }
 
-        // ── TOGGLE CONTRAT ──
-        function toggleContrat() {
-            const role = document.getElementById('role-nouveau').value;
-            document.getElementById('div-contrat').classList.toggle('hidden', role !== 'client');
-        }
-
-        // ── PRÉVISUALISER EXCEL ──
-        function previsualiserExcel() {
-            const input = document.getElementById('input-excel');
-            const file = input.files[0];
-            if (!file) return;
-            document.getElementById('nom-fichier-excel').textContent = file.name;
-
-            const apercu = document.getElementById('apercu-excel');
-            apercu.innerHTML = '<p class="text-sm text-gray-500">⏳ Analyse en cours...</p>';
-            apercu.classList.remove('hidden');
-
-            const formData = new FormData();
-            formData.append('fichier', file);
-
-            fetch('/api/admin/apercu-excel', { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.erreur) {
-                        apercu.innerHTML = `<p class="text-red-500 text-sm">❌ ${data.erreur}</p>`;
-                        return;
-                    }
-                    apercu.innerHTML = `
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-700">
-                            📋 ${data.nouvelles} nouvelles lignes | ${data.existantes} déjà en base
-                        </div>`;
-
-                    if (data.nouvelles > 0) {
-                        document.getElementById('btn-import-excel').innerHTML = `
-                            <button onclick="importerExcel()"
-                                class="w-full bg-green-600 text-white py-2 rounded-lg text-sm hover:bg-green-700">
-                                ✅ Importer les ${data.nouvelles} nouvelles lignes
-                            </button>`;
-                        document.getElementById('btn-import-excel').classList.remove('hidden');
-                    } else {
-                        apercu.innerHTML += `
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-sm text-yellow-700 mt-2">
-                                ⚠️ Ce fichier est déjà entièrement en base.
-                            </div>`;
-                    }
-                });
-        }
-
-        // ── IMPORTER EXCEL ──
-        async function importerExcel() {
-            const input = document.getElementById('input-excel');
-            const file = input.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('fichier', file);
-
-            document.getElementById('btn-import-excel').innerHTML =
-                '<p class="text-sm text-gray-500">⏳ Import en cours...</p>';
-
-            const res = await fetch('/api/admin/import-excel', { method: 'POST', body: formData });
-            const data = await res.json();
-
-            const resultat = document.getElementById('resultat-excel');
-            resultat.innerHTML = `
-                <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-sm text-green-700">
-                    ✅ ${data.nouvelles} factures ajoutées.
-                </div>`;
-            resultat.classList.remove('hidden');
-            document.getElementById('btn-import-excel').classList.add('hidden');
-        }
-
-        // ── SUPPRIMER CLIENT ──
-        async function supprimerClient() {
-            const client = document.getElementById('select-client-suppr').value;
-            if (!client) return;
-            if (!confirm(`Supprimer toutes les factures de ${client} ?`)) return;
-
-            const res = await fetch('/api/admin/supprimer-client', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ client: client })
-            });
-            const data = await res.json();
-            const msg = document.getElementById('msg-suppr-client');
-            msg.className = 'mt-2 text-sm text-green-600';
-            msg.textContent = `✅ ${data.supprimees} factures supprimées pour ${client}`;
-        }
-
-        // ── SUPPRIMER FICHIER ENTIER ──
-        async function supprimerFichier() {
-            const fichier = document.getElementById('select-fichier-suppr').value;
-            if (!fichier) return;
-            if (!confirm(`Supprimer toutes les factures du fichier "${fichier}" ? Cette action est irréversible.`)) return;
-
-            const res = await fetch('/api/admin/reset-fichier', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ nom_fichier: fichier })
-            });
-            const data = await res.json();
-            const msg = document.getElementById('msg-suppr-fichier');
-            msg.className = 'text-sm text-green-600';
-            msg.textContent = `✅ ${data.supprimees} factures supprimées pour "${fichier}"`;
-
-            // Retirer l'option du select
-            const select = document.getElementById('select-fichier-suppr');
-            for (let i = 0; i < select.options.length; i++) {
-                if (select.options[i].value === fichier) {
-                    select.remove(i);
-                    break;
-                }
-            }
-        }
-
-        // ── RESET BASE COMPLÈTE ──
-        async function resetBase() {
-            if (!confirm('⚠️ Supprimer TOUTE la base Excel ? Cette action est irréversible.')) return;
-            const res = await fetch('/api/admin/reset-base', { method: 'POST' });
-            const data = await res.json();
-            const msg = document.getElementById('msg-reset');
-            msg.className = 'mt-2 text-sm text-green-600';
-            msg.textContent = `✅ ${data.supprimees} factures supprimées.`;
-        }
-
-        // ── IMPORTER PDF ──
-        async function importerPdf() {
-            const input = document.getElementById('input-pdf');
-            const files = input.files;
-            if (!files.length) return;
-
-            document.getElementById('progress-pdf').classList.remove('hidden');
-
-            let succes = 0, doublons = 0, erreurs = 0;
-
-            for (let i = 0; i < files.length; i++) {
-                const formData = new FormData();
-                formData.append('fichier', files[i]);
-
-                try {
-                    const res = await fetch('/api/admin/import-pdf', { method: 'POST', body: formData });
-                    const data = await res.json();
-                    if (data.statut === 'succes') succes++;
-                    else if (data.statut === 'doublon') doublons++;
-                    else erreurs++;
-                } catch {
-                    erreurs++;
-                }
-
-                const pct = Math.round(((i + 1) / files.length) * 100);
-                document.getElementById('progress-bar').style.width = pct + '%';
-                document.getElementById('progress-text').textContent = `${i+1}/${files.length} fichiers traités...`;
-            }
-
-            const resultat = document.getElementById('resultat-pdf');
-            resultat.innerHTML = `
-                <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-sm text-green-700">
-                    ✅ Import terminé — ${succes} ajoutés | ${doublons} doublons | ${erreurs} erreurs
-                </div>`;
-            resultat.classList.remove('hidden');
-        }
-
-        // ── CRÉER USER ──
-        async function creerUser() {
-            const role = document.getElementById('role-nouveau').value;
-            const email = document.getElementById('email-nouveau').value;
-            const password = document.getElementById('password-nouveau').value;
-            const contrat = document.getElementById('contrat-nouveau').value;
-
-            if (!email || !password) {
-                document.getElementById('msg-creer-user').textContent = '⚠️ Remplissez email et mot de passe.';
-                return;
-            }
-            if (role === 'client' && !contrat) {
-                document.getElementById('msg-creer-user').textContent = '⚠️ Le numéro de contrat est obligatoire.';
-                return;
-            }
-
-            const res = await fetch('/api/admin/creer-user', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ role, email, password, numero_contrat: contrat || null })
-            });
-            const data = await res.json();
-            const msg = document.getElementById('msg-creer-user');
-            if (data.succes) {
-                msg.className = 'text-sm text-green-600';
-                msg.textContent = `✅ Compte ${email} créé — rôle : ${role}`;
-                document.getElementById('email-nouveau').value = '';
-                document.getElementById('password-nouveau').value = '';
-            } else {
-                msg.className = 'text-sm text-red-500';
-                msg.textContent = '❌ Cet email existe déjà.';
-            }
-        }
-
-        // ── SUPPRIMER USER ──
-        async function supprimerUser(userId, btn) {
-            if (!confirm('Supprimer cet utilisateur ?')) return;
-            const res = await fetch('/api/admin/supprimer-user', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ user_id: userId })
-            });
-            const data = await res.json();
-            if (data.succes) {
-                btn.closest('tr').remove();
-            }
-        }
-
-        // ── AFFICHER FICHIER PDF SÉLECTIONNÉ ──
-        document.getElementById('input-pdf').addEventListener('change', function() {
-            const nb = this.files.length;
-            document.getElementById('nom-fichier-pdf').textContent =
-                nb > 0 ? `${nb} fichier(s) sélectionné(s)` : 'Aucun fichier sélectionné';
+    function afficherOnglet(o) {
+        ['excel','pdf','users'].forEach(id => {
+            document.getElementById('onglet-' + id).classList.toggle('active', id === o);
+            document.getElementById('pill-' + id).classList.toggle('active', id === o);
         });
-    </script>
+    }
 
+    function toggleContrat() {
+        const role = document.getElementById('role-nouveau').value;
+        document.getElementById('div-contrat').style.display = role === 'client' ? 'block' : 'none';
+    }
+
+    function showFeedback(id, msg, type = 'ok') {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = msg;
+        el.className = `feedback ${type} show`;
+        setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    async function previsualiserExcel() {
+        const input = document.getElementById('input-excel');
+        const file = input.files[0];
+        if (!file) return;
+        document.getElementById('nom-fichier-excel').textContent = '📎 ' + file.name;
+        const apercu = document.getElementById('apercu-excel');
+        document.getElementById('apercu-texte').textContent = 'Analyse en cours…';
+        apercu.style.display = 'flex';
+        const fd = new FormData();
+        fd.append('fichier', file);
+        try {
+            const res = await fetch('/api/admin/apercu-excel', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.erreur) {
+                document.getElementById('apercu-texte').textContent = '❌ ' + data.erreur;
+                return;
+            }
+            document.getElementById('apercu-texte').textContent = `📋 ${data.nouvelles} nouvelle(s) ligne(s) · ${data.existantes} déjà en base`;
+            const btnWrap = document.getElementById('btn-import-excel');
+            if (data.nouvelles > 0) btnWrap.style.display = 'block';
+            else showFeedback('fb-excel', '⚠️ Ce fichier est déjà entièrement en base.', 'err');
+        } catch { document.getElementById('apercu-texte').textContent = '❌ Erreur de connexion.'; }
+    }
+
+    async function importerExcel() {
+        const file = document.getElementById('input-excel').files[0];
+        if (!file) return;
+        const fd = new FormData();
+        fd.append('fichier', file);
+        document.getElementById('btn-import-excel').style.display = 'none';
+        const res = await fetch('/api/admin/import-excel', { method: 'POST', body: fd });
+        const data = await res.json();
+        showFeedback('fb-excel', `✅ ${data.nouvelles} factures ajoutées avec succès.`, 'ok');
+        if (data.total_factures !== undefined) document.getElementById('stat-factures').textContent = data.total_factures;
+    }
+
+    let actionEnAttente = null;
+    function demanderConfirm(type) {
+        const modal = document.getElementById('confirmModal');
+        let title = '', msg = '';
+        if (type === 'client') {
+            const v = document.getElementById('select-client-suppr').value;
+            if (!v) return;
+            title = 'Supprimer ce client'; msg = `Toutes les factures de "${v}" seront supprimées définitivement.`;
+            actionEnAttente = () => supprimerClient(v);
+        } else if (type === 'fichier') {
+            const v = document.getElementById('select-fichier-suppr').value;
+            if (!v) return;
+            title = 'Supprimer ce fichier'; msg = `Toutes les factures du fichier "${v}" seront supprimées définitivement.`;
+            actionEnAttente = () => supprimerFichier(v);
+        } else if (type === 'reset') {
+            title = 'Reset complet'; msg = '⚠️ TOUTE la base Excel sera supprimée. Cette action est irréversible.';
+            actionEnAttente = () => resetBase();
+        }
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-msg').textContent = msg;
+        modal.classList.add('open');
+    }
+
+    function demanderConfirmUser(userId, btn) {
+        document.getElementById('modal-title').textContent = 'Supprimer cet utilisateur';
+        document.getElementById('modal-msg').textContent = 'Le compte sera supprimé définitivement.';
+        actionEnAttente = () => supprimerUser(userId, btn);
+        document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function fermerModal() { document.getElementById('confirmModal').classList.remove('open'); actionEnAttente = null; }
+    function executerAction() { fermerModal(); if (actionEnAttente) actionEnAttente(); }
+    document.getElementById('confirmModal').addEventListener('click', function(e) { if (e.target === this) fermerModal(); });
+
+    async function supprimerClient(client) {
+        const res = await fetch('/api/admin/supprimer-client', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ client }) });
+        const data = await res.json();
+        showFeedback('fb-client', `✅ ${data.supprimees} factures supprimées pour "${client}".`, 'ok');
+        location.reload();
+    }
+
+    async function supprimerFichier(fichier) {
+        const res = await fetch('/api/admin/reset-fichier', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nom_fichier: fichier }) });
+        const data = await res.json();
+        showFeedback('fb-fichier', `✅ ${data.supprimees} factures supprimées pour "${fichier}".`, 'ok');
+        const sel = document.getElementById('select-fichier-suppr');
+        for (let i = 0; i < sel.options.length; i++) { if (sel.options[i].value === fichier) { sel.remove(i); break; } }
+        location.reload();
+    }
+
+    async function resetBase() {
+        const res = await fetch('/api/admin/reset-base', { method: 'POST' });
+        const data = await res.json();
+        showFeedback('fb-reset', `✅ ${data.supprimees} factures supprimées. Base vidée.`, 'ok');
+        location.reload();
+    }
+
+    async function importerPdf() {
+        const input = document.getElementById('input-pdf');
+        const files = input.files;
+        if (!files.length) return;
+        const prog = document.getElementById('progress-pdf');
+        prog.style.display = 'block';
+        let succes = 0, doublons = 0, erreurs = 0;
+        for (let i = 0; i < files.length; i++) {
+            const fd = new FormData();
+            fd.append('fichier', files[i]);
+            try {
+                const res = await fetch('/api/admin/import-pdf', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.statut === 'succes') succes++;
+                else if (data.statut === 'doublon') doublons++;
+                else erreurs++;
+            } catch { erreurs++; }
+            const pct = Math.round(((i + 1) / files.length) * 100);
+            document.getElementById('progress-bar').style.width = pct + '%';
+            document.getElementById('progress-text').textContent = `${i+1}/${files.length} traités…`;
+        }
+        showFeedback('fb-pdf', `✅ ${succes} ajouté(s) · ${doublons} doublon(s) · ${erreurs} erreur(s)`, 'ok');
+        prog.style.display = 'none';
+        location.reload();
+    }
+
+    async function creerUser() {
+        const role = document.getElementById('role-nouveau').value;
+        const email = document.getElementById('email-nouveau').value.trim();
+        const password = document.getElementById('password-nouveau').value;
+        const contrat = document.getElementById('contrat-nouveau').value.trim();
+        if (!email || !password) { showFeedback('fb-user', '⚠️ Email et mot de passe obligatoires.', 'err'); return; }
+        if (role === 'client' && !contrat) { showFeedback('fb-user', '⚠️ Le numéro de contrat est obligatoire.', 'err'); return; }
+        const res = await fetch('/api/admin/creer-user', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ role, email, password, numero_contrat: contrat || null }) });
+        const data = await res.json();
+        if (data.succes) {
+            showFeedback('fb-user', `✅ Compte "${email}" créé — rôle : ${role}`, 'ok');
+            location.reload();
+        } else { showFeedback('fb-user', '❌ Cet email existe déjà.', 'err'); }
+    }
+
+    async function supprimerUser(userId, btn) {
+        const res = await fetch('/api/admin/supprimer-user', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: userId }) });
+        const data = await res.json();
+        if (data.succes) btn.closest('tr').remove();
+    }
+
+    function editPassword(userId, btn) {
+        currentUserId = userId;
+        const row = btn.closest('tr');
+        currentRow = row;
+        const email = row.querySelector('td:first-child').textContent;
+        document.getElementById('edit-user-email').textContent = email;
+        document.getElementById('new-password-input').value = '';
+        document.getElementById('fb-edit-pwd').className = 'feedback';
+        document.getElementById('editPwdModal').classList.add('open');
+    }
+
+    function fermerModalPwd() { document.getElementById('editPwdModal').classList.remove('open'); currentUserId = null; currentRow = null; }
+
+    async function saveNewPassword() {
+        const newPassword = document.getElementById('new-password-input').value;
+        if (!newPassword || newPassword.length < 4) {
+            const fb = document.getElementById('fb-edit-pwd');
+            fb.textContent = '⚠️ Le mot de passe doit contenir au moins 4 caractères.';
+            fb.className = 'feedback err show';
+            return;
+        }
+        const res = await fetch('/api/admin/changer-mot-de-passe', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ user_id: currentUserId, nouveau_mdp: newPassword })
+        });
+        const data = await res.json();
+        if (data.succes) {
+            const fb = document.getElementById('fb-edit-pwd');
+            fb.textContent = '✅ Mot de passe modifié avec succès !';
+            fb.className = 'feedback ok show';
+            setTimeout(() => fermerModalPwd(), 1500);
+        } else {
+            const fb = document.getElementById('fb-edit-pwd');
+            fb.textContent = '❌ ' + (data.erreur || 'Erreur lors de la modification');
+            fb.className = 'feedback err show';
+        }
+    }
+
+    document.getElementById('editPwdModal').addEventListener('click', function(e) { if (e.target === this) fermerModalPwd(); });
+    document.getElementById('new-password-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') saveNewPassword(); });
+
+    toggleContrat();
+</script>
 </body>
 </html>

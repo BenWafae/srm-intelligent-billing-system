@@ -222,6 +222,28 @@ async def supprimer_user_route(request: Request):
     from src.database import supprimer_user
     supprimer_user(data.get("user_id"))
     return {"succes": True}
+# ════════════════════════════════════════════
+# ADMIN — CHANGER MOT DE PASSE UTILISATEUR
+# ════════════════════════════════════════════
+@app.post("/api/admin/changer-mot-de-passe")
+async def admin_changer_mot_de_passe(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    nouveau_mdp = data.get("nouveau_mdp")
+    
+    if not user_id or not nouveau_mdp:
+        return {"succes": False, "erreur": "user_id et nouveau_mdp requis"}
+    
+    if len(nouveau_mdp) < 4:
+        return {"succes": False, "erreur": "Le mot de passe doit contenir au moins 4 caractères"}
+    
+    from src.database import update_user_password
+    success = update_user_password(user_id, nouveau_mdp)
+    
+    if success:
+        return {"succes": True}
+    else:
+        return {"succes": False, "erreur": "Utilisateur non trouvé"}
 
 @app.get("/employe", response_class=HTMLResponse)
 def page_employe(request: Request):

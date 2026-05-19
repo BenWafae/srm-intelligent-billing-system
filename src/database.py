@@ -915,3 +915,22 @@ def changer_password_employe(email: str, nouveau_mdp: str) -> None:
     )
     conn.commit()
     conn.close()
+def update_user_password(user_id: int, new_password: str) -> bool:
+    """
+    Met à jour le mot de passe d'un utilisateur.
+    Retourne True si la mise à jour a réussi, False sinon.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET password = ? WHERE id = ?",
+            (hash_password(new_password), user_id)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Erreur update password: {e}")
+        return False
+    finally:
+        conn.close()
