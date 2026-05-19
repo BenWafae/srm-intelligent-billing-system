@@ -1162,7 +1162,19 @@
         document.getElementById('confirmModal').classList.add('open');
     }
 
-    function fermerModal() { document.getElementById('confirmModal').classList.remove('open'); actionEnAttente = null; }
+function fermerModal() { 
+    document.getElementById('confirmModal').classList.remove('open'); 
+    // NE PAS mettre actionEnAttente = null ici
+}
+
+function executerAction() { 
+    fermerModal(); 
+    if (actionEnAttente) {
+        const action = actionEnAttente;
+        actionEnAttente = null; // Met à null APRÈS avoir récupéré l'action
+        action();
+    }
+}
     function executerAction() { fermerModal(); if (actionEnAttente) actionEnAttente(); }
     document.getElementById('confirmModal').addEventListener('click', function(e) { if (e.target === this) fermerModal(); });
 

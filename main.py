@@ -156,11 +156,21 @@ async def supprimer_client(request: Request):
 # ════════════════════════════════════════════
 @app.post("/api/admin/reset-fichier")
 async def reset_fichier(request: Request):
-    data = await request.json()
-    nom_fichier = data.get("nom_fichier", "")
-    from src.database import reset_fichier_excel
-    n = reset_fichier_excel(nom_fichier)
-    return {"supprimees": n, "nom_fichier": nom_fichier}
+    try:
+        data = await request.json()
+        nom_fichier = data.get("nom_fichier", "")
+        print(f"Tentative de suppression du fichier: {nom_fichier}")  # Debug
+        
+        if not nom_fichier:
+            return {"supprimees": 0, "erreur": "Nom de fichier manquant"}
+        
+        from src.database import reset_fichier_excel
+        n = reset_fichier_excel(nom_fichier)
+        print(f"Nombre de lignes supprimées: {n}")  # Debug
+        return {"supprimees": n, "nom_fichier": nom_fichier}
+    except Exception as e:
+        print(f"Erreur dans reset-fichier: {str(e)}")  # Debug
+        return {"supprimees": 0, "erreur": str(e)}
 
 # ════════════════════════════════════════════
 # ADMIN — RESET BASE COMPLÈTE
