@@ -85,5 +85,17 @@ const translations = {
 "filter_pdf": "PDF", 
 "invoices": "invoices",
 "clients": "clients",
-"periods": "periods"
+"periods": "periods",
+"conversations_label": "Conversations",
+"no_conversations": "No conversations",
+"suggestion_top_consumer": "Who consumes the most?",
+"suggestion_unpaid_clients": "Unpaid clients",
+"suggestion_consumption_period": "Consumption by period",
+"suggestion_total_amount": "Total amount",
+"suggestion_period": "Period",
+"suggestion_consumption_details": "Consumption details",
+"confirm_delete_title": "Confirm deletion",
+"cancel": "Cancel",
+"no_pdf": "No PDF available"
+
 };

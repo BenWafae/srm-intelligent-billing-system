@@ -85,6 +85,17 @@ const translations = {
 "filter_pdf": "بي دي إف",
 "invoices": "فواتير",
 "clients": "عملاء", 
-"periods": "فترات"
+"periods": "فترات",
+"conversations_label": "المحادثات",
+"no_conversations": "لا توجد محادثات",
+"suggestion_top_consumer": "من يستهلك أكثر؟",
+"suggestion_unpaid_clients": "عملاء غير مدفوعين",
+"suggestion_consumption_period": "الاستهلاك حسب الفترة",
+"suggestion_total_amount": "المبلغ الإجمالي",
+"suggestion_period": "الفترة",
+"suggestion_consumption_details": "تفاصيل الاستهلاك",
+"confirm_delete_title": "تأكيد الحذف",
+"cancel": "إلغاء",
+"no_pdf": "لا يوجد PDF متاح"
 
 };

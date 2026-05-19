@@ -86,5 +86,16 @@ const translations = {
 "filter_pdf": "PDF",
 "invoices": "factures",
 "clients": "clients",
-"periods": "périodes"
+"periods": "périodes",
+"conversations_label": "Conversations",
+"no_conversations": "Aucune conversation",
+"suggestion_top_consumer": "Qui consomme le plus ?",
+"suggestion_unpaid_clients": "Clients impayés",
+"suggestion_consumption_period": "Conso par période",
+"suggestion_total_amount": "Montant total",
+"suggestion_period": "Période",
+"suggestion_consumption_details": "Détails conso",
+"confirm_delete_title": "Confirmer la suppression",
+"cancel": "Annuler",
+"no_pdf": "Aucun PDF disponible"
 };

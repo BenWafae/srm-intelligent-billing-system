@@ -62,11 +62,19 @@ const i18n = {
     },
     
     applyTranslations() {
+        // Traduire les éléments avec data-i18n
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             let params = {};
             
             if (key === 'welcome_title') {
+                const nameAttr = el.getAttribute('data-name');
+                if (nameAttr && nameAttr !== '') {
+                    params = { name: nameAttr };
+                }
+            }
+            
+            if (key === 'welcome_title_employee') {
                 const nameAttr = el.getAttribute('data-name');
                 if (nameAttr && nameAttr !== '') {
                     params = { name: nameAttr };
@@ -82,23 +90,115 @@ const i18n = {
             
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 el.placeholder = this.t(key, params);
+            } else if (el.tagName === 'BUTTON' && key === 'new_conversation') {
+                // Gérer le bouton nouvelle conversation qui a un SVG à l'intérieur
+                const svg = el.querySelector('svg');
+                if (svg) {
+                    el.innerHTML = '';
+                    el.appendChild(svg);
+                    const textNode = document.createTextNode(' ' + this.t(key, params));
+                    el.appendChild(textNode);
+                } else {
+                    el.innerHTML = this.t(key, params);
+                }
             } else {
                 el.innerHTML = this.t(key, params);
             }
         });
         
+        // Traduire les placeholders
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
             const key = el.getAttribute('data-i18n-placeholder');
             el.placeholder = this.t(key);
         });
         
+        // Traduire les éléments des statistiques de l'info-banner
+        document.querySelectorAll('[data-i18n="invoices"]').forEach(el => {
+            el.textContent = this.t('invoices');
+        });
+        document.querySelectorAll('[data-i18n="clients"]').forEach(el => {
+            el.textContent = this.t('clients');
+        });
+        document.querySelectorAll('[data-i18n="periods"]').forEach(el => {
+            el.textContent = this.t('periods');
+        });
+        document.querySelectorAll('[data-i18n="database_active"]').forEach(el => {
+            el.innerHTML = `📈 ${this.t('database_active')}`;
+        });
+        document.querySelectorAll('[data-i18n="filter_label"]').forEach(el => {
+            el.innerHTML = `📂 ${this.t('filter_label')}`;
+        });
+        document.querySelectorAll('[data-i18n="client_label"]').forEach(el => {
+            el.innerHTML = `👤 ${this.t('client_label')}`;
+        });
+        
+        // Traduire les onglets
+        const excelTab = document.querySelector('.tab-btn[onclick*="excel"]');
+        if (excelTab && excelTab.getAttribute('data-i18n') === 'excel_tab') {
+            excelTab.innerHTML = `📊 ${this.t('excel_tab')}`;
+        }
+        const pdfTab = document.querySelector('.tab-btn[onclick*="pdf"]');
+        if (pdfTab && pdfTab.getAttribute('data-i18n') === 'pdf_tab') {
+            pdfTab.innerHTML = `📄 ${this.t('pdf_tab')}`;
+        }
+        
+        // Traduire les filtres de la sidebar
+        document.querySelectorAll('.filter-pill[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            el.textContent = this.t(key);
+        });
+        
+        // Traduire le label des conversations
+        const convLabel = document.querySelector('.conv-section-label[data-i18n="conversations_label"]');
+        if (convLabel) {
+            convLabel.textContent = this.t('conversations_label');
+        }
+        
+        // Traduire le message "Aucune conversation"
+        const noConvMsg = document.querySelector('#conv-list p[data-i18n="no_conversations"]');
+        if (noConvMsg) {
+            noConvMsg.textContent = this.t('no_conversations');
+        }
+        
+        // Traduire les suggestions spécifiques employé
+        document.querySelectorAll('[data-i18n="suggestion_top_consumer"]').forEach(el => {
+            el.textContent = this.t('suggestion_top_consumer');
+        });
+        document.querySelectorAll('[data-i18n="suggestion_unpaid_clients"]').forEach(el => {
+            el.textContent = this.t('suggestion_unpaid_clients');
+        });
+        document.querySelectorAll('[data-i18n="suggestion_consumption_period"]').forEach(el => {
+            el.textContent = this.t('suggestion_consumption_period');
+        });
+        document.querySelectorAll('[data-i18n="suggestion_total_amount"]').forEach(el => {
+            el.textContent = this.t('suggestion_total_amount');
+        });
+        document.querySelectorAll('[data-i18n="suggestion_period"]').forEach(el => {
+            el.textContent = this.t('suggestion_period');
+        });
+        document.querySelectorAll('[data-i18n="suggestion_consumption_details"]').forEach(el => {
+            el.textContent = this.t('suggestion_consumption_details');
+        });
+        
+        // Traduire le select des fichiers
+        const selectFichier = document.getElementById('select-fichier');
+        if (selectFichier && selectFichier.options[0] && selectFichier.options[0].getAttribute('data-i18n') === 'all_files') {
+            selectFichier.options[0].text = `🌐 ${this.t('all_files')}`;
+        }
+        
+        // Traduire le label du fichier
+        const labelFichier = document.getElementById('label-fichier');
+        if (labelFichier && labelFichier.getAttribute('data-i18n') === 'all_database' && !window.nomFichierActif) {
+            labelFichier.innerHTML = `🌐 ${this.t('all_database')}`;
+        }
+        
         this.translateEmployeeInterface();
         this.translateConversationDates();
         this.translateDaysBadge();
-        this.translateSidebarFilters();
     },
     
     translateSidebarFilters() {
+        // Pour l'interface client (ancienne méthode)
         const allBtn = document.getElementById('sb-all');
         if (allBtn && allBtn.textContent === 'Tout') allBtn.textContent = this.t('filter_all');
         
@@ -115,95 +215,53 @@ const i18n = {
     },
     
     translateEmployeeInterface() {
-        const btnExcel = document.getElementById('btn-excel');
-        if (btnExcel && btnExcel.textContent.includes('Base clients Excel')) {
-            btnExcel.innerHTML = `📊 ${this.t('excel_tab')}`;
-        }
-        
-        const btnPdf = document.getElementById('btn-pdf');
-        if (btnPdf && btnPdf.textContent.includes('Analyse facture PDF')) {
-            btnPdf.innerHTML = `📄 ${this.t('pdf_tab')}`;
-        }
-        
-        document.querySelectorAll('.badge-excel').forEach(badge => {
+        // Traduire les badges Excel/PDF
+        document.querySelectorAll('.conv-badge').forEach(badge => {
             if (badge.textContent === 'XLS') badge.textContent = this.t('badge_excel');
-        });
-        document.querySelectorAll('.badge-pdf').forEach(badge => {
             if (badge.textContent === 'PDF') badge.textContent = this.t('badge_pdf');
         });
         
+        // Traduire les titres de bienvenue Excel
         const excelWelcomeTitle = document.querySelector('#chat-excel .welcome-title');
-        if (excelWelcomeTitle && excelWelcomeTitle.textContent.includes('Bonjour')) {
+        if (excelWelcomeTitle && excelWelcomeTitle.getAttribute('data-i18n') === 'welcome_title_employee') {
             const name = document.querySelector('.user-name')?.textContent.split(' ')[0] || 'Employé';
             excelWelcomeTitle.innerHTML = this.t('welcome_title_employee', { name: name });
         }
         
+        // Traduire les sous-titres de bienvenue Excel
         const excelWelcomeSub = document.querySelector('#chat-excel .welcome-sub');
-        if (excelWelcomeSub && excelWelcomeSub.textContent.includes('Posez une question')) {
+        if (excelWelcomeSub && excelWelcomeSub.getAttribute('data-i18n') === 'welcome_sub_excel') {
             excelWelcomeSub.innerHTML = this.t('welcome_sub_excel');
         }
         
+        // Traduire les titres PDF
         const pdfWelcomeTitle = document.querySelector('#chat-pdf .welcome-title');
-        if (pdfWelcomeTitle && pdfWelcomeTitle.textContent === 'Analyse PDF') {
+        if (pdfWelcomeTitle && pdfWelcomeTitle.getAttribute('data-i18n') === 'pdf_welcome_title') {
             pdfWelcomeTitle.innerHTML = this.t('pdf_welcome_title');
         }
         
+        // Traduire les sous-titres PDF
         const pdfWelcomeSub = document.querySelector('#chat-pdf .welcome-sub');
-        if (pdfWelcomeSub && pdfWelcomeSub.textContent.includes('Sélectionnez un client')) {
+        if (pdfWelcomeSub && pdfWelcomeSub.getAttribute('data-i18n') === 'pdf_welcome_sub') {
             pdfWelcomeSub.innerHTML = this.t('pdf_welcome_sub');
         }
         
-        const filterLabel = document.querySelector('.filter-label');
-        if (filterLabel && filterLabel.textContent === 'Fichier source') {
-            filterLabel.innerHTML = this.t('filter_label');
+        // Traduire le rôle utilisateur
+        const userRole = document.querySelector('.user-role');
+        if (userRole && userRole.getAttribute('data-i18n') === 'employee_role') {
+            userRole.innerHTML = this.t('employee_role');
         }
         
-        const clientLabel = document.querySelector('#onglet-pdf .filter-label');
-        if (clientLabel && clientLabel.textContent === 'Client concerné') {
-            clientLabel.innerHTML = this.t('client_label');
-        }
-        
+        // Traduire les placeholders des inputs
         const inputExcel = document.getElementById('input-excel');
-        if (inputExcel && inputExcel.placeholder === 'Ex: Qui consomme le plus ? Liste des clients...') {
+        if (inputExcel && inputExcel.getAttribute('data-i18n-placeholder') === 'excel_placeholder') {
             inputExcel.placeholder = this.t('excel_placeholder');
         }
         
         const inputPdf = document.getElementById('input-pdf');
-        if (inputPdf && inputPdf.placeholder === 'Ex: Quel est le montant ? Quelle est la période ?') {
+        if (inputPdf && inputPdf.getAttribute('data-i18n-placeholder') === 'pdf_placeholder') {
             inputPdf.placeholder = this.t('pdf_placeholder');
         }
-        
-        const selectFichier = document.getElementById('select-fichier');
-        if (selectFichier && selectFichier.options[0] && selectFichier.options[0].text === '📂 Tous les fichiers') {
-            selectFichier.options[0].text = `📂 ${this.t('all_files')}`;
-        }
-        
-        const labelFichier = document.getElementById('label-fichier');
-        if (labelFichier && labelFichier.innerHTML === '🌐 Toute la base') {
-            labelFichier.innerHTML = `🌐 ${this.t('all_database')}`;
-        }
-        
-        const userRole = document.querySelector('.user-role');
-        if (userRole && userRole.textContent === 'Employé SRM') {
-            userRole.innerHTML = this.t('employee_role');
-        }
-        
-        const bannerText = document.querySelector('.info-banner span:first-child');
-        if (bannerText && bannerText.textContent === 'Base de données active') {
-            bannerText.innerHTML = this.t('database_active');
-        }
-        
-        const statLabels = document.querySelectorAll('.info-banner-stat');
-        statLabels.forEach(stat => {
-            let text = stat.textContent;
-            if (text.includes('factures') && !text.includes(this.t('invoices'))) {
-                stat.innerHTML = text.replace('factures', this.t('invoices'));
-            } else if (text.includes('clients') && !text.includes(this.t('clients'))) {
-                stat.innerHTML = text.replace('clients', this.t('clients'));
-            } else if (text.includes('périodes') && !text.includes(this.t('periods'))) {
-                stat.innerHTML = text.replace('périodes', this.t('periods'));
-            }
-        });
     },
     
     translateConversationDates() {
@@ -247,8 +305,9 @@ const i18n = {
     },
     
     updateDynamicContent() {
+        // Pour l'interface client
         const welcomeTitle = document.querySelector('.welcome-title');
-        if (welcomeTitle) {
+        if (welcomeTitle && welcomeTitle.getAttribute('data-i18n') === 'welcome_title') {
             const nameSpan = document.querySelector('.user-name');
             let name = '';
             if (nameSpan) {
@@ -261,7 +320,7 @@ const i18n = {
         const suggestions = document.querySelectorAll('.suggestion-chip');
         const suggestionKeys = ['suggestion_invoice', 'suggestion_consumption_month', 'suggestion_consumption_total', 'suggestion_complaint'];
         suggestions.forEach((chip, idx) => {
-            if (suggestionKeys[idx]) {
+            if (suggestionKeys[idx] && chip.getAttribute('data-i18n') === suggestionKeys[idx]) {
                 chip.innerHTML = this.t(suggestionKeys[idx]);
             }
         });
@@ -307,11 +366,19 @@ const i18n = {
         await this.loadLanguage(lang);
         this.applyTranslations();
         this.updateDynamicContent();
+        
         if (typeof window.updateRenameDeleteTexts === 'function') {
             window.updateRenameDeleteTexts();
         }
-        // ✅ Rafraîchir les dates
+        
+        // Rafraîchir les dates
         this.refreshAllDates();
+        
+        // Mettre à jour le label du fichier si nécessaire
+        const labelFichier = document.getElementById('label-fichier');
+        if (labelFichier && labelFichier.getAttribute('data-i18n') === 'all_database' && !window.nomFichierActif) {
+            labelFichier.innerHTML = `🌐 ${this.t('all_database')}`;
+        }
         
         document.querySelectorAll('.lang-option').forEach(opt => {
             opt.classList.remove('active');
@@ -323,7 +390,6 @@ const i18n = {
         });
     },
     
-    // ✅ FONCTION pour rafraîchir toutes les dates (à l'intérieur de l'objet)
     refreshAllDates() {
         const dateElements = document.querySelectorAll('.conv-date');
         dateElements.forEach(el => {
@@ -338,5 +404,5 @@ const i18n = {
     }
 };
 
-// ✅ Initialisation
+// Initialisation
 document.addEventListener('DOMContentLoaded', () => i18n.init());
