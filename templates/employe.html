@@ -3,629 +3,771 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SRM — Interface Employé</title>
+    <title>SRM — Interface Employé | Souss-Massa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/static/js/i18n.js" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; margin: 0; background: #f8f7ff; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --srm-navy: #1e3155;
+            --srm-navy-light: #334867;
+            --srm-navy-soft: #4a6080;
+            --srm-gold: #eaba62;
+            --srm-gold-dark: #d4a44a;
+            --srm-gold-light: #f5e4be;
+            --srm-green: #79ad66;
+            --srm-green-dark: #5e8a4f;
+            --srm-cream: #faf7f0;
+            --srm-white: #ffffff;
+            --srm-gray: #8a9ab5;
+            --srm-gray-light: #c5cfdd;
+        }
 
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--srm-cream);
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        body.rtl {
+            direction: rtl;
+        }
+
+        /* Cercles de fond animés */
+        .bg-particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatUp linear infinite;
+            opacity: 0;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-80px) rotate(360deg); opacity: 0; }
+        }
+
+        /* ===== SIDEBAR ===== */
         .sidebar {
-            width: 260px;
-            background: #ffffff;
-            border-right: 1px solid #ede9fe;
+            width: 280px;
+            background: var(--srm-white);
+            border-right: 1px solid rgba(234,186,98,0.15);
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
             position: relative;
             height: 100vh;
-            overflow: hidden;
+            overflow: visible;
+            box-shadow: 4px 0 20px rgba(30,49,85,0.05);
+            z-index: 2;
         }
+        
+        body.rtl .sidebar {
+            border-right: none;
+            border-left: 1px solid rgba(234,186,98,0.15);
+        }
+        
         .sidebar::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd);
+            height: 4px;
+            background: linear-gradient(90deg, var(--srm-navy), var(--srm-gold), var(--srm-green));
         }
 
-        body.rtl .sidebar {
-            border-right: none;
-            border-left: 1px solid #ede9fe;
+        /* Logo section */
+        .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid rgba(234,186,98,0.12); }
+        .logo-inner {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, #f8f5f0, #fefcf8);
+            border: 1px solid rgba(234,186,98,0.25);
+            border-radius: 16px;
+            transition: all 0.3s ease;
         }
-        body.rtl .sidebar::before {
-            left: auto;
-            right: 0;
+        body.rtl .logo-inner { flex-direction: row-reverse; }
+        .logo-inner:hover { border-color: var(--srm-gold); box-shadow: 0 4px 12px rgba(234,186,98,0.1); transform: translateX(3px); }
+        body.rtl .logo-inner:hover { transform: translateX(-3px); }
+        .logo-img { width: 38px; height: 38px; object-fit: contain; border-radius: 10px; }
+        .logo-text { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: var(--srm-navy); }
+        .logo-sub { font-size: 10px; color: var(--srm-gold-dark); margin-top: 2px; font-weight: 500; }
+
+        /* Nouvelle conversation */
+        .btn-new-conv {
+            margin: 16px 16px 8px;
+            width: calc(100% - 32px);
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 16px;
+            background: linear-gradient(135deg, var(--srm-navy), #2a456e);
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(30,49,85,0.2);
         }
-        body.rtl .conv-item {
-            flex-direction: row-reverse;
+        body.rtl .btn-new-conv { flex-direction: row-reverse; }
+        .btn-new-conv:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #2a456e, var(--srm-navy));
+            box-shadow: 0 8px 20px rgba(30,49,85,0.25);
         }
-        body.rtl .lang-submenu {
-            left: auto;
-            right: 100%;
-        }
-        body.rtl .user-menu-dropdown {
-            right: auto;
-            left: 0;
-        }
-        body.rtl .filter-bar,
-        body.rtl .info-banner {
-            text-align: right;
+        .btn-new-conv svg { stroke: white; }
+
+        .conv-section-label {
+            font-size: 10px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--srm-gold-dark);
+            padding: 16px 20px 8px;
         }
 
-        .conv-list::-webkit-scrollbar,
-        .chat-area::-webkit-scrollbar {
-            width: 4px;
+        /* Filtres */
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            padding: 0 16px 12px;
         }
-        .conv-list::-webkit-scrollbar-track,
-        .chat-area::-webkit-scrollbar-track {
-            background: #f3f0ff;
-            border-radius: 4px;
+        body.rtl .filter-group { flex-direction: row-reverse; }
+        .filter-pill {
+            flex: 1;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 11px;
+            font-weight: 500;
+            border-radius: 20px;
+            background: rgba(234,186,98,0.08);
+            color: var(--srm-navy-soft);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
         }
-        .conv-list::-webkit-scrollbar-thumb,
-        .chat-area::-webkit-scrollbar-thumb {
-            background: #c4b5fd;
-            border-radius: 4px;
+        .filter-pill.active {
+            background: linear-gradient(135deg, var(--srm-navy), var(--srm-navy-light));
+            color: white;
+            box-shadow: 0 2px 8px rgba(30,49,85,0.2);
         }
+        .filter-pill:hover:not(.active) {
+            background: rgba(234,186,98,0.15);
+            border-color: rgba(234,186,98,0.3);
+        }
+
+        /* Liste conversations */
+        .conv-list {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            padding: 4px 12px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--srm-gold-light) transparent;
+        }
+        .conv-list::-webkit-scrollbar { width: 3px; }
+        .conv-list::-webkit-scrollbar-thumb { background: var(--srm-gold-light); border-radius: 3px; }
 
         .conv-item {
             position: relative;
-            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            animation: fadeSlideIn 0.3s ease backwards;
         }
-        .conv-item:hover {
-            background: #faf5ff;
+        body.rtl .conv-item { flex-direction: row-reverse; }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-        .conv-item.active {
-            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
-            border-left: 3px solid #7c3aed;
+        body.rtl .conv-item { animation: fadeSlideInRtl 0.3s ease backwards; }
+        @keyframes fadeSlideInRtl {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-        .three-dots {
-            opacity: 0;
-            transition: opacity 0.15s;
-        }
-        .conv-item:hover .three-dots {
-            opacity: 1;
-        }
+        .conv-item:hover { background: rgba(234,186,98,0.08); border-color: rgba(234,186,98,0.2); }
+        .conv-item.active { background: linear-gradient(135deg, rgba(30,49,85,0.06), rgba(234,186,98,0.08)); border-color: rgba(234,186,98,0.3); }
 
+        .conv-icon {
+            width: 32px; height: 32px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--srm-navy), var(--srm-navy-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .conv-icon svg { width: 14px; height: 14px; stroke: var(--srm-gold); }
+
+        .conv-content { flex: 1; overflow: hidden; }
+        .conv-title { font-size: 13px; color: var(--srm-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+        .conv-item.active .conv-title { color: var(--srm-gold-dark); font-weight: 600; }
+        .conv-date { font-size: 10px; color: var(--srm-gray); margin-top: 2px; }
+
+        .conv-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-right: 8px;
+            background: rgba(121,173,102,0.12);
+            color: var(--srm-green-dark);
+        }
+        body.rtl .conv-badge { margin-right: 0; margin-left: 8px; }
+        .conv-badge.pdf { background: rgba(212,164,74,0.12); color: var(--srm-gold-dark); }
+
+        .conv-menu-btn {
+            width: 28px; height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            opacity: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--srm-gray);
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .conv-item:hover .conv-menu-btn { opacity: 1; }
+        .conv-menu-btn:hover { background: rgba(234,186,98,0.15); color: var(--srm-gold-dark); }
+
+        /* Dropdown menu */
         .dropdown-menu {
             display: none;
             position: absolute;
-            right: 8px;
-            top: 36px;
-            background: white;
-            border: 1px solid #ede9fe;
-            border-radius: 10px;
-            padding: 4px;
+            right: 12px;
+            top: 40px;
+            background: var(--srm-white);
+            border: 1px solid rgba(234,186,98,0.2);
+            border-radius: 12px;
+            padding: 6px;
             z-index: 100;
-            width: 145px;
-            box-shadow: 0 8px 24px rgba(109,40,217,0.1);
+            width: 140px;
+            box-shadow: 0 12px 28px rgba(30,49,85,0.12);
         }
         body.rtl .dropdown-menu {
             right: auto;
-            left: 8px;
+            left: 12px;
         }
-        .dropdown-menu.open {
-            display: block;
-        }
+        .dropdown-menu.open { display: block; animation: menuFade 0.15s ease; }
+        @keyframes menuFade { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
         .dd-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 7px 10px;
-            border-radius: 7px;
-            font-size: 12px;
-            cursor: pointer;
-            color: #4b5563;
-            transition: background 0.15s;
-        }
-        .dd-item:hover {
-            background: #f5f3ff;
-            color: #7c3aed;
-        }
-        .dd-item.danger {
-            color: #ef4444;
-        }
-        .dd-item.danger:hover {
-            background: #fef2f2;
-        }
-        .rename-input {
-            font-size: 12px;
-            font-family: 'DM Sans', sans-serif;
-            background: white;
-            border: 1px solid #a78bfa;
-            border-radius: 5px;
-            padding: 2px 6px;
-            color: #374151;
-            outline: none;
-            width: 100%;
-        }
-
-        .filter-btn {
-            transition: all 0.2s;
-        }
-        .filter-btn.active {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            color: white;
-            box-shadow: 0 2px 8px rgba(109,40,217,0.25);
-        }
-        .filter-btn:not(.active) {
-            background: #f5f3ff;
-            color: #6b7280;
-        }
-        .filter-btn:not(.active):hover {
-            background: #ede9fe;
-            color: #7c3aed;
-        }
-
-        .tab-btn {
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            color: white;
-            box-shadow: 0 2px 8px rgba(109,40,217,0.25);
-        }
-        .tab-btn:not(.active) {
-            background: #f5f3ff;
-            color: #6b7280;
-        }
-        .tab-btn:not(.active):hover {
-            background: #ede9fe;
-            color: #7c3aed;
-        }
-
-        .msg-user {
-            align-self: flex-end;
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            border-radius: 18px 18px 4px 18px;
-            box-shadow: 0 4px 16px rgba(109,40,217,0.25);
-        }
-        .msg-assistant {
-            background: white;
-            border: 1px solid #ede9fe;
-            border-radius: 4px 18px 18px 18px;
-            box-shadow: 0 2px 10px rgba(109,40,217,0.06);
-        }
-        .msg-loading {
-            background: white;
-            border: 1px solid #ede9fe;
-            border-radius: 18px;
-        }
-
-        .dot-pulse {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #c4b5fd;
-            animation: pulse-dot 1.4s ease-in-out infinite;
-        }
-        .dot-pulse:nth-child(2) { animation-delay: 0.2s; }
-        .dot-pulse:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes pulse-dot {
-            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-            40% { opacity: 1; transform: scale(1); }
-        }
-
-        .badge-excel {
-            background: #ede9fe;
-            color: #7c3aed;
-        }
-        .badge-pdf {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
-        .filter-bar {
-            background: linear-gradient(135deg, #faf5ff, #ffffff);
-            border: 1px solid #ede9fe;
-            border-radius: 14px;
-            padding: 12px 16px;
-        }
-        .filter-label {
-            font-size: 12px;
-            font-weight: 500;
-            color: #7c3aed;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .custom-select {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
+            display: flex; align-items: center; gap: 10px;
             padding: 8px 12px;
-            font-size: 13px;
-            color: #374151;
-            outline: none;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .custom-select:hover, .custom-select:focus {
-            border-color: #a78bfa;
-            box-shadow: 0 0 0 3px rgba(167,139,250,0.1);
-        }
-
-        .chat-input {
-            background: #faf5ff;
-            border: 1.5px solid #ede9fe;
-            border-radius: 16px;
-            transition: all 0.2s;
-        }
-        .chat-input:focus-within {
-            border-color: #a78bfa;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(167,139,250,0.12);
-        }
-        .chat-input input {
-            background: none;
-            border: none;
-            outline: none;
-            font-size: 14px;
-            font-family: 'DM Sans', sans-serif;
-            color: #374151;
-        }
-        .chat-input input::placeholder {
-            color: #d1d5db;
-        }
-
-        .btn-send {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            border-radius: 12px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(109,40,217,0.3);
-        }
-        .btn-send:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 16px rgba(109,40,217,0.4);
-        }
-        .btn-send:active {
-            transform: scale(0.97);
-        }
-
-        .info-banner {
-            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
-            border: 1px solid #ddd6fe;
-            border-radius: 14px;
-            padding: 12px 16px;
-        }
-        .info-banner-stat {
-            display: inline-flex;
-            align-items: baseline;
-            gap: 4px;
-            background: white;
-            padding: 4px 10px;
-            border-radius: 20px;
+            border-radius: 10px;
             font-size: 12px;
-            font-weight: 500;
-            color: #7c3aed;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            cursor: pointer;
+            color: var(--srm-navy-light);
+            transition: all 0.15s;
         }
-        .welcome-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            text-align: center;
-            padding: 20px;
-        }
-        .welcome-orb {
-            width: 56px;
-            height: 56px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
-            border: 1.5px solid #ddd6fe;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-        }
-        .welcome-orb svg {
-            width: 24px;
-            height: 24px;
-            stroke: #8b5cf6;
-        }
-        .welcome-title {
-            font-family: 'Sora', sans-serif;
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f1535;
-            margin-bottom: 6px;
-        }
-        .welcome-sub {
-            font-size: 13px;
-            color: #9ca3af;
-            max-width: 280px;
-            line-height: 1.5;
-        }
+        body.rtl .dd-item { flex-direction: row-reverse; }
+        .dd-item:hover { background: rgba(234,186,98,0.1); color: var(--srm-gold-dark); }
+        .dd-item.danger { color: #e74c3c; }
+        .dd-item.danger:hover { background: rgba(231,76,60,0.08); }
+        .dd-divider { height: 1px; background: rgba(234,186,98,0.15); margin: 6px 0; }
 
-        .sidebar-footer {
-            padding: 12px;
-            border-top: 1px solid #f3f0ff;
+        /* Sidebar footer - user card */
+        .sidebar-footer { 
+            padding: 16px; 
+            border-top: 1px solid rgba(234,186,98,0.12); 
             position: relative;
-            overflow: visible;
-        }
-        .sidebar {
             overflow: visible;
         }
         .user-card {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            background: linear-gradient(135deg, #faf5ff, #f5f3ff);
-            border: 1px solid #ede9fe;
-            border-radius: 12px;
+            gap: 12px;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, #f8f5f0, #fefcf8);
+            border: 1px solid rgba(234,186,98,0.25);
+            border-radius: 14px;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .user-card:hover {
-            background: linear-gradient(135deg, #f5f3ff, #ede9fe);
-            border-color: #c4b5fd;
-        }
+        body.rtl .user-card { flex-direction: row-reverse; }
+        .user-card:hover { border-color: var(--srm-gold); background: linear-gradient(135deg, #fefcf8, #fff8ee); transform: translateY(-1px); }
         .user-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            width: 38px; height: 38px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--srm-navy), var(--srm-gold-dark));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             color: white;
             flex-shrink: 0;
-            box-shadow: 0 4px 10px rgba(109,40,217,0.25);
+            box-shadow: 0 4px 10px rgba(30,49,85,0.2);
         }
-        .user-name {
-            font-size: 13px;
-            font-weight: 500;
-            color: #374151;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .user-role {
-            font-size: 10px;
-            color: #a78bfa;
-        }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--srm-navy); }
+        .user-role { font-size: 10px; color: var(--srm-gold-dark); font-weight: 500; }
 
         .user-menu-dropdown {
             display: none;
             position: absolute;
             bottom: 100%;
-            left: 12px;
-            right: 12px;
+            left: 16px;
+            right: 16px;
             margin-bottom: 8px;
-            background: white;
-            border: 1px solid #ede9fe;
-            border-radius: 12px;
-            padding: 6px;
+            background: var(--srm-white);
+            border: 1px solid rgba(234,186,98,0.2);
+            border-radius: 16px;
+            padding: 8px;
             z-index: 200;
-            box-shadow: 0 10px 25px -5px rgba(109,40,217,0.15);
+            box-shadow: 0 12px 32px rgba(30,49,85,0.15);
         }
-        body.rtl .user-menu-dropdown {
-            left: auto;
-            right: 12px;
-        }
-        .user-menu-dropdown.open {
-            display: block;
-            animation: menuFadeIn 0.15s ease-out;
-        }
-        @keyframes menuFadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .user-menu-dropdown.open { display: block; animation: menuSlideUp 0.2s ease; }
+        @keyframes menuSlideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
         .user-menu-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 10px;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 13px;
-            color: #4b5563;
+            color: var(--srm-navy-light);
             transition: all 0.15s;
         }
-        .user-menu-item:hover {
-            background: #f5f3ff;
-            color: #7c3aed;
-        }
-        .user-menu-item svg {
-            width: 16px;
-            height: 16px;
-            stroke: currentColor;
-            stroke-width: 1.8;
-            fill: none;
-        }
-        .user-menu-item.danger {
-            color: #ef4444;
-        }
-        .user-menu-item.danger:hover {
-            background: #fef2f2;
-        }
-        .user-menu-divider {
-            height: 1px;
-            background: #f3f0ff;
-            margin: 6px 0;
-        }
+        body.rtl .user-menu-item { flex-direction: row-reverse; }
+        .user-menu-item:hover { background: rgba(234,186,98,0.1); color: var(--srm-gold-dark); }
+        .user-menu-item svg { width: 16px; height: 16px; stroke: currentColor; }
+        .user-menu-item.danger { color: #e74c3c; }
+        .user-menu-item.danger:hover { background: rgba(231,76,60,0.08); }
+        .user-menu-divider { height: 1px; background: rgba(234,186,98,0.15); margin: 6px 0; }
 
-        .user-menu-item.lang-item {
-            position: relative;
-            justify-content: space-between;
-        }
-        .user-menu-item.lang-item .arrow {
-            margin-left: auto;
-            font-size: 12px;
-            color: #a78bfa;
-        }
+        /* Lang submenu */
         .lang-submenu {
             display: none;
             position: absolute;
-            left: 100%;
-            top: -10px;
-            background: white;
-            border: 1px solid #ede9fe;
-            border-radius: 10px;
+            bottom: 100%;
+            left: 0;
+            margin-bottom: 8px;
+            background: var(--srm-white);
+            border: 1px solid rgba(234,186,98,0.2);
+            border-radius: 12px;
             padding: 6px;
             min-width: 140px;
-            box-shadow: 0 8px 24px rgba(109,40,217,0.15);
+            box-shadow: 0 8px 24px rgba(30,49,85,0.15);
             z-index: 1000;
         }
-        body.rtl .lang-submenu {
-            left: auto;
-            right: 100%;
-        }
-        .lang-submenu.show {
-            display: block;
-        }
+        .lang-submenu.show { display: block; animation: menuSlideUp 0.2s ease; }
         .lang-option {
             display: flex;
             align-items: center;
             gap: 10px;
             padding: 8px 12px;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 13px;
-            color: #4b5563;
+            font-size: 12px;
+            color: var(--srm-navy-light);
             transition: all 0.15s;
         }
-        .lang-option:hover {
-            background: #f5f3ff;
-            color: #7c3aed;
+        body.rtl .lang-option { flex-direction: row-reverse; }
+        .lang-option:hover { background: rgba(234,186,98,0.1); color: var(--srm-gold-dark); }
+        .lang-option.active { background: rgba(234,186,98,0.15); color: var(--srm-gold-dark); font-weight: 500; }
+
+        /* ===== MAIN PANEL ===== */
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--srm-cream); position: relative; z-index: 1; }
+
+        /* Header tabs */
+        .tabs-header {
+            background: var(--srm-white);
+            border-bottom: 1px solid rgba(234,186,98,0.15);
+            padding: 0 24px;
+            display: flex;
+            gap: 8px;
         }
-        .lang-option.active {
-            background: #ede9fe;
-            color: #7c3aed;
-            font-weight: 500;
+        body.rtl .tabs-header { flex-direction: row-reverse; }
+        .tab-btn {
+            padding: 14px 24px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--srm-gray);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            position: relative;
+        }
+        .tab-btn:hover { color: var(--srm-gold-dark); }
+        .tab-btn.active {
+            color: var(--srm-navy);
+            border-bottom-color: var(--srm-gold);
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--srm-gold), var(--srm-green));
         }
 
-        .modal-panel {
-            background: white;
+        /* Onglet content */
+        .tab-content {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px 24px;
+        }
+        .tab-content.active { display: flex; animation: fadeInUp 0.4s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Info banner */
+        .info-banner {
+            background: linear-gradient(135deg, rgba(30,49,85,0.05), rgba(234,186,98,0.08));
+            border: 1px solid rgba(234,186,98,0.2);
+            border-radius: 16px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .stat-group {
+            display: flex;
+            gap: 16px;
+        }
+        body.rtl .stat-group { flex-direction: row-reverse; }
+        .stat-badge {
+            background: var(--srm-white);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--srm-navy);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .stat-badge span { color: var(--srm-gold-dark); font-weight: 700; margin-right: 4px; }
+        body.rtl .stat-badge span { margin-right: 0; margin-left: 4px; }
+
+        /* Filter bar */
+        .filter-bar {
+            background: var(--srm-white);
+            border: 1px solid rgba(234,186,98,0.15);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        body.rtl .filter-bar { flex-direction: row-reverse; }
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--srm-gold-dark);
+        }
+        .custom-select {
+            background: var(--srm-cream);
+            border: 1px solid rgba(234,186,98,0.25);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 13px;
+            color: var(--srm-navy);
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .custom-select:focus { border-color: var(--srm-gold); box-shadow: 0 0 0 3px rgba(234,186,98,0.1); }
+
+        /* Chat area */
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scrollbar-width: thin;
+        }
+        .chat-area::-webkit-scrollbar { width: 4px; }
+        .chat-area::-webkit-scrollbar-thumb { background: var(--srm-gold-light); border-radius: 4px; }
+
+        /* Messages */
+        .msg-user {
+            align-self: flex-end;
+            max-width: 70%;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, var(--srm-navy), var(--srm-navy-light));
+            border-radius: 20px 20px 4px 20px;
+            font-size: 14px;
+            color: white;
+            line-height: 1.5;
+            box-shadow: 0 4px 14px rgba(30,49,85,0.2);
+            animation: messageSlide 0.3s ease;
+        }
+        body.rtl .msg-user {
+            border-radius: 20px 20px 20px 4px;
+            align-self: flex-start;
+        }
+        .msg-assistant-wrap {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            max-width: 75%;
+            animation: messageSlide 0.3s ease;
+        }
+        body.rtl .msg-assistant-wrap { flex-direction: row-reverse; }
+        @keyframes messageSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-avatar {
+            width: 34px; height: 34px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--srm-gold-light), #fef8ee);
+            border: 1px solid rgba(234,186,98,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .msg-avatar svg { width: 16px; height: 16px; stroke: var(--srm-gold-dark); }
+        .msg-assistant {
+            padding: 12px 18px;
+            background: var(--srm-white);
+            border: 1px solid rgba(234,186,98,0.2);
+            border-radius: 4px 20px 20px 20px;
+            font-size: 14px;
+            color: var(--srm-navy);
+            line-height: 1.6;
+            box-shadow: 0 2px 10px rgba(30,49,85,0.05);
+        }
+        body.rtl .msg-assistant { border-radius: 20px 4px 20px 20px; }
+
+        /* Loading dots */
+        .msg-loading { display: flex; gap: 6px; align-items: center; padding: 12px 18px; }
+        .dot-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--srm-gold); animation: pulseDot 1.4s ease-in-out infinite; }
+        .dot-pulse:nth-child(2) { animation-delay: 0.2s; }
+        .dot-pulse:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulseDot { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1.2); } }
+
+        /* Welcome state */
+        .welcome-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
+            padding: 40px;
+        }
+        .welcome-orb {
+            width: 70px; height: 70px;
             border-radius: 24px;
+            background: linear-gradient(135deg, var(--srm-navy), var(--srm-gold-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 12px 28px rgba(30,49,85,0.2);
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 12px 28px rgba(30,49,85,0.2); transform: scale(1); }
+            50% { box-shadow: 0 16px 36px rgba(234,186,98,0.3); transform: scale(1.02); }
+        }
+        .welcome-title { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; color: var(--srm-navy); margin-bottom: 8px; }
+        .welcome-sub { font-size: 14px; color: var(--srm-gray); max-width: 360px; line-height: 1.6; }
+
+        /* Suggestions */
+        .suggestions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 24px; }
+        body.rtl .suggestions { flex-direction: row-reverse; }
+        .suggestion-chip {
+            padding: 8px 18px;
+            background: var(--srm-white);
+            border: 1.5px solid rgba(234,186,98,0.25);
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--srm-navy-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .suggestion-chip:hover {
+            border-color: var(--srm-gold);
+            color: var(--srm-gold-dark);
+            background: rgba(234,186,98,0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(234,186,98,0.15);
+        }
+
+        /* Input zone */
+        .input-zone { padding: 0 0 16px 0; flex-shrink: 0; }
+        .input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--srm-white);
+            border: 1.5px solid rgba(234,186,98,0.2);
+            border-radius: 20px;
+            padding: 6px 6px 6px 20px;
+            transition: all 0.2s;
+        }
+        body.rtl .input-wrap { flex-direction: row-reverse; padding: 6px 20px 6px 6px; }
+        .input-wrap:focus-within { border-color: var(--srm-gold); box-shadow: 0 0 0 3px rgba(234,186,98,0.15); }
+        .input-zone input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--srm-navy);
+        }
+        .input-zone input::placeholder { color: var(--srm-gray-light); }
+        .btn-send {
+            width: 42px; height: 42px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--srm-navy), var(--srm-gold-dark));
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(30,49,85,0.25);
+        }
+        .btn-send:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(30,49,85,0.35); }
+        .btn-send:active { transform: scale(0.97); }
+
+        /* Modal */
+        .modal-panel {
+            background: var(--srm-white);
+            border-radius: 28px;
             max-width: 480px;
             width: 90%;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: modalFadeIn 0.2s ease-out;
+            box-shadow: 0 32px 64px rgba(30,49,85,0.2);
+            animation: modalFade 0.2s ease;
             overflow: hidden;
         }
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
+        @keyframes modalFade { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
         .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #f3f0ff;
-            background: linear-gradient(135deg, #faf5ff, #ffffff);
+            padding: 24px 28px;
+            border-bottom: 1px solid rgba(234,186,98,0.15);
+            background: linear-gradient(135deg, #fefcf8, var(--srm-white));
         }
-        .modal-body { padding: 24px; }
-        .form-group { margin-bottom: 20px; }
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 6px;
-        }
+        .modal-header h3 { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: var(--srm-navy); margin: 0; }
+        .modal-body { padding: 28px; }
+        .form-group { margin-bottom: 24px; }
+        .form-label { font-size: 13px; font-weight: 600; color: var(--srm-navy); margin-bottom: 8px; display: block; }
         .form-input {
             width: 100%;
-            padding: 10px 14px;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1.5px solid rgba(234,186,98,0.25);
+            border-radius: 14px;
             font-size: 14px;
             font-family: 'DM Sans', sans-serif;
             transition: all 0.2s;
             outline: none;
         }
-        .form-input:focus {
-            border-color: #a78bfa;
-            box-shadow: 0 0 0 3px rgba(167,139,250,0.1);
-        }
+        .form-input:focus { border-color: var(--srm-gold); box-shadow: 0 0 0 3px rgba(234,186,98,0.1); }
         .btn-primary {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            background: linear-gradient(135deg, var(--srm-navy), #2a456e);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-weight: 500;
+            border-radius: 14px;
+            font-weight: 600;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(109,40,217,0.35);
-        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,49,85,0.3); }
         .btn-secondary {
             width: 100%;
             padding: 12px;
-            background: white;
-            color: #6b7280;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
+            background: var(--srm-white);
+            color: var(--srm-gray);
+            border: 1.5px solid rgba(234,186,98,0.25);
+            border-radius: 14px;
             font-weight: 500;
             font-size: 14px;
             cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.2s;
+            margin-top: 12px;
         }
-        .btn-secondary:hover {
-            border-color: #a78bfa;
-            color: #7c3aed;
-            background: #faf5ff;
+        .btn-secondary:hover { border-color: var(--srm-gold); color: var(--srm-gold-dark); background: rgba(234,186,98,0.05); }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 260px; }
+            .tab-content { padding: 16px; }
+            .msg-assistant-wrap, .msg-user { max-width: 85%; }
         }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden">
+<body>
+
+<div class="bg-particles" id="particles"></div>
 
 <div class="flex h-screen w-full overflow-hidden">
 
     <!-- SIDEBAR -->
     <div class="sidebar">
-        <div class="sidebar-logo p-4 border-b border-purple-50">
-            <div class="logo-inner flex items-center gap-3 px-2 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
-                <img src="/static/srm_logo.png" alt="SRM" class="logo-img w-8 h-8 object-contain" onerror="this.style.display='none'">
+        <div class="sidebar-logo">
+            <div class="logo-inner">
+                <img src="/static/srm_logo.jpeg" alt="SRM" class="logo-img" onerror="this.style.display='none'">
                 <div>
-                    <div class="logo-text font-sora text-sm font-semibold text-purple-800">SRM Souss-Massa</div>
-                    <div class="logo-sub text-xs text-purple-400">Espace Employé</div>
+                    <div class="logo-text">SRM Souss-Massa</div>
+                    <div class="logo-sub">Espace Employé</div>
                 </div>
             </div>
         </div>
 
-        <div class="px-3 pt-3 pb-2">
-            <button onclick="nouvelleConversation()"
-                class="btn-new-conv flex items-center justify-center gap-2 w-full px-3 py-2.5 bg-white border border-gray-200 hover:border-purple-300 rounded-xl text-sm text-gray-600 hover:text-purple-700 hover:bg-purple-50 transition-all">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12h14"/>
-                </svg>
-                <span data-i18n="new_conversation">Nouvelle conversation</span>
-            </button>
+        <button class="btn-new-conv" onclick="nouvelleConversation()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Nouvelle conversation
+        </button>
+
+        <div class="conv-section-label">Conversations</div>
+
+        <div class="filter-group">
+            <div class="filter-pill active" onclick="filtrerSidebar('all')" data-filter="all">Tout</div>
+            <div class="filter-pill" onclick="filtrerSidebar('excel')" data-filter="excel">Excel</div>
+            <div class="filter-pill" onclick="filtrerSidebar('pdf')" data-filter="pdf">PDF</div>
         </div>
 
-        <div class="px-3 pt-2 pb-1">
-            <div class="flex gap-1">
-                <button onclick="filtrerSidebar('all')" id="sb-all" class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all active">Tout</button>
-                <button onclick="filtrerSidebar('excel')" id="sb-excel" class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all">Excel</button>
-                <button onclick="filtrerSidebar('pdf')" id="sb-pdf" class="filter-btn flex-1 text-xs py-1.5 rounded-lg transition-all">PDF</button>
-            </div>
-        </div>
-
-        <div class="conv-list flex-1 overflow-y-auto px-2 py-1">
-            <p class="text-[10px] font-medium uppercase tracking-wider text-purple-300 px-2 py-2 mb-1" data-i18n="recent">Récentes</p>
-            <div id="conversations-container">
-                <p class="text-xs text-purple-300 text-center py-8" id="empty-msg">Chargement...</p>
-            </div>
+        <div class="conv-list" id="conv-list">
+            <p style="font-size:12px;color:var(--srm-gray);text-align:center;padding:16px;">Chargement...</p>
         </div>
 
         <div class="sidebar-footer">
             <div class="user-card" onclick="toggleUserMenu(event)">
-                <div class="user-avatar">{{ email[0].upper() }}</div>
-                <div style="flex:1; overflow:hidden;">
-                    <div class="user-name">{{ email.split('@')[0] }}</div>
+                <div class="user-avatar">{{ email[0].upper() if email else 'E' }}</div>
+                <div style="flex:1;overflow:hidden;">
+                    <div class="user-name">{{ email.split('@')[0] if email else 'Employé' }}</div>
                     <div class="user-role" data-i18n="employee_role">Employé SRM</div>
                 </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--srm-gold)" stroke-width="2">
                     <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
             </div>
@@ -644,7 +786,7 @@
                         <path d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 0 1 6.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
                     </svg>
                     <span data-i18n="language">Langue</span>
-                    <span class="arrow">▶</span>
+                    <span class="arrow" style="margin-left:auto;">▶</span>
                     <div class="lang-submenu" id="langSubmenu">
                         <div class="lang-option" onclick="changerLangue('fr'); event.stopPropagation();"><span>🇫🇷</span> Français</div>
                         <div class="lang-option" onclick="changerLangue('en'); event.stopPropagation();"><span>🇬🇧</span> English</div>
@@ -667,158 +809,213 @@
     </div>
 
     <!-- MAIN CONTENT -->
-    <div class="main flex-1 flex flex-col overflow-hidden bg-purple-50/30">
-
-        <div class="bg-white border-b border-purple-100 px-6 py-3 flex justify-between items-center flex-shrink-0">
-            <h1 class="font-sora text-base font-semibold bg-gradient-to-r from-purple-700 to-purple-500 bg-clip-text text-transparent">
-                Assistant SRM — Interface Employé
-            </h1>
-            <div class="flex gap-2">
-                <button onclick="afficherOnglet('excel')" id="btn-excel" class="tab-btn px-4 py-1.5 rounded-xl font-medium text-sm transition-all active">Base clients Excel</button>
-                <button onclick="afficherOnglet('pdf')" id="btn-pdf" class="tab-btn px-4 py-1.5 rounded-xl font-medium text-sm transition-all">Analyse facture PDF</button>
-            </div>
+    <div class="main">
+        <div class="tabs-header">
+            <div class="tab-btn active" onclick="afficherOnglet('excel')">📊 Base clients Excel</div>
+            <div class="tab-btn" onclick="afficherOnglet('pdf')">📄 Analyse facture PDF</div>
         </div>
 
         <!-- ONGLET EXCEL -->
-        <div id="onglet-excel" class="flex-1 flex flex-col overflow-hidden p-5">
-
+        <div id="onglet-excel" class="tab-content active">
             {% if total_factures > 0 %}
-            <div class="info-banner mb-4 flex items-center justify-between flex-wrap gap-2 flex-shrink-0">
-                <div class="flex items-center gap-2 text-sm text-purple-700">
-                    <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span>Base de données active</span>
-                </div>
-                <div class="flex gap-2">
-                    <span class="info-banner-stat">{{ total_factures }} factures</span>
-                    <span class="info-banner-stat">{{ nb_clients }} clients</span>
-                    <span class="info-banner-stat">{{ nb_periodes }} périodes</span>
+            <div class="info-banner">
+                <div class="filter-label">📈 Base de données active</div>
+                <div class="stat-group">
+                    <div class="stat-badge"><span>{{ total_factures }}</span> factures</div>
+                    <div class="stat-badge"><span>{{ nb_clients }}</span> clients</div>
+                    <div class="stat-badge"><span>{{ nb_periodes }}</span> périodes</div>
                 </div>
             </div>
             {% else %}
-            <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 text-sm text-amber-700 flex-shrink-0">
-                ⚠️ Aucune donnée en base. L'administrateur doit importer un fichier Excel.
+            <div class="info-banner" style="background:rgba(212,164,74,0.08);">
+                <span>⚠️ Aucune donnée en base. L'administrateur doit importer un fichier Excel.</span>
             </div>
             {% endif %}
 
-            <!-- Barre de filtre stylisée -->
-            <div class="filter-bar mb-4 flex items-center justify-between flex-wrap gap-3 flex-shrink-0">
-                <div class="filter-label">Fichier source</div>
-                <div class="flex items-center gap-3 flex-wrap">
-                    <select id="select-fichier" onchange="changerFichier()" class="custom-select">
-                        <option value=""><span>📂</span> Tous les fichiers</option>
-                        {% for f in fichiers %}
-                        <option value="{{ f }}">{{ f }}</option>
-                        {% endfor %}
-                    </select>
-                    <span id="label-fichier" class="text-xs text-purple-400 bg-white px-3 py-1.5 rounded-full border border-purple-100">
-                        🌐 Toute la base
-                    </span>
-                </div>
+            <div class="filter-bar">
+                <span class="filter-label">📂 Fichier source</span>
+                <select id="select-fichier" onchange="changerFichier()" class="custom-select">
+                    <option value="">🌐 Tous les fichiers</option>
+                    {% for f in fichiers %}
+                    <option value="{{ f }}">{{ f }}</option>
+                    {% endfor %}
+                </select>
+                <span id="label-fichier" class="text-xs text-srm-gold-dark bg-white px-3 py-1.5 rounded-full border border-srm-gold/20">🌐 Toute la base</span>
             </div>
 
-            <div id="chat-excel" class="chat-area flex-1 overflow-y-auto flex flex-col gap-3 mb-4 p-3 bg-white/50 rounded-xl border border-purple-100">
-                <div class="welcome-state" id="excel-empty">
+            <div id="chat-excel" class="chat-area">
+                <div class="welcome-state">
                     <div class="welcome-orb">
-                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28">
                             <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                         </svg>
                     </div>
-                    <div class="welcome-title" data-name="{{ email.split('@')[0] }}">Bonjour {{ email.split('@')[0] }} 👋</div>
-                    <div class="welcome-sub">Posez une question sur la base clients Excel, les consommations ou les factures.</div>
+                    <div class="welcome-title" data-i18n="welcome_title_employee" data-name="{{ email.split('@')[0] if email else 'Employé' }}">Bonjour {{ email.split('@')[0] if email else 'Employé' }} 👋</div>
+                    <div class="welcome-sub" data-i18n="welcome_sub_excel">Posez une question sur la base clients Excel, les consommations ou les factures.</div>
+                    <div class="suggestions">
+                        <div class="suggestion-chip" onclick="sendSuggestionExcel('Qui consomme le plus ?')">Qui consomme le plus ?</div>
+                        <div class="suggestion-chip" onclick="sendSuggestionExcel('Liste des clients avec factures impayées')">Clients impayés</div>
+                        <div class="suggestion-chip" onclick="sendSuggestionExcel('Consommation totale par période')">Conso par période</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="chat-input flex items-center gap-2 p-1.5 pl-4 bg-white flex-shrink-0">
-                <input type="text" id="input-excel"
-                    placeholder="Ex: Qui consomme le plus ? Liste des clients..."
-                    class="flex-1 py-2 text-sm bg-transparent outline-none"
-                    autocomplete="off"/>
-                <button onclick="envoyerExcel()" class="btn-send w-9 h-9 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <line x1="22" y1="2" x2="11" y2="13"/>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                    </svg>
-                </button>
+            <div class="input-zone">
+                <div class="input-wrap">
+                    <input type="text" id="input-excel" data-i18n-placeholder="excel_placeholder" placeholder="Ex: Qui consomme le plus ? Liste des clients..." autocomplete="off"/>
+                    <button class="btn-send" onclick="envoyerExcel()">
+                        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
 
         <!-- ONGLET PDF -->
-        <div id="onglet-pdf" class="flex-1 flex flex-col overflow-hidden p-5 hidden">
-
-            <div class="filter-bar mb-4 flex items-center justify-between flex-wrap gap-3 flex-shrink-0">
-                <div class="filter-label">Client concerné</div>
-                <div class="flex items-center gap-3">
-                    <select id="select-client-pdf" onchange="changerClientPdf()" class="custom-select">
-                        {% if clients_pdf %}
-                            {% for c in clients_pdf %}
-                            <option value="{{ c }}">{{ c }}</option>
-                            {% endfor %}
-                        {% else %}
-                            <option value="">Aucun PDF disponible</option>
-                        {% endif %}
-                    </select>
-                </div>
+        <div id="onglet-pdf" class="tab-content">
+            <div class="filter-bar">
+                <span class="filter-label">👤 Client concerné</span>
+                <select id="select-client-pdf" onchange="changerClientPdf()" class="custom-select">
+                    {% if clients_pdf %}
+                        {% for c in clients_pdf %}
+                        <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">Aucun PDF disponible</option>
+                    {% endif %}
+                </select>
             </div>
 
-            <div id="chat-pdf" class="chat-area flex-1 overflow-y-auto flex flex-col gap-3 mb-4 p-3 bg-white/50 rounded-xl border border-purple-100">
-                <div class="welcome-state" id="pdf-empty">
+            <div id="chat-pdf" class="chat-area">
+                <div class="welcome-state">
                     <div class="welcome-orb">
-                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28">
                             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </div>
-                    <div class="welcome-title">Analyse PDF</div>
-                    <div class="welcome-sub">Sélectionnez un client ci-dessus puis posez une question sur sa facture.</div>
+                    <div class="welcome-title" data-i18n="pdf_welcome_title">Analyse PDF</div>
+                    <div class="welcome-sub" data-i18n="pdf_welcome_sub">Sélectionnez un client ci-dessus puis posez une question sur sa facture.</div>
+                    <div class="suggestions">
+                        <div class="suggestion-chip" onclick="sendSuggestionPdf('Quel est le montant total ?')">Montant total</div>
+                        <div class="suggestion-chip" onclick="sendSuggestionPdf('Quelle est la période de facturation ?')">Période</div>
+                        <div class="suggestion-chip" onclick="sendSuggestionPdf('Détails de consommation')">Détails conso</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="chat-input flex items-center gap-2 p-1.5 pl-4 bg-white flex-shrink-0">
-                <input type="text" id="input-pdf"
-                    placeholder="Ex: Quel est le montant ? Quelle est la période ?"
-                    class="flex-1 py-2 text-sm bg-transparent outline-none"
-                    autocomplete="off"/>
-                <button onclick="envoyerPdf()" class="btn-send w-9 h-9 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <line x1="22" y1="2" x2="11" y2="13"/>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                    </svg>
-                </button>
+            <div class="input-zone">
+                <div class="input-wrap">
+                    <input type="text" id="input-pdf" data-i18n-placeholder="pdf_placeholder" placeholder="Ex: Quel est le montant ? Quelle est la période ?" autocomplete="off"/>
+                    <button class="btn-send" onclick="envoyerPdf()">
+                        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
-
     </div>
 </div>
 
 <!-- MODALE COMPTE -->
-<div id="modal-compte" style="display:none;position:fixed;inset:0;background:rgba(109,40,217,0.15);backdrop-filter:blur(2px);z-index:1000;align-items:center;justify-content:center;">
+<div id="modal-compte" style="display:none;position:fixed;inset:0;background:rgba(30,49,85,0.3);backdrop-filter:blur(3px);z-index:1000;align-items:center;justify-content:center;">
     <div class="modal-panel">
         <div class="modal-header">
-            <h3 class="font-sora text-lg font-semibold text-purple-800 m-0" data-i18n="my_account">Mon compte</h3>
-            <p class="text-sm text-gray-400 mt-1" data-i18n="account_subtitle">Modifier mon mot de passe</p>
+            <h3 data-i18n="my_account">Mon compte</h3>
+            <p style="font-size:13px;color:var(--srm-gray);margin-top:5px;" data-i18n="account_subtitle">Modifier mon mot de passe</p>
         </div>
         <div class="modal-body">
             <div class="form-group">
-                <label class="form-label" data-i18n="current_password">Mot de passe actuel</label>
-                <input type="password" id="ancien-mdp" class="form-input" placeholder="Mot de passe actuel">
-                <label class="form-label mt-3" data-i18n="new_password">Nouveau mot de passe</label>
-                <input type="password" id="nouveau-mdp" class="form-input" placeholder="Nouveau mot de passe">
-                <label class="form-label mt-3" data-i18n="confirm_password">Confirmer le mot de passe</label>
-                <input type="password" id="confirmation-mdp" class="form-input" placeholder="Confirmer le mot de passe">
-                <div id="error-msg" class="text-red-500 text-xs mt-2 hidden"></div>
-                <div id="success-msg" class="text-green-500 text-xs mt-2 hidden" data-i18n="password_changed">Mot de passe modifié avec succès !</div>
+                <label class="form-label" data-i18n="change_password">Changer le mot de passe</label>
+                <input type="password" id="ancien-mdp" class="form-input" data-i18n-placeholder="current_password" placeholder="Mot de passe actuel">
+                <input type="password" id="nouveau-mdp" class="form-input" style="margin-top:16px;" data-i18n-placeholder="new_password" placeholder="Nouveau mot de passe">
+                <input type="password" id="confirmation-mdp" class="form-input" style="margin-top:16px;" data-i18n-placeholder="confirm_password" placeholder="Confirmer le mot de passe">
+                <div id="error-msg" style="color:#e74c3c;font-size:12px;margin-top:8px;display:none;"></div>
+                <div id="success-msg" style="color:var(--srm-green);font-size:12px;margin-top:8px;display:none;" data-i18n="password_changed">Mot de passe modifié avec succès !</div>
             </div>
             <button class="btn-primary" onclick="changerMotDePasse()" data-i18n="save">Enregistrer</button>
-            <button class="btn-secondary mt-2" onclick="fermerCompte()" data-i18n="close">Fermer</button>
+            <button class="btn-secondary" onclick="fermerCompte()" data-i18n="close">Fermer</button>
         </div>
     </div>
 </div>
 
 <script>
-    // ════════════════════════════════════════════════════════════════
-    // ÉTAT GLOBAL
-    // ════════════════════════════════════════════════════════════════
+    // ==================== PARTICULES ====================
+    const pc = document.getElementById('particles');
+    const cols = ['rgba(212,164,74,', 'rgba(121,173,102,', 'rgba(30,49,85,'];
+    for(let i=0;i<25;i++){
+        const d = document.createElement('div');
+        d.className = 'particle';
+        const sz = Math.random()*5+2;
+        const c = cols[Math.floor(Math.random()*cols.length)];
+        const op = (Math.random()*.28+.06).toFixed(2);
+        d.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${c}${op});animation-duration:${Math.random()*14+10}s;animation-delay:${Math.random()*14}s;`;
+        pc.appendChild(d);
+    }
+
+    // ==================== FONCTION DATE MULTILANGUE ====================
+    function formaterDate(dateStr, lang = null) {
+        if (!dateStr) return '';
+        const currentLang = lang || (typeof i18n !== 'undefined' && i18n.currentLang) || 'fr';
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 86400000);
+        
+        if (isNaN(date.getTime())) {
+            return '';
+        }
+        
+        if (diff === 0) {
+            if (currentLang === 'en') return 'Today';
+            if (currentLang === 'ar') return 'اليوم';
+            return "Aujourd'hui";
+        }
+        if (diff === 1) {
+            if (currentLang === 'en') return 'Yesterday';
+            if (currentLang === 'ar') return 'أمس';
+            return "Hier";
+        }
+        if (diff < 7) {
+            if (currentLang === 'en') return `${diff} days ago`;
+            if (currentLang === 'ar') return `قبل ${diff} أيام`;
+            return `Il y a ${diff} jours`;
+        }
+        return date.toLocaleDateString(currentLang === 'fr' ? 'fr-FR' : currentLang === 'en' ? 'en-US' : 'ar-EG', 
+            { day: 'numeric', month: 'short' });
+    }
+
+    // ==================== MISE À JOUR DES DATES ====================
+    function refreshAllDates() {
+        const dateElements = document.querySelectorAll('.conv-date');
+        dateElements.forEach(el => {
+            const originalDate = el.getAttribute('data-original-date');
+            if (originalDate) {
+                const newFormatted = formaterDate(originalDate);
+                if (newFormatted !== el.textContent) {
+                    el.textContent = newFormatted;
+                }
+            }
+        });
+    }
+
+    // ==================== MISE À JOUR TEXTE RENOMMER/SUPPRIMER ====================
+    function updateRenameDeleteTexts() {
+        if (typeof i18n === 'undefined' || !i18n) return;
+        const renameText = i18n.t('rename');
+        const deleteText = i18n.t('delete');
+        
+        document.querySelectorAll('.rename-text').forEach(el => {
+            if (el.textContent !== renameText) el.textContent = renameText;
+        });
+        document.querySelectorAll('.delete-text').forEach(el => {
+            if (el.textContent !== deleteText) el.textContent = deleteText;
+        });
+    }
+
+    // ==================== ÉTAT GLOBAL ====================
     let nomFichierActif = "";
     let clientPdfActif = "{{ clients_pdf[0] if clients_pdf else '' }}";
     let historiqueExcel = [];
@@ -827,473 +1024,227 @@
     let convIdPdf = null;
     let modeActif = "excel";
     let filtreSidebar = "all";
+    let conversationsData = [];
 
-    // ════════════════════════════════════════════════════════════════
-    // GESTION MENU UTILISATEUR
-    // ════════════════════════════════════════════════════════════════
+    // ==================== GESTION MENUS ====================
     function toggleUserMenu(event) {
         event.stopPropagation();
         const menu = document.getElementById('userMenuDropdown');
         menu.classList.toggle('open');
         document.getElementById('langSubmenu').classList.remove('show');
     }
-    
-    function closeUserMenu() {
-        const menu = document.getElementById('userMenuDropdown');
-        menu.classList.remove('open');
-        document.getElementById('langSubmenu').classList.remove('show');
+    function closeUserMenu() { 
+        document.getElementById('userMenuDropdown').classList.remove('open'); 
+        document.getElementById('langSubmenu').classList.remove('show'); 
     }
-    
-    function toggleLangSubmenu(event) {
-        event.stopPropagation();
-        const submenu = document.getElementById('langSubmenu');
-        submenu.classList.toggle('show');
+    function toggleLangSubmenu(event) { 
+        event.stopPropagation(); 
+        document.getElementById('langSubmenu').classList.toggle('show');
     }
-    
     document.addEventListener('click', function(event) {
         const menu = document.getElementById('userMenuDropdown');
-        const userCard = document.querySelector('.user-card');
-        if (menu && !menu.contains(event.target) && userCard && !userCard.contains(event.target)) {
+        if (menu && !menu.contains(event.target) && !event.target.closest('.user-card')) {
             menu.classList.remove('open');
             document.getElementById('langSubmenu').classList.remove('show');
         }
     });
 
-    function ouvrirCompte() {
-        closeUserMenu();
-        document.getElementById('modal-compte').style.display = 'flex';
-        document.getElementById('ancien-mdp').value = '';
-        document.getElementById('nouveau-mdp').value = '';
-        document.getElementById('confirmation-mdp').value = '';
-        document.getElementById('error-msg').classList.add('hidden');
-        document.getElementById('success-msg').classList.add('hidden');
-    }
-
-    function fermerCompte() {
-        document.getElementById('modal-compte').style.display = 'none';
-    }
-
-    async function changerMotDePasse() {
-        const ancien = document.getElementById('ancien-mdp').value;
-        const nouveau = document.getElementById('nouveau-mdp').value;
-        const confirmation = document.getElementById('confirmation-mdp').value;
-        
-        document.getElementById('error-msg').classList.add('hidden');
-        document.getElementById('success-msg').classList.add('hidden');
-        
-        if (!ancien || !nouveau || !confirmation) {
-            document.getElementById('error-msg').textContent = 'Tous les champs sont requis.';
-            document.getElementById('error-msg').classList.remove('hidden');
-            return;
-        }
-        if (nouveau !== confirmation) {
-            document.getElementById('error-msg').textContent = 'Les nouveaux mots de passe ne correspondent pas.';
-            document.getElementById('error-msg').classList.remove('hidden');
-            return;
-        }
-        if (nouveau.length < 4) {
-            document.getElementById('error-msg').textContent = 'Le mot de passe doit contenir au moins 4 caractères.';
-            document.getElementById('error-msg').classList.remove('hidden');
-            return;
-        }
-        
-        try {
-            const res = await fetch('/api/employe/changer-mot-de-passe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ancien_mdp: ancien, nouveau_mdp: nouveau })
-            });
-            const data = await res.json();
-            if (data.succes) {
-                document.getElementById('success-msg').classList.remove('hidden');
-                setTimeout(() => fermerCompte(), 1500);
-            } else {
-                document.getElementById('error-msg').textContent = data.erreur || 'Une erreur est survenue.';
-                document.getElementById('error-msg').classList.remove('hidden');
-            }
-        } catch (err) {
-            document.getElementById('error-msg').textContent = 'Erreur de connexion au serveur.';
-            document.getElementById('error-msg').classList.remove('hidden');
-        }
-    }
-
-    function changerLangue(lang) {
-        if (typeof i18n !== 'undefined' && i18n) {
-            i18n.switchTo(lang);
-        }
-        document.querySelectorAll('.lang-option').forEach(opt => {
-            opt.classList.remove('active');
-            if ((lang === 'fr' && opt.textContent.includes('Français')) ||
-                (lang === 'en' && opt.textContent.includes('English')) ||
-                (lang === 'ar' && opt.textContent.includes('العربية'))) {
-                opt.classList.add('active');
-            }
-        });
-        document.getElementById('langSubmenu').classList.remove('show');
-        closeUserMenu();
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // INIT
-    // ════════════════════════════════════════════════════════════════
-    document.addEventListener('DOMContentLoaded', () => {
-        chargerConversations();
-        document.getElementById('sb-all').classList.add('active');
-    });
-
-    function afficherOnglet(onglet) {
-        modeActif = onglet;
-        document.getElementById('onglet-excel').classList.toggle('hidden', onglet !== 'excel');
-        document.getElementById('onglet-pdf').classList.toggle('hidden', onglet !== 'pdf');
-        
-        const btnExcel = document.getElementById('btn-excel');
-        const btnPdf = document.getElementById('btn-pdf');
-        
-        if (onglet === 'excel') {
-            btnExcel.classList.add('active');
-            btnPdf.classList.remove('active');
-        } else {
-            btnExcel.classList.remove('active');
-            btnPdf.classList.add('active');
-        }
-    }
-
-    function filtrerSidebar(mode) {
-        filtreSidebar = mode;
-        ['all', 'excel', 'pdf'].forEach(m => {
-            const btn = document.getElementById('sb-' + m);
-            if (m === mode) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-        chargerConversations();
-    }
-
+    // ==================== CONVERSATIONS ====================
     async function chargerConversations() {
         const url = filtreSidebar === 'all'
             ? '/api/employe/conversations'
             : `/api/employe/conversations?mode=${filtreSidebar}`;
         const res = await fetch(url);
         const data = await res.json();
-        const container = document.getElementById('conversations-container');
-
-        if (!data.conversations || data.conversations.length === 0) {
-            container.innerHTML = '<p class="text-xs text-purple-300 text-center py-8">Aucune conversation</p>';
+        conversationsData = data.conversations || [];
+        const container = document.getElementById('conv-list');
+        if (!conversationsData.length) {
+            container.innerHTML = '<p style="font-size:12px;color:var(--srm-gray);text-align:center;padding:16px;">Aucune conversation</p>';
             return;
         }
-
         container.innerHTML = '';
-        data.conversations.forEach(conv => {
-            container.appendChild(creerElementConversation(conv));
+        conversationsData.forEach(conv => {
+            container.appendChild(creerItemConv(conv));
         });
     }
 
-    function creerElementConversation(conv) {
+    function creerItemConv(conv) {
         const div = document.createElement('div');
-        div.className = 'conv-item flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer mb-0.5';
+        div.className = 'conv-item';
         div.dataset.id = conv.id;
         div.dataset.mode = conv.mode;
-
-        const badgeClass = conv.mode === 'excel' ? 'badge-excel' : 'badge-pdf';
+        const badgeClass = conv.mode === 'excel' ? '' : 'pdf';
         const badgeLabel = conv.mode === 'excel' ? 'XLS' : 'PDF';
-
+        const renameText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('rename') : 'Renommer';
+        const deleteText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('delete') : 'Supprimer';
+        const formattedDate = formaterDate(conv.date_creation);
+        
         div.innerHTML = `
-            <div class="flex-1 overflow-hidden" onclick="chargerConversation(${conv.id}, '${conv.mode}')">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                    <span class="text-[10px] px-1.5 py-0.5 rounded ${badgeClass} font-medium">${badgeLabel}</span>
-                    <p class="text-sm text-gray-700 truncate" id="titre-${conv.id}">${escapeHtml(conv.titre)}</p>
-                </div>
-                <p class="text-xs text-purple-300 pl-0.5">${formaterDate(conv.date_creation)}</p>
+            <div class="conv-icon"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div>
+            <div class="conv-content" onclick="chargerConversation(${conv.id}, '${conv.mode}')">
+                <div class="conv-title"><span class="conv-badge ${badgeClass}">${badgeLabel}</span> ${escapeHtml(conv.titre)}</div>
+                <div class="conv-date" data-original-date="${conv.date_creation}">${formattedDate}</div>
             </div>
-            <button class="three-dots w-7 h-7 flex items-center justify-center rounded-lg hover:bg-purple-100 text-purple-300 flex-shrink-0 transition-all"
-                onclick="toggleMenu(event, ${conv.id})">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
-                </svg>
-            </button>
+            <button class="conv-menu-btn" onclick="toggleMenu(event,${conv.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
             <div class="dropdown-menu" id="menu-${conv.id}">
-                <div class="dd-item" onclick="demanderRenommage(${conv.id})">
-                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                    Renommer
-                </div>
-                <div class="dd-divider" style="height:1px;background:#f3f0ff;margin:4px 0;"></div>
-                <div class="dd-item danger" onclick="supprimerConversation(${conv.id})">
-                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                        <path d="M10 11v6M14 11v6"/>
-                    </svg>
-                    Supprimer
-                </div>
-            </div>
-        `;
+                <div class="dd-item" onclick="demanderRenommage(${conv.id})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="rename-text">${renameText}</span></div>
+                <div class="dd-divider"></div>
+                <div class="dd-item danger" onclick="supprimerConversation(${conv.id})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg><span class="delete-text">${deleteText}</span></div>
+            </div>`;
         return div;
     }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        return text.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
+    function escapeHtml(text) { if (!text) return ''; return text.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
 
-    function formaterDate(dateStr, forceLang = null) {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    const auj = new Date();
-    const diff = Math.floor((auj - d) / 86400000);
-    
-    // Utiliser la langue forcée ou celle de i18n
-    let currentLang = forceLang;
-    if (!currentLang && typeof i18n !== 'undefined' && i18n) {
-        currentLang = i18n.currentLang;
+    function toggleMenu(e, id) { 
+        e.stopPropagation(); 
+        document.querySelectorAll('.dropdown-menu').forEach(m => { if (m.id !== `menu-${id}`) m.classList.remove('open'); }); 
+        document.getElementById(`menu-${id}`).classList.toggle('open'); 
     }
-    if (!currentLang) currentLang = 'fr';
-    
-    if (diff === 0) {
-        if (currentLang === 'en') return 'Today';
-        if (currentLang === 'ar') return 'اليوم';
-        return "Aujourd'hui";
-    }
-    if (diff === 1) {
-        if (currentLang === 'en') return 'Yesterday';
-        if (currentLang === 'ar') return 'أمس';
-        return "Hier";
-    }
-    if (diff < 7) {
-        if (currentLang === 'en') return `${diff} days ago`;
-        if (currentLang === 'ar') return `قبل ${diff} أيام`;
-        return `Il y a ${diff} jours`;
-    }
-    return d.toLocaleDateString(currentLang === 'ar' ? 'ar-MA' : (currentLang === 'en' ? 'en-US' : 'fr-FR'), 
-        { day: 'numeric', month: 'short' });
-}
-    function toggleMenu(e, convId) {
-        e.stopPropagation();
-        document.querySelectorAll('.dropdown-menu').forEach(m => {
-            if (m.id !== `menu-${convId}`) m.classList.remove('open');
-        });
-        document.getElementById(`menu-${convId}`).classList.toggle('open');
-    }
+    document.addEventListener('click', () => { document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open')); });
 
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
-    });
-
-    function demanderRenommage(convId) {
-        document.getElementById(`menu-${convId}`).classList.remove('open');
-        const el = document.getElementById(`titre-${convId}`);
-        const ancienTitre = el.textContent;
-        el.innerHTML = `<input class="rename-input" id="ri-${convId}" value="${ancienTitre}" />`;
-        const inp = document.getElementById(`ri-${convId}`);
+    async function demanderRenommage(id) {
+        document.getElementById(`menu-${id}`).classList.remove('open');
+        const el = document.getElementById(`titre-${id}`);
+        if(!el) return;
+        const ancien = el.textContent.replace(/^(XLS|PDF)\s/, '');
+        const badge = el.querySelector('.conv-badge')?.outerHTML || '';
+        el.innerHTML = `<input class="rename-input" id="ri-${id}" value="${ancien}" style="font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--srm-gold);width:100%;"/>`;
+        const inp = document.getElementById(`ri-${id}`);
         inp.focus(); inp.select();
-
-        const sauvegarder = async () => {
-            const nouveau = inp.value.trim() || ancienTitre;
-            el.textContent = nouveau;
-            await fetch('/api/employe/conversation/renommer', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ conversation_id: convId, nouveau_titre: nouveau })
+        const save = async () => { 
+            const v = inp.value.trim() || ancien; 
+            el.innerHTML = badge + ' ' + v;
+            await fetch('/api/employe/conversation/renommer', { 
+                method: 'POST', headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ conversation_id: id, nouveau_titre: v }) 
             });
         };
-        inp.addEventListener('blur', sauvegarder);
-        inp.addEventListener('keydown', e => {
-            if (e.key === 'Enter') inp.blur();
-            if (e.key === 'Escape') { el.textContent = ancienTitre; }
-        });
+        inp.addEventListener('blur', save);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') el.innerHTML = badge + ' ' + ancien; });
     }
 
-    async function supprimerConversation(convId) {
-        document.getElementById(`menu-${convId}`).classList.remove('open');
-        const convItem = document.querySelector(`[data-id="${convId}"]`);
-        if (convItem) convItem.remove();
-
-        await fetch('/api/employe/conversation/supprimer', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ conversation_id: convId })
-        });
-
-        if (convIdExcel === convId || convIdPdf === convId) {
-            nouvelleConversation();
-        }
+    async function supprimerConversation(id) {
+        document.getElementById(`menu-${id}`).classList.remove('open');
+        document.querySelector(`[data-id="${id}"]`)?.remove();
+        await fetch('/api/employe/conversation/supprimer', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ conversation_id: id }) });
+        if ((modeActif === 'excel' && convIdExcel === id) || (modeActif === 'pdf' && convIdPdf === id)) nouvelleConversation();
     }
 
-    async function chargerConversation(convId, mode) {
-        const res = await fetch(`/api/employe/messages/${convId}`);
+    async function chargerConversation(id, mode) {
+        const res = await fetch(`/api/employe/messages/${id}`);
         const data = await res.json();
-        const messages = data.messages || [];
-
         afficherOnglet(mode);
-
         const chatId = mode === 'excel' ? 'chat-excel' : 'chat-pdf';
         const chatDiv = document.getElementById(chatId);
         chatDiv.innerHTML = '';
-
         if (mode === 'excel') {
-            convIdExcel = convId;
-            historiqueExcel = messages;
+            convIdExcel = id;
+            historiqueExcel = data.messages || [];
+            historiqueExcel.forEach(m => afficherBulle(chatId, m.role, m.content));
         } else {
-            convIdPdf = convId;
-            historiquePdf = messages;
+            convIdPdf = id;
+            historiquePdf = data.messages || [];
+            historiquePdf.forEach(m => afficherBulle(chatId, m.role, m.content));
         }
-
-        messages.forEach(msg => afficherBulle(chatId, msg.role, msg.content));
-
         document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
-        document.querySelector(`[data-id="${convId}"]`)?.classList.add('active');
+        document.querySelector(`[data-id="${id}"]`)?.classList.add('active');
     }
 
     function nouvelleConversation() {
-        convIdExcel = null;
-        convIdPdf = null;
-        historiqueExcel = [];
-        historiquePdf = [];
-
-        document.getElementById('chat-excel').innerHTML = `
-            <div class="welcome-state">
-                <div class="welcome-orb">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                    </svg>
-                </div>
-                <div class="welcome-title">Bonjour {{ email.split('@')[0] }} 👋</div>
-                <div class="welcome-sub">Posez une question sur la base clients Excel, les consommations ou les factures.</div>
-            </div>`;
-        document.getElementById('chat-pdf').innerHTML = `
-            <div class="welcome-state">
-                <div class="welcome-orb">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <div class="welcome-title">Analyse PDF</div>
-                <div class="welcome-sub">Sélectionnez un client ci-dessus puis posez une question sur sa facture.</div>
-            </div>`;
-
+        if (modeActif === 'excel') {
+            convIdExcel = null;
+            historiqueExcel = [];
+            document.getElementById('chat-excel').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="welcome-title" data-i18n="welcome_title_employee">Bonjour 👋</div><div class="welcome-sub" data-i18n="welcome_sub_excel">Posez une question sur la base clients Excel.</div><div class="suggestions"><div class="suggestion-chip" onclick="sendSuggestionExcel('Qui consomme le plus ?')">Qui consomme le plus ?</div><div class="suggestion-chip" onclick="sendSuggestionExcel('Liste des clients avec factures impayées')">Clients impayés</div></div></div>`;
+        } else {
+            convIdPdf = null;
+            historiquePdf = [];
+            document.getElementById('chat-pdf').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div class="welcome-title" data-i18n="pdf_welcome_title">Analyse PDF</div><div class="welcome-sub" data-i18n="pdf_welcome_sub">Sélectionnez un client et posez une question.</div><div class="suggestions"><div class="suggestion-chip" onclick="sendSuggestionPdf('Quel est le montant total ?')">Montant total</div><div class="suggestion-chip" onclick="sendSuggestionPdf('Période de facturation')">Période</div></div></div>`;
+        }
         document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
     }
 
-    function changerFichier() {
-        nomFichierActif = document.getElementById('select-fichier').value;
-        const label = document.getElementById('label-fichier');
-        label.innerHTML = nomFichierActif ? `📁 ${nomFichierActif}` : '🌐 Toute la base';
-        document.getElementById('chat-excel').innerHTML = `
-            <div class="welcome-state">
-                <div class="welcome-orb">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                    </svg>
-                </div>
-                <div class="welcome-title">Fichier modifié</div>
-                <div class="welcome-sub">Posez une question sur le fichier sélectionné.</div>
-            </div>`;
-        convIdExcel = null;
-        historiqueExcel = [];
-    }
-
-    function changerClientPdf() {
-        clientPdfActif = document.getElementById('select-client-pdf').value;
-        document.getElementById('chat-pdf').innerHTML = `
-            <div class="welcome-state">
-                <div class="welcome-orb">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                </div>
-                <div class="welcome-title">Client sélectionné</div>
-                <div class="welcome-sub">Posez une question sur la facture de ${clientPdfActif}.</div>
-            </div>`;
-        convIdPdf = null;
-        historiquePdf = [];
-    }
+    function sendSuggestionExcel(text) { document.getElementById('input-excel').value = text; envoyerExcel(); }
+    function sendSuggestionPdf(text) { document.getElementById('input-pdf').value = text; envoyerPdf(); }
 
     function afficherBulle(chatId, role, texte) {
         const chat = document.getElementById(chatId);
         const empty = chat.querySelector('.welcome-state');
         if (empty) empty.remove();
-
-        const div = document.createElement('div');
-        
+        const wrap = document.createElement('div');
         if (role === 'user') {
-            div.className = 'msg-user self-end max-w-[70%] px-4 py-2 text-white text-sm';
-            div.textContent = texte;
+            wrap.className = 'msg-user';
+            wrap.textContent = texte;
         } else if (role === 'loading') {
-            div.className = 'msg-loading self-start px-4 py-2 text-purple-400 text-sm flex items-center gap-2';
-            div.innerHTML = `
-                <div class="dot-pulse"></div>
-                <div class="dot-pulse"></div>
-                <div class="dot-pulse"></div>
-                <span class="ml-1">Recherche en cours...</span>
-            `;
+            wrap.className = 'msg-assistant-wrap';
+            wrap.innerHTML = `<div class="msg-avatar"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="msg-assistant msg-loading"><div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div></div>`;
         } else {
-            div.className = 'msg-assistant self-start max-w-[75%] px-4 py-2 text-gray-700 text-sm leading-relaxed';
-            div.innerHTML = texte.replace(/\*\*(.*?)\*\*/g, '<strong class="text-purple-700">$1</strong>')
-                                 .replace(/\n/g, '<br>');
+            wrap.className = 'msg-assistant-wrap';
+            let formatted = texte.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--srm-gold-dark)">$1</strong>').replace(/\n/g, '<br>');
+            wrap.innerHTML = `<div class="msg-avatar"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="msg-assistant">${formatted}</div>`;
         }
-        
-        chat.appendChild(div);
+        chat.appendChild(wrap);
         chat.scrollTop = chat.scrollHeight;
-        return div;
+        return wrap;
+    }
+
+    function afficherOnglet(onglet) {
+        modeActif = onglet;
+        document.getElementById('onglet-excel').classList.toggle('active', onglet === 'excel');
+        document.getElementById('onglet-pdf').classList.toggle('active', onglet === 'pdf');
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        if (onglet === 'excel') document.querySelector('.tab-btn:first-child').classList.add('active');
+        else document.querySelector('.tab-btn:last-child').classList.add('active');
+    }
+
+    function filtrerSidebar(mode) {
+        filtreSidebar = mode;
+        document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        document.querySelector(`.filter-pill[data-filter="${mode}"]`).classList.add('active');
+        chargerConversations();
+    }
+
+    function changerFichier() {
+        nomFichierActif = document.getElementById('select-fichier').value;
+        document.getElementById('label-fichier').innerHTML = nomFichierActif ? `📁 ${nomFichierActif}` : '🌐 Toute la base';
+        document.getElementById('chat-excel').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="welcome-title">Fichier modifié</div><div class="welcome-sub">Posez une question sur ${nomFichierActif || 'toute la base'}.</div></div>`;
+        convIdExcel = null; historiqueExcel = [];
+    }
+
+    function changerClientPdf() {
+        clientPdfActif = document.getElementById('select-client-pdf').value;
+        document.getElementById('chat-pdf').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div class="welcome-title">Client: ${clientPdfActif}</div><div class="welcome-sub">Posez une question sur sa facture.</div></div>`;
+        convIdPdf = null; historiquePdf = [];
     }
 
     async function envoyerExcel() {
         const input = document.getElementById('input-excel');
         const question = input.value.trim();
         if (!question) return;
-
         historiqueExcel.push({ role: 'user', content: question });
         afficherBulle('chat-excel', 'user', question);
         input.value = '';
         const loading = afficherBulle('chat-excel', 'loading', '');
-
         const res = await fetch('/api/chat/employe/excel', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                question: question,
-                nom_fichier: nomFichierActif,
-                historique: historiqueExcel.slice(0, -1)
-            })
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ question, nom_fichier: nomFichierActif, historique: historiqueExcel.slice(0, -1) })
         });
         const data = await res.json();
         loading.remove();
-
         historiqueExcel.push({ role: 'assistant', content: data.reponse });
         afficherBulle('chat-excel', 'assistant', data.reponse);
-
         if (convIdExcel === null) {
             const r2 = await fetch('/api/employe/conversation/creer', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    premiere_question: question,
-                    mode: 'excel',
-                    nom_fichier: nomFichierActif
-                })
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ premiere_question: question, mode: 'excel', nom_fichier: nomFichierActif })
             });
             const d2 = await r2.json();
             convIdExcel = d2.conversation_id;
             await chargerConversations();
         }
         await fetch('/api/employe/conversation/ajouter-message', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                conversation_id: convIdExcel,
-                messages: [
-                    { role: 'user', content: question },
-                    { role: 'assistant', content: data.reponse }
-                ]
-            })
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ conversation_id: convIdExcel, messages: [{ role: 'user', content: question }, { role: 'assistant', content: data.reponse }] })
         });
     }
 
@@ -1301,67 +1252,135 @@
         const input = document.getElementById('input-pdf');
         const question = input.value.trim();
         if (!question) return;
-        if (!clientPdfActif) { alert("Sélectionnez un client PDF d'abord."); return; }
-
+        if (!clientPdfActif) { alert("Sélectionnez un client."); return; }
         historiquePdf.push({ role: 'user', content: question });
         afficherBulle('chat-pdf', 'user', question);
         input.value = '';
         const loading = afficherBulle('chat-pdf', 'loading', '');
-
         const res = await fetch('/api/chat/employe/pdf', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                question: question,
-                client: clientPdfActif,
-                historique: historiquePdf.slice(0, -1)
-            })
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ question, client: clientPdfActif, historique: historiquePdf.slice(0, -1) })
         });
         const data = await res.json();
         loading.remove();
-
         historiquePdf.push({ role: 'assistant', content: data.reponse });
         afficherBulle('chat-pdf', 'assistant', data.reponse);
-
         if (convIdPdf === null) {
             const r2 = await fetch('/api/employe/conversation/creer', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    premiere_question: question,
-                    mode: 'pdf',
-                    nom_fichier: clientPdfActif
-                })
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ premiere_question: question, mode: 'pdf', nom_fichier: clientPdfActif })
             });
             const d2 = await r2.json();
             convIdPdf = d2.conversation_id;
             await chargerConversations();
         }
         await fetch('/api/employe/conversation/ajouter-message', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                conversation_id: convIdPdf,
-                messages: [
-                    { role: 'user', content: question },
-                    { role: 'assistant', content: data.reponse }
-                ]
-            })
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ conversation_id: convIdPdf, messages: [{ role: 'user', content: question }, { role: 'assistant', content: data.reponse }] })
         });
     }
 
-    document.getElementById('input-excel').addEventListener('keypress', e => {
-        if (e.key === 'Enter') envoyerExcel();
-    });
-    document.getElementById('input-pdf').addEventListener('keypress', e => {
-        if (e.key === 'Enter') envoyerPdf();
+    // ==================== COMPTE ====================
+    function ouvrirCompte() { closeUserMenu(); document.getElementById('modal-compte').style.display = 'flex'; clearCompteForm(); }
+    function fermerCompte() { document.getElementById('modal-compte').style.display = 'none'; }
+    function clearCompteForm() {
+        document.getElementById('ancien-mdp').value = '';
+        document.getElementById('nouveau-mdp').value = '';
+        document.getElementById('confirmation-mdp').value = '';
+        document.getElementById('error-msg').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'none';
+    }
+    async function changerMotDePasse() {
+        const ancien = document.getElementById('ancien-mdp').value;
+        const nouveau = document.getElementById('nouveau-mdp').value;
+        const confirmation = document.getElementById('confirmation-mdp').value;
+        document.getElementById('error-msg').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'none';
+        if (!ancien || !nouveau || !confirmation) {
+            document.getElementById('error-msg').textContent = 'Tous les champs sont requis.';
+            document.getElementById('error-msg').style.display = 'block';
+            return;
+        }
+        if (nouveau !== confirmation) {
+            document.getElementById('error-msg').textContent = 'Les mots de passe ne correspondent pas.';
+            document.getElementById('error-msg').style.display = 'block';
+            return;
+        }
+        if (nouveau.length < 4) {
+            document.getElementById('error-msg').textContent = 'Minimum 4 caractères.';
+            document.getElementById('error-msg').style.display = 'block';
+            return;
+        }
+        try {
+            const res = await fetch('/api/employe/changer-mot-de-passe', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ancien_mdp: ancien, nouveau_mdp: nouveau })
+            });
+            const data = await res.json();
+            if (data.succes) {
+                document.getElementById('success-msg').style.display = 'block';
+                setTimeout(() => fermerCompte(), 1500);
+            } else {
+                document.getElementById('error-msg').textContent = data.erreur || 'Erreur';
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        } catch (err) {
+            document.getElementById('error-msg').textContent = 'Erreur de connexion.';
+            document.getElementById('error-msg').style.display = 'block';
+        }
+    }
+
+    // ==================== CHANGEMENT DE LANGUE ====================
+    function changerLangue(lang) {
+        if (typeof i18n !== 'undefined' && i18n) {
+            i18n.switchTo(lang);
+            // Mettre à jour les dates après changement de langue
+            setTimeout(() => {
+                refreshAllDates();
+                updateRenameDeleteTexts();
+                // Recharger les conversations pour mettre à jour les dates dans la liste
+                chargerConversations();
+            }, 100);
+        }
+        document.getElementById('langSubmenu').classList.remove('show');
+        closeUserMenu();
+    }
+
+    // ==================== INITIALISATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        chargerConversations();
+        document.getElementById('input-excel').addEventListener('keypress', e => { if (e.key === 'Enter') envoyerExcel(); });
+        document.getElementById('input-pdf').addEventListener('keypress', e => { if (e.key === 'Enter') envoyerPdf(); });
+        
+        // Attendre que i18n soit chargé
+        setTimeout(() => {
+            refreshAllDates();
+            updateRenameDeleteTexts();
+        }, 500);
     });
 
     window.ouvrirCompte = ouvrirCompte;
+    window.fermerCompte = fermerCompte;
+    window.changerMotDePasse = changerMotDePasse;
     window.changerLangue = changerLangue;
+    window.toggleUserMenu = toggleUserMenu;
+    window.toggleLangSubmenu = toggleLangSubmenu;
     window.closeUserMenu = closeUserMenu;
+    window.filtrerSidebar = filtrerSidebar;
+    window.afficherOnglet = afficherOnglet;
+    window.nouvelleConversation = nouvelleConversation;
+    window.chargerConversation = chargerConversation;
+    window.supprimerConversation = supprimerConversation;
+    window.demanderRenommage = demanderRenommage;
+    window.envoyerExcel = envoyerExcel;
+    window.envoyerPdf = envoyerPdf;
+    window.changerFichier = changerFichier;
+    window.changerClientPdf = changerClientPdf;
+    window.sendSuggestionExcel = sendSuggestionExcel;
+    window.sendSuggestionPdf = sendSuggestionPdf;
     window.formaterDate = formaterDate;
+    window.refreshAllDates = refreshAllDates;
+    window.updateRenameDeleteTexts = updateRenameDeleteTexts;
 </script>
-
 </body>
 </html>
