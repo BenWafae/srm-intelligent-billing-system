@@ -1,52 +1,129 @@
 <div align="center">
 
 <img src="https://img.shields.io/badge/Python-3.10.9-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
-<img src="https://img.shields.io/badge/Streamlit-Interface-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white"/>
+<img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
+<img src="https://img.shields.io/badge/TailwindCSS-Frontend-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white"/>
 <img src="https://img.shields.io/badge/Ollama-Mistral_Local-000000?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/SQLite-Base_de_données-003B57?style=for-the-badge&logo=sqlite&logoColor=white"/>
-<img src="https://img.shields.io/badge/RAG-Architecture_Hybride-7B68EE?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Architecture-LLM_as_a_Router-7B68EE?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/Status-En_cours-orange?style=for-the-badge"/>
 
 # 🧾 SRM Intelligent Billing System
-> Système Intelligent de Gestion des Factures, SRM Souss-Massa
 
-Réalisé par : **BEN ZHIR Wafa**
+> Système Intelligent de Gestion des Factures — SRM Souss-Massa
+
+**Réalisé par : BEN ZHIR Wafa**
 Encadrant entreprise : **ZEROUALI Hassan** · Encadrant académique : **AIT BAHA Tarek**
+*Stage de fin d'études — EST Guelmim, Filière SDSI 2025–2026*
 
 </div>
 
 ---
 
-##  Description
+## Vue d'ensemble
 
-Système de gestion intelligente des factures développé pour la **SRM Souss-Massa**, composé de trois interfaces dédiées et d'un assistant conversationnel basé sur une architecture RAG hybride avec LLM local.
+Ce projet est un système complet de gestion intelligente des factures développé pour la **SRM Souss-Massa** dans le cadre d'un stage de fin d'études. Il repose sur une **architecture hybride LLM as a Router** qui garantit des réponses déterministes et fiables en confiant au LLM uniquement la compréhension du langage naturel, tandis que Python et SQL assurent l'intégralité des calculs et du traitement des données.
 
-| Interface | Fonctionnalités |
-|---|---|
-| **Admin** | Import Excel/PDF, gestion base de données & comptes utilisateurs |
-| **Employé** | Analyse PDF (RAG classique) + interrogation multi-clients Excel (détection d'intents → fetchers Python → fallback Text-to-SQL) |
-| **Client** | Authentification sécurisée, chatbot filtré par contrat, téléchargement de factures PDF personnalisées |
+Le système évolue en trois phases :
 
----
-
-##  Tech Stack
-
-| Couche | Technologie |
-|---|---|
-| Langage | Python 3.10.9 |
-| Interface | Streamlit |
-| LLM | Mistral via Ollama (local) |
-| Extraction PDF | pdfplumber |
-| Génération PDF | ReportLab |
-| Base de données | SQLite |
-| Traitement Excel | pandas / openpyxl |
-| Similarité texte | fuzzywuzzy / python-levenshtein |
+| Phase | Statut | Description |
+|---|---|---|
+| **Tâche 1** | ✅ Terminée | Système complet de gestion et d'analyse des factures avec 3 interfaces dédiées |
+| **Tâche 2** | 🔄 En cours | Agent autonome de détection des surconsommations et alertes email |
+| **Tâche 3** | 📋 Planifiée | Containerisation Docker + déploiement sur infrastructure SRM |
 
 ---
 
-##  Prérequis
+## Architecture IA : LLM as a Router
 
-Avant de lancer le projet, assurez-vous d'avoir installé :
+Le cœur du système repose sur un paradigme architectural original, distinct du RAG classique, dans lequel le LLM joue **uniquement le rôle de routeur sémantique** — il n'intervient jamais dans le calcul ou la génération des réponses finales.
+
+> Ce paradigme s'inscrit dans le cadre des *LLM augmentés par des outils* (Mialon et al., 2023 ; Schick et al., 2023 — Toolformer).
+
+```
+Question utilisateur (Interface Employé)
+        │
+        ▼
+┌─────────────────────────────────────────┐
+│  Niveau 0 — Portail de validation       │
+│  Champ inexistant dans la base ?        │──→ Message d'indisponibilité immédiat
+└─────────────────────────────────────────┘
+        │ Non
+        ▼
+┌─────────────────────────────────────────┐
+│  Niveau 1 — Règles Python               │
+│  Mot-clé / intent reconnu ?             │──→ Réponse déterministe (sans LLM)
+└─────────────────────────────────────────┘
+        │ Non
+        ▼
+┌─────────────────────────────────────────┐
+│  Niveau 2 — LLM Router (Mistral)        │
+│  Classificateur d'intention uniquement  │──→ Validation en 3 couches
+└─────────────────────────────────────────┘
+        │ Intent non reconnu
+        ▼
+┌─────────────────────────────────────────┐
+│  Niveau 3 — Fallback Text-to-SQL        │
+│  Génération SQL contrainte              │──→ Whitelist SELECT + Validation schéma
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Interfaces & Fonctionnalités
+
+### Interface Administrateur
+- Import de fichiers Excel multi-clients / multi-périodes et factures PDF
+- Gestion de la base de données SQLite
+- Gestion des comptes utilisateurs (création, suppression, rôles)
+
+### Interface Employé SRM
+- **Assistant conversationnel PDF** : analyse de factures individuelles via RAG classique
+- **Assistant Excel multi-clients** : interrogation via l'architecture hybride LLM as a Router
+- Filtre par fichier Excel source pour des analyses ciblées
+- **Persistance des conversations** : historique sauvegardé en base, consultable et renommable depuis la sidebar
+
+### Interface Client Connecté
+- Authentification sécurisée par email
+- Chatbot personnalisé filtré automatiquement par numéro de contrat (isolation totale des données)
+- Mini-dashboard : dernière facture, prochain paiement, graphique de consommation
+- Téléchargement de factures PDF personnalisées (ReportLab)
+- Base de connaissance institutionnelle SRM (abonnement, branchement, contacts)
+- **Persistance des conversations** : historique sauvegardé par client, accessible après reconnexion
+
+---
+
+## Tech Stack
+
+| Couche | Technologie | Rôle |
+|---|---|---|
+| Langage | Python 3.10.9 | Développement principal |
+| Backend | FastAPI + Jinja2 | Routes HTTP, sessions par cookies, routage par rôle |
+| Frontend | Tailwind CSS | Design des interfaces |
+| LLM | Mistral via Ollama | Classificateur d'intention uniquement (local) |
+| Extraction PDF | pdfplumber | Lecture des factures PDF |
+| Génération PDF | ReportLab | Factures personnalisées téléchargeables |
+| Base de données | SQLite | Persistance des données et conversations |
+| Traitement Excel | pandas / openpyxl | Lecture multi-clients / multi-périodes |
+| Similarité texte | fuzzywuzzy | Détection des noms mal orthographiés |
+| Sécurité | hashlib SHA-256 | Hashage des mots de passe |
+
+> **Note sur la migration UI :** Le prototype initial a été développé sous Streamlit, puis migré vers FastAPI + Jinja2 + Tailwind CSS pour lever les contraintes de personnalisation UI. La migration a été réalisée sans aucune régression fonctionnelle, confirmant la solidité de l'architecture modulaire adoptée dès le départ.
+
+---
+
+## Sécurité
+
+- Authentification par email avec hashage **SHA-256**
+- Système de rôles : **Admin / Employé / Client**
+- **Isolation totale** des données client par numéro de contrat
+- Validation du schéma SQL avant toute exécution (rejet des colonnes inexistantes)
+- Whitelist SELECT : rejet de toute instruction de modification (INSERT, UPDATE, DELETE, DROP...)
+- Le LLM tourne **entièrement en local** via Ollama — aucune donnée ne quitte la machine
+
+---
+
+## Prérequis
 
 - **Python 3.10.9** : [python.org](https://www.python.org/downloads/release/python-3109/)
 - **Ollama** : [ollama.com](https://ollama.com/)
@@ -54,95 +131,30 @@ Avant de lancer le projet, assurez-vous d'avoir installé :
 
 ---
 
-## ⚡ Quick Start
+## ⚡ Lancement
 
 ```bash
-pip install -r requirements.txt
-ollama pull mistral
-streamlit run app.py
-```
-
----
-
-##  Lancer le projet
-
-### 1. Cloner le dépôt
-
-```bash
+# 1. Cloner le dépôt
 git clone https://github.com/<username>/srm-intelligent-billing-system.git
 cd srm-intelligent-billing-system
-```
 
-### 2. Installer les dépendances
-
-```bash
+# 2. Installer les dépendances
 pip install -r requirements.txt
-```
 
-### 3. Télécharger le modèle Mistral
-
-```bash
+# 3. Télécharger le modèle Mistral
 ollama pull mistral
+
+# 4. Lancer l'application
+uvicorn main:app --reload
 ```
 
-> Ollama tourne en arrière-plan automatiquement après installation. Vérifiable sur `http://localhost:11434`
+L'application est accessible sur `http://localhost:8000`
 
-### 4. Lancer l'application
-
-```bash
-streamlit run app.py
-```
-
-L'application s'ouvre dans le navigateur sur `http://localhost:8501`
+> Au premier lancement, Ollama peut prendre quelques secondes pour charger le modèle Mistral en mémoire.
 
 ---
 
-## 🗂️ Structure du projet
-
-```
-srm-intelligent-billing-system/
-│
-├── app.py                            # Point d'entrée : authentification & routage par rôle
-│
-├── pages/
-│   ├── admin.py                      # Interface administrateur
-│   ├── employe.py                    # Interface employé (assistant complet)
-│   └── client.py                     # Interface client (filtrage par contrat)
-│
-├── src/
-│   ├── pdf_reader.py                 # Extraction texte PDF
-│   ├── excel_reader.py               # Traitement Excel multi-clients
-│   ├── extractor.py                  # Structuration des données via LLM
-│   ├── database.py                   # Gestion SQLite (factures, users)
-│   ├── llm.py                        # Interactions avec le modèle LLM
-│   ├── normalisation.py              # Normalisation des questions
-│   ├── rag_general.py                # RAG classique pour factures PDF
-│   │
-│   ├── rag/
-│   │   ├── dispatcher.py             # Routage vers le bon fetcher
-│   │   ├── intent.py                 # Détection d'intention (règles → LLM fallback)
-│   │   ├── mode.py                   # Mode de réponse (count / list / detail)
-│   │   ├── fetchers_generaux.py      # Fetchers multi-clients
-│   │   └── fetchers_client.py        # Fetchers spécifiques client
-│   │
-│   └── rag_client/
-│       ├── dispatcher.py             # Pipeline client : filtrage par contrat
-│       ├── intent.py                 # Détection d'intention (contexte client)
-│       ├── fetchers.py               # Données filtrées par contrat
-│       ├── tokens.py                 # Mots-clés pour la détection d'intents
-│       └── pdf_facture.py            # Génération factures PDF (ReportLab)
-│
-├── assets/
-│   └── srm_logo.png
-│
-├── data/                             # Fichiers Excel/PDF importés
-├── requirements.txt
-└── README.md
-```
-
----
-
-##  Rôles & accès
+## Rôles & Accès
 
 | Rôle | Accès |
 |---|---|
@@ -150,21 +162,4 @@ srm-intelligent-billing-system/
 | **Employé** | Assistant complet : analyse PDF + interrogation multi-clients Excel |
 | **Client** | Espace personnel : ses factures uniquement + téléchargement PDF |
 
-> Les comptes utilisateurs sont créés et gérés par l'Admin depuis son interface.
-
----
-
-##  Sécurité
-
-- Hashage des mots de passe **SHA-256**
-- Isolation totale des données client par numéro de contrat
-- Validation du schéma SQL avant toute exécution (fallback Text-to-SQL)
-- Rejet de toute requête non-SELECT
-
----
-
-##  Notes
-
-- Le LLM tourne **entièrement en local** via Ollama ; aucune donnée ne quitte la machine.
-- La base SQLite est stockée localement dans le répertoire du projet
-- Le premier lancement peut être lent le temps qu'Ollama charge le modèle Mistral en mémoire
+> Les comptes sont créés et gérés par l'Admin depuis son interface.
