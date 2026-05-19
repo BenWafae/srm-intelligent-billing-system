@@ -34,9 +34,9 @@ Le système évolue en trois phases :
 
 ---
 
-## Architecture IA : LLM as a Router
+## Architecture IA — Pipeline Employé SRM
 
-Le cœur du système repose sur un paradigme architectural original, distinct du RAG classique, dans lequel le LLM joue **uniquement le rôle de routeur sémantique** — il n'intervient jamais dans le calcul ou la génération des réponses finales.
+Le pipeline employé repose sur un mécanisme de décision hiérarchique à 4 niveaux. Le LLM joue **uniquement le rôle de routeur sémantique** — il n'intervient jamais dans le calcul ou la génération des réponses finales sur les données.
 
 > Ce paradigme s'inscrit dans le cadre des *LLM augmentés par des outils* (Mialon et al., 2023 ; Schick et al., 2023 — Toolformer).
 
@@ -58,7 +58,7 @@ Question utilisateur (Interface Employé)
         ▼
 ┌─────────────────────────────────────────┐
 │  Niveau 2 — LLM Router (Mistral)        │
-│  Classificateur d'intention uniquement  │──→ Validation en 3 couches
+│  Classificateur d'intention uniquement  │──→ Validation en 3 couches avant routage
 └─────────────────────────────────────────┘
         │ Intent non reconnu
         ▼
@@ -67,6 +67,64 @@ Question utilisateur (Interface Employé)
 │  Génération SQL contrainte              │──→ Whitelist SELECT + Validation schéma
 └─────────────────────────────────────────┘
 ```
+
+---
+
+## Architecture IA — Pipeline Client Connecté
+
+Le pipeline client est distinct du pipeline employé. Il intègre deux mécanismes absents chez l'employé : un **routeur amont General/Personnel** qui distingue les questions sur les factures des questions générales sur la SRM, et un **intent ANALYSE** qui permet des réponses narratives personnalisées combinant données réelles et génération LLM.
+
+```
+Question utilisateur (Interface Client)
+        │
+        ▼
+┌─────────────────────────────────────────┐
+│  Niveau 0 — Routeur General / Personnel │
+│  Détection automatique du contexte      │
+│                                         │
+│  Question générale SRM ?                │──→ Base de connaissance SRM
+│  (abonnement, branchement, stage,       │    (abonnement, contact, recrutement,
+│   recrutement, contact...)              │     sensibilisation eau/électricité)
+│                                         │
+│  Question personnelle sur factures ?    │──→ Pipeline personnel (suite)
+└─────────────────────────────────────────┘
+        │ Personnelle
+        ▼
+┌─────────────────────────────────────────┐
+│  Niveau 1 — Champ précis du profil      │
+│  Usage, agence, compteur, contrat ?     │──→ Réponse ciblée (champ unique)
+└─────────────────────────────────────────┘
+        │ Non
+        ▼
+┌─────────────────────────────────────────┐
+│  Niveau 2 — Règles Python déterministes │
+│  Année / Top N / Comparaison /          │──→ Réponse déterministe filtrée
+│  Mois spécifique / Mois relatifs /      │    par numéro de contrat (sans LLM)
+│  Max / Min / Somme / Évolution...       │
+└─────────────────────────────────────────┘
+        │ Non couvert
+        ▼
+┌─────────────────────────────────────────┐
+│  Niveau 3 — Fallback LLM               │
+│  • Questions hors règles → LLM Router   │──→ Réponse guidée avec exemples
+│  • Intent ANALYSE → LLM narratif        │──→ Réponse personnalisée avec données
+│    (données réelles injectées,          │    réelles, comparaison mois actuel
+│     zéro hallucination sur les chiffres)│    vs précédent, saisonnalité marocaine
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Différences entre les deux pipelines
+
+| | Pipeline Employé | Pipeline Client |
+|---|---|---|
+| **Données accessibles** | Tous les clients (multi-contrats) | Uniquement son contrat (isolation totale) |
+| **Routeur amont** | Portail de validation (champs inexistants) | Routeur General / Personnel |
+| **Niveau LLM** | Classificateur d'intention strict + validation 3 couches | Classificateur + intent ANALYSE narratif |
+| **Fallback final** | Text-to-SQL sécurisé (whitelist + schéma) | LLM narratif avec données réelles injectées |
+| **Base de connaissance** | Non | Oui — questions générales SRM (abonnement, contact, stage...) |
+| **Analyse personnalisée** | Non | Oui — explication des variations, conseils adaptés à l'usage et à la saisonnalité |
 
 ---
 
