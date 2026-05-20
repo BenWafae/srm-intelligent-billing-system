@@ -276,16 +276,13 @@ async def sauvegarder_seuil_route(request: Request):
 
 
 @app.get("/api/admin/agent/detecter")
-def detecter_route(request: Request):
-    """
-    Lance la détection des surconsommations.
-    Retourne la liste des clients détectés.
-    """
-    from src.agent.agent_alertes import detecter_surconsommations, get_seuil
+def detecter_route(request: Request, mode: str = "precedent"):
+    from src.agent.agent_alertes import detecter, get_seuil
     seuil = get_seuil()
-    detectes = detecter_surconsommations(seuil)
+    detectes = detecter(seuil, mode=mode)
     return {
         "seuil"    : seuil,
+        "mode"     : mode,
         "total"    : len(detectes),
         "detectes" : detectes
     }

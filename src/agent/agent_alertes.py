@@ -169,3 +169,104 @@ def get_seuil() -> float:
     except Exception:
         conn.close()
         return 30.0
+# ════════════════════════════════════════════════════════════
+# MODE 2 — Détection par moyenne historique (6 mois)
+# ════════════════════════════════════════════════════════════
+
+def detecter_par_moyenne(seuil: float, nb_mois: int = 6) -> list[dict]:
+    """
+    Détecte les surconsommations en comparant le mois actuel
+    à la moyenne des N mois précédents (défaut: 6).
+
+    Plus fiable que la comparaison mois-à-mois car :
+    - Élimine les fausses alertes dues à un mois précédent anormalement bas
+    - Tient compte du comportement habituel du client sur la durée
+
+    Retourne une liste de dicts enrichis :
+    {
+        ...mêmes champs que detecter_surconsommations()...
+        "moyenne_historique": float,   ← nouveau
+        "nb_mois_utilises": int,       ← nouveau
+        "mode_detection": "moyenne"    ← nouveau
+    }
+
+    Ignoré si le client a moins de 3 mois de données.
+    """
+    rows = get_clients_deux_derniers_mois()
+    groupes = grouper_par_contrat(rows)
+
+    detectes = []
+
+    for numero_contrat, mois_list in groupes.items():
+
+        # Minimum 3 mois requis : 1 actuel + 2 pour la moyenne
+        if len(mois_list) < 3:
+            continue
+
+        mois_actuel = mois_list[0]  # le plus récent
+        conso_actuelle = mois_actuel.get("consommation") or 0
+
+        # Prendre les N mois AVANT le mois actuel pour calculer la moyenne
+        mois_historiques = mois_list[1 : nb_mois + 1]  # ex: indices 1 à 6
+
+        consos_historiques = [
+            m.get("consommation") or 0
+            for m in mois_historiques
+            if (m.get("consommation") or 0) > 0
+        ]
+
+        # Pas assez de données valides
+        if len(consos_historiques) < 2:
+            continue
+
+        moyenne = sum(consos_historiques) / len(consos_historiques)
+
+        if moyenne == 0:
+            continue
+
+        variation_pct = ((conso_actuelle - moyenne) / moyenne) * 100
+
+        if variation_pct > seuil:
+            detectes.append({
+                "numero_contrat"    : numero_contrat,
+                "nom_client"        : mois_actuel.get("nom_client", ""),
+                "email"             : mois_actuel.get("email"),
+                "mois_actuel"       : mois_actuel.get("mois_source", ""),
+                "conso_actuelle"    : round(conso_actuelle, 2),
+                # Pour affichage dans le tableau — on montre la moyenne
+                "mois_precedent"    : f"Moyenne {len(consos_historiques)} mois",
+                "conso_precedente"  : round(moyenne, 2),
+                "variation_pct"     : round(variation_pct, 1),
+                "unite"             : mois_actuel.get("unite", ""),
+                "montant_ttc"       : mois_actuel.get("montant_ttc", 0),
+                "usage"             : mois_actuel.get("usage", ""),
+                "agence"            : mois_actuel.get("agence", ""),
+                # Champs supplémentaires Mode 2
+                "moyenne_historique": round(moyenne, 2),
+                "nb_mois_utilises"  : len(consos_historiques),
+                "mode_detection"    : "moyenne"
+            })
+
+    detectes.sort(key=lambda x: x["variation_pct"], reverse=True)
+    return detectes
+
+
+# ════════════════════════════════════════════════════════════
+# DISPATCHER — choisit le bon mode selon paramètre admin
+# ════════════════════════════════════════════════════════════
+
+def detecter(seuil: float, mode: str = "precedent") -> list[dict]:
+    """
+    Point d'entrée unique pour la détection.
+
+    Paramètres :
+        seuil : % d'augmentation déclenchant l'alerte
+        mode  : "precedent" → Mode 1 (mois précédent)
+                "moyenne"   → Mode 2 (moyenne 6 mois)
+
+    Appelé par la route FastAPI /api/admin/agent/detecter
+    """
+    if mode == "moyenne":
+        return detecter_par_moyenne(seuil)
+    else:
+        return detecter_surconsommations(seuil)

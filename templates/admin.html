@@ -1154,14 +1154,14 @@
                             <td><div class="action-icons">
                                 <button class="action-edit" onclick="editPassword('{{ u.id }}', this)" title="Modifier mot de passe">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                     </svg>
                                 </button>
                                 <button class="action-delete" onclick="demanderConfirmUser({{ u.id }}, this)" title="Supprimer">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <polyline points="3 6 5 6 21 6"/>
-                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
                                     </svg>
                                 </button>
                             </div></td>
@@ -1181,8 +1181,8 @@
             <div class="section-head">
                 <div class="section-head-ico" style="background:rgba(234,186,98,.12);color:var(--srm-gold-dark);">
                     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"></path>
                     </svg>
                 </div>
                 <div>
@@ -1192,12 +1192,12 @@
             </div>
             <div class="section-body">
                 <div class="seuil-input-wrap">
-                    <input type="number" id="seuil-input" value="30" min="1" max="200"/>
+                    <input type="number" id="seuil-input" value="30" min="1" max="200">
                     <span class="seuil-pct-label">%</span>
                     <button class="btn btn-primary" onclick="sauvegarderSeuil()">
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                            <polyline points="17 21 17 13 7 13 7 21"/>
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
                         </svg>
                         Sauvegarder
                     </button>
@@ -1211,8 +1211,8 @@
             <div class="section-head">
                 <div class="section-head-ico" style="background:rgba(30,49,85,.08);color:var(--srm-navy-light);">
                     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"/>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </div>
                 <div>
@@ -1221,31 +1221,38 @@
                 </div>
             </div>
             <div class="section-body">
+                <!-- NOUVEAU : Toggle Mode détection -->
+                <div style="display:flex; gap:10px; margin-bottom:16px; align-items:center; flex-wrap:wrap;">
+                    <span style="font-size:13px; font-weight:600; color:var(--srm-navy);">Mode de détection :</span>
+                    <div style="display:flex; gap:6px;">
+                        <button id="btn-mode-precedent" onclick="setMode('precedent')" class="btn btn-primary" style="padding:7px 16px; font-size:12px;">📅 Mois précédent</button>
+                        <button id="btn-mode-moyenne" onclick="setMode('moyenne')" class="btn btn-ghost" style="padding:7px 16px; font-size:12px;">📊 Moyenne 6 mois</button>
+                    </div>
+                    <span id="mode-description" style="font-size:11px; color:var(--srm-gray); font-style:italic;">Comparaison avec le mois précédent</span>
+                </div>
+
                 <button class="btn btn-primary btn-full" onclick="lancerDetection()" id="btn-detecter">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <polygon points="5 3 19 12 5 21 5 3"/>
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
                     Analyser les consommations
                 </button>
 
                 <!-- Résultats — cachés au départ -->
                 <div id="detection-results" style="display:none; margin-top:20px;">
-
                     <div class="alert alert-warn" id="detection-summary" style="margin-bottom:16px;">
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="8" x2="12" y2="12"/>
-                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
                         </svg>
                         <span id="detection-summary-text">Analyse en cours…</span>
                     </div>
-
-                    <!-- Tableau clients détectés -->
                     <div style="overflow-x:auto; margin-bottom:16px;">
                         <table class="detection-table">
                             <thead>
                                 <tr>
-                                    <th><input type="checkbox" id="check-all" onchange="toggleAll(this)"/></th>
+                                    <th><input type="checkbox" id="check-all" onchange="toggleAll(this)"></th>
                                     <th>Client</th>
                                     <th>Mois précédent</th>
                                     <th>Mois actuel</th>
@@ -1256,42 +1263,28 @@
                             <tbody id="tbody-detection"></tbody>
                         </table>
                     </div>
-
-                    <!-- Boutons envoi -->
                     <div style="display:flex; gap:12px; flex-wrap:wrap;">
                         <button class="btn btn-success" onclick="envoyerTous()" id="btn-envoyer-tous">
                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <line x1="22" y1="2" x2="11" y2="13"/>
-                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                             </svg>
                             Envoyer à tous
                         </button>
                         <button class="btn btn-warn" onclick="envoyerSelection()">
                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <polyline points="9 11 12 14 22 4"/>
-                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                                <polyline points="9 11 12 14 22 4"></polyline>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                             </svg>
                             Envoyer la sélection
                         </button>
                     </div>
-
                     <div class="feedback" id="fb-envoi"></div>
-
-                    <!-- Rapport envoi -->
                     <div id="rapport-envoi" style="display:none; margin-top:16px;">
                         <div class="rapport-grid">
-                            <div class="rapport-card">
-                                <div class="rapport-num" id="rapport-envoyes">0</div>
-                                <div class="rapport-lbl">✅ Envoyés</div>
-                            </div>
-                            <div class="rapport-card">
-                                <div class="rapport-num" id="rapport-sans-email">0</div>
-                                <div class="rapport-lbl">📭 Sans email</div>
-                            </div>
-                            <div class="rapport-card">
-                                <div class="rapport-num" id="rapport-erreurs">0</div>
-                                <div class="rapport-lbl">❌ Erreurs</div>
-                            </div>
+                            <div class="rapport-card"><div class="rapport-num" id="rapport-envoyes">0</div><div class="rapport-lbl">✅ Envoyés</div></div>
+                            <div class="rapport-card"><div class="rapport-num" id="rapport-sans-email">0</div><div class="rapport-lbl">📭 Sans email</div></div>
+                            <div class="rapport-card"><div class="rapport-num" id="rapport-erreurs">0</div><div class="rapport-lbl">❌ Erreurs</div></div>
                         </div>
                     </div>
                 </div>
@@ -1305,11 +1298,11 @@
             <div class="section-head">
                 <div class="section-head-ico" style="background:rgba(30,49,85,.08);color:var(--srm-navy-light);">
                     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10 9 9 9 8 9"/>
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
                     </svg>
                 </div>
                 <div>
@@ -1318,61 +1311,34 @@
                 </div>
             </div>
             <div class="section-body">
-                <!-- Statistiques -->
                 <div class="historique-stats">
-                    <div class="stat-card">
-                        <div class="stat-num" id="stat-total-alertes">0</div>
-                        <div class="stat-lbl">Total alertes</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-num" id="stat-envoyes">0</div>
-                        <div class="stat-lbl">✅ Envoyées</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-num" id="stat-sans-email">0</div>
-                        <div class="stat-lbl">📭 Sans email</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-num" id="stat-erreurs">0</div>
-                        <div class="stat-lbl">❌ Erreurs</div>
-                    </div>
+                    <div class="stat-card"><div class="stat-num" id="stat-total-alertes">0</div><div class="stat-lbl">Total alertes</div></div>
+                    <div class="stat-card"><div class="stat-num" id="stat-envoyes">0</div><div class="stat-lbl">✅ Envoyées</div></div>
+                    <div class="stat-card"><div class="stat-num" id="stat-sans-email">0</div><div class="stat-lbl">📭 Sans email</div></div>
+                    <div class="stat-card"><div class="stat-num" id="stat-erreurs">0</div><div class="stat-lbl">❌ Erreurs</div></div>
                 </div>
-
-                <!-- Tableau historique -->
                 <div class="historique-table-wrapper">
                     <table class="historique-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Client</th>
-                                <th>Email</th>
-                                <th>Mois</th>
-                                <th>Variation</th>
-                                <th>Statut</th>
-                            </thead>
-                            <tbody id="tbody-historique">
-                                <tr><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...<\/td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="display:flex; gap:12px; margin-top:20px;">
-                        <button class="btn btn-ghost btn-refresh" onclick="chargerHistorique()">
-                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                            Rafraîchir
-                        </button>
-                        <button class="btn btn-primary" onclick="exporterHistoriqueCSV()">
-                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="7 10 12 15 17 10"/>
-                                <line x1="12" y1="15" x2="12" y2="3"/>
-                            </svg>
-                            Exporter CSV
-                        </button>
-                    </div>
+                        <thead><tr><th>Date</th><th>Client</th><th>Email</th><th>Mois</th><th>Variation</th><th>Statut</th></tr></thead>
+                        <tbody id="tbody-historique"><tr><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr></tbody>
+                    </table>
+                </div>
+                <div style="display:flex; gap:12px; margin-top:20px;">
+                    <button class="btn btn-ghost btn-refresh" onclick="chargerHistorique()">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        Rafraîchir
+                    </button>
+                    <button class="btn btn-primary" onclick="exporterHistoriqueCSV()">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Exporter CSV
+                    </button>
                 </div>
             </div>
         </div>
@@ -1385,9 +1351,9 @@
         <div class="modal-head">
             <div class="modal-icon" style="background:rgba(30,49,85,.08);">
                 <svg fill="none" stroke="var(--srm-gold-dark)" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
                 </svg>
             </div>
             <h3 id="modal-title">Confirmer la suppression</h3>
@@ -1406,8 +1372,8 @@
         <div class="modal-head">
             <div class="modal-icon" style="background:rgba(121,173,102,.1);">
                 <svg fill="none" stroke="var(--srm-green-dark)" stroke-width="2" viewBox="0 0 24 24">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                 </svg>
             </div>
             <h3>Modifier le mot de passe</h3>
@@ -1419,8 +1385,8 @@
                 <input type="password" id="new-password-input" class="form-input" placeholder="••••••••" autocomplete="off" style="padding-right: 45px;">
                 <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                 </button>
             </div>
@@ -1443,103 +1409,133 @@
         const sz = Math.random()*5+2;
         const c = cols[Math.floor(Math.random()*cols.length)];
         const op = (Math.random()*.28+.06).toFixed(2);
-        d.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${c}${op});animation-duration:${Math.random()*14+10}s;animation-delay:${Math.random()*14}s;`;
+        d.style.cssText = 'width:' + sz + 'px;height:' + sz + 'px;left:' + Math.random()*100 + '%;background:' + c + op + ');animation-duration:' + (Math.random()*14+10) + 's;animation-delay:' + (Math.random()*14) + 's;';
         pc.appendChild(d);
     }
 
     let currentUserId = null;
     let currentRow = null;
+    let modeDetection = 'precedent';
+    let clientsDetectes = [];
 
     function togglePasswordVisibility() {
         const input = document.getElementById('new-password-input');
         const btn = document.querySelector('#editPwdModal .toggle-password');
         if (input.type === 'password') {
             input.type = 'text';
-            btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+            btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
         } else {
             input.type = 'password';
-            btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+            btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
         }
     }
 
     function afficherOnglet(o) {
-        ['excel','pdf','users','agent','historique'].forEach(id => {
-            const panel = document.getElementById('onglet-' + id);
-            const pill = document.getElementById('pill-' + id);
-            if (panel) panel.classList.toggle('active', id === o);
-            if (pill) pill.classList.toggle('active', id === o);
-        });
+        var onglets = ['excel','pdf','users','agent','historique'];
+        for (var i = 0; i < onglets.length; i++) {
+            var id = onglets[i];
+            var panel = document.getElementById('onglet-' + id);
+            var pill = document.getElementById('pill-' + id);
+            if (panel) {
+                if (id === o) panel.classList.add('active');
+                else panel.classList.remove('active');
+            }
+            if (pill) {
+                if (id === o) pill.classList.add('active');
+                else pill.classList.remove('active');
+            }
+        }
         if (o === 'historique') {
             chargerHistorique();
         }
     }
 
     function toggleContrat() {
-        const role = document.getElementById('role-nouveau').value;
-        document.getElementById('div-contrat').style.display = role === 'client' ? 'block' : 'none';
+        var role = document.getElementById('role-nouveau').value;
+        var divContrat = document.getElementById('div-contrat');
+        if (divContrat) divContrat.style.display = role === 'client' ? 'block' : 'none';
     }
 
-    function showFeedback(id, msg, type = 'ok') {
-        const el = document.getElementById(id);
+    function showFeedback(id, msg, type) {
+        type = type || 'ok';
+        var el = document.getElementById(id);
         if (!el) return;
         el.textContent = msg;
-        el.className = `feedback ${type} show`;
-        setTimeout(() => el.classList.remove('show'), 5000);
+        el.className = 'feedback ' + type + ' show';
+        setTimeout(function() { el.classList.remove('show'); }, 5000);
+    }
+
+    // ── NOUVEAU : Mode de détection ──
+    function setMode(mode) {
+        modeDetection = mode;
+        var btnPrecedent = document.getElementById('btn-mode-precedent');
+        var btnMoyenne = document.getElementById('btn-mode-moyenne');
+        if (btnPrecedent) btnPrecedent.className = mode === 'precedent' ? 'btn btn-primary' : 'btn btn-ghost';
+        if (btnMoyenne) btnMoyenne.className = mode === 'moyenne' ? 'btn btn-primary' : 'btn btn-ghost';
+        var desc = document.getElementById('mode-description');
+        if (desc) {
+            desc.textContent = mode === 'precedent' ? 'Comparaison avec le mois précédent' : 'Comparaison avec la moyenne des 6 derniers mois — moins de fausses alertes';
+        }
     }
 
     async function previsualiserExcel() {
-        const input = document.getElementById('input-excel');
-        const file = input.files[0];
+        var input = document.getElementById('input-excel');
+        var file = input.files[0];
         if (!file) return;
         document.getElementById('nom-fichier-excel').textContent = '📎 ' + file.name;
-        const apercu = document.getElementById('apercu-excel');
+        var apercu = document.getElementById('apercu-excel');
         document.getElementById('apercu-texte').textContent = 'Analyse en cours…';
         apercu.style.display = 'flex';
-        const fd = new FormData();
+        var fd = new FormData();
         fd.append('fichier', file);
         try {
-            const res = await fetch('/api/admin/apercu-excel', { method: 'POST', body: fd });
-            const data = await res.json();
+            var res = await fetch('/api/admin/apercu-excel', { method: 'POST', body: fd });
+            var data = await res.json();
             if (data.erreur) {
                 document.getElementById('apercu-texte').textContent = '❌ ' + data.erreur;
                 return;
             }
-            document.getElementById('apercu-texte').textContent = `📋 ${data.nouvelles} nouvelle(s) ligne(s) · ${data.existantes} déjà en base`;
-            const btnWrap = document.getElementById('btn-import-excel');
+            document.getElementById('apercu-texte').textContent = '📋 ' + data.nouvelles + ' nouvelle(s) ligne(s) · ' + data.existantes + ' déjà en base';
+            var btnWrap = document.getElementById('btn-import-excel');
             if (data.nouvelles > 0) btnWrap.style.display = 'block';
             else showFeedback('fb-excel', '⚠️ Ce fichier est déjà entièrement en base.', 'err');
-        } catch { document.getElementById('apercu-texte').textContent = '❌ Erreur de connexion.'; }
+        } catch(e) {
+            document.getElementById('apercu-texte').textContent = '❌ Erreur de connexion.';
+        }
     }
 
     async function importerExcel() {
-        const file = document.getElementById('input-excel').files[0];
+        var file = document.getElementById('input-excel').files[0];
         if (!file) return;
-        const fd = new FormData();
+        var fd = new FormData();
         fd.append('fichier', file);
         document.getElementById('btn-import-excel').style.display = 'none';
-        const res = await fetch('/api/admin/import-excel', { method: 'POST', body: fd });
-        const data = await res.json();
-        showFeedback('fb-excel', `✅ ${data.nouvelles} factures ajoutées avec succès.`, 'ok');
+        var res = await fetch('/api/admin/import-excel', { method: 'POST', body: fd });
+        var data = await res.json();
+        showFeedback('fb-excel', '✅ ' + data.nouvelles + ' factures ajoutées avec succès.', 'ok');
         if (data.total_factures !== undefined) document.getElementById('stat-factures').textContent = data.total_factures;
     }
 
-    let actionEnAttente = null;
+    var actionEnAttente = null;
     function demanderConfirm(type) {
-        const modal = document.getElementById('confirmModal');
-        let title = '', msg = '';
+        var modal = document.getElementById('confirmModal');
+        var title = '', msg = '';
         if (type === 'client') {
-            const v = document.getElementById('select-client-suppr').value;
+            var v = document.getElementById('select-client-suppr').value;
             if (!v) return;
-            title = 'Supprimer ce client'; msg = `Toutes les factures de "${v}" seront supprimées définitivement.`;
-            actionEnAttente = () => supprimerClient(v);
+            title = 'Supprimer ce client';
+            msg = 'Toutes les factures de "' + v + '" seront supprimées définitivement.';
+            actionEnAttente = function() { supprimerClient(v); };
         } else if (type === 'fichier') {
-            const v = document.getElementById('select-fichier-suppr').value;
+            var v = document.getElementById('select-fichier-suppr').value;
             if (!v) return;
-            title = 'Supprimer ce fichier'; msg = `Toutes les factures du fichier "${v}" seront supprimées définitivement.`;
-            actionEnAttente = () => supprimerFichier(v);
+            title = 'Supprimer ce fichier';
+            msg = 'Toutes les factures du fichier "' + v + '" seront supprimées définitivement.';
+            actionEnAttente = function() { supprimerFichier(v); };
         } else if (type === 'reset') {
-            title = 'Reset complet'; msg = '⚠️ TOUTE la base Excel sera supprimée. Cette action est irréversible.';
-            actionEnAttente = () => resetBase();
+            title = 'Reset complet';
+            msg = '⚠️ TOUTE la base Excel sera supprimée. Cette action est irréversible.';
+            actionEnAttente = function() { resetBase(); };
         }
         document.getElementById('modal-title').textContent = title;
         document.getElementById('modal-msg').textContent = msg;
@@ -1549,18 +1545,15 @@
     function demanderConfirmUser(userId, btn) {
         document.getElementById('modal-title').textContent = 'Supprimer cet utilisateur';
         document.getElementById('modal-msg').textContent = 'Le compte sera supprimé définitivement.';
-        actionEnAttente = () => supprimerUser(userId, btn);
+        actionEnAttente = function() { supprimerUser(userId, btn); };
         document.getElementById('confirmModal').classList.add('open');
     }
 
-    function fermerModal() { 
-        document.getElementById('confirmModal').classList.remove('open'); 
-    }
-
+    function fermerModal() { document.getElementById('confirmModal').classList.remove('open'); }
     function executerAction() { 
         fermerModal(); 
         if (actionEnAttente) {
-            const action = actionEnAttente;
+            var action = actionEnAttente;
             actionEnAttente = null;
             action();
         }
@@ -1568,80 +1561,80 @@
     document.getElementById('confirmModal').addEventListener('click', function(e) { if (e.target === this) fermerModal(); });
 
     async function supprimerClient(client) {
-        const res = await fetch('/api/admin/supprimer-client', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ client }) });
-        const data = await res.json();
-        showFeedback('fb-client', `✅ ${data.supprimees} factures supprimées pour "${client}".`, 'ok');
+        var res = await fetch('/api/admin/supprimer-client', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ client: client }) });
+        var data = await res.json();
+        showFeedback('fb-client', '✅ ' + data.supprimees + ' factures supprimées pour "' + client + '".', 'ok');
         location.reload();
     }
 
     async function supprimerFichier(fichier) {
-        const res = await fetch('/api/admin/reset-fichier', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nom_fichier: fichier }) });
-        const data = await res.json();
-        showFeedback('fb-fichier', `✅ ${data.supprimees} factures supprimées pour "${fichier}".`, 'ok');
-        const sel = document.getElementById('select-fichier-suppr');
-        for (let i = 0; i < sel.options.length; i++) { if (sel.options[i].value === fichier) { sel.remove(i); break; } }
+        var res = await fetch('/api/admin/reset-fichier', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nom_fichier: fichier }) });
+        var data = await res.json();
+        showFeedback('fb-fichier', '✅ ' + data.supprimees + ' factures supprimées pour "' + fichier + '".', 'ok');
+        var sel = document.getElementById('select-fichier-suppr');
+        for (var i = 0; i < sel.options.length; i++) { if (sel.options[i].value === fichier) { sel.remove(i); break; } }
         location.reload();
     }
 
     async function resetBase() {
-        const res = await fetch('/api/admin/reset-base', { method: 'POST' });
-        const data = await res.json();
-        showFeedback('fb-reset', `✅ ${data.supprimees} factures supprimées. Base vidée.`, 'ok');
+        var res = await fetch('/api/admin/reset-base', { method: 'POST' });
+        var data = await res.json();
+        showFeedback('fb-reset', '✅ ' + data.supprimees + ' factures supprimées. Base vidée.', 'ok');
         location.reload();
     }
 
     async function importerPdf() {
-        const input = document.getElementById('input-pdf');
-        const files = input.files;
+        var input = document.getElementById('input-pdf');
+        var files = input.files;
         if (!files.length) return;
-        const prog = document.getElementById('progress-pdf');
+        var prog = document.getElementById('progress-pdf');
         prog.style.display = 'block';
-        let succes = 0, doublons = 0, erreurs = 0;
-        for (let i = 0; i < files.length; i++) {
-            const fd = new FormData();
+        var succes = 0, doublons = 0, erreurs = 0;
+        for (var i = 0; i < files.length; i++) {
+            var fd = new FormData();
             fd.append('fichier', files[i]);
             try {
-                const res = await fetch('/api/admin/import-pdf', { method: 'POST', body: fd });
-                const data = await res.json();
+                var res = await fetch('/api/admin/import-pdf', { method: 'POST', body: fd });
+                var data = await res.json();
                 if (data.statut === 'succes') succes++;
                 else if (data.statut === 'doublon') doublons++;
                 else erreurs++;
-            } catch { erreurs++; }
-            const pct = Math.round(((i + 1) / files.length) * 100);
+            } catch(e) { erreurs++; }
+            var pct = Math.round(((i + 1) / files.length) * 100);
             document.getElementById('progress-bar').style.width = pct + '%';
-            document.getElementById('progress-text').textContent = `${i+1}/${files.length} traités…`;
+            document.getElementById('progress-text').textContent = (i+1) + '/' + files.length + ' traités…';
         }
-        showFeedback('fb-pdf', `✅ ${succes} ajouté(s) · ${doublons} doublon(s) · ${erreurs} erreur(s)`, 'ok');
+        showFeedback('fb-pdf', '✅ ' + succes + ' ajouté(s) · ' + doublons + ' doublon(s) · ' + erreurs + ' erreur(s)', 'ok');
         prog.style.display = 'none';
         location.reload();
     }
 
     async function creerUser() {
-        const role = document.getElementById('role-nouveau').value;
-        const email = document.getElementById('email-nouveau').value.trim();
-        const password = document.getElementById('password-nouveau').value;
-        const contrat = document.getElementById('contrat-nouveau').value.trim();
+        var role = document.getElementById('role-nouveau').value;
+        var email = document.getElementById('email-nouveau').value.trim();
+        var password = document.getElementById('password-nouveau').value;
+        var contrat = document.getElementById('contrat-nouveau').value.trim();
         if (!email || !password) { showFeedback('fb-user', '⚠️ Email et mot de passe obligatoires.', 'err'); return; }
         if (role === 'client' && !contrat) { showFeedback('fb-user', '⚠️ Le numéro de contrat est obligatoire.', 'err'); return; }
-        const res = await fetch('/api/admin/creer-user', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ role, email, password, numero_contrat: contrat || null }) });
-        const data = await res.json();
+        var res = await fetch('/api/admin/creer-user', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ role: role, email: email, password: password, numero_contrat: contrat || null }) });
+        var data = await res.json();
         if (data.succes) {
-            showFeedback('fb-user', `✅ Compte "${email}" créé — rôle : ${role}`, 'ok');
+            showFeedback('fb-user', '✅ Compte "' + email + '" créé — rôle : ' + role, 'ok');
             location.reload();
         } else { showFeedback('fb-user', '❌ Cet email existe déjà.', 'err'); }
     }
 
     async function supprimerUser(userId, btn) {
-        const res = await fetch('/api/admin/supprimer-user', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: userId }) });
-        const data = await res.json();
+        var res = await fetch('/api/admin/supprimer-user', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ user_id: userId }) });
+        var data = await res.json();
         if (data.succes) btn.closest('tr').remove();
     }
 
     function editPassword(userId, btn) {
         currentUserId = userId;
-        const row = btn.closest('tr');
+        var row = btn.closest('tr');
         currentRow = row;
-        const email = row.querySelector('td:first-child').textContent;
+        var email = row.querySelector('td:first-child').textContent;
         document.getElementById('edit-user-email').textContent = email;
         document.getElementById('new-password-input').value = '';
         document.getElementById('fb-edit-pwd').className = 'feedback';
@@ -1651,26 +1644,26 @@
     function fermerModalPwd() { document.getElementById('editPwdModal').classList.remove('open'); currentUserId = null; currentRow = null; }
 
     async function saveNewPassword() {
-        const newPassword = document.getElementById('new-password-input').value;
+        var newPassword = document.getElementById('new-password-input').value;
         if (!newPassword || newPassword.length < 4) {
-            const fb = document.getElementById('fb-edit-pwd');
+            var fb = document.getElementById('fb-edit-pwd');
             fb.textContent = '⚠️ Le mot de passe doit contenir au moins 4 caractères.';
             fb.className = 'feedback err show';
             return;
         }
-        const res = await fetch('/api/admin/changer-mot-de-passe', {
+        var res = await fetch('/api/admin/changer-mot-de-passe', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify({ user_id: currentUserId, nouveau_mdp: newPassword })
         });
-        const data = await res.json();
+        var data = await res.json();
         if (data.succes) {
-            const fb = document.getElementById('fb-edit-pwd');
+            var fb = document.getElementById('fb-edit-pwd');
             fb.textContent = '✅ Mot de passe modifié avec succès !';
             fb.className = 'feedback ok show';
-            setTimeout(() => fermerModalPwd(), 1500);
+            setTimeout(function() { fermerModalPwd(); }, 1500);
         } else {
-            const fb = document.getElementById('fb-edit-pwd');
+            var fb = document.getElementById('fb-edit-pwd');
             fb.textContent = '❌ ' + (data.erreur || 'Erreur lors de la modification');
             fb.className = 'feedback err show';
         }
@@ -1683,89 +1676,90 @@
     // AGENT ALERTES
     // ═══════════════════════════════════════════════
 
-    let clientsDetectes = [];
-
     async function chargerSeuil() {
         try {
-            const res = await fetch('/api/admin/agent/seuil');
-            const data = await res.json();
+            var res = await fetch('/api/admin/agent/seuil');
+            var data = await res.json();
             document.getElementById('seuil-input').value = data.seuil;
         } catch(e) {}
     }
     chargerSeuil();
 
     async function sauvegarderSeuil() {
-        const seuil = parseFloat(document.getElementById('seuil-input').value);
+        var seuil = parseFloat(document.getElementById('seuil-input').value);
         if (!seuil || seuil <= 0) {
             showFeedback('fb-seuil', '⚠️ Seuil invalide.', 'err');
             return;
         }
-        const res = await fetch('/api/admin/agent/seuil', {
+        var res = await fetch('/api/admin/agent/seuil', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ seuil })
+            body: JSON.stringify({ seuil: seuil })
         });
-        const data = await res.json();
-        if (data.succes) showFeedback('fb-seuil', `✅ Seuil sauvegardé : ${seuil}%`, 'ok');
+        var data = await res.json();
+        if (data.succes) showFeedback('fb-seuil', '✅ Seuil sauvegardé : ' + seuil + '%', 'ok');
     }
 
+    // MODIFIÉ : lancerDetection avec mode
     async function lancerDetection() {
-        const btn = document.getElementById('btn-detecter');
+        var btn = document.getElementById('btn-detecter');
         btn.disabled = true;
         btn.innerHTML = '⏳ Analyse en cours…';
 
         try {
-            const res = await fetch('/api/admin/agent/detecter');
-            const data = await res.json();
+            var res = await fetch('/api/admin/agent/detecter?mode=' + modeDetection);
+            var data = await res.json();
             clientsDetectes = data.detectes;
 
             document.getElementById('detection-results').style.display = 'block';
 
-            const txt = data.total === 0
-                ? `✅ Aucune surconsommation détectée avec un seuil de ${data.seuil}%`
-                : `⚠️ ${data.total} client(s) en surconsommation détecté(s) — seuil : ${data.seuil}%`;
+            var modeLabel = data.mode === 'moyenne' ? 'moyenne 6 mois' : 'mois précédent';
+            var txt = data.total === 0
+                ? '✅ Aucune surconsommation détectée (seuil : ' + data.seuil + '% — mode : ' + modeLabel + ')'
+                : '⚠️ ' + data.total + ' client(s) détecté(s) — seuil : ' + data.seuil + '% — mode : ' + modeLabel;
             document.getElementById('detection-summary-text').textContent = txt;
 
-            const tbody = document.getElementById('tbody-detection');
+            var tbody = document.getElementById('tbody-detection');
             tbody.innerHTML = '';
-            clientsDetectes.forEach((c, i) => {
-                const varClass = c.variation_pct >= 80 ? 'var-critique'
-                               : c.variation_pct >= 50 ? 'var-elevee'
-                               : 'var-moderee';
-                const emailChip = c.email
-                    ? `<span class="email-chip email-ok">✓ ${c.email}</span>`
-                    : `<span class="email-chip email-no">Sans compte</span>`;
-                tbody.innerHTML += `
-                    <tr>
-                        <td><input type="checkbox" class="client-check" data-index="${i}" checked/></td>
-                        <td style="font-weight:600;color:var(--srm-navy);">${c.nom_client}</td>
-                        <td>${c.conso_precedente} ${c.unite}<br>
-                            <span style="font-size:11px;color:var(--srm-gray);">${c.mois_precedent}</span>
-                        </td>
-                        <td>${c.conso_actuelle} ${c.unite}<br>
-                            <span style="font-size:11px;color:var(--srm-gray);">${c.mois_actuel}</span>
-                        </td>
-                        <td><span class="variation-badge ${varClass}">+${c.variation_pct}%</span></td>
-                        <td>${emailChip}</td>
-                    </tr>`;
-            });
+            for (var i = 0; i < clientsDetectes.length; i++) {
+                var c = clientsDetectes[i];
+                var varClass = c.variation_pct >= 80 ? 'var-critique' : (c.variation_pct >= 50 ? 'var-elevee' : 'var-moderee');
+                var emailChip = c.email ? '<span class="email-chip email-ok">✓ ' + c.email + '</span>' : '<span class="email-chip email-no">Sans compte</span>';
+                tbody.innerHTML += '<tr>' +
+                    '<td><input type="checkbox" class="client-check" data-index="' + i + '" checked></td>' +
+                    '<td style="font-weight:600;color:var(--srm-navy);">' + c.nom_client + '</td>' +
+                    '<td>' + c.conso_precedente + ' ' + c.unite + '<br><span style="font-size:11px;color:var(--srm-gray);">' + c.mois_precedent + '</span></td>' +
+                    '<td>' + c.conso_actuelle + ' ' + c.unite + '<br><span style="font-size:11px;color:var(--srm-gray);">' + c.mois_actuel + '</span></td>' +
+                    '<td><span class="variation-badge ' + varClass + '">+' + c.variation_pct + '%</span></td>' +
+                    '<td>' + emailChip + '</td>' +
+                '</tr>';
+            }
         } catch(e) {
             showFeedback('fb-seuil', '❌ Erreur lors de la détection.', 'err');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Analyser les consommations`;
+            btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Analyser les consommations';
         }
     }
 
     function toggleAll(checkbox) {
-        document.querySelectorAll('.client-check')
-            .forEach(c => c.checked = checkbox.checked);
+        var checks = document.querySelectorAll('.client-check');
+        for (var i = 0; i < checks.length; i++) {
+            checks[i].checked = checkbox.checked;
+        }
     }
 
     function getClientsSelectionnes() {
-        const indices = [...document.querySelectorAll('.client-check:checked')]
-            .map(c => parseInt(c.dataset.index));
-        return indices.map(i => clientsDetectes[i]);
+        var indices = [];
+        var checks = document.querySelectorAll('.client-check:checked');
+        for (var i = 0; i < checks.length; i++) {
+            indices.push(parseInt(checks[i].dataset.index));
+        }
+        var result = [];
+        for (var i = 0; i < indices.length; i++) {
+            result.push(clientsDetectes[indices[i]]);
+        }
+        return result;
     }
 
     async function envoyerTous() {
@@ -1773,7 +1767,7 @@
     }
 
     async function envoyerSelection() {
-        const selection = getClientsSelectionnes();
+        var selection = getClientsSelectionnes();
         if (!selection.length) {
             showFeedback('fb-envoi', '⚠️ Aucun client sélectionné.', 'err');
             return;
@@ -1784,24 +1778,20 @@
     async function envoyerAlertes(clients, endpoint) {
         showFeedback('fb-envoi', '⏳ Envoi en cours…', 'ok');
         try {
-            const res = await fetch(`/api/admin/agent/${endpoint}`, {
+            var res = await fetch('/api/admin/agent/' + endpoint, {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ clients })
+                body: JSON.stringify({ clients: clients })
             });
-            const rapport = await res.json();
+            var rapport = await res.json();
 
             document.getElementById('rapport-envoi').style.display = 'block';
-            document.getElementById('rapport-envoyes').textContent    = rapport.envoyes;
+            document.getElementById('rapport-envoyes').textContent = rapport.envoyes;
             document.getElementById('rapport-sans-email').textContent = rapport.sans_email;
-            document.getElementById('rapport-erreurs').textContent    = rapport.erreurs;
+            document.getElementById('rapport-erreurs').textContent = rapport.erreurs;
 
-            showFeedback('fb-envoi',
-                `✅ ${rapport.envoyes} email(s) envoyé(s) · ${rapport.sans_email} sans email · ${rapport.erreurs} erreur(s)`,
-                'ok'
-            );
+            showFeedback('fb-envoi', '✅ ' + rapport.envoyes + ' email(s) envoyé(s) · ' + rapport.sans_email + ' sans email · ' + rapport.erreurs + ' erreur(s)', 'ok');
             
-            // Recharger l'historique après envoi si l'onglet historique est actif
             if (document.getElementById('onglet-historique').classList.contains('active')) {
                 chargerHistorique();
             }
@@ -1815,25 +1805,27 @@
     // ═══════════════════════════════════════════════
 
     async function chargerHistorique() {
-        const tbody = document.getElementById('tbody-historique');
+        var tbody = document.getElementById('tbody-historique');
         if (!tbody) return;
-        tbody.innerHTML = '<td><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...<\/td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr>';
         
         try {
-            const res = await fetch('/api/admin/agent/historique?limit=50');
-            const data = await res.json();
-            const historique = data.historique || [];
+            var res = await fetch('/api/admin/agent/historique?limit=50');
+            var data = await res.json();
+            var historique = data.historique || [];
             
-            // Statistiques
-            const total = historique.length;
-            const envoyes = historique.filter(h => h.statut === 'envoye').length;
-            const sansEmail = historique.filter(h => h.statut === 'sans_email').length;
-            const erreurs = historique.filter(h => h.statut === 'erreur').length;
+            var total = historique.length;
+            var envoyes = 0, sansEmail = 0, erreurs = 0;
+            for (var i = 0; i < historique.length; i++) {
+                if (historique[i].statut === 'envoye') envoyes++;
+                else if (historique[i].statut === 'sans_email') sansEmail++;
+                else if (historique[i].statut === 'erreur') erreurs++;
+            }
             
-            const statTotal = document.getElementById('stat-total-alertes');
-            const statEnvoyes = document.getElementById('stat-envoyes');
-            const statSansEmail = document.getElementById('stat-sans-email');
-            const statErreurs = document.getElementById('stat-erreurs');
+            var statTotal = document.getElementById('stat-total-alertes');
+            var statEnvoyes = document.getElementById('stat-envoyes');
+            var statSansEmail = document.getElementById('stat-sans-email');
+            var statErreurs = document.getElementById('stat-erreurs');
             
             if (statTotal) statTotal.textContent = total;
             if (statEnvoyes) statEnvoyes.textContent = envoyes;
@@ -1846,13 +1838,12 @@
             }
             
             tbody.innerHTML = '';
-            historique.forEach(h => {
-                const varClass = h.variation_pct >= 80 ? 'var-critique'
-                               : h.variation_pct >= 50 ? 'var-elevee'
-                               : 'var-moderee';
-                const date = new Date(h.date_envoi).toLocaleString('fr-FR');
+            for (var i = 0; i < historique.length; i++) {
+                var h = historique[i];
+                var varClass = h.variation_pct >= 80 ? 'var-critique' : (h.variation_pct >= 50 ? 'var-elevee' : 'var-moderee');
+                var date = new Date(h.date_envoi).toLocaleString('fr-FR');
                 
-                let statutClass = '', statutTexte = '';
+                var statutClass = '', statutTexte = '';
                 if (h.statut === 'envoye') {
                     statutClass = 'email-ok';
                     statutTexte = '✅ Envoyé';
@@ -1864,17 +1855,15 @@
                     statutTexte = '❌ Erreur';
                 }
                 
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-size:12px;">${date}</td>
-                        <td style="font-weight:600;">${h.nom_client || h.numero_contrat}</td>
-                        <td style="font-size:12px;">${h.email_destinataire || '—'}</td>
-                        <td>${h.mois_source || '—'}</td>
-                        <td><span class="variation-badge ${varClass}">+${h.variation_pct}%</span></td>
-                        <td><span class="email-chip ${statutClass}">${statutTexte}</span></td>
-                    </tr>
-                `;
-            });
+                tbody.innerHTML += '<tr>' +
+                    '<td style="font-size:12px;">' + date + '</td>' +
+                    '<td style="font-weight:600;">' + (h.nom_client || h.numero_contrat) + '</td>' +
+                    '<td style="font-size:12px;">' + (h.email_destinataire || '—') + '</td>' +
+                    '<td>' + (h.mois_source || '—') + '</td>' +
+                    '<td><span class="variation-badge ' + varClass + '">+' + h.variation_pct + '%</span></td>' +
+                    '<td><span class="email-chip ' + statutClass + '">' + statutTexte + '</span></td>' +
+                '</tr>';
+            }
         } catch(e) {
             console.error('Erreur chargement historique:', e);
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">❌ Erreur de chargement</td></tr>';
@@ -1883,35 +1872,52 @@
 
     async function exporterHistoriqueCSV() {
         try {
-            const res = await fetch('/api/admin/agent/historique?limit=500');
-            const data = await res.json();
-            const historique = data.historique || [];
+            var res = await fetch('/api/admin/agent/historique?limit=500');
+            var data = await res.json();
+            var historique = data.historique || [];
             
             if (historique.length === 0) {
                 alert('Aucune donnée à exporter');
                 return;
             }
             
-            const headers = ['Date', 'Client', 'Email', 'Mois', 'Variation (%)', 'Statut', 'Consommation actuelle', 'Consommation précédente', 'Unité', 'Montant TTC', 'Usage', 'Agence'];
-            const rows = historique.map(h => [
-                new Date(h.date_envoi).toLocaleString('fr-FR'),
-                h.nom_client || h.numero_contrat,
-                h.email_destinataire || '',
-                h.mois_source || '',
-                h.variation_pct,
-                h.statut,
-                h.consommation_actuelle || '',
-                h.consommation_precedente || '',
-                h.unite || '',
-                h.montant_ttc || '',
-                h.usage_type || '',
-                h.agence || ''
-            ]);
+            var headers = ['Date', 'Client', 'Email', 'Mois', 'Variation (%)', 'Statut', 'Consommation actuelle', 'Consommation précédente', 'Unité', 'Montant TTC', 'Usage', 'Agence'];
+            var rows = [];
+            for (var i = 0; i < historique.length; i++) {
+                var h = historique[i];
+                rows.push([
+                    new Date(h.date_envoi).toLocaleString('fr-FR'),
+                    h.nom_client || h.numero_contrat,
+                    h.email_destinataire || '',
+                    h.mois_source || '',
+                    h.variation_pct,
+                    h.statut,
+                    h.consommation_actuelle || '',
+                    h.consommation_precedente || '',
+                    h.unite || '',
+                    h.montant_ttc || '',
+                    h.usage_type || '',
+                    h.agence || ''
+                ]);
+            }
             
-            const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
+            var csvContent = '';
+            for (var i = 0; i < headers.length; i++) {
+                csvContent += '"' + headers[i] + '"';
+                if (i < headers.length - 1) csvContent += ',';
+            }
+            csvContent += '\n';
+            for (var i = 0; i < rows.length; i++) {
+                for (var j = 0; j < rows[i].length; j++) {
+                    csvContent += '"' + String(rows[i][j]).replace(/"/g, '""') + '"';
+                    if (j < rows[i].length - 1) csvContent += ',';
+                }
+                if (i < rows.length - 1) csvContent += '\n';
+            }
+            
+            var blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            var url = URL.createObjectURL(blob);
             link.href = url;
             link.setAttribute('download', 'historique_alertes.csv');
             document.body.appendChild(link);
@@ -1924,6 +1930,8 @@
         }
     }
 
+    // Initialiser le mode par défaut
+    setMode('precedent');
     toggleContrat();
 </script>
 </body>
