@@ -713,6 +713,53 @@
             margin-top: 3px; text-transform: uppercase;
             letter-spacing: .05em;
         }
+
+        /* ═══════════════════════════════════
+           HISTORIQUE ALERTES — styles
+        ═══════════════════════════════════ */
+        .historique-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .historique-stats .stat-card {
+            padding: 14px 16px;
+            text-align: center;
+        }
+        .historique-stats .stat-num {
+            font-size: 22px;
+        }
+        .historique-table-wrapper {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid var(--srm-border);
+        }
+        .historique-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .historique-table th {
+            padding: 12px 16px;
+            background: rgba(234,186,98,.06);
+            font-weight: 600;
+            color: var(--srm-navy);
+            border-bottom: 1px solid var(--srm-border);
+            text-align: left;
+        }
+        .historique-table td {
+            padding: 10px 16px;
+            color: var(--srm-navy-light);
+            border-bottom: 1px solid rgba(234,186,98,.1);
+        }
+        .historique-table tr:hover td {
+            background: rgba(234,186,98,.04);
+        }
+        .btn-refresh {
+            margin-top: 16px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -813,6 +860,10 @@
         <div class="tab-pill" onclick="afficherOnglet('agent')" id="pill-agent">
             <span class="tab-ico">🤖</span>
             <span class="tab-lbl">Agent Alertes</span>
+        </div>
+        <div class="tab-pill" onclick="afficherOnglet('historique')" id="pill-historique">
+            <span class="tab-ico">📜</span>
+            <span class="tab-lbl">Historique</span>
         </div>
     </div>
 
@@ -1218,6 +1269,85 @@
             </div>
         </div>
     </div>
+
+    <!-- Onglet HISTORIQUE ALERTES -->
+    <div id="onglet-historique" class="tab-panel">
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-ico" style="background:rgba(30,49,85,.08);color:var(--srm-navy-light);">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>Historique des alertes envoyées</h3>
+                    <p>Suivi des notifications de surconsommation</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <!-- Statistiques -->
+                <div class="historique-stats">
+                    <div class="stat-card">
+                        <div class="stat-num" id="stat-total-alertes">0</div>
+                        <div class="stat-lbl">Total alertes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" id="stat-envoyes">0</div>
+                        <div class="stat-lbl">✅ Envoyées</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" id="stat-sans-email">0</div>
+                        <div class="stat-lbl">📭 Sans email</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-num" id="stat-erreurs">0</div>
+                        <div class="stat-lbl">❌ Erreurs</div>
+                    </div>
+                </div>
+
+                <!-- Tableau historique -->
+                <div class="historique-table-wrapper">
+                    <table class="historique-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Client</th>
+                                <th>Email</th>
+                                <th>Mois</th>
+                                <th>Variation</th>
+                                <th>Statut</th>
+                            </thead>
+                            <tbody id="tbody-historique">
+                                <tr><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="display:flex; gap:12px; margin-top:20px;">
+                        <button class="btn btn-ghost btn-refresh" onclick="chargerHistorique()">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            Rafraîchir
+                        </button>
+                        <button class="btn btn-primary" onclick="exporterHistoriqueCSV()">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Exporter CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal confirmation -->
@@ -1304,10 +1434,15 @@
     }
 
     function afficherOnglet(o) {
-        ['excel','pdf','users','agent'].forEach(id => {
-            document.getElementById('onglet-' + id).classList.toggle('active', id === o);
-            document.getElementById('pill-' + id).classList.toggle('active', id === o);
+        ['excel','pdf','users','agent','historique'].forEach(id => {
+            const panel = document.getElementById('onglet-' + id);
+            const pill = document.getElementById('pill-' + id);
+            if (panel) panel.classList.toggle('active', id === o);
+            if (pill) pill.classList.toggle('active', id === o);
         });
+        if (o === 'historique') {
+            chargerHistorique();
+        }
     }
 
     function toggleContrat() {
@@ -1636,8 +1771,127 @@
                 `✅ ${rapport.envoyes} email(s) envoyé(s) · ${rapport.sans_email} sans email · ${rapport.erreurs} erreur(s)`,
                 'ok'
             );
+            
+            // Recharger l'historique après envoi si l'onglet historique est actif
+            if (document.getElementById('onglet-historique').classList.contains('active')) {
+                chargerHistorique();
+            }
         } catch(e) {
             showFeedback('fb-envoi', '❌ Erreur lors de l\'envoi.', 'err');
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    // HISTORIQUE ALERTES
+    // ═══════════════════════════════════════════════
+
+    async function chargerHistorique() {
+        const tbody = document.getElementById('tbody-historique');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr>';
+        
+        try {
+            const res = await fetch('/api/admin/agent/historique?limit=50');
+            const data = await res.json();
+            const historique = data.historique || [];
+            
+            // Statistiques
+            const total = historique.length;
+            const envoyes = historique.filter(h => h.statut === 'envoye').length;
+            const sansEmail = historique.filter(h => h.statut === 'sans_email').length;
+            const erreurs = historique.filter(h => h.statut === 'erreur').length;
+            
+            const statTotal = document.getElementById('stat-total-alertes');
+            const statEnvoyes = document.getElementById('stat-envoyes');
+            const statSansEmail = document.getElementById('stat-sans-email');
+            const statErreurs = document.getElementById('stat-erreurs');
+            
+            if (statTotal) statTotal.textContent = total;
+            if (statEnvoyes) statEnvoyes.textContent = envoyes;
+            if (statSansEmail) statSansEmail.textContent = sansEmail;
+            if (statErreurs) statErreurs.textContent = erreurs;
+            
+            if (historique.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">📭 Aucune alerte envoyée pour le moment</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            historique.forEach(h => {
+                const varClass = h.variation_pct >= 80 ? 'var-critique'
+                               : h.variation_pct >= 50 ? 'var-elevee'
+                               : 'var-moderee';
+                const date = new Date(h.date_envoi).toLocaleString('fr-FR');
+                
+                let statutClass = '', statutTexte = '';
+                if (h.statut === 'envoye') {
+                    statutClass = 'email-ok';
+                    statutTexte = '✅ Envoyé';
+                } else if (h.statut === 'sans_email') {
+                    statutClass = 'email-no';
+                    statutTexte = '📭 Sans email';
+                } else {
+                    statutClass = 'email-no';
+                    statutTexte = '❌ Erreur';
+                }
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-size:12px;">${date}</td>
+                        <td style="font-weight:600;">${h.nom_client || h.numero_contrat}</td>
+                        <td style="font-size:12px;">${h.email_destinataire || '—'}</td>
+                        <td>${h.mois_source || '—'}</td>
+                        <td><span class="variation-badge ${varClass}">+${h.variation_pct}%</span></td>
+                        <td><span class="email-chip ${statutClass}">${statutTexte}</span></td>
+                    </tr>
+                `;
+            });
+        } catch(e) {
+            console.error('Erreur chargement historique:', e);
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">❌ Erreur de chargement</td></tr>';
+        }
+    }
+
+    async function exporterHistoriqueCSV() {
+        try {
+            const res = await fetch('/api/admin/agent/historique?limit=500');
+            const data = await res.json();
+            const historique = data.historique || [];
+            
+            if (historique.length === 0) {
+                alert('Aucune donnée à exporter');
+                return;
+            }
+            
+            const headers = ['Date', 'Client', 'Email', 'Mois', 'Variation (%)', 'Statut', 'Consommation actuelle', 'Consommation précédente', 'Unité', 'Montant TTC', 'Usage', 'Agence'];
+            const rows = historique.map(h => [
+                new Date(h.date_envoi).toLocaleString('fr-FR'),
+                h.nom_client || h.numero_contrat,
+                h.email_destinataire || '',
+                h.mois_source || '',
+                h.variation_pct,
+                h.statut,
+                h.consommation_actuelle || '',
+                h.consommation_precedente || '',
+                h.unite || '',
+                h.montant_ttc || '',
+                h.usage_type || '',
+                h.agence || ''
+            ]);
+            
+            const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.setAttribute('download', 'historique_alertes.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch(e) {
+            console.error('Erreur export:', e);
+            alert('Erreur lors de l\'export');
         }
     }
 

@@ -79,6 +79,7 @@ def envoyer_alertes_masse(clients_detectes: list[dict]) -> dict:
         generer_email_html,
         generer_sujet_email
     )
+    from src.database import enregistrer_alerte
 
     rapport = {
         "total"      : len(clients_detectes),
@@ -100,6 +101,9 @@ def envoyer_alertes_masse(clients_detectes: list[dict]) -> dict:
                 "statut"       : "sans_email",
                 "erreur"       : None
             })
+            # Enregistrer quand même dans l'historique comme sans_email
+            sujet = generer_sujet_email(client)
+            enregistrer_alerte(client, sujet, False, statut="sans_email")
             continue
 
         # Générer le contenu
@@ -108,6 +112,9 @@ def envoyer_alertes_masse(clients_detectes: list[dict]) -> dict:
 
         # Envoyer
         resultat = envoyer_email(email, sujet, corps_html)
+
+        # Enregistrer dans l'historique
+        enregistrer_alerte(client, sujet, resultat["succes"])
 
         if resultat["succes"]:
             rapport["envoyes"] += 1

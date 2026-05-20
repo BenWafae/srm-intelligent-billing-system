@@ -119,6 +119,26 @@ def init_db():
         FOREIGN KEY (conversation_id) REFERENCES conversations_employe(id)
     )
 """)
+    # Table d'historique des alertes (Tâche 2 - Amélioration)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS alertes_envoyees (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        numero_contrat TEXT NOT NULL,
+        nom_client TEXT NOT NULL,
+        email_destinataire TEXT NOT NULL,
+        sujet TEXT NOT NULL,
+        consommation_actuelle REAL,
+        consommation_precedente REAL,
+        variation_pct REAL NOT NULL,
+        mois_source TEXT NOT NULL,
+        unite TEXT,
+        montant_ttc REAL,
+        usage_type TEXT,
+        agence TEXT,
+        date_envoi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        statut TEXT DEFAULT 'envoye'
+    )
+""")
     conn.commit()
     conn.close()
 
@@ -1002,3 +1022,99 @@ def get_clients_pour_detection() -> list[dict]:
     rows = [dict(zip(colonnes, r)) for r in cursor.fetchall()]
     conn.close()
     return rows
+# ════════════════════════════════════════════════════════════
+# HISTORIQUE DES ALERTES — Amélioration Tâche 2
+# ════════════════════════════════════════════════════════════
+
+def enregistrer_alerte(client: dict, sujet: str, succes: bool, statut: str = None) -> None:
+    """
+    Enregistre une alerte envoyée dans l'historique.
+    
+    Paramètres:
+        client: dict du client détecté (retourné par detecter_surconsommations)
+        sujet: sujet de l'email envoyé
+        succes: True si l'email a été envoyé avec succès, False sinon
+        statut: optionnel - force un statut spécifique ('sans_email', 'envoye', 'erreur')
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    # Déterminer le statut final
+    if statut:
+        statut_final = statut
+    else:
+        statut_final = "envoye" if succes else "erreur"
+    
+    cursor.execute("""
+        INSERT INTO alertes_envoyees (
+            numero_contrat, nom_client, email_destinataire, sujet,
+            consommation_actuelle, consommation_precedente, variation_pct,
+            mois_source, unite, montant_ttc, usage_type, agence, statut
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        client.get("numero_contrat"),
+        client.get("nom_client"),
+        client.get("email") if client.get("email") else "sans_email",
+        sujet,
+        client.get("conso_actuelle"),
+        client.get("conso_precedente"),
+        client.get("variation_pct"),
+        client.get("mois_actuel"),
+        client.get("unite"),
+        client.get("montant_ttc"),
+        client.get("usage"),
+        client.get("agence"),
+        statut_final
+    ))
+    conn.commit()
+    conn.close()
+
+
+def get_historique_alertes(limit: int = 50) -> list[dict]:
+    """
+    Retourne l'historique des alertes envoyées.
+    
+    Paramètres:
+        limit: nombre maximum d'alertes à retourner (défaut: 50)
+    
+    Retourne:
+        Liste de dictionnaires contenant les informations des alertes
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, numero_contrat, nom_client, email_destinataire,
+               sujet, variation_pct, mois_source, date_envoi, statut,
+               consommation_actuelle, consommation_precedente, unite,
+               montant_ttc, usage_type, agence
+        FROM alertes_envoyees
+        ORDER BY date_envoi DESC
+        LIMIT ?
+    """, (limit,))
+    colonnes = [description[0] for description in cursor.description]
+    rows = [dict(zip(colonnes, r)) for r in cursor.fetchall()]
+    conn.close()
+    return rows
+
+
+def alerte_deja_envoyee(numero_contrat: str, mois_source: str) -> bool:
+    """
+    Vérifie si une alerte a déjà été envoyée pour un client et un mois donnés.
+    
+    Paramètres:
+        numero_contrat: numéro de contrat du client
+        mois_source: mois de la facture (ex: "Septembre 2026")
+    
+    Retourne:
+        True si une alerte existe déjà, False sinon
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id FROM alertes_envoyees
+        WHERE numero_contrat = ? AND mois_source = ?
+        LIMIT 1
+    """, (numero_contrat, mois_source))
+    existe = cursor.fetchone() is not None
+    conn.close()
+    return existe

@@ -328,6 +328,46 @@ async def envoyer_un_route(request: Request):
     from src.agent.email_sender import envoyer_alertes_masse
     rapport = envoyer_alertes_masse([client])
     return rapport
+# ════════════════════════════════════════════
+# ADMIN — HISTORIQUE ALERTES (Amélioration Tâche 2)
+# ════════════════════════════════════════════
+
+@app.get("/api/admin/agent/historique")
+def get_historique_route(request: Request, limit: int = 50):
+    """
+    Retourne l'historique des alertes envoyées.
+    Paramètre optionnel: limit (nombre max d'alertes, défaut: 50)
+    """
+    from src.database import get_historique_alertes
+    historique = get_historique_alertes(limit)
+    return {
+        "total": len(historique),
+        "historique": historique
+    }
+
+
+@app.get("/api/admin/agent/historique/client/{numero_contrat}")
+def get_historique_client_route(request: Request, numero_contrat: str):
+    """
+    Retourne l'historique des alertes pour un client spécifique.
+    """
+    from src.database import get_historique_alertes_client
+    historique = get_historique_alertes_client(numero_contrat)
+    return {
+        "numero_contrat": numero_contrat,
+        "total": len(historique),
+        "historique": historique
+    }
+
+
+@app.delete("/api/admin/agent/historique/{alerte_id}")
+async def supprimer_alerte_route(request: Request, alerte_id: int):
+    """
+    Supprime une alerte spécifique de l'historique.
+    """
+    from src.database import supprimer_alerte_historique
+    success = supprimer_alerte_historique(alerte_id)
+    return {"succes": success, "alerte_id": alerte_id}
 
 @app.get("/employe", response_class=HTMLResponse)
 def page_employe(request: Request):
