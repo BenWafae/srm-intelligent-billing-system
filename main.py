@@ -254,6 +254,80 @@ async def admin_changer_mot_de_passe(request: Request):
         return {"succes": True}
     else:
         return {"succes": False, "erreur": "Utilisateur non trouvé"}
+# ════════════════════════════════════════════
+# ADMIN — AGENT ALERTES (Tâche 2)
+# ════════════════════════════════════════════
+
+@app.get("/api/admin/agent/seuil")
+def get_seuil_route(request: Request):
+    """Retourne le seuil actuel sauvegardé."""
+    from src.agent.agent_alertes import get_seuil
+    return {"seuil": get_seuil()}
+
+
+@app.post("/api/admin/agent/seuil")
+async def sauvegarder_seuil_route(request: Request):
+    """Sauvegarde le nouveau seuil défini par l'admin."""
+    data = await request.json()
+    seuil = data.get("seuil", 30.0)
+    from src.agent.agent_alertes import sauvegarder_seuil
+    sauvegarder_seuil(float(seuil))
+    return {"succes": True, "seuil": seuil}
+
+
+@app.get("/api/admin/agent/detecter")
+def detecter_route(request: Request):
+    """
+    Lance la détection des surconsommations.
+    Retourne la liste des clients détectés.
+    """
+    from src.agent.agent_alertes import detecter_surconsommations, get_seuil
+    seuil = get_seuil()
+    detectes = detecter_surconsommations(seuil)
+    return {
+        "seuil"    : seuil,
+        "total"    : len(detectes),
+        "detectes" : detectes
+    }
+
+
+@app.post("/api/admin/agent/envoyer-tous")
+async def envoyer_tous_route(request: Request):
+    """
+    Envoie les alertes à tous les clients détectés.
+    Reçoit la liste complète des clients détectés.
+    """
+    data = await request.json()
+    clients = data.get("clients", [])
+    from src.agent.email_sender import envoyer_alertes_masse
+    rapport = envoyer_alertes_masse(clients)
+    return rapport
+
+
+@app.post("/api/admin/agent/envoyer-selection")
+async def envoyer_selection_route(request: Request):
+    """
+    Envoie les alertes uniquement aux clients sélectionnés par l'admin.
+    Reçoit une liste de clients sélectionnés.
+    """
+    data = await request.json()
+    clients = data.get("clients", [])
+    from src.agent.email_sender import envoyer_alertes_masse
+    rapport = envoyer_alertes_masse(clients)
+    return rapport
+
+
+@app.post("/api/admin/agent/envoyer-un")
+async def envoyer_un_route(request: Request):
+    """
+    Envoie l'alerte à un seul client.
+    Utile pour tester ou envoyer manuellement.
+    """
+    data = await request.json()
+    client = data.get("client", {})
+    from src.agent.email_sender import envoyer_alertes_masse
+    rapport = envoyer_alertes_masse([client])
+    return rapport
 
 @app.get("/employe", response_class=HTMLResponse)
 def page_employe(request: Request):
