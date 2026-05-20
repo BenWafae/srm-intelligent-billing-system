@@ -945,13 +945,13 @@ def reset_fichier_excel(nom_fichier: str) -> int:
     conn.close()
     return total
 # ════════════════════════════════════════════════════════════
-# AGENT ALERTES — Tâche 2
+# AGENT ALERTES — Tâche 2 (CORRIGÉ)
 # ════════════════════════════════════════════════════════════
 
 def get_email_par_contrat(numero_contrat: str) -> str | None:
     """
     Retourne l'email du client via son numéro de contrat.
-    Jointure factures_excel → users via numero_client.
+    Jointure factures_excel → users via numero_contrat.
     Retourne None si le client n'a pas de compte utilisateur.
     """
     conn = sqlite3.connect(DB_PATH)
@@ -959,7 +959,7 @@ def get_email_par_contrat(numero_contrat: str) -> str | None:
     cursor.execute("""
         SELECT u.email 
         FROM users u
-        JOIN factures_excel f ON u.numero_client = f.numero_client
+        JOIN factures_excel f ON u.numero_client = f.numero_contrat
         WHERE f.numero_contrat = ?
         AND u.role = 'client'
         LIMIT 1
@@ -992,7 +992,7 @@ def get_clients_pour_detection() -> list[dict]:
             u.email
         FROM factures_excel f
         LEFT JOIN users u 
-            ON f.numero_client = u.numero_client 
+            ON f.numero_contrat = u.numero_client 
             AND u.role = 'client'
         ORDER BY 
             f.numero_contrat,

@@ -617,6 +617,102 @@
             .form-grid-2 { grid-template-columns: 1fr; }
             .tab-pill .tab-lbl { display: none; }
         }
+
+        /* ═══════════════════════════════════
+           AGENT ALERTES — styles
+        ═══════════════════════════════════ */
+        .seuil-input-wrap {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 20px;
+        }
+        .seuil-input-wrap input {
+            width: 120px;
+            padding: 11px 16px;
+            border: 1.5px solid rgba(234,186,98,.25);
+            border-radius: 12px;
+            font-size: 20px; font-weight: 700;
+            font-family: 'Sora', sans-serif;
+            color: var(--srm-navy);
+            background: var(--srm-cream);
+            text-align: center;
+            outline: none;
+            transition: all .2s;
+        }
+        .seuil-input-wrap input:focus {
+            border-color: var(--srm-gold);
+            background: var(--srm-white);
+            box-shadow: 0 0 0 3px rgba(234,186,98,.12);
+        }
+        .seuil-pct-label {
+            font-size: 22px; font-weight: 700;
+            color: var(--srm-gold-dark);
+            font-family: 'Sora', sans-serif;
+        }
+        .detection-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .detection-table thead tr th {
+            padding: 10px 16px;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .07em;
+            color: var(--srm-gold-dark);
+            background: rgba(234,186,98,.06);
+            border-bottom: 1px solid var(--srm-border);
+            text-align: left;
+        }
+        .detection-table tbody tr {
+            border-bottom: 1px solid rgba(234,186,98,.1);
+            transition: background .15s;
+        }
+        .detection-table tbody tr:hover { background: rgba(234,186,98,.04); }
+        .detection-table tbody tr td {
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--srm-navy-light);
+            vertical-align: middle;
+        }
+        .variation-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px; font-weight: 700;
+        }
+        .var-critique { background: rgba(220,38,38,.1);  color: #dc2626; }
+        .var-elevee   { background: rgba(249,115,22,.1);  color: #f97316; }
+        .var-moderee  { background: rgba(234,186,98,.15); color: var(--srm-gold-dark); }
+        .email-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px; font-weight: 600;
+        }
+        .email-ok  { background: rgba(121,173,102,.1); color: var(--srm-green-dark); }
+        .email-no  { background: rgba(30,49,85,.06);   color: var(--srm-gray); }
+        .rapport-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .rapport-card {
+            background: var(--srm-cream);
+            border: 1px solid var(--srm-border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            text-align: center;
+        }
+        .rapport-card .rapport-num {
+            font-family: 'Sora', sans-serif;
+            font-size: 22px; font-weight: 700;
+            color: var(--srm-navy);
+        }
+        .rapport-card .rapport-lbl {
+            font-size: 11px; color: var(--srm-gray);
+            margin-top: 3px; text-transform: uppercase;
+            letter-spacing: .05em;
+        }
     </style>
 </head>
 <body>
@@ -639,6 +735,7 @@
             Administration
         </div>
     </div>
+    
     <div class="topbar-right">
         <div class="topbar-email">{{ email }}</div>
         <a href="/logout" class="btn-logout">
@@ -712,6 +809,10 @@
         <div class="tab-pill" onclick="afficherOnglet('users')" id="pill-users">
             <span class="tab-ico">👥</span>
             <span class="tab-lbl">Utilisateurs</span>
+        </div>
+        <div class="tab-pill" onclick="afficherOnglet('agent')" id="pill-agent">
+            <span class="tab-ico">🤖</span>
+            <span class="tab-lbl">Agent Alertes</span>
         </div>
     </div>
 
@@ -991,6 +1092,132 @@
             </div>
         </div>
     </div>
+
+    <!-- Onglet AGENT ALERTES -->
+    <div id="onglet-agent" class="tab-panel">
+
+        <!-- Carte 1 : Configuration seuil -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-ico" style="background:rgba(234,186,98,.12);color:var(--srm-gold-dark);">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>Seuil de détection</h3>
+                    <p>Définissez le % d'augmentation à partir duquel une surconsommation est détectée</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="seuil-input-wrap">
+                    <input type="number" id="seuil-input" value="30" min="1" max="200"/>
+                    <span class="seuil-pct-label">%</span>
+                    <button class="btn btn-primary" onclick="sauvegarderSeuil()">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                            <polyline points="17 21 17 13 7 13 7 21"/>
+                        </svg>
+                        Sauvegarder
+                    </button>
+                </div>
+                <div class="feedback" id="fb-seuil"></div>
+            </div>
+        </div>
+
+        <!-- Carte 2 : Lancer la détection -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-ico" style="background:rgba(30,49,85,.08);color:var(--srm-navy-light);">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>Lancer la détection</h3>
+                    <p>Analyse automatique de tous les clients — comparaison des 2 derniers mois</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <button class="btn btn-primary btn-full" onclick="lancerDetection()" id="btn-detecter">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Analyser les consommations
+                </button>
+
+                <!-- Résultats — cachés au départ -->
+                <div id="detection-results" style="display:none; margin-top:20px;">
+
+                    <div class="alert alert-warn" id="detection-summary" style="margin-bottom:16px;">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span id="detection-summary-text">Analyse en cours…</span>
+                    </div>
+
+                    <!-- Tableau clients détectés -->
+                    <div style="overflow-x:auto; margin-bottom:16px;">
+                        <table class="detection-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="check-all" onchange="toggleAll(this)"/></th>
+                                    <th>Client</th>
+                                    <th>Mois précédent</th>
+                                    <th>Mois actuel</th>
+                                    <th>Variation</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-detection"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Boutons envoi -->
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <button class="btn btn-success" onclick="envoyerTous()" id="btn-envoyer-tous">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                            Envoyer à tous
+                        </button>
+                        <button class="btn btn-warn" onclick="envoyerSelection()">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <polyline points="9 11 12 14 22 4"/>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                            </svg>
+                            Envoyer la sélection
+                        </button>
+                    </div>
+
+                    <div class="feedback" id="fb-envoi"></div>
+
+                    <!-- Rapport envoi -->
+                    <div id="rapport-envoi" style="display:none; margin-top:16px;">
+                        <div class="rapport-grid">
+                            <div class="rapport-card">
+                                <div class="rapport-num" id="rapport-envoyes">0</div>
+                                <div class="rapport-lbl">✅ Envoyés</div>
+                            </div>
+                            <div class="rapport-card">
+                                <div class="rapport-num" id="rapport-sans-email">0</div>
+                                <div class="rapport-lbl">📭 Sans email</div>
+                            </div>
+                            <div class="rapport-card">
+                                <div class="rapport-num" id="rapport-erreurs">0</div>
+                                <div class="rapport-lbl">❌ Erreurs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal confirmation -->
@@ -1077,7 +1304,7 @@
     }
 
     function afficherOnglet(o) {
-        ['excel','pdf','users'].forEach(id => {
+        ['excel','pdf','users','agent'].forEach(id => {
             document.getElementById('onglet-' + id).classList.toggle('active', id === o);
             document.getElementById('pill-' + id).classList.toggle('active', id === o);
         });
@@ -1162,20 +1389,18 @@
         document.getElementById('confirmModal').classList.add('open');
     }
 
-function fermerModal() { 
-    document.getElementById('confirmModal').classList.remove('open'); 
-    // NE PAS mettre actionEnAttente = null ici
-}
-
-function executerAction() { 
-    fermerModal(); 
-    if (actionEnAttente) {
-        const action = actionEnAttente;
-        actionEnAttente = null; // Met à null APRÈS avoir récupéré l'action
-        action();
+    function fermerModal() { 
+        document.getElementById('confirmModal').classList.remove('open'); 
     }
-}
-    function executerAction() { fermerModal(); if (actionEnAttente) actionEnAttente(); }
+
+    function executerAction() { 
+        fermerModal(); 
+        if (actionEnAttente) {
+            const action = actionEnAttente;
+            actionEnAttente = null;
+            action();
+        }
+    }
     document.getElementById('confirmModal').addEventListener('click', function(e) { if (e.target === this) fermerModal(); });
 
     async function supprimerClient(client) {
@@ -1289,6 +1514,132 @@ function executerAction() {
 
     document.getElementById('editPwdModal').addEventListener('click', function(e) { if (e.target === this) fermerModalPwd(); });
     document.getElementById('new-password-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') saveNewPassword(); });
+
+    // ═══════════════════════════════════════════════
+    // AGENT ALERTES
+    // ═══════════════════════════════════════════════
+
+    let clientsDetectes = [];
+
+    async function chargerSeuil() {
+        try {
+            const res = await fetch('/api/admin/agent/seuil');
+            const data = await res.json();
+            document.getElementById('seuil-input').value = data.seuil;
+        } catch(e) {}
+    }
+    chargerSeuil();
+
+    async function sauvegarderSeuil() {
+        const seuil = parseFloat(document.getElementById('seuil-input').value);
+        if (!seuil || seuil <= 0) {
+            showFeedback('fb-seuil', '⚠️ Seuil invalide.', 'err');
+            return;
+        }
+        const res = await fetch('/api/admin/agent/seuil', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ seuil })
+        });
+        const data = await res.json();
+        if (data.succes) showFeedback('fb-seuil', `✅ Seuil sauvegardé : ${seuil}%`, 'ok');
+    }
+
+    async function lancerDetection() {
+        const btn = document.getElementById('btn-detecter');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Analyse en cours…';
+
+        try {
+            const res = await fetch('/api/admin/agent/detecter');
+            const data = await res.json();
+            clientsDetectes = data.detectes;
+
+            document.getElementById('detection-results').style.display = 'block';
+
+            const txt = data.total === 0
+                ? `✅ Aucune surconsommation détectée avec un seuil de ${data.seuil}%`
+                : `⚠️ ${data.total} client(s) en surconsommation détecté(s) — seuil : ${data.seuil}%`;
+            document.getElementById('detection-summary-text').textContent = txt;
+
+            const tbody = document.getElementById('tbody-detection');
+            tbody.innerHTML = '';
+            clientsDetectes.forEach((c, i) => {
+                const varClass = c.variation_pct >= 80 ? 'var-critique'
+                               : c.variation_pct >= 50 ? 'var-elevee'
+                               : 'var-moderee';
+                const emailChip = c.email
+                    ? `<span class="email-chip email-ok">✓ ${c.email}</span>`
+                    : `<span class="email-chip email-no">Sans compte</span>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td><input type="checkbox" class="client-check" data-index="${i}" checked/></td>
+                        <td style="font-weight:600;color:var(--srm-navy);">${c.nom_client}</td>
+                        <td>${c.conso_precedente} ${c.unite}<br>
+                            <span style="font-size:11px;color:var(--srm-gray);">${c.mois_precedent}</span>
+                        </td>
+                        <td>${c.conso_actuelle} ${c.unite}<br>
+                            <span style="font-size:11px;color:var(--srm-gray);">${c.mois_actuel}</span>
+                        </td>
+                        <td><span class="variation-badge ${varClass}">+${c.variation_pct}%</span></td>
+                        <td>${emailChip}</td>
+                    </tr>`;
+            });
+        } catch(e) {
+            showFeedback('fb-seuil', '❌ Erreur lors de la détection.', 'err');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Analyser les consommations`;
+        }
+    }
+
+    function toggleAll(checkbox) {
+        document.querySelectorAll('.client-check')
+            .forEach(c => c.checked = checkbox.checked);
+    }
+
+    function getClientsSelectionnes() {
+        const indices = [...document.querySelectorAll('.client-check:checked')]
+            .map(c => parseInt(c.dataset.index));
+        return indices.map(i => clientsDetectes[i]);
+    }
+
+    async function envoyerTous() {
+        await envoyerAlertes(clientsDetectes, 'envoyer-tous');
+    }
+
+    async function envoyerSelection() {
+        const selection = getClientsSelectionnes();
+        if (!selection.length) {
+            showFeedback('fb-envoi', '⚠️ Aucun client sélectionné.', 'err');
+            return;
+        }
+        await envoyerAlertes(selection, 'envoyer-selection');
+    }
+
+    async function envoyerAlertes(clients, endpoint) {
+        showFeedback('fb-envoi', '⏳ Envoi en cours…', 'ok');
+        try {
+            const res = await fetch(`/api/admin/agent/${endpoint}`, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ clients })
+            });
+            const rapport = await res.json();
+
+            document.getElementById('rapport-envoi').style.display = 'block';
+            document.getElementById('rapport-envoyes').textContent    = rapport.envoyes;
+            document.getElementById('rapport-sans-email').textContent = rapport.sans_email;
+            document.getElementById('rapport-erreurs').textContent    = rapport.erreurs;
+
+            showFeedback('fb-envoi',
+                `✅ ${rapport.envoyes} email(s) envoyé(s) · ${rapport.sans_email} sans email · ${rapport.erreurs} erreur(s)`,
+                'ok'
+            );
+        } catch(e) {
+            showFeedback('fb-envoi', '❌ Erreur lors de l\'envoi.', 'err');
+        }
+    }
 
     toggleContrat();
 </script>

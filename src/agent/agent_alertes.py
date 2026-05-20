@@ -33,7 +33,7 @@ def get_clients_deux_derniers_mois() -> list[dict]:
             u.email
         FROM factures_excel f
         LEFT JOIN users u 
-            ON f.numero_client = u.numero_client 
+            ON f.numero_contrat = u.numero_client
             AND u.role = 'client'
         ORDER BY 
             f.numero_contrat,
