@@ -1027,23 +1027,21 @@ def get_clients_pour_detection() -> list[dict]:
 # ════════════════════════════════════════════════════════════
 
 def enregistrer_alerte(client: dict, sujet: str, succes: bool, statut: str = None) -> None:
-    """
-    Enregistre une alerte envoyée dans l'historique.
-    
-    Paramètres:
-        client: dict du client détecté (retourné par detecter_surconsommations)
-        sujet: sujet de l'email envoyé
-        succes: True si l'email a été envoyé avec succès, False sinon
-        statut: optionnel - force un statut spécifique ('sans_email', 'envoye', 'erreur')
-    """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Déterminer le statut final
     if statut:
         statut_final = statut
     else:
         statut_final = "envoye" if succes else "erreur"
+    
+    # Déterminer la valeur à stocker dans mois_source
+    mode_detection = client.get("mode_detection", "precedent")
+    if mode_detection == "moyenne":
+        nb_mois = client.get("nb_mois_utilises", 6)
+        mois_source = f"Moyenne {nb_mois} mois (→ {client.get('mois_actuel', '')})"
+    else:
+        mois_source = client.get("mois_actuel", "")
     
     cursor.execute("""
         INSERT INTO alertes_envoyees (
@@ -1057,9 +1055,9 @@ def enregistrer_alerte(client: dict, sujet: str, succes: bool, statut: str = Non
         client.get("email") if client.get("email") else "sans_email",
         sujet,
         client.get("conso_actuelle"),
-        client.get("conso_precedente"),
+        client.get("moyenne_historique") if mode_detection == "moyenne" else client.get("conso_precedente"),
         client.get("variation_pct"),
-        client.get("mois_actuel"),
+        mois_source,  # ← MODIFIÉ ICI
         client.get("unite"),
         client.get("montant_ttc"),
         client.get("usage"),
