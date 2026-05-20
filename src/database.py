@@ -944,3 +944,61 @@ def reset_fichier_excel(nom_fichier: str) -> int:
     conn.commit()
     conn.close()
     return total
+# ════════════════════════════════════════════════════════════
+# AGENT ALERTES — Tâche 2
+# ════════════════════════════════════════════════════════════
+
+def get_email_par_contrat(numero_contrat: str) -> str | None:
+    """
+    Retourne l'email du client via son numéro de contrat.
+    Jointure factures_excel → users via numero_client.
+    Retourne None si le client n'a pas de compte utilisateur.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT u.email 
+        FROM users u
+        JOIN factures_excel f ON u.numero_client = f.numero_client
+        WHERE f.numero_contrat = ?
+        AND u.role = 'client'
+        LIMIT 1
+    """, (numero_contrat,))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else None
+
+
+def get_clients_pour_detection() -> list[dict]:
+    """
+    Retourne tous les mois de tous les clients
+    triés du plus récent au plus ancien.
+    Jointure avec users pour récupérer l'email.
+    Utilisé par l'agent de détection des surconsommations.
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT 
+            f.numero_contrat,
+            f.nom_client,
+            f.consommation,
+            f.unite,
+            f.montant_ttc,
+            f.mois_source,
+            f.periode_debut,
+            f.usage,
+            f.agence,
+            u.email
+        FROM factures_excel f
+        LEFT JOIN users u 
+            ON f.numero_client = u.numero_client 
+            AND u.role = 'client'
+        ORDER BY 
+            f.numero_contrat,
+            SUBSTR(f.periode_debut,7,4)||SUBSTR(f.periode_debut,4,2)||SUBSTR(f.periode_debut,1,2) DESC
+    """)
+    colonnes = [d[0] for d in cursor.description]
+    rows = [dict(zip(colonnes, r)) for r in cursor.fetchall()]
+    conn.close()
+    return rows
