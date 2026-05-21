@@ -1919,30 +1919,59 @@
     }
 
     async function envoyerAlertes(clients, endpoint) {
-        showFeedback('fb-envoi', '⏳ Envoi en cours…', 'ok');
+    // Étape 1 : Vérifier les doublons
+    showFeedback('fb-envoi', '⏳ Vérification des alertes déjà envoyées...', 'ok');
+    
+    const clientsFiltres = [];
+    for (const client of clients) {
         try {
-            var res = await fetch('/api/admin/agent/' + endpoint, {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ clients: clients })
-            });
-            var rapport = await res.json();
-
-            document.getElementById('rapport-envoi').style.display = 'block';
-            document.getElementById('rapport-envoyes').textContent = rapport.envoyes;
-            document.getElementById('rapport-sans-email').textContent = rapport.sans_email;
-            document.getElementById('rapport-erreurs').textContent = rapport.erreurs;
-
-            showFeedback('fb-envoi', '✅ ' + rapport.envoyes + ' email(s) envoyé(s) · ' + rapport.sans_email + ' sans email · ' + rapport.erreurs + ' erreur(s)', 'ok');
-            
-            if (document.getElementById('onglet-historique').classList.contains('active')) {
-                chargerHistorique();
+            const resCheck = await fetch(`/api/admin/agent/alerte-existe?numero_contrat=${encodeURIComponent(client.numero_contrat)}&mois=${encodeURIComponent(client.mois_actuel)}`);
+            const data = await resCheck.json();
+            if (data.existe) {
+                console.log(`⚠️ Alerte déjà envoyée pour ${client.nom_client} - ignoré`);
+            } else {
+                clientsFiltres.push(client);
             }
         } catch(e) {
-            showFeedback('fb-envoi', '❌ Erreur lors de l\'envoi.', 'err');
+            // En cas d'erreur, on envoie quand même (principe de précaution)
+            clientsFiltres.push(client);
         }
     }
+    
+    if (clientsFiltres.length === 0) {
+        showFeedback('fb-envoi', '⚠️ Aucun client à notifier (alertes déjà envoyées pour ce mois)', 'warn');
+        return;
+    }
+    
+    // Étape 2 : Envoyer uniquement les nouveaux clients
+    showFeedback('fb-envoi', `⏳ Envoi à ${clientsFiltres.length} client(s)...`, 'ok');
+    
+    try {
+        var res = await fetch('/api/admin/agent/' + endpoint, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ clients: clientsFiltres })
+        });
+        var rapport = await res.json();
 
+        document.getElementById('rapport-envoi').style.display = 'block';
+        document.getElementById('rapport-envoyes').textContent = rapport.envoyes;
+        document.getElementById('rapport-sans-email').textContent = rapport.sans_email;
+        document.getElementById('rapport-erreurs').textContent = rapport.erreurs;
+
+        var msg = '✅ ' + rapport.envoyes + ' email(s) envoyé(s) · ' + rapport.sans_email + ' sans email · ' + rapport.erreurs + ' erreur(s)';
+        if (clients.length !== clientsFiltres.length) {
+            msg += ` · ${clients.length - clientsFiltres.length} client(s) ignoré(s) (alerte déjà envoyée)`;
+        }
+        showFeedback('fb-envoi', msg, 'ok');
+        
+        if (document.getElementById('onglet-historique').classList.contains('active')) {
+            chargerHistorique();
+        }
+    } catch(e) {
+        showFeedback('fb-envoi', '❌ Erreur lors de l\'envoi.', 'err');
+    }
+}
     // ═══════════════════════════════════════════════
     // HISTORIQUE ALERTES
     // ═══════════════════════════════════════════════

@@ -620,7 +620,12 @@ async def toggle_agent_auto(request: Request):
         print("[AGENT] ⏸ Agent automatique désactivé")
     
     return {"succes": True, "actif": agent_status["actif"]}
-
+@app.get("/api/admin/agent/alerte-existe")
+def alerte_existe_route(request: Request, numero_contrat: str, mois: str):
+    """Vérifie si une alerte a déjà été envoyée pour ce client ce mois."""
+    from src.database import alerte_deja_envoyee
+    existe = alerte_deja_envoyee(numero_contrat, mois)
+    return {"existe": existe}
 
 @app.get("/employe", response_class=HTMLResponse)
 def page_employe(request: Request):
