@@ -138,8 +138,15 @@ def init_db():
         date_envoi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         statut TEXT DEFAULT 'envoye'
     )
-""")
-    conn.commit()
+    """)
+    
+    # Migration pour ajouter la colonne source (après CREATE TABLE, avant conn.commit())
+    try:
+        cursor.execute("ALTER TABLE alertes_envoyees ADD COLUMN source TEXT DEFAULT 'manuel'")
+    except:
+        pass  # La colonne existe déjà
+    
+    conn.commit()  # ← IMPORTANT: commit après les migrations
     conn.close()
 
 
@@ -1026,7 +1033,7 @@ def get_clients_pour_detection() -> list[dict]:
 # HISTORIQUE DES ALERTES — Amélioration Tâche 2
 # ════════════════════════════════════════════════════════════
 
-def enregistrer_alerte(client: dict, sujet: str, succes: bool, statut: str = None) -> None:
+def enregistrer_alerte(client: dict, sujet: str, succes: bool, statut: str = None, source: str = "manuel") -> None:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
@@ -1047,8 +1054,8 @@ def enregistrer_alerte(client: dict, sujet: str, succes: bool, statut: str = Non
         INSERT INTO alertes_envoyees (
             numero_contrat, nom_client, email_destinataire, sujet,
             consommation_actuelle, consommation_precedente, variation_pct,
-            mois_source, unite, montant_ttc, usage_type, agence, statut
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            mois_source, unite, montant_ttc, usage_type, agence, statut, source
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         client.get("numero_contrat"),
         client.get("nom_client"),
@@ -1057,34 +1064,24 @@ def enregistrer_alerte(client: dict, sujet: str, succes: bool, statut: str = Non
         client.get("conso_actuelle"),
         client.get("moyenne_historique") if mode_detection == "moyenne" else client.get("conso_precedente"),
         client.get("variation_pct"),
-        mois_source,  # ← MODIFIÉ ICI
+        mois_source,
         client.get("unite"),
         client.get("montant_ttc"),
         client.get("usage"),
         client.get("agence"),
-        statut_final
+        statut_final,
+        source
     ))
     conn.commit()
     conn.close()
-
-
 def get_historique_alertes(limit: int = 50) -> list[dict]:
-    """
-    Retourne l'historique des alertes envoyées.
-    
-    Paramètres:
-        limit: nombre maximum d'alertes à retourner (défaut: 50)
-    
-    Retourne:
-        Liste de dictionnaires contenant les informations des alertes
-    """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
         SELECT id, numero_contrat, nom_client, email_destinataire,
                sujet, variation_pct, mois_source, date_envoi, statut,
                consommation_actuelle, consommation_precedente, unite,
-               montant_ttc, usage_type, agence
+               montant_ttc, usage_type, agence, source
         FROM alertes_envoyees
         ORDER BY date_envoi DESC
         LIMIT ?
@@ -1121,3 +1118,58 @@ def alerte_deja_envoyee(numero_contrat: str, mois_source: str) -> bool:
     existe = cursor.fetchone() is not None
     conn.close()
     return existe
+# ════════════════════════════════════════════════════════════
+# SUPPRESSION ALERTE HISTORIQUE
+# ════════════════════════════════════════════════════════════
+
+def supprimer_alerte_historique(alerte_id: int) -> bool:
+    """
+    Supprime une alerte spécifique de l'historique.
+    
+    Paramètres:
+        alerte_id: ID de l'alerte à supprimer
+    
+    Retourne:
+        True si la suppression a réussi, False sinon
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM alertes_envoyees WHERE id = ?", (alerte_id,))
+        deleted = cursor.rowcount > 0
+        conn.commit()
+        return deleted
+    except Exception as e:
+        print(f"Erreur suppression alerte: {e}")
+        return False
+    finally:
+        conn.close()
+
+
+def get_historique_alertes_client(numero_contrat: str, limit: int = 20) -> list[dict]:
+    """
+    Retourne l'historique des alertes pour un client spécifique.
+    
+    Paramètres:
+        numero_contrat: numéro de contrat du client
+        limit: nombre maximum d'alertes à retourner (défaut: 20)
+    
+    Retourne:
+        Liste de dictionnaires contenant les informations des alertes
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, nom_client, email_destinataire, sujet,
+               variation_pct, mois_source, date_envoi, statut,
+               consommation_actuelle, consommation_precedente, unite,
+               montant_ttc, usage_type, agence, source
+        FROM alertes_envoyees
+        WHERE numero_contrat = ?
+        ORDER BY date_envoi DESC
+        LIMIT ?
+    """, (numero_contrat, limit))
+    colonnes = [description[0] for description in cursor.description]
+    rows = [dict(zip(colonnes, r)) for r in cursor.fetchall()]
+    conn.close()
+    return rows

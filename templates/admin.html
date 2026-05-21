@@ -1376,9 +1376,22 @@
                 </div>
                 <div class="historique-table-wrapper">
                     <table class="historique-table">
-                        <thead><tr><th>Date</th><th>Client</th><th>Email</th><th>Mois</th><th>Variation</th><th>Statut</th></tr></thead>
-                        <tbody id="tbody-historique"><tr><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr></tbody>
-                    </table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Email</th>
+            <th>Mois</th>
+            <th>Variation</th>
+            <th>Source</th>
+            <th>Statut</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="tbody-historique">
+        <tr><td colspan="8" style="text-align:center; padding:30px;">⏳ Chargement...<\/td></tr>
+    </tbody>
+</table>
                 </div>
                 <div style="display:flex; gap:12px; margin-top:20px;">
                     <button class="btn btn-ghost btn-refresh" onclick="chargerHistorique()">
@@ -1977,135 +1990,172 @@
     // ═══════════════════════════════════════════════
 
     async function chargerHistorique() {
-        var tbody = document.getElementById('tbody-historique');
-        if (!tbody) return;
-        tbody.innerHTML = '</table><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr>';
+    var tbody = document.getElementById('tbody-historique');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">⏳ Chargement...<\/td></tr>';
+    
+    try {
+        var res = await fetch('/api/admin/agent/historique?limit=50');
+        var data = await res.json();
+        var historique = data.historique || [];
         
-        try {
-            var res = await fetch('/api/admin/agent/historique?limit=50');
-            var data = await res.json();
-            var historique = data.historique || [];
-            
-            var total = historique.length;
-            var envoyes = 0, sansEmail = 0, erreurs = 0;
-            for (var i = 0; i < historique.length; i++) {
-                if (historique[i].statut === 'envoye') envoyes++;
-                else if (historique[i].statut === 'sans_email') sansEmail++;
-                else if (historique[i].statut === 'erreur') erreurs++;
-            }
-            
-            var statTotal = document.getElementById('stat-total-alertes');
-            var statEnvoyes = document.getElementById('stat-envoyes');
-            var statSansEmail = document.getElementById('stat-sans-email');
-            var statErreurs = document.getElementById('stat-erreurs');
-            
-            if (statTotal) statTotal.textContent = total;
-            if (statEnvoyes) statEnvoyes.textContent = envoyes;
-            if (statSansEmail) statSansEmail.textContent = sansEmail;
-            if (statErreurs) statErreurs.textContent = erreurs;
-            
-            if (historique.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">📭 Aucune alerte envoyée pour le moment</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = '';
-            for (var i = 0; i < historique.length; i++) {
-                var h = historique[i];
-                var varClass = h.variation_pct >= 80 ? 'var-critique' : (h.variation_pct >= 50 ? 'var-elevee' : 'var-moderee');
-                var date = new Date(h.date_envoi).toLocaleString('fr-FR');
-                
-                var statutClass = '', statutTexte = '';
-                if (h.statut === 'envoye') {
-                    statutClass = 'email-ok';
-                    statutTexte = '✅ Envoyé';
-                } else if (h.statut === 'sans_email') {
-                    statutClass = 'email-no';
-                    statutTexte = '📭 Sans email';
-                } else {
-                    statutClass = 'email-no';
-                    statutTexte = '❌ Erreur';
-                }
-                
-                tbody.innerHTML += '<tr>' +
-                    '<td style="font-size:12px;">' + date + '</td>' +
-                    '<td style="font-weight:600;">' + (h.nom_client || h.numero_contrat) + '</td>' +
-                    '<td style="font-size:12px;">' + (h.email_destinataire || '—') + '</td>' +
-                    '<td>' + (h.mois_source || '—') + '</td>' +
-                    '<td><span class="variation-badge ' + varClass + '">+' + h.variation_pct + '%</span></td>' +
-                    '<td><span class="email-chip ' + statutClass + '">' + statutTexte + '</span></td>' +
-                '</tr>';
-            }
-        } catch(e) {
-            console.error('Erreur chargement historique:', e);
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">❌ Erreur de chargement</td></tr>';
+        var total = historique.length;
+        var envoyes = 0, sansEmail = 0, erreurs = 0;
+        for (var i = 0; i < historique.length; i++) {
+            if (historique[i].statut === 'envoye') envoyes++;
+            else if (historique[i].statut === 'sans_email') sansEmail++;
+            else if (historique[i].statut === 'erreur') erreurs++;
         }
+        
+        var statTotal = document.getElementById('stat-total-alertes');
+        var statEnvoyes = document.getElementById('stat-envoyes');
+        var statSansEmail = document.getElementById('stat-sans-email');
+        var statErreurs = document.getElementById('stat-erreurs');
+        
+        if (statTotal) statTotal.textContent = total;
+        if (statEnvoyes) statEnvoyes.textContent = envoyes;
+        if (statSansEmail) statSansEmail.textContent = sansEmail;
+        if (statErreurs) statErreurs.textContent = erreurs;
+        
+        if (historique.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">📭 Aucune alerte envoyée pour le moment<\/td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = '';
+        for (var i = 0; i < historique.length; i++) {
+            var h = historique[i];
+            var varClass = h.variation_pct >= 80 ? 'var-critique' : (h.variation_pct >= 50 ? 'var-elevee' : 'var-moderee');
+            var date = new Date(h.date_envoi).toLocaleString('fr-FR');
+            
+            var statutClass = '', statutTexte = '';
+            if (h.statut === 'envoye') {
+                statutClass = 'email-ok';
+                statutTexte = '✅ Envoyé';
+            } else if (h.statut === 'sans_email') {
+                statutClass = 'email-no';
+                statutTexte = '📭 Sans email';
+            } else {
+                statutClass = 'email-no';
+                statutTexte = '❌ Erreur';
+            }
+            
+            var sourceClass = (h.source === 'auto') ? 'email-ok' : 'email-no';
+            var sourceText = (h.source === 'auto') ? '🤖 Automatique' : '👤 Manuel';
+            
+            tbody.innerHTML += '<tr>' +
+                '<td style="font-size:12px;">' + date + '<\/td>' +
+                '<td style="font-weight:600;">' + (h.nom_client || h.numero_contrat) + '<\/td>' +
+                '<td style="font-size:12px;">' + (h.email_destinataire || '—') + '<\/td>' +
+                '<td>' + (h.mois_source || '—') + '<\/td>' +
+                '<td><span class="variation-badge ' + varClass + '">+' + h.variation_pct + '%<\/span><\/td>' +
+                '<td><span class="email-chip ' + sourceClass + '">' + sourceText + '<\/span><\/td>' +
+                '<td><span class="email-chip ' + statutClass + '">' + statutTexte + '<\/span><\/td>' +
+                '<td><button class="btn-icon-del" onclick="supprimerAlerte(' + h.id + ', this)" title="Supprimer l\'alerte"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><polyline points="3 6 5 6 21 6"><\/polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"><\/path><\/svg><\/button><\/td>' +
+            '</tr>';
+        }
+    } catch(e) {
+        console.error('Erreur chargement historique:', e);
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">❌ Erreur de chargement<\/td></tr>';
     }
+}
+    async function supprimerAlerte(alerteId, btn) {
+    if (!confirm('Supprimer définitivement cette alerte de l\'historique ?')) return;
+    
+    var row = btn.closest('tr');
+    try {
+        var res = await fetch('/api/admin/agent/historique/' + alerteId, { method: 'DELETE' });
+        var data = await res.json();
+        if (data.succes) {
+            row.remove();
+            var total = document.querySelectorAll('#tbody-historique tr').length;
+            document.getElementById('stat-total-alertes').textContent = total;
+            var envoyes = 0, sansEmail = 0, erreurs = 0;
+            var rows = document.querySelectorAll('#tbody-historique tr');
+            for (var i = 0; i < rows.length; i++) {
+                var statut = rows[i].cells[6].textContent.trim();
+                if (statut === '✅ Envoyé') envoyes++;
+                else if (statut === '📭 Sans email') sansEmail++;
+                else if (statut === '❌ Erreur') erreurs++;
+            }
+            document.getElementById('stat-envoyes').textContent = envoyes;
+            document.getElementById('stat-sans-email').textContent = sansEmail;
+            document.getElementById('stat-erreurs').textContent = erreurs;
+        } else {
+            alert('Erreur lors de la suppression');
+        }
+    } catch(e) {
+        alert('Erreur lors de la suppression');
+    }
+}
 
     async function exporterHistoriqueCSV() {
-        try {
-            var res = await fetch('/api/admin/agent/historique?limit=500');
-            var data = await res.json();
-            var historique = data.historique || [];
-            
-            if (historique.length === 0) {
-                alert('Aucune donnée à exporter');
-                return;
-            }
-            
-            var headers = ['Date', 'Client', 'Email', 'Mois', 'Variation (%)', 'Statut', 'Consommation actuelle', 'Consommation précédente', 'Unité', 'Montant TTC', 'Usage', 'Agence'];
-            var rows = [];
-            for (var i = 0; i < historique.length; i++) {
-                var h = historique[i];
-                rows.push([
-                    new Date(h.date_envoi).toLocaleString('fr-FR'),
-                    h.nom_client || h.numero_contrat,
-                    h.email_destinataire || '',
-                    h.mois_source || '',
-                    h.variation_pct,
-                    h.statut,
-                    h.consommation_actuelle || '',
-                    h.consommation_precedente || '',
-                    h.unite || '',
-                    h.montant_ttc || '',
-                    h.usage_type || '',
-                    h.agence || ''
-                ]);
-            }
-            
-            var csvContent = '';
-            for (var i = 0; i < headers.length; i++) {
-                csvContent += '"' + headers[i] + '"';
-                if (i < headers.length - 1) csvContent += ',';
-            }
-            csvContent += '\n';
-            for (var i = 0; i < rows.length; i++) {
-                for (var j = 0; j < rows[i].length; j++) {
-                    csvContent += '"' + String(rows[i][j]).replace(/"/g, '""') + '"';
-                    if (j < rows[i].length - 1) csvContent += ',';
-                }
-                if (i < rows.length - 1) csvContent += '\n';
-            }
-            
-            var blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-            var link = document.createElement('a');
-            var url = URL.createObjectURL(blob);
-            link.href = url;
-            link.setAttribute('download', 'historique_alertes.csv');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        } catch(e) {
-            console.error('Erreur export:', e);
-            alert('Erreur lors de l\'export');
+    try {
+        var res = await fetch('/api/admin/agent/historique?limit=500');
+        var data = await res.json();
+        var historique = data.historique || [];
+        
+        if (historique.length === 0) {
+            alert('Aucune donnée à exporter');
+            return;
         }
+        
+        var headers = ['Date', 'Client', 'Email', 'Mois', 'Variation (%)', 'Source', 'Statut', 'Consommation actuelle', 'Consommation précédente', 'Unité', 'Montant TTC', 'Usage', 'Agence'];
+        var rows = [];
+        for (var i = 0; i < historique.length; i++) {
+            var h = historique[i];
+            var sourceText = (h.source === 'auto') ? 'Automatique' : 'Manuel';
+            rows.push([
+                new Date(h.date_envoi).toLocaleString('fr-FR'),
+                h.nom_client || h.numero_contrat,
+                h.email_destinataire || '',
+                h.mois_source || '',
+                h.variation_pct,
+                sourceText,
+                h.statut === 'envoye' ? 'Envoyé' : (h.statut === 'sans_email' ? 'Sans email' : 'Erreur'),
+                h.consommation_actuelle || '',
+                h.consommation_precedente || '',
+                h.unite || '',
+                h.montant_ttc || '',
+                h.usage_type || '',
+                h.agence || ''
+            ]);
+        }
+        
+        var csvContent = '';
+        for (var i = 0; i < headers.length; i++) {
+            csvContent += '"' + headers[i] + '"';
+            if (i < headers.length - 1) csvContent += ',';
+        }
+        csvContent += '\n';
+        for (var i = 0; i < rows.length; i++) {
+            for (var j = 0; j < rows[i].length; j++) {
+                csvContent += '"' + String(rows[i][j]).replace(/"/g, '""') + '"';
+                if (j < rows[i].length - 1) csvContent += ',';
+            }
+            if (i < rows.length - 1) csvContent += '\n';
+        }
+        
+        var blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement('a');
+        var url = URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', 'historique_alertes.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } catch(e) {
+        console.error('Erreur export:', e);
+        alert('Erreur lors de l\'export');
     }
+}
 
     // Initialisations
     setMode('precedent');
     chargerStatutAuto();
     toggleContrat();
+
 </script>
 </body>
 </html>

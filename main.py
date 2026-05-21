@@ -145,6 +145,8 @@ def tache_agent_automatique():
             if alerte_deja_envoyee(c["numero_contrat"], c["mois_actuel"]):
                 print(f"[AGENT] ⚠ {c['nom_client']} — alerte déjà envoyée ce mois, ignoré")
                 continue
+            # ✅ AJOUT DE LA SOURCE "auto" POUR L'AGENT AUTONOME
+            c["source"] = "auto"
             a_envoyer.append(c)
 
         # Envoi
@@ -478,6 +480,9 @@ async def envoyer_tous_route(request: Request):
     """
     data = await request.json()
     clients = data.get("clients", [])
+    # Ajouter source='manuel' pour chaque client
+    for client in clients:
+        client["source"] = "manuel"
     from src.agent.email_sender import envoyer_alertes_masse
     rapport = envoyer_alertes_masse(clients)
     return rapport
@@ -491,6 +496,9 @@ async def envoyer_selection_route(request: Request):
     """
     data = await request.json()
     clients = data.get("clients", [])
+    # Ajouter source='manuel' pour chaque client
+    for client in clients:
+        client["source"] = "manuel"
     from src.agent.email_sender import envoyer_alertes_masse
     rapport = envoyer_alertes_masse(clients)
     return rapport
@@ -504,6 +512,7 @@ async def envoyer_un_route(request: Request):
     """
     data = await request.json()
     client = data.get("client", {})
+    client["source"] = "manuel"  # Ajouter source
     from src.agent.email_sender import envoyer_alertes_masse
     rapport = envoyer_alertes_masse([client])
     return rapport
@@ -620,6 +629,8 @@ async def toggle_agent_auto(request: Request):
         print("[AGENT] ⏸ Agent automatique désactivé")
     
     return {"succes": True, "actif": agent_status["actif"]}
+
+
 @app.get("/api/admin/agent/alerte-existe")
 def alerte_existe_route(request: Request, numero_contrat: str, mois: str):
     """Vérifie si une alerte a déjà été envoyée pour ce client ce mois."""
