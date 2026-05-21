@@ -29,8 +29,34 @@ Le système évolue en trois phases :
 | Phase | Statut | Description |
 |---|---|---|
 | **Tâche 1** | ✅ Terminée | Système complet de gestion et d'analyse des factures avec 3 interfaces dédiées |
-| **Tâche 2** | 🔄 En cours | Agent autonome de détection des surconsommations et alertes email |
+| **Tâche 2** | ✅ Terminée | Agent autonome de détection des surconsommations et alertes email |
 | **Tâche 3** | 📋 Planifiée | Containerisation Docker + déploiement sur infrastructure SRM |
+
+---
+
+## Aperçu des interfaces
+
+### 🔐 Page de connexion
+
+![Login](screenshots/login_page.png)
+
+---
+
+### 🛠️ Interface Administrateur
+
+![Admin](screenshots/admin_interface.png)
+
+---
+
+### 👨‍💼 Interface Employé SRM
+
+![Employé](screenshots/emp_interface.png)
+
+---
+
+### 👤 Interface Client Connecté
+
+![Client](screenshots/client_interface.png)
 
 ---
 
@@ -105,7 +131,7 @@ Question utilisateur (Interface Client)
         │ Non couvert
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 3 — Fallback LLM               │
+│  Niveau 3 — Fallback LLM                │
 │  • Questions hors règles → LLM Router   │──→ Réponse guidée avec exemples
 │  • Intent ANALYSE → LLM narratif        │──→ Réponse personnalisée avec données
 │    (données réelles injectées,          │    réelles, comparaison mois actuel
@@ -134,6 +160,7 @@ Question utilisateur (Interface Client)
 - Import de fichiers Excel multi-clients / multi-périodes et factures PDF
 - Gestion de la base de données SQLite
 - Gestion des comptes utilisateurs (création, suppression, rôles)
+- **Agent Alertes** : détection des surconsommations, envoi ciblé ou en masse, historique complet
 
 ### Interface Employé SRM
 - **Assistant conversationnel PDF** : analyse de factures individuelles via RAG classique
@@ -148,6 +175,20 @@ Question utilisateur (Interface Client)
 - Téléchargement de factures PDF personnalisées (ReportLab)
 - Base de connaissance institutionnelle SRM (abonnement, branchement, contacts)
 - **Persistance des conversations** : historique sauvegardé par client, accessible après reconnexion
+- **Multilinguisme** : interface disponible en français, anglais et arabe
+
+---
+
+## Agent Alertes — Tâche 2
+
+L'agent autonome de détection des surconsommations tourne automatiquement sans intervention humaine via **APScheduler**. Il supporte deux modes de détection configurables par l'admin :
+
+| Mode | Méthode | Avantage |
+|---|---|---|
+| **Mode 1** | Comparaison mois précédent | Détection immédiate des hausses soudaines |
+| **Mode 2** | Moyenne historique 6 mois | Élimine les fausses alertes dues à un mois anormalement bas |
+
+Fonctionnalités : seuil configurable, envoi individuel ou en masse, historique des alertes avec export CSV, déduplication anti-doublons, distinction envoi manuel / automatique, template email HTML avec niveaux de criticité (modéré / élevé / critique).
 
 ---
 
@@ -165,6 +206,7 @@ Question utilisateur (Interface Client)
 | Traitement Excel | pandas / openpyxl | Lecture multi-clients / multi-périodes |
 | Similarité texte | fuzzywuzzy | Détection des noms mal orthographiés |
 | Sécurité | hashlib SHA-256 | Hashage des mots de passe |
+| Planification | APScheduler | Agent autonome planifié |
 
 > **Note sur la migration UI :** Le prototype initial a été développé sous Streamlit, puis migré vers FastAPI + Jinja2 + Tailwind CSS pour lever les contraintes de personnalisation UI. La migration a été réalisée sans aucune régression fonctionnelle, confirmant la solidité de l'architecture modulaire adoptée dès le départ.
 
@@ -193,7 +235,7 @@ Question utilisateur (Interface Client)
 
 ```bash
 # 1. Cloner le dépôt
-git clone https://github.com/<username>/srm-intelligent-billing-system.git
+git clone https://github.com/BenWafae/srm-intelligent-billing-system.git
 cd srm-intelligent-billing-system
 
 # 2. Installer les dépendances
@@ -216,7 +258,7 @@ L'application est accessible sur `http://localhost:8000`
 
 | Rôle | Accès |
 |---|---|
-| **Admin** | Import données, gestion utilisateurs, supervision base de données |
+| **Admin** | Import données, gestion utilisateurs, agent alertes, historique |
 | **Employé** | Assistant complet : analyse PDF + interrogation multi-clients Excel |
 | **Client** | Espace personnel : ses factures uniquement + téléchargement PDF |
 
