@@ -1,5 +1,6 @@
 import sys
 import os
+import sqlite3
 
 BASE_DIR = os.path.dirname(__file__)
 sys.path.insert(0, BASE_DIR)
@@ -26,14 +27,89 @@ app.mount("/static", StaticFiles(directory="src/assets"), name="static")  # 2. m
 templates = Jinja2Templates(directory=str(os.path.join(BASE_DIR, "templates")))  # 3. templates
 
 init_db()
+
 # ════════════════════════════════════════════════════════════
 # AGENT AUTONOME — Scheduler (Tâche 2 — Amélioration)
 # ════════════════════════════════════════════════════════════
 
+DB_PATH = os.path.join(BASE_DIR, "data", "srm.db")
+
+def sauvegarder_derniere_execution(date_str: str):
+    """Sauvegarde la date de dernière exécution en base."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS config_agent (
+            cle TEXT PRIMARY KEY,
+            valeur TEXT
+        )
+    """)
+    cursor.execute("""
+        INSERT INTO config_agent (cle, valeur) VALUES ('derniere_execution_auto', ?)
+        ON CONFLICT(cle) DO UPDATE SET valeur = excluded.valeur
+    """, (date_str,))
+    conn.commit()
+    conn.close()
+
+
+def charger_derniere_execution() -> str | None:
+    """Charge la date de dernière exécution depuis la base."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT valeur FROM config_agent WHERE cle = 'derniere_execution_auto'")
+        row = cursor.fetchone()
+        conn.close()
+        return row[0] if row else None
+    except:
+        return None
+
+
+def sauvegarder_dernier_resultat(resultat: str, nb_detectes: int, nb_envoyes: int):
+    """Sauvegarde le dernier résultat en base."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO config_agent (cle, valeur) VALUES ('dernier_resultat_auto', ?)
+        ON CONFLICT(cle) DO UPDATE SET valeur = excluded.valeur
+    """, (resultat,))
+    cursor.execute("""
+        INSERT INTO config_agent (cle, valeur) VALUES ('nb_detectes_auto', ?)
+        ON CONFLICT(cle) DO UPDATE SET valeur = excluded.valeur
+    """, (str(nb_detectes),))
+    cursor.execute("""
+        INSERT INTO config_agent (cle, valeur) VALUES ('nb_envoyes_auto', ?)
+        ON CONFLICT(cle) DO UPDATE SET valeur = excluded.valeur
+    """, (str(nb_envoyes),))
+    conn.commit()
+    conn.close()
+
+
+def charger_dernier_resultat():
+    """Charge le dernier résultat depuis la base."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT valeur FROM config_agent WHERE cle = 'dernier_resultat_auto'")
+        resultat = cursor.fetchone()
+        cursor.execute("SELECT valeur FROM config_agent WHERE cle = 'nb_detectes_auto'")
+        nb_detectes = cursor.fetchone()
+        cursor.execute("SELECT valeur FROM config_agent WHERE cle = 'nb_envoyes_auto'")
+        nb_envoyes = cursor.fetchone()
+        conn.close()
+        return {
+            "dernier_resultat": resultat[0] if resultat else None,
+            "nb_detectes": int(nb_detectes[0]) if nb_detectes else 0,
+            "nb_envoyes": int(nb_envoyes[0]) if nb_envoyes else 0
+        }
+    except:
+        return {"dernier_resultat": None, "nb_detectes": 0, "nb_envoyes": 0}
+
+
 # Stockage en mémoire du statut de l'agent
 agent_status = {
     "actif"              : True,
-    "derniere_execution" : None,
+    "derniere_execution" : charger_derniere_execution(),
     "prochain_run"       : None,
     "dernier_resultat"   : None,
     "nb_detectes"        : 0,
@@ -80,15 +156,20 @@ def tache_agent_automatique():
         else:
             print("[AGENT] ✅ Aucune nouvelle alerte à envoyer")
 
-        # Mettre à jour le statut
+        # Mettre à jour le statut en mémoire
         agent_status["derniere_execution"] = maintenant
         agent_status["dernier_resultat"]   = "succes"
         agent_status["nb_detectes"]        = len(detectes)
         agent_status["nb_envoyes"]         = nb_envoyes
 
+        # Sauvegarder en base pour persistance
+        sauvegarder_derniere_execution(maintenant)
+        sauvegarder_dernier_resultat("succes", len(detectes), nb_envoyes)
+
     except Exception as e:
         print(f"[AGENT] ❌ Erreur : {e}")
         agent_status["dernier_resultat"] = f"erreur: {str(e)}"
+        sauvegarder_dernier_resultat(f"erreur: {str(e)}", 0, 0)
 
     print(f"[AGENT] ═══ Cycle terminé ═══\n")
 
@@ -111,6 +192,8 @@ print("[AGENT] ✅ Scheduler démarré — exécution quotidienne à 08:00")
 import atexit
 atexit.register(lambda: scheduler.shutdown())
 sessions = {}
+
+
 # ════════════════════════════════════════════
 # PAGE LOGIN — GET
 # ════════════════════════════════════════════
@@ -121,6 +204,7 @@ def page_login(request: Request):
         name="login.html",
         context={"erreur": None}
     )
+
 
 @app.post("/login")
 def login(request: Request, email: str = Form(...), password: str = Form(...)):
@@ -141,9 +225,7 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)):
     response.set_cookie("session_id", session_id)
     return response
 
-# ════════════════════════════════════════════
-# PAGES RÔLES — temporaires pour tester
-# ════════════════════════════════════════════
+
 # ════════════════════════════════════════════
 # PAGE ADMIN
 # ════════════════════════════════════════════
@@ -180,6 +262,7 @@ def page_admin(request: Request):
         }
     )
 
+
 # ════════════════════════════════════════════
 # ADMIN — APERÇU EXCEL
 # ════════════════════════════════════════════
@@ -203,6 +286,7 @@ async def apercu_excel(fichier: UploadFile = File(...)):
             if os.path.exists(chemin_temp):
                 os.remove(chemin_temp)
         except: pass
+
 
 # ════════════════════════════════════════════
 # ADMIN — IMPORT EXCEL
@@ -229,6 +313,7 @@ async def import_excel(fichier: UploadFile = File(...)):
                 os.remove(chemin_temp)
         except: pass
 
+
 # ════════════════════════════════════════════
 # ADMIN — SUPPRIMER CLIENT
 # ════════════════════════════════════════════
@@ -239,6 +324,7 @@ async def supprimer_client(request: Request):
     from src.database import supprimer_factures_client
     n = supprimer_factures_client(client)
     return {"supprimees": n}
+
 
 # ════════════════════════════════════════════
 # ADMIN — RESET FICHIER EXCEL
@@ -261,6 +347,7 @@ async def reset_fichier(request: Request):
         print(f"Erreur dans reset-fichier: {str(e)}")  # Debug
         return {"supprimees": 0, "erreur": str(e)}
 
+
 # ════════════════════════════════════════════
 # ADMIN — RESET BASE COMPLÈTE
 # ════════════════════════════════════════════
@@ -269,6 +356,7 @@ async def reset_base():
     from src.database import reset_base_excel
     n = reset_base_excel()
     return {"supprimees": n}
+
 
 # ════════════════════════════════════════════
 # ADMIN — IMPORT PDF
@@ -297,6 +385,7 @@ async def import_pdf(fichier: UploadFile = File(...)):
                 os.remove(chemin_temp)
         except: pass
 
+
 # ════════════════════════════════════════════
 # ADMIN — CRÉER USER
 # ════════════════════════════════════════════
@@ -312,6 +401,7 @@ async def creer_user_route(request: Request):
     )
     return {"succes": ok}
 
+
 # ════════════════════════════════════════════
 # ADMIN — SUPPRIMER USER
 # ════════════════════════════════════════════
@@ -321,6 +411,8 @@ async def supprimer_user_route(request: Request):
     from src.database import supprimer_user
     supprimer_user(data.get("user_id"))
     return {"succes": True}
+
+
 # ════════════════════════════════════════════
 # ADMIN — CHANGER MOT DE PASSE UTILISATEUR
 # ════════════════════════════════════════════
@@ -343,10 +435,11 @@ async def admin_changer_mot_de_passe(request: Request):
         return {"succes": True}
     else:
         return {"succes": False, "erreur": "Utilisateur non trouvé"}
+
+
 # ════════════════════════════════════════════
 # ADMIN — AGENT ALERTES (Tâche 2)
 # ════════════════════════════════════════════
-
 @app.get("/api/admin/agent/seuil")
 def get_seuil_route(request: Request):
     """Retourne le seuil actuel sauvegardé."""
@@ -415,10 +508,10 @@ async def envoyer_un_route(request: Request):
     rapport = envoyer_alertes_masse([client])
     return rapport
 
+
 # ════════════════════════════════════════════
 # ADMIN — HISTORIQUE ALERTES (Amélioration Tâche 2)
 # ════════════════════════════════════════════
-
 @app.get("/api/admin/agent/historique")
 def get_historique_route(request: Request, limit: int = 50):
     """
@@ -455,10 +548,11 @@ async def supprimer_alerte_route(request: Request, alerte_id: int):
     from src.database import supprimer_alerte_historique
     success = supprimer_alerte_historique(alerte_id)
     return {"succes": success, "alerte_id": alerte_id}
+
+
 # ════════════════════════════════════════════════════════════
 # AGENT AUTONOME — Routes scheduler
 # ════════════════════════════════════════════════════════════
-
 @app.get("/api/admin/agent/statut-auto")
 def get_statut_auto(request: Request):
     """Retourne le statut actuel de l'agent automatique."""
@@ -466,6 +560,18 @@ def get_statut_auto(request: Request):
     prochain = None
     if job and job.next_run_time:
         prochain = job.next_run_time.strftime("%d/%m/%Y %H:%M")
+    
+    # Si la mémoire est vide, charger depuis la base
+    if not agent_status["derniere_execution"]:
+        saved_exec = charger_derniere_execution()
+        if saved_exec:
+            agent_status["derniere_execution"] = saved_exec
+        
+        saved_result = charger_dernier_resultat()
+        if saved_result["dernier_resultat"]:
+            agent_status["dernier_resultat"] = saved_result["dernier_resultat"]
+            agent_status["nb_detectes"] = saved_result["nb_detectes"]
+            agent_status["nb_envoyes"] = saved_result["nb_envoyes"]
     
     return {
         "actif"              : agent_status["actif"],
@@ -514,6 +620,8 @@ async def toggle_agent_auto(request: Request):
         print("[AGENT] ⏸ Agent automatique désactivé")
     
     return {"succes": True, "actif": agent_status["actif"]}
+
+
 @app.get("/employe", response_class=HTMLResponse)
 def page_employe(request: Request):
     session_id = request.cookies.get("session_id")
@@ -582,7 +690,6 @@ async def chat_employe_pdf(request: Request):
 # ════════════════════════════════════════════════════════════
 # EMPLOYÉ — CONVERSATIONS PERSISTANTES
 # ════════════════════════════════════════════════════════════
-
 @app.get("/api/employe/conversations")
 def get_conversations_employe(request: Request, mode: str = None):
     session_id = request.cookies.get("session_id")
@@ -641,8 +748,9 @@ async def supprimer_conv_employe(request: Request):
     from src.database import supprimer_conversation_employe
     supprimer_conversation_employe(data["conversation_id"])
     return {"succes": True}
-# Ajoutez après les routes existantes de l'employé
 
+
+# Ajoutez après les routes existantes de l'employé
 @app.post("/api/employe/changer-mot-de-passe")
 async def changer_mdp_employe(request: Request):
     session_id = request.cookies.get("session_id")
@@ -655,6 +763,7 @@ async def changer_mdp_employe(request: Request):
         return {"succes": False, "erreur": "Mot de passe actuel incorrect"}
     changer_password_employe(user["email"], data["nouveau_mdp"])
     return {"succes": True}
+
 
 @app.get("/client", response_class=HTMLResponse)
 def page_client(request: Request):
@@ -713,7 +822,6 @@ async def chat_client(request: Request):
 # ════════════════════════════════════════════
 # CLIENT — CONVERSATIONS PERSISTANTES
 # ════════════════════════════════════════════
-
 @app.get("/api/client/conversations")
 def get_conversations(request: Request):
     session_id = request.cookies.get("session_id")
@@ -772,7 +880,6 @@ async def supprimer_conv(request: Request):
 # ════════════════════════════════════════════
 # CLIENT — TÉLÉCHARGEMENT FACTURE PDF
 # ════════════════════════════════════════════
-
 @app.get("/api/client/mois-disponibles")
 def mois_disponibles(request: Request):
     session_id = request.cookies.get("session_id")
@@ -800,6 +907,8 @@ def telecharger_facture(request: Request, mois: str):
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=facture_{mois}.pdf"}
     )
+
+
 @app.post("/api/client/changer-mot-de-passe")
 async def changer_mdp(request: Request):
     session_id = request.cookies.get("session_id")
@@ -812,6 +921,7 @@ async def changer_mdp(request: Request):
         return {"succes": False, "erreur": "Mot de passe actuel incorrect"}
     changer_password_client(user["email"], data["nouveau_mdp"])
     return {"succes": True}
+
 
 # ════════════════════════════════════════════
 # DÉCONNEXION
