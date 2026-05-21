@@ -13,3 +13,4 @@ requests==2.33.1
 fuzzywuzzy
 python-levenshtein
 python-dotenv
+apscheduler
