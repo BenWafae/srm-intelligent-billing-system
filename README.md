@@ -29,7 +29,7 @@ Le système évolue en trois phases :
 | Phase | Statut | Description |
 |---|---|---|
 | **Tâche 1** | ✅ Terminée | Système complet de gestion et d'analyse des factures avec 3 interfaces dédiées |
-| **Tâche 2** | ✅ Terminée | Agent autonome de détection des surconsommations et alertes email |
+| **Tâche 2** | 🔄 En cours | Agent autonome de détection des surconsommations et alertes email |
 | **Tâche 3** | 📋 Planifiée | Containerisation Docker + déploiement sur infrastructure SRM |
 
 ---
@@ -167,6 +167,7 @@ Question utilisateur (Interface Client)
 - **Assistant Excel multi-clients** : interrogation via l'architecture hybride LLM as a Router
 - Filtre par fichier Excel source pour des analyses ciblées
 - **Persistance des conversations** : historique sauvegardé en base, consultable et renommable depuis la sidebar
+- **Multilinguisme** : interface disponible en français, anglais et arabe
 
 ### Interface Client Connecté
 - Authentification sécurisée par email
@@ -181,14 +182,22 @@ Question utilisateur (Interface Client)
 
 ## Agent Alertes — Tâche 2
 
-L'agent autonome de détection des surconsommations tourne automatiquement sans intervention humaine via **APScheduler**. Il supporte deux modes de détection configurables par l'admin :
+### Mode Manuel (Admin)
+
+L'admin peut déclencher la détection depuis l'interface et choisir entre deux modes :
 
 | Mode | Méthode | Avantage |
 |---|---|---|
 | **Mode 1** | Comparaison mois précédent | Détection immédiate des hausses soudaines |
 | **Mode 2** | Moyenne historique 6 mois | Élimine les fausses alertes dues à un mois anormalement bas |
 
-Fonctionnalités : seuil configurable, envoi individuel ou en masse, historique des alertes avec export CSV, déduplication anti-doublons, distinction envoi manuel / automatique, template email HTML avec niveaux de criticité (modéré / élevé / critique).
+Envoi individuel, par sélection, ou en masse. Historique des alertes avec export CSV, déduplication anti-doublons.
+
+### Mode Automatique (APScheduler)
+
+L'agent tourne **sans intervention humaine** — planifié automatiquement via APScheduler. Par défaut il utilise le **Mode 2 (moyenne historique)** pour réduire les fausses alertes. L'admin reçoit un rapport récapitulatif après chaque exécution.
+
+Fonctionnalités communes : seuil configurable, template email HTML avec niveaux de criticité (modéré / élevé / critique), distinction source manuel / automatique dans l'historique.
 
 ---
 
