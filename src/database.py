@@ -1098,6 +1098,7 @@ def get_historique_alertes(limit: int = 50) -> list[dict]:
 def alerte_deja_envoyee(numero_contrat: str, mois_source: str) -> bool:
     """
     Vérifie si une alerte a déjà été envoyée pour un client et un mois donnés.
+    Compatible Mode 1 (mois exact) et Mode 2 (mois dans "Moyenne X mois (→ mois)").
     
     Paramètres:
         numero_contrat: numéro de contrat du client
@@ -1108,11 +1109,15 @@ def alerte_deja_envoyee(numero_contrat: str, mois_source: str) -> bool:
     """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+    
+    # Vérification : soit le mois exact, soit le mois contenu dans "Moyenne X mois (→ mois)"
     cursor.execute("""
         SELECT id FROM alertes_envoyees
-        WHERE numero_contrat = ? AND mois_source = ?
+        WHERE numero_contrat = ? 
+        AND (mois_source = ? OR mois_source LIKE ?)
         LIMIT 1
-    """, (numero_contrat, mois_source))
+    """, (numero_contrat, mois_source, f'%→ {mois_source}%'))
+    
     existe = cursor.fetchone() is not None
     conn.close()
     return existe
