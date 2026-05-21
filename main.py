@@ -13,6 +13,11 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
 from src.database import init_db, verifier_login
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+import logging
+logging.basicConfig()
+logging.getLogger('apscheduler').setLevel(logging.WARNING)
 
 app = FastAPI()  # 1. créer app
 
@@ -21,6 +26,90 @@ app.mount("/static", StaticFiles(directory="src/assets"), name="static")  # 2. m
 templates = Jinja2Templates(directory=str(os.path.join(BASE_DIR, "templates")))  # 3. templates
 
 init_db()
+# ════════════════════════════════════════════════════════════
+# AGENT AUTONOME — Scheduler (Tâche 2 — Amélioration)
+# ════════════════════════════════════════════════════════════
+
+# Stockage en mémoire du statut de l'agent
+agent_status = {
+    "actif"              : True,
+    "derniere_execution" : None,
+    "prochain_run"       : None,
+    "dernier_resultat"   : None,
+    "nb_detectes"        : 0,
+    "nb_envoyes"         : 0,
+}
+
+def tache_agent_automatique():
+    """
+    Fonction principale de l'agent autonome.
+    Tourne en arrière-plan selon le planning défini.
+    Zéro intervention humaine requise.
+    """
+    from datetime import datetime
+    from src.agent.agent_alertes import detecter, get_seuil
+    from src.agent.email_sender import envoyer_alertes_masse
+    from src.database import alerte_deja_envoyee
+
+    maintenant = datetime.now().strftime("%d/%m/%Y %H:%M")
+    print(f"\n[AGENT] ═══ Cycle automatique démarré — {maintenant} ═══")
+
+    try:
+        seuil = get_seuil()
+        detectes = detecter(seuil, mode="moyenne")
+
+        print(f"[AGENT] Seuil : {seuil}% — {len(detectes)} client(s) détecté(s)")
+
+        # Filtrer : clients avec email ET alerte pas encore envoyée ce mois
+        a_envoyer = []
+        for c in detectes:
+            if not c.get("email"):
+                print(f"[AGENT] ⚠ {c['nom_client']} — sans email, ignoré")
+                continue
+            if alerte_deja_envoyee(c["numero_contrat"], c["mois_actuel"]):
+                print(f"[AGENT] ⚠ {c['nom_client']} — alerte déjà envoyée ce mois, ignoré")
+                continue
+            a_envoyer.append(c)
+
+        # Envoi
+        nb_envoyes = 0
+        if a_envoyer:
+            rapport = envoyer_alertes_masse(a_envoyer)
+            nb_envoyes = rapport.get("envoyes", 0)
+            print(f"[AGENT] ✅ {nb_envoyes} email(s) envoyé(s)")
+        else:
+            print("[AGENT] ✅ Aucune nouvelle alerte à envoyer")
+
+        # Mettre à jour le statut
+        agent_status["derniere_execution"] = maintenant
+        agent_status["dernier_resultat"]   = "succes"
+        agent_status["nb_detectes"]        = len(detectes)
+        agent_status["nb_envoyes"]         = nb_envoyes
+
+    except Exception as e:
+        print(f"[AGENT] ❌ Erreur : {e}")
+        agent_status["dernier_resultat"] = f"erreur: {str(e)}"
+
+    print(f"[AGENT] ═══ Cycle terminé ═══\n")
+
+
+# Démarrage du scheduler
+scheduler = BackgroundScheduler(timezone="Africa/Casablanca")
+
+# Job de production : chaque jour à 08h00
+scheduler.add_job(
+    tache_agent_automatique,
+    trigger=CronTrigger(hour=8, minute=0),
+    id="agent_prod",
+    replace_existing=True
+)
+
+scheduler.start()
+print("[AGENT] ✅ Scheduler démarré — exécution quotidienne à 08:00")
+
+# Arrêt propre quand FastAPI s'arrête
+import atexit
+atexit.register(lambda: scheduler.shutdown())
 sessions = {}
 # ════════════════════════════════════════════
 # PAGE LOGIN — GET
@@ -325,6 +414,7 @@ async def envoyer_un_route(request: Request):
     from src.agent.email_sender import envoyer_alertes_masse
     rapport = envoyer_alertes_masse([client])
     return rapport
+
 # ════════════════════════════════════════════
 # ADMIN — HISTORIQUE ALERTES (Amélioration Tâche 2)
 # ════════════════════════════════════════════
@@ -365,7 +455,65 @@ async def supprimer_alerte_route(request: Request, alerte_id: int):
     from src.database import supprimer_alerte_historique
     success = supprimer_alerte_historique(alerte_id)
     return {"succes": success, "alerte_id": alerte_id}
+# ════════════════════════════════════════════════════════════
+# AGENT AUTONOME — Routes scheduler
+# ════════════════════════════════════════════════════════════
 
+@app.get("/api/admin/agent/statut-auto")
+def get_statut_auto(request: Request):
+    """Retourne le statut actuel de l'agent automatique."""
+    job = scheduler.get_job("agent_prod")
+    prochain = None
+    if job and job.next_run_time:
+        prochain = job.next_run_time.strftime("%d/%m/%Y %H:%M")
+    
+    return {
+        "actif"              : agent_status["actif"],
+        "derniere_execution" : agent_status["derniere_execution"],
+        "prochain_run"       : prochain,
+        "dernier_resultat"   : agent_status["dernier_resultat"],
+        "nb_detectes"        : agent_status["nb_detectes"],
+        "nb_envoyes"         : agent_status["nb_envoyes"],
+    }
+
+
+@app.post("/api/admin/agent/lancer-auto")
+def lancer_agent_maintenant(request: Request):
+    """
+    Lance le cycle agent immédiatement.
+    Utile pour tester sans attendre le planning.
+    """
+    tache_agent_automatique()
+    return {
+        "succes"             : True,
+        "derniere_execution" : agent_status["derniere_execution"],
+        "nb_detectes"        : agent_status["nb_detectes"],
+        "nb_envoyes"         : agent_status["nb_envoyes"],
+    }
+
+
+@app.post("/api/admin/agent/toggle-auto")
+async def toggle_agent_auto(request: Request):
+    """Active ou désactive le scheduler."""
+    data = await request.json()
+    activer = data.get("activer", True)
+    
+    if activer:
+        if not scheduler.running:
+            scheduler.start()
+        job = scheduler.get_job("agent_prod")
+        if job:
+            job.resume()
+        agent_status["actif"] = True
+        print("[AGENT] ✅ Agent automatique activé")
+    else:
+        job = scheduler.get_job("agent_prod")
+        if job:
+            job.pause()
+        agent_status["actif"] = False
+        print("[AGENT] ⏸ Agent automatique désactivé")
+    
+    return {"succes": True, "actif": agent_status["actif"]}
 @app.get("/employe", response_class=HTMLResponse)
 def page_employe(request: Request):
     session_id = request.cookies.get("session_id")

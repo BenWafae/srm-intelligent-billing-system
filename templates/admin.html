@@ -1176,6 +1176,63 @@
     <!-- Onglet AGENT ALERTES -->
     <div id="onglet-agent" class="tab-panel">
 
+        <!-- NOUVEAU : Carte Agent Autonome -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-head-ico" style="background:rgba(121,173,102,.12);color:var(--srm-green-dark);">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3>🤖 Agent autonome — Mode automatique</h3>
+                    <p>Détection et envoi automatiques sans intervention humaine</p>
+                </div>
+            </div>
+            <div class="section-body">
+                <!-- Statut + Toggle -->
+                <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
+                    <div id="agent-statut-badge" style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; border-radius:30px; font-size:12px; font-weight:600; background:rgba(121,173,102,.12); color:var(--srm-green-dark); border:1px solid rgba(121,173,102,.25);">
+                        <span id="agent-dot" style="width:8px;height:8px;border-radius:50%;background:var(--srm-green);animation:livePulse 2s infinite;"></span>
+                        <span id="agent-statut-texte">Agent actif</span>
+                    </div>
+                    <button class="btn btn-ghost" onclick="toggleAgentAuto()" id="btn-toggle-agent" style="padding:7px 16px; font-size:12px;">⏸ Désactiver</button>
+                </div>
+
+                <!-- Infos planning -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+                    <div style="background:var(--srm-cream); border:1px solid var(--srm-border); border-radius:12px; padding:14px 16px;">
+                        <div style="font-size:11px; color:var(--srm-gray); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Prochaine exécution</div>
+                        <div id="agent-prochain" style="font-size:14px; font-weight:600; color:var(--srm-navy);">Chargement…</div>
+                    </div>
+                    <div style="background:var(--srm-cream); border:1px solid var(--srm-border); border-radius:12px; padding:14px 16px;">
+                        <div style="font-size:11px; color:var(--srm-gray); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px;">Dernière exécution</div>
+                        <div id="agent-derniere" style="font-size:14px; font-weight:600; color:var(--srm-navy);">Jamais</div>
+                    </div>
+                </div>
+
+                <!-- Résultat dernier cycle -->
+                <div id="agent-dernier-resultat" style="display:none;" class="alert alert-success" style="margin-bottom:16px;">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <span id="agent-dernier-resultat-texte"></span>
+                </div>
+
+                <!-- Bouton tester -->
+                <button class="btn btn-primary btn-full" onclick="testerAgentAuto()" id="btn-tester-auto">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    ▶ Tester maintenant — lancer un cycle immédiatement
+                </button>
+
+                <div class="feedback" id="fb-auto"></div>
+            </div>
+        </div>
+
         <!-- Carte 1 : Configuration seuil -->
         <div class="section-card">
             <div class="section-head">
@@ -1206,7 +1263,7 @@
             </div>
         </div>
 
-        <!-- Carte 2 : Lancer la détection -->
+        <!-- Carte 2 : Lancer la détection (mode manuel) -->
         <div class="section-card">
             <div class="section-head">
                 <div class="section-head-ico" style="background:rgba(30,49,85,.08);color:var(--srm-navy-light);">
@@ -1216,12 +1273,12 @@
                     </svg>
                 </div>
                 <div>
-                    <h3>Lancer la détection</h3>
-                    <p>Analyse automatique de tous les clients — comparaison des 2 derniers mois</p>
+                    <h3>Mode manuel — Détection à la demande</h3>
+                    <p>Analyse et envoi contrôlés par l'administrateur</p>
                 </div>
             </div>
             <div class="section-body">
-                <!-- NOUVEAU : Toggle Mode détection -->
+                <!-- Toggle Mode détection -->
                 <div style="display:flex; gap:10px; margin-bottom:16px; align-items:center; flex-wrap:wrap;">
                     <span style="font-size:13px; font-weight:600; color:var(--srm-navy);">Mode de détection :</span>
                     <div style="display:flex; gap:6px;">
@@ -1465,7 +1522,7 @@
         setTimeout(function() { el.classList.remove('show'); }, 5000);
     }
 
-    // ── NOUVEAU : Mode de détection ──
+    // ── Mode de détection (manuel) ──
     function setMode(mode) {
         modeDetection = mode;
         var btnPrecedent = document.getElementById('btn-mode-precedent');
@@ -1475,6 +1532,93 @@
         var desc = document.getElementById('mode-description');
         if (desc) {
             desc.textContent = mode === 'precedent' ? 'Comparaison avec le mois précédent' : 'Comparaison avec la moyenne des 6 derniers mois — moins de fausses alertes';
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    // AGENT AUTOMATIQUE
+    // ═══════════════════════════════════════════════
+
+    async function chargerStatutAuto() {
+        try {
+            const res = await fetch('/api/admin/agent/statut-auto');
+            const data = await res.json();
+
+            const badge = document.getElementById('agent-statut-badge');
+            const dot = document.getElementById('agent-dot');
+            const texte = document.getElementById('agent-statut-texte');
+            const btnTgl = document.getElementById('btn-toggle-agent');
+
+            if (data.actif) {
+                badge.style.background = 'rgba(121,173,102,.12)';
+                badge.style.color = 'var(--srm-green-dark)';
+                badge.style.borderColor = 'rgba(121,173,102,.25)';
+                dot.style.background = 'var(--srm-green)';
+                texte.textContent = '✅ Agent actif';
+                btnTgl.textContent = '⏸ Désactiver';
+            } else {
+                badge.style.background = 'rgba(30,49,85,.06)';
+                badge.style.color = 'var(--srm-gray)';
+                badge.style.borderColor = 'var(--srm-border)';
+                dot.style.background = 'var(--srm-gray)';
+                texte.textContent = '⏸ Agent inactif';
+                btnTgl.textContent = '▶ Activer';
+            }
+
+            document.getElementById('agent-prochain').textContent = data.prochain_run || 'Non planifié';
+            document.getElementById('agent-derniere').textContent = data.derniere_execution || 'Jamais';
+
+            if (data.dernier_resultat) {
+                const div = document.getElementById('agent-dernier-resultat');
+                div.style.display = 'flex';
+                const estSucces = data.dernier_resultat === 'succes';
+                div.className = 'alert ' + (estSucces ? 'alert-success' : 'alert-warn');
+                document.getElementById('agent-dernier-resultat-texte').textContent = estSucces
+                    ? `Dernier cycle : ${data.nb_detectes} détecté(s) — ${data.nb_envoyes} email(s) envoyé(s)`
+                    : `Dernier cycle : ${data.dernier_resultat}`;
+            } else {
+                const div = document.getElementById('agent-dernier-resultat');
+                if (div) div.style.display = 'none';
+            }
+        } catch(e) {
+            console.error('Erreur statut agent:', e);
+        }
+    }
+
+    async function toggleAgentAuto() {
+        const actif = document.getElementById('agent-statut-texte').textContent.includes('actif');
+        await fetch('/api/admin/agent/toggle-auto', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ activer: !actif })
+        });
+        chargerStatutAuto();
+    }
+
+    async function testerAgentAuto() {
+        const btn = document.getElementById('btn-tester-auto');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Cycle en cours…';
+        showFeedback('fb-auto', '⏳ Agent en cours d\'exécution…', 'ok');
+
+        try {
+            const res = await fetch('/api/admin/agent/lancer-auto', { method: 'POST' });
+            const data = await res.json();
+
+            if (data.succes) {
+                showFeedback('fb-auto', `✅ Cycle terminé — ${data.nb_detectes} détecté(s) · ${data.nb_envoyes} email(s) envoyé(s)`, 'ok');
+                chargerStatutAuto();
+                if (document.getElementById('onglet-historique').classList.contains('active')) {
+                    chargerHistorique();
+                }
+            } else {
+                showFeedback('fb-auto', '❌ Erreur lors du test.', 'err');
+            }
+        } catch(e) {
+            showFeedback('fb-auto', '❌ Erreur lors du test.', 'err');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '▶ Tester maintenant — lancer un cycle immédiatement';
         }
     }
 
@@ -1673,7 +1817,7 @@
     document.getElementById('new-password-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') saveNewPassword(); });
 
     // ═══════════════════════════════════════════════
-    // AGENT ALERTES
+    // AGENT ALERTES (Mode manuel)
     // ═══════════════════════════════════════════════
 
     async function chargerSeuil() {
@@ -1700,7 +1844,6 @@
         if (data.succes) showFeedback('fb-seuil', '✅ Seuil sauvegardé : ' + seuil + '%', 'ok');
     }
 
-    // MODIFIÉ : lancerDetection avec mode
     async function lancerDetection() {
         var btn = document.getElementById('btn-detecter');
         btn.disabled = true;
@@ -1807,7 +1950,7 @@
     async function chargerHistorique() {
         var tbody = document.getElementById('tbody-historique');
         if (!tbody) return;
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr>';
+        tbody.innerHTML = '</table><td colspan="6" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr>';
         
         try {
             var res = await fetch('/api/admin/agent/historique?limit=50');
@@ -1930,8 +2073,9 @@
         }
     }
 
-    // Initialiser le mode par défaut
+    // Initialisations
     setMode('precedent');
+    chargerStatutAuto();
     toggleContrat();
 </script>
 </body>
