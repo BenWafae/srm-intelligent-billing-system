@@ -216,6 +216,7 @@ Fonctionnalités communes : seuil configurable, template email HTML avec niveaux
 | Similarité texte | fuzzywuzzy | Détection des noms mal orthographiés |
 | Sécurité | hashlib SHA-256 | Hashage des mots de passe |
 | Planification | APScheduler | Agent autonome planifié |
+| Email | smtplib + SMTP Gmail | Envoi automatique des alertes |
 
 > **Note sur la migration UI :** Le prototype initial a été développé sous Streamlit, puis migré vers FastAPI + Jinja2 + Tailwind CSS pour lever les contraintes de personnalisation UI. La migration a été réalisée sans aucune régression fonctionnelle, confirmant la solidité de l'architecture modulaire adoptée dès le départ.
 
@@ -250,10 +251,14 @@ cd srm-intelligent-billing-system
 # 2. Installer les dépendances
 pip install -r requirements.txt
 
-# 3. Télécharger le modèle Mistral
+# 3. Configurer les variables d'environnement
+cp .env.example .env
+# Remplir EMAIL_SENDER et EMAIL_PASSWORD dans .env
+
+# 4. Télécharger le modèle Mistral
 ollama pull mistral
 
-# 4. Lancer l'application
+# 5. Lancer l'application
 uvicorn main:app --reload
 ```
 
