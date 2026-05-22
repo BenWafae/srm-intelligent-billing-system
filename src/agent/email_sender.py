@@ -95,7 +95,7 @@ def envoyer_alertes_masse(clients_detectes: list[dict]) -> dict:
         # Récupérer la source (défaut "manuel" si non définie)
         source = client.get("source", "manuel")
 
-        # Client sans email → on note et on passe
+        # Client sans email → on note et on passe (sans enregistrer dans l'historique)
         if not email:
             rapport["sans_email"] += 1
             rapport["details"].append({
@@ -104,9 +104,7 @@ def envoyer_alertes_masse(clients_detectes: list[dict]) -> dict:
                 "statut"       : "sans_email",
                 "erreur"       : None
             })
-            # Enregistrer dans l'historique comme sans_email AVEC LA SOURCE
-            sujet = generer_sujet_email(client)
-            enregistrer_alerte(client, sujet, False, statut="sans_email", source=source)
+            # ⚠️ NE PAS enregistrer dans l'historique pour les clients sans email
             continue
 
         # Générer le contenu
@@ -116,7 +114,7 @@ def envoyer_alertes_masse(clients_detectes: list[dict]) -> dict:
         # Envoyer
         resultat = envoyer_email(email, sujet, corps_html)
 
-        # Enregistrer dans l'historique AVEC LA SOURCE
+        # Enregistrer dans l'historique UNIQUEMENT pour les clients avec email
         enregistrer_alerte(client, sujet, resultat["succes"], source=source)
 
         if resultat["succes"]:
