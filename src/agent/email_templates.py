@@ -217,7 +217,7 @@ def generer_analyse_llm(client: dict) -> str:
     conso_prec   = client.get("conso_precedente", 0)
     mois_prec    = client.get("mois_precedent", "")
     agence       = client.get("agence", "")
-    type_service = client.get("type_service", "")  # ← AJOUT IMPORTANT
+    type_service = client.get("type_service", "")
 
     # Déterminer le type de service si non fourni
     if not type_service:
@@ -253,7 +253,7 @@ DONNÉES RÉELLES DU CLIENT (à utiliser pour le contexte UNIQUEMENT) :
 - Usage RÉEL : {usage}
 - Type service RÉEL : {type_service}
 - Mois concerné : {mois_actuel}
-- Saison approximative : {"été ☀️" if mois_actuel in ["Juin", "Juillet", "Août", "Septembre"] else ("hiver ❄️" if mois_actuel in ["Décembre", "Janvier", "Février"] else "printemps/automne")}
+- Saison approximative : {"été" if mois_actuel in ["Juin", "Juillet", "Août", "Septembre"] else ("hiver" if mois_actuel in ["Décembre", "Janvier", "Février"] else "printemps/automne")}
 - Augmentation : +{variation}%
 - Agence : {agence}
 
@@ -268,20 +268,54 @@ Phrase 1 : Une explication plausible de cette hausse, adaptée STRICTEMENT à :
 
 Phrase 2 : Un conseil pratique et bienveillant adapté à ce type de client.
 
-Contraintes FINALES :
+Contraintes FINALES IMPORTANTES :
+- Rédige les 2 phrases à la suite, SÉPARÉES PAR UN ESPACE, sans les préfixer par "Phrase 1 :" ou "Phrase 2 :"
+- Ne mets aucun numéro, aucun tiret, aucun marqueur avant les phrases
+- Commence directement par la première phrase
+- Termine la première phrase par un point, puis espace, puis la deuxième phrase
 - EXACTEMENT 2 phrases
 - Pas de "Bonjour", pas de "Cordialement", pas de signature
-- Pas de markdown (**), pas de tirets (-), pas de numérotation
+- Pas de markdown, pas d'émoticônes
 - Ton professionnel, précis et bienveillant
-- Le client est dans la région Souss-Massa (climat chaud, zone touristique)
+- Soigne l'orthographe : les apostrophes doivent être correctement placées (l'activité, d'eau, l'eau, d'énergie)
 
 RÉPONDS UNIQUEMENT AVEC LES 2 PHRASES, RIEN D'AUTRE."""
 
     try:
         analyse = _appeler_llm(prompt)
-        # Nettoyage
-        analyse = analyse.replace("1.", "").replace("2.", "").strip()
-        analyse = analyse.replace('"', '').replace("'", "")
+        
+        # Nettoyage renforcé
+        analyse = analyse.replace("1.", "").replace("2.", "")
+        analyse = analyse.replace("Phrase 1 :", "").replace("Phrase 2 :", "")
+        analyse = analyse.replace("Phrase 1", "").replace("Phrase 2", "")
+        analyse = analyse.replace("phrase 1 :", "").replace("phrase 2 :", "")
+        analyse = analyse.replace("Première phrase :", "").replace("Deuxième phrase :", "")
+        analyse = analyse.strip()
+        
+        # Supprimer les guillemets superflus
+        analyse = analyse.strip('"').strip("'")
+        
+        # Correction automatique des apostrophes mal placées
+        corrections = {
+            "lactivité": "l'activité",
+            "lactivite": "l'activité",
+            "deau": "d'eau",
+            "leau": "l'eau",
+            "denergie": "d'énergie",
+            "denergie": "d'énergie",
+            "lenergie": "l'énergie",
+            "lentreprise": "l'entreprise",
+            "lefficacite": "l'efficacité",
+            "lefficacité": "l'efficacité",
+            "dun": "d'un",
+            "une eau": "d'eau",
+        }
+        
+        for mauvais, bon in corrections.items():
+            analyse = analyse.replace(mauvais, bon)
+        
+        # Nettoyer les espaces multiples
+        analyse = " ".join(analyse.split())
         
         # Validation simple : si l'analyse contient "agricole" mais usage != AGRICOLE → rejeter
         if "agricole" in analyse.lower() and "AGRICOLE" not in usage.upper():
@@ -296,7 +330,18 @@ RÉPONDS UNIQUEMENT AVEC LES 2 PHRASES, RIEN D'AUTRE."""
             print(f"[LLM] ⚠️ Hallucination détectée (eau vs électricité) - analyse ignorée")
             return ""
         
+        # Vérifier qu'il y a bien 2 phrases (au moins 2 points ou points d'exclamation)
+        nb_phrases = analyse.count('.') + analyse.count('!')
+        if nb_phrases < 2:
+            print(f"[LLM] ⚠️ Moins de 2 phrases détectées ({nb_phrases}) - analyse ignorée")
+            return ""
+        
+        # Capitaliser la première lettre
+        if analyse and len(analyse) > 0:
+            analyse = analyse[0].upper() + analyse[1:]
+        
         return analyse
+        
     except Exception as e:
         print(f"[LLM] Erreur génération analyse : {e}")
-        return ""  # fallback silencieux
+        return ""
