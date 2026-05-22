@@ -605,8 +605,81 @@ def lancer_agent_maintenant(request: Request):
         "nb_detectes"        : agent_status["nb_detectes"],
         "nb_envoyes"         : agent_status["nb_envoyes"],
     }
+@app.post("/api/admin/agent/lancer-auto-ia")
+def lancer_agent_avec_ia(request: Request):
+    """
+    Lance le cycle agent avec enrichissement IA (Mistral).
+    Même logique que lancer-auto mais les emails contiennent
+    une analyse contextuelle générée par le LLM.
+    """
+    from src.agent.agent_alertes import detecter, get_seuil
+    from src.agent.email_sender import envoyer_email
+    from src.agent.email_templates import generer_email_html, generer_sujet_email, generer_analyse_llm
+    from src.database import enregistrer_alerte, alerte_deja_envoyee
 
+    seuil = get_seuil()
+    detectes = detecter(seuil, mode="moyenne")  # mode par défaut agent auto
 
+    nb_detectes = len(detectes)
+    nb_envoyes = 0
+    nb_sans_email = 0
+    nb_erreurs = 0
+
+    for client in detectes:
+        # ⭐ AJOUT 1 : Déterminer le type_service à partir de l'unité ou du service
+        unite = client.get("unite", "")
+        if "m³" in unite or "m3" in unite:
+            client["type_service"] = "eau"
+        else:
+            client["type_service"] = "électricité"
+        
+        # ⭐ AJOUT 2 : Si usage est manquant ou vide, mettre une valeur par défaut
+        if not client.get("usage"):
+            client["usage"] = "non spécifié"
+        
+        # Vérifier doublon
+        if alerte_deja_envoyee(client["numero_contrat"], client["mois_actuel"]):
+            print(f"[IA] Doublon ignoré : {client['nom_client']} — {client['mois_actuel']}")
+            continue
+
+        client["source"] = "auto"
+        sujet = generer_sujet_email(client)
+
+        if not client.get("email"):
+            nb_sans_email += 1
+            enregistrer_alerte(client, sujet, False, statut="sans_email", source="auto")
+            continue
+
+        # Générer analyse LLM — fallback silencieux si Mistral indisponible
+        analyse = generer_analyse_llm(client)
+        print(f"[IA] Analyse pour {client['nom_client']} : {analyse[:100]}..." if analyse else f"[IA] Pas d'analyse pour {client['nom_client']}")
+
+        # Générer email enrichi
+        corps_html = generer_email_html(client, analyse_ia=analyse if analyse else None)
+
+        # Envoyer
+        resultat = envoyer_email(client["email"], sujet, corps_html)
+        enregistrer_alerte(client, sujet, resultat["succes"], source="auto")
+
+        if resultat["succes"]:
+            nb_envoyes += 1
+        else:
+            nb_erreurs += 1
+            print(f"[IA] Erreur envoi {client['nom_client']} : {resultat['erreur']}")
+
+    # Mettre à jour le statut agent
+    from datetime import datetime
+    agent_status["derniere_execution"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+    agent_status["nb_detectes"] = nb_detectes
+    agent_status["nb_envoyes"] = nb_envoyes
+
+    return {
+        "succes"      : True,
+        "nb_detectes" : nb_detectes,
+        "nb_envoyes"  : nb_envoyes,
+        "nb_sans_email": nb_sans_email,
+        "nb_erreurs"  : nb_erreurs,
+    }
 @app.post("/api/admin/agent/toggle-auto")
 async def toggle_agent_auto(request: Request):
     """Active ou désactive le scheduler."""

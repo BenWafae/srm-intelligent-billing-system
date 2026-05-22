@@ -1229,7 +1229,21 @@
                     ▶ Tester maintenant — lancer un cycle immédiatement
                 </button>
 
+                <!-- NOUVEAU : Bouton Tester avec IA -->
+                <div style="margin-top:12px;">
+                    <button class="btn btn-warn btn-full" onclick="testerAgentIA()" id="btn-tester-ia">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        ✨ Tester avec IA — email enrichi par Mistral
+                    </button>
+                    <div style="margin-top:8px; font-size:11px; color:var(--srm-gray); text-align:center; font-style:italic;">
+                        Même détection Python + analyse contextuelle générée par Mistral
+                    </div>
+                </div>
+
                 <div class="feedback" id="fb-auto"></div>
+                <div class="feedback" id="fb-auto-ia"></div>
             </div>
         </div>
 
@@ -1635,6 +1649,39 @@
         }
     }
 
+    // ═══════════════════════════════════════════════
+    // NOUVEAU : TEST AGENT AVEC IA (Mistral)
+    // ═══════════════════════════════════════════════
+    async function testerAgentIA() {
+        const btn = document.getElementById('btn-tester-ia');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Mistral génère les analyses…';
+        showFeedback('fb-auto-ia', '⏳ Détection + génération IA en cours… (peut prendre quelques secondes)', 'ok');
+
+        try {
+            const res = await fetch('/api/admin/agent/lancer-auto-ia', { method: 'POST' });
+            const data = await res.json();
+
+            if (data.succes) {
+                const msg = `✅ Cycle IA terminé — ${data.nb_detectes} détecté(s) · ${data.nb_envoyes} email(s) enrichi(s) envoyé(s)` +
+                            (data.nb_sans_email > 0 ? ` · ${data.nb_sans_email} sans email` : '') +
+                            (data.nb_erreurs > 0 ? ` · ${data.nb_erreurs} erreur(s)` : '');
+                showFeedback('fb-auto-ia', msg, 'ok');
+                chargerStatutAuto();
+                if (document.getElementById('onglet-historique').classList.contains('active')) {
+                    chargerHistorique();
+                }
+            } else {
+                showFeedback('fb-auto-ia', '❌ Erreur lors du cycle IA.', 'err');
+            }
+        } catch(e) {
+            showFeedback('fb-auto-ia', '❌ Erreur de connexion (Mistral est-il lancé ?)', 'err');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '✨ Tester avec IA — email enrichi par Mistral';
+        }
+    }
+
     async function previsualiserExcel() {
         var input = document.getElementById('input-excel');
         var file = input.files[0];
@@ -1992,7 +2039,7 @@
     async function chargerHistorique() {
     var tbody = document.getElementById('tbody-historique');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">⏳ Chargement...<\/td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">⏳ Chargement...<\/td><tr>';
     
     try {
         var res = await fetch('/api/admin/agent/historique?limit=50');

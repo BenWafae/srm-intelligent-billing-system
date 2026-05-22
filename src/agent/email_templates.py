@@ -2,21 +2,7 @@
 # EMAIL TEMPLATES — Cas 1 : template fixe, zéro LLM
 # ════════════════════════════════════════════════════════════
 
-def generer_email_html(client: dict) -> str:
-    """
-    Génère un email HTML personnalisé à partir des données du client.
-    Zéro LLM — uniquement des variables injectées dans un template fixe.
-
-    Paramètre :
-        client : dict retourné par detecter_surconsommations()
-        {
-            nom_client, mois_actuel, conso_actuelle,
-            mois_precedent, conso_precedente,
-            variation_pct, unite, montant_ttc, usage, agence
-        }
-
-    Retourne : str (HTML complet de l'email)
-    """
+def generer_email_html(client: dict, analyse_ia: str = None) -> str:
 
     nom          = client.get("nom_client", "Client")
     mois_actuel  = client.get("mois_actuel", "")
@@ -29,16 +15,36 @@ def generer_email_html(client: dict) -> str:
     usage        = client.get("usage", "")
     agence       = client.get("agence", "")
 
-    # Couleur selon niveau de variation
     if variation >= 80:
-        couleur_badge = "#dc2626"   # rouge — critique
+        couleur_badge = "#dc2626"
         niveau        = "critique"
     elif variation >= 50:
-        couleur_badge = "#f97316"   # orange — élevée
+        couleur_badge = "#f97316"
         niveau        = "élevée"
     else:
-        couleur_badge = "#eab308"   # jaune — modérée
+        couleur_badge = "#eab308"
         niveau        = "modérée"
+
+    bloc_analyse = ""
+    if analyse_ia:
+        bloc_analyse = f"""
+                            <table width="100%" cellpadding="0" cellspacing="0"
+                                   style="background:#f0fdf4; border-radius:8px;
+                                          border:1px solid #bbf7d0; margin-bottom:24px;">
+                                <tr>
+                                    <td style="padding:16px 20px;">
+                                        <p style="margin:0 0 6px; font-size:12px; font-weight:bold;
+                                                  color:#15803d; text-transform:uppercase;
+                                                  letter-spacing:0.5px;">
+                                            💡 Analyse personnalisée
+                                        </p>
+                                        <p style="margin:0; font-size:14px; color:#166534;
+                                                  line-height:1.7;">
+                                            {analyse_ia}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>"""
 
     html = f"""
 <!DOCTYPE html>
@@ -49,7 +55,6 @@ def generer_email_html(client: dict) -> str:
     <title>Alerte Surconsommation — SRM Souss-Massa</title>
 </head>
 <body style="margin:0; padding:0; background:#f4f4f4; font-family: Arial, sans-serif;">
-
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4; padding: 30px 0;">
         <tr>
             <td align="center">
@@ -60,9 +65,7 @@ def generer_email_html(client: dict) -> str:
                     <!-- EN-TÊTE -->
                     <tr>
                         <td style="background:#1e3a5f; padding: 24px 32px;">
-                            <h1 style="margin:0; color:#ffffff; font-size:20px;">
-                                SRM Souss-Massa
-                            </h1>
+                            <h1 style="margin:0; color:#ffffff; font-size:20px;">SRM Souss-Massa</h1>
                             <p style="margin:4px 0 0; color:#a0b4c8; font-size:13px;">
                                 Société Régionale Multiservices
                             </p>
@@ -72,15 +75,10 @@ def generer_email_html(client: dict) -> str:
                     <!-- BADGE ALERTE -->
                     <tr>
                         <td style="padding: 28px 32px 0;">
-                            <span style="
-                                background:{couleur_badge};
-                                color:#ffffff;
-                                padding: 5px 14px;
-                                border-radius: 20px;
-                                font-size: 12px;
-                                font-weight: bold;
-                                text-transform: uppercase;
-                                letter-spacing: 0.5px;">
+                            <span style="background:{couleur_badge}; color:#ffffff;
+                                         padding: 5px 14px; border-radius: 20px;
+                                         font-size: 12px; font-weight: bold;
+                                         text-transform: uppercase; letter-spacing: 0.5px;">
                                 ⚠ Alerte surconsommation — niveau {niveau}
                             </span>
                         </td>
@@ -104,18 +102,14 @@ def generer_email_html(client: dict) -> str:
                                           border:1px solid #e2e8f0; margin-bottom:24px;">
                                 <tr style="background:#e2e8f0;">
                                     <td style="padding:10px 16px; font-size:13px;
-                                               font-weight:bold; color:#475569;">
-                                        Période
-                                    </td>
+                                               font-weight:bold; color:#475569;">Période</td>
                                     <td style="padding:10px 16px; font-size:13px;
-                                               font-weight:bold; color:#475569; text-align:right;">
-                                        Consommation
-                                    </td>
+                                               font-weight:bold; color:#475569;
+                                               text-align:right;">Consommation</td>
                                 </tr>
                                 <tr>
-                                    <td style="padding:12px 16px; font-size:14px; color:#334155;">
-                                        {mois_prec}
-                                    </td>
+                                    <td style="padding:12px 16px; font-size:14px;
+                                               color:#334155;">{mois_prec}</td>
                                     <td style="padding:12px 16px; font-size:14px;
                                                color:#334155; text-align:right;">
                                         {conso_prec} {unite}
@@ -127,18 +121,15 @@ def generer_email_html(client: dict) -> str:
                                         {mois_actuel} ← mois actuel
                                     </td>
                                     <td style="padding:12px 16px; font-size:14px;
-                                               color:#c2410c; font-weight:bold; text-align:right;">
-                                        {conso_act} {unite}
-                                    </td>
+                                               color:#c2410c; font-weight:bold;
+                                               text-align:right;">{conso_act} {unite}</td>
                                 </tr>
                                 <tr style="background:#fef2f2; border-top:1px solid #fecaca;">
-                                    <td style="padding:10px 16px; font-size:13px; color:#991b1b;">
-                                        Augmentation détectée
-                                    </td>
                                     <td style="padding:10px 16px; font-size:13px;
-                                               color:#991b1b; text-align:right; font-weight:bold;">
-                                        +{variation}%
-                                    </td>
+                                               color:#991b1b;">Augmentation détectée</td>
+                                    <td style="padding:10px 16px; font-size:13px;
+                                               color:#991b1b; text-align:right;
+                                               font-weight:bold;">+{variation}%</td>
                                 </tr>
                             </table>
 
@@ -147,15 +138,17 @@ def generer_email_html(client: dict) -> str:
                                    style="background:#eff6ff; border-radius:8px;
                                           border:1px solid #bfdbfe; margin-bottom:24px;">
                                 <tr>
-                                    <td style="padding:14px 16px; font-size:14px; color:#1e40af;">
+                                    <td style="padding:14px 16px; font-size:14px;
+                                               color:#1e40af;">
                                         💳 Montant de votre dernière facture
                                     </td>
                                     <td style="padding:14px 16px; font-size:16px;
-                                               color:#1e40af; font-weight:bold; text-align:right;">
-                                        {montant} MAD
-                                    </td>
+                                               color:#1e40af; font-weight:bold;
+                                               text-align:right;">{montant} MAD</td>
                                 </tr>
                             </table>
+
+                            {bloc_analyse}
 
                             <p style="font-size:14px; color:#555; line-height:1.7; margin:0 0 16px;">
                                 Nous vous invitons à vérifier vos installations et à contacter
@@ -183,12 +176,9 @@ def generer_email_html(client: dict) -> str:
             </td>
         </tr>
     </table>
-
 </body>
-</html>
-"""
+</html>"""
     return html
-
 
 def generer_sujet_email(client: dict) -> str:
     """
@@ -203,3 +193,110 @@ def generer_sujet_email(client: dict) -> str:
         return f"⚠ Alerte : augmentation élevée de votre consommation — {mois}"
     else:
         return f"Information : augmentation de votre consommation — {mois}"
+# ════════════════════════════════════════════════════════════
+# ENRICHISSEMENT IA — Analyse contextuelle par Mistral (Ollama)
+# ════════════════════════════════════════════════════════════
+
+def generer_analyse_llm(client: dict) -> str:
+    """
+    Génère 2 phrases d'analyse contextuelle via Mistral local (Ollama).
+    Le LLM reçoit uniquement les données déjà calculées par Python.
+    Il n'intervient PAS dans les chiffres — uniquement l'interprétation.
+
+    Retourne : str (2 phrases, texte brut)
+    Fallback  : "" si erreur — l'email part quand même sans analyse
+    """
+    from rag.intent import _appeler_llm
+
+    nom          = client.get("nom_client", "le client")
+    usage        = client.get("usage", "")
+    mois_actuel  = client.get("mois_actuel", "")
+    variation    = client.get("variation_pct", 0)
+    unite        = client.get("unite", "")
+    conso_act    = client.get("conso_actuelle", 0)
+    conso_prec   = client.get("conso_precedente", 0)
+    mois_prec    = client.get("mois_precedent", "")
+    agence       = client.get("agence", "")
+    type_service = client.get("type_service", "")  # ← AJOUT IMPORTANT
+
+    # Déterminer le type de service si non fourni
+    if not type_service:
+        type_service = "eau" if unite == "m³" else "électricité"
+
+    # Adapter les exemples selon l'usage réel
+    if "PROFESSIONNEL" in usage.upper() or "COMMERCIAL" in usage.upper():
+        conseil_exemple = """Exemple pour usage PROFESSIONNEL :
+"Cette augmentation de votre consommation peut s'expliquer par une activité accrue de votre établissement pendant cette période. Nous vous recommandons de vérifier l'état de vos équipements et d'optimiser vos plages horaires d'utilisation." """
+    elif "AGRICOLE" in usage.upper():
+        conseil_exemple = """Exemple pour usage AGRICOLE :
+"Cette hausse est cohérente avec les besoins d'irrigation pendant la saison estivale dans la région Souss-Massa. Nous vous conseillons de programmer votre pompage pendant les heures creuses et de vérifier l'étanchéité de votre réseau." """
+    elif "DOMESTIQUE" in usage.upper():
+        conseil_exemple = """Exemple pour usage DOMESTIQUE :
+"Cette augmentation peut être liée à l'utilisation de la climatisation ou du chauffage selon la saison. Pensez à vérifier vos appareils électriques et à adopter des gestes simples pour réduire votre consommation." """
+    else:
+        conseil_exemple = ""
+
+    prompt = f"""Tu es un assistant expert en efficacité énergétique pour SRM Souss-Massa (région d'Agadir, Maroc).
+
+⚠️ RÈGLES ABSOLUMENT STRICTES À RESPECTER ⚠️
+1. NE JAMAIS inventer ou modifier l'USAGE du client
+2. L'usage EXACT du client est : "{usage}"
+3. Le type de service EXACT est : "{type_service}"
+4. Si usage = PROFESSIONNEL → ne JAMAIS parler d'agriculture, de ferme, d'irrigation
+5. Si usage = PROFESSIONNEL → parler de son activité commerciale/professionnelle
+6. Si type_service = eau → parler de consommation D'EAU, pas d'électricité
+7. Si type_service = électricité → parler de consommation ÉLECTRIQUE, pas d'eau
+8. NE PAS mentionner les chiffres exacts (ils sont déjà dans le tableau)
+
+DONNÉES RÉELLES DU CLIENT (à utiliser pour le contexte UNIQUEMENT) :
+- Nom : {nom}
+- Usage RÉEL : {usage}
+- Type service RÉEL : {type_service}
+- Mois concerné : {mois_actuel}
+- Saison approximative : {"été ☀️" if mois_actuel in ["Juin", "Juillet", "Août", "Septembre"] else ("hiver ❄️" if mois_actuel in ["Décembre", "Janvier", "Février"] else "printemps/automne")}
+- Augmentation : +{variation}%
+- Agence : {agence}
+
+{conseil_exemple}
+
+Ta mission : rédige EXACTEMENT 2 phrases en français, SANS introduire d'erreur.
+
+Phrase 1 : Une explication plausible de cette hausse, adaptée STRICTEMENT à :
+   - L'usage réel : "{usage}"
+   - Le type service réel : "{type_service}"
+   - La saison du mois concerné
+
+Phrase 2 : Un conseil pratique et bienveillant adapté à ce type de client.
+
+Contraintes FINALES :
+- EXACTEMENT 2 phrases
+- Pas de "Bonjour", pas de "Cordialement", pas de signature
+- Pas de markdown (**), pas de tirets (-), pas de numérotation
+- Ton professionnel, précis et bienveillant
+- Le client est dans la région Souss-Massa (climat chaud, zone touristique)
+
+RÉPONDS UNIQUEMENT AVEC LES 2 PHRASES, RIEN D'AUTRE."""
+
+    try:
+        analyse = _appeler_llm(prompt)
+        # Nettoyage
+        analyse = analyse.replace("1.", "").replace("2.", "").strip()
+        analyse = analyse.replace('"', '').replace("'", "")
+        
+        # Validation simple : si l'analyse contient "agricole" mais usage != AGRICOLE → rejeter
+        if "agricole" in analyse.lower() and "AGRICOLE" not in usage.upper():
+            print(f"[LLM] ⚠️ Hallucination détectée (agricole vs {usage}) - analyse ignorée")
+            return ""
+        
+        if ("électrique" in analyse.lower() or "electricite" in analyse.lower()) and type_service == "eau":
+            print(f"[LLM] ⚠️ Hallucination détectée (électrique vs eau) - analyse ignorée")
+            return ""
+        
+        if ("eau" in analyse.lower() or "hydrique" in analyse.lower()) and type_service == "électricité":
+            print(f"[LLM] ⚠️ Hallucination détectée (eau vs électricité) - analyse ignorée")
+            return ""
+        
+        return analyse
+    except Exception as e:
+        print(f"[LLM] Erreur génération analyse : {e}")
+        return ""  # fallback silencieux
