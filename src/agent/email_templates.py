@@ -261,6 +261,11 @@ DONNÉES RÉELLES DU CLIENT (à utiliser pour le contexte UNIQUEMENT) :
 
 Ta mission : rédige EXACTEMENT 2 phrases en français, SANS introduire d'erreur.
 
+⚠️ STYLE À RESPECTER :
+- Sois direct, sans formules redondantes
+- Évite : "une explication... s'explique", "une hausse... augmente", "une augmentation... augmenter"
+- Commence par : "Cette hausse est due à..." ou "L'augmentation s'explique par..."
+
 Phrase 1 : Une explication plausible de cette hausse, adaptée STRICTEMENT à :
    - L'usage réel : "{usage}"
    - Le type service réel : "{type_service}"
@@ -309,6 +314,8 @@ RÉPONDS UNIQUEMENT AVEC LES 2 PHRASES, RIEN D'AUTRE."""
             "lefficacité": "l'efficacité",
             "dun": "d'un",
             "une eau": "d'eau",
+            "printanps": "printemps",
+             "printanp": "printemps",
         }
         
         for mauvais, bon in corrections.items():
