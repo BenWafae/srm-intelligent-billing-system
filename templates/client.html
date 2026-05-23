@@ -1243,21 +1243,78 @@
     }
     document.addEventListener('click', () => { document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open')); });
 
-    async function demanderRenommage(id) {
-        document.getElementById(`menu-${id}`).classList.remove('open');
-        const el = document.getElementById(`titre-${id}`);
-        const ancien = el.textContent;
-        el.innerHTML = `<input class="rename-input" id="ri-${id}" value="${ancien}" style="font-size:13px;padding:3px 6px;border-radius:6px;border:1px solid var(--srm-gold);width:100%;background:var(--bg-input);color:var(--text-primary);"/>`;
-        const inp = document.getElementById(`ri-${id}`);
-        inp.focus(); inp.select();
-        const save = async () => {
-            const v = inp.value.trim() || ancien;
-            el.textContent = v;
-            await fetch('/api/client/conversation/renommer', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ conversation_id: id, nouveau_titre: v }) });
-        };
-        inp.addEventListener('blur', save);
-        inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') el.textContent = ancien; });
+    // ==================== RENOMMAGE CORRIGÉ (avec badge) ====================
+function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+async function demanderRenommage(id) {
+    // Fermer le menu dropdown
+    const menu = document.getElementById(`menu-${id}`);
+    if (menu) menu.classList.remove('open');
+    
+    // Récupérer l'élément du titre
+    const titreSpan = document.getElementById(`titre-${id}`);
+    if (!titreSpan) return;
+    
+    // Sauvegarder le badge (XLS ou PDF)
+    const badgeSpan = titreSpan.querySelector('.conv-badge');
+    const badgeHTML = badgeSpan ? badgeSpan.outerHTML : '';
+    
+    // Extraire le texte sans le badge
+    let ancienTexte = titreSpan.textContent;
+    if (badgeSpan) {
+        ancienTexte = ancienTexte.replace(/^(XLS|PDF)\s/, '');
     }
+    
+    // Remplacer par un input
+    titreSpan.innerHTML = badgeHTML + '<input class="rename-input" id="ri-' + id + '" value="' + escapeHtml(ancienTexte) + '" style="font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--srm-gold);width:100%;background:var(--bg-input);color:var(--text-primary);outline:none;"/>';
+    
+    const inp = document.getElementById('ri-' + id);
+    if (!inp) return;
+    
+    inp.focus();
+    inp.select();
+    
+    const save = async function() {
+        const nouvelleValeur = inp.value.trim();
+        const v = nouvelleValeur || ancienTexte;
+        titreSpan.innerHTML = badgeHTML + ' ' + escapeHtml(v);
+        
+        try {
+            await fetch('/api/employe/conversation/renommer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conversation_id: id, nouveau_titre: v })
+            });
+            // Recharger la liste des conversations pour mettre à jour
+            await chargerConversations();
+        } catch (error) {
+            console.error('Erreur lors du renommage:', error);
+        }
+    };
+    
+    const cancel = function() {
+        titreSpan.innerHTML = badgeHTML + ' ' + escapeHtml(ancienTexte);
+    };
+    
+    inp.addEventListener('blur', save);
+    inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            inp.blur();
+        }
+        if (e.key === 'Escape') {
+            cancel();
+        }
+    });
+}
 
     // ==================== MODAL DE CONFIRMATION SUPPRESSION ====================
     function showConfirmModal(message, onConfirm) {
