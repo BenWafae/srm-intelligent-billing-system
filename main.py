@@ -23,6 +23,7 @@ logging.getLogger('apscheduler').setLevel(logging.WARNING)
 app = FastAPI()  # 1. créer app
 
 app.mount("/static", StaticFiles(directory="src/assets"), name="static")  # 2. monter static
+app.mount("/js", StaticFiles(directory=os.path.join(BASE_DIR, "src", "assets", "js")), name="js")
 
 templates = Jinja2Templates(directory=str(os.path.join(BASE_DIR, "templates")))  # 3. templates
 
