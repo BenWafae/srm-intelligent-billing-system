@@ -6,10 +6,15 @@
     <title>SRM — Interface Employé | Souss-Massa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/static/js/i18n.js" defer></script>
+    <!-- theme.js DOIT être en premier pour éviter le flash -->
+    <script src="/js/theme.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
+        /* ══════════════════════════════════════
+           VARIABLES — LIGHT (défaut) - IDENTIQUE CLIENT
+        ══════════════════════════════════════ */
         :root {
             --srm-navy: #1e3155;
             --srm-navy-light: #334867;
@@ -23,62 +28,195 @@
             --srm-white: #ffffff;
             --srm-gray: #8a9ab5;
             --srm-gray-light: #c5cfdd;
+
+            --bg-body:          #faf7f0;
+            --bg-sidebar:       #ffffff;
+            --bg-main:          #faf7f0;
+            --bg-topbar:        #ffffff;
+            --bg-input:         #fafbfd;
+            --bg-input-focus:   #ffffff;
+            --bg-card:          #ffffff;
+            --bg-card-hover:    rgba(234,186,98,0.03);
+            --bg-conv-active:   linear-gradient(135deg, rgba(30,49,85,0.06), rgba(234,186,98,0.08));
+            --bg-conv-hover:    rgba(234,186,98,0.08);
+            --bg-logo-inner:    linear-gradient(135deg, #f8f5f0, #fefcf8);
+            --bg-user-card:     linear-gradient(135deg, #f8f5f0, #fefcf8);
+            --bg-user-card-hover: linear-gradient(135deg, #fefcf8, #fff8ee);
+            --bg-msg-user:      linear-gradient(135deg, var(--srm-navy), var(--srm-navy-light));
+            --bg-msg-assistant: #ffffff;
+            --bg-suggestion:    #ffffff;
+            --bg-download:      #ffffff;
+            --bg-inputzone:     #ffffff;
+            --bg-inputwrap:     rgba(234,186,98,0.05);
+            --bg-inputwrap-focus: #ffffff;
+            --bg-welc-orb:      linear-gradient(135deg, var(--srm-navy), var(--srm-gold-dark));
+            --bg-dropdown:      #ffffff;
+            --bg-send-btn:      linear-gradient(135deg, var(--srm-navy), var(--srm-gold-dark));
+            --bg-new-conv:      linear-gradient(135deg, var(--srm-navy), #2a456e);
+            --bg-btn-dl:        linear-gradient(135deg, var(--srm-navy), #2a456e);
+            --bg-role-pill:     rgba(234,186,98,0.08);
+            --bg-dd-item-hover: rgba(234,186,98,0.1);
+            --bg-select:        rgba(234,186,98,0.08);
+            --bg-msg-avatar:    linear-gradient(135deg, var(--srm-gold-light), #fef8ee);
+
+            --border-sidebar:   rgba(234,186,98,0.15);
+            --border-logo:      rgba(234,186,98,0.25);
+            --border-conv:      transparent;
+            --border-conv-active: rgba(234,186,98,0.3);
+            --border-conv-hover: rgba(234,186,98,0.2);
+            --border-input:     rgba(234,186,98,0.2);
+            --border-input-focus: var(--srm-gold);
+            --border-card:      rgba(234,186,98,0.2);
+            --border-msg-ass:   rgba(234,186,98,0.2);
+            --border-msg-avatar: rgba(234,186,98,0.3);
+            --border-suggestion: rgba(234,186,98,0.25);
+            --border-user-card: rgba(234,186,98,0.25);
+            --border-dd:        rgba(234,186,98,0.2);
+            --border-topbar:    rgba(234,186,98,0.15);
+            --border-dash:      rgba(234,186,98,0.1);
+            --border-select:    rgba(234,186,98,0.25);
+            --border-role:      rgba(234,186,98,0.15);
+            --border-sep:       rgba(234,186,98,0.12);
+
+            --text-primary:     #1e3155;
+            --text-secondary:   #334867;
+            --text-muted:       #8a9ab5;
+            --text-light:       #c5cfdd;
+            --text-gold:        #d4a44a;
+            --text-msg-user:    #ffffff;
+            --text-msg-ass:     #1e3155;
+            --text-conv-title:  #1e3155;
+            --text-conv-date:   #8a9ab5;
+            --text-dash-val:    #1e3155;
+            --text-welcome-sub: #8a9ab5;
+
+            --shadow-sidebar:   4px 0 20px rgba(30,49,85,0.05);
+            --shadow-send-btn:  0 4px 12px rgba(30,49,85,0.25);
+            --shadow-send-hover: 0 6px 18px rgba(30,49,85,0.35);
+            --shadow-new-conv:  0 4px 12px rgba(30,49,85,0.2);
+            --shadow-dl-btn:    0 2px 8px rgba(30,49,85,0.2);
+            --shadow-avatar:    0 4px 10px rgba(30,49,85,0.2);
+            --shadow-welc-orb:  0 12px 28px rgba(30,49,85,0.2);
+            --shadow-modal:     0 32px 64px rgba(30,49,85,0.2);
+        }
+
+        /* ══════════════════════════════════════
+           VARIABLES — DARK (IDENTIQUE CLIENT)
+        ══════════════════════════════════════ */
+        [data-theme="dark"] {
+            --bg-body:          #0d1525;
+            --bg-sidebar:       #111c30;
+            --bg-main:          #0d1525;
+            --bg-topbar:        #111c30;
+            --bg-input:         #182236;
+            --bg-input-focus:   #1e2d45;
+            --bg-card:          #111c30;
+            --bg-card-hover:    rgba(234,186,98,0.04);
+            --bg-conv-active:   linear-gradient(135deg, rgba(234,186,98,0.1), rgba(30,49,85,0.35));
+            --bg-conv-hover:    rgba(234,186,98,0.07);
+            --bg-logo-inner:    linear-gradient(135deg, #182236, #1a2840);
+            --bg-user-card:     linear-gradient(135deg, #182236, #1a2840);
+            --bg-user-card-hover: linear-gradient(135deg, #1e2d45, #253554);
+            --bg-msg-user:      linear-gradient(135deg, #253554, #2f4268);
+            --bg-msg-assistant: #111c30;
+            --bg-suggestion:    #182236;
+            --bg-download:      #111c30;
+            --bg-inputzone:     #111c30;
+            --bg-inputwrap:     rgba(234,186,98,0.04);
+            --bg-inputwrap-focus: #182236;
+            --bg-welc-orb:      linear-gradient(135deg, #253554, #c49030);
+            --bg-dropdown:      #182236;
+            --bg-send-btn:      linear-gradient(135deg, #253554, #b07d2a);
+            --bg-new-conv:      linear-gradient(135deg, #253554, #2f4268);
+            --bg-btn-dl:        linear-gradient(135deg, #253554, #2f4268);
+            --bg-role-pill:     rgba(234,186,98,0.06);
+            --bg-dd-item-hover: rgba(234,186,98,0.08);
+            --bg-select:        rgba(234,186,98,0.06);
+            --bg-msg-avatar:    linear-gradient(135deg, #2a3a55, #1e2d45);
+
+            --border-sidebar:   rgba(234,186,98,0.08);
+            --border-logo:      rgba(234,186,98,0.12);
+            --border-conv:      transparent;
+            --border-conv-active: rgba(234,186,98,0.2);
+            --border-conv-hover: rgba(234,186,98,0.12);
+            --border-input:     rgba(234,186,98,0.15);
+            --border-input-focus: var(--srm-gold);
+            --border-card:      rgba(234,186,98,0.1);
+            --border-msg-ass:   rgba(234,186,98,0.12);
+            --border-msg-avatar: rgba(234,186,98,0.15);
+            --border-suggestion: rgba(234,186,98,0.15);
+            --border-user-card: rgba(234,186,98,0.12);
+            --border-dd:        rgba(234,186,98,0.1);
+            --border-topbar:    rgba(234,186,98,0.08);
+            --border-dash:      rgba(234,186,98,0.06);
+            --border-select:    rgba(234,186,98,0.15);
+            --border-role:      rgba(234,186,98,0.08);
+            --border-sep:       rgba(234,186,98,0.08);
+
+            --text-primary:     #e8f0ff;
+            --text-secondary:   #8ba4cc;
+            --text-muted:       #5a7499;
+            --text-light:       #2e4268;
+            --text-gold:        #eaba62;
+            --text-msg-user:    #e8f0ff;
+            --text-msg-ass:     #c8d8ef;
+            --text-conv-title:  #c8d8ef;
+            --text-conv-date:   #5a7499;
+            --text-dash-val:    #e8f0ff;
+            --text-welcome-sub: #5a7499;
+
+            --shadow-sidebar:   4px 0 20px rgba(0,0,0,0.3);
+            --shadow-send-btn:  0 4px 12px rgba(0,0,0,0.4);
+            --shadow-send-hover: 0 6px 18px rgba(0,0,0,0.5);
+            --shadow-new-conv:  0 4px 12px rgba(0,0,0,0.3);
+            --shadow-dl-btn:    0 2px 8px rgba(0,0,0,0.3);
+            --shadow-avatar:    0 4px 10px rgba(0,0,0,0.35);
+            --shadow-welc-orb:  0 12px 28px rgba(0,0,0,0.4);
+            --shadow-modal:     0 32px 64px rgba(0,0,0,0.6);
+        }
+
+        /* Transition globale thème */
+        html {
+            transition: background-color .35s ease;
+        }
+        body,
+        .sidebar, .main, .tabs-header, .tab-btn,
+        .sidebar-logo, .logo-inner, .btn-new-conv,
+        .conv-list, .conv-item, .conv-icon, .conv-menu-btn,
+        .dropdown-menu, .dd-item, .sidebar-footer, .user-card,
+        .user-menu-dropdown, .user-menu-item, .lang-submenu, .lang-option,
+        .chat-area, .welcome-state, .welcome-orb,
+        .suggestion-chip, .msg-assistant-wrap, .msg-assistant, .msg-avatar,
+        .input-zone, .input-wrap, .btn-send,
+        .modal-panel, .form-input, .btn-primary, .btn-secondary,
+        .theme-toggle-btn, .filter-pill, .info-banner, .filter-bar,
+        .custom-select, .label-fichier {
+            transition: background .35s ease, background-color .35s ease,
+                        border-color .35s ease, color .35s ease,
+                        box-shadow .35s ease !important;
         }
 
         body {
             font-family: 'DM Sans', sans-serif;
-            background: var(--srm-cream);
+            background: var(--bg-body);
             margin: 0;
             height: 100vh;
             overflow: hidden;
         }
 
-        body.rtl {
-            direction: rtl;
-        }
-
-        /* Cercles de fond animés */
-        .bg-particles {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: floatUp linear infinite;
-            opacity: 0;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 0.5; }
-            100% { transform: translateY(-80px) rotate(360deg); opacity: 0; }
-        }
-
         /* ===== SIDEBAR ===== */
         .sidebar {
             width: 280px;
-            background: var(--srm-white);
-            border-right: 1px solid rgba(234,186,98,0.15);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-sidebar);
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
             position: relative;
             height: 100vh;
             overflow: visible;
-            box-shadow: 4px 0 20px rgba(30,49,85,0.05);
-            z-index: 2;
+            box-shadow: var(--shadow-sidebar);
         }
-        
-        body.rtl .sidebar {
-            border-right: none;
-            border-left: 1px solid rgba(234,186,98,0.15);
-        }
-        
         .sidebar::before {
             content: '';
             position: absolute;
@@ -88,21 +226,19 @@
         }
 
         /* Logo section */
-        .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid rgba(234,186,98,0.12); }
+        .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border-sep); }
         .logo-inner {
             display: flex; align-items: center; gap: 12px;
             padding: 10px 14px;
-            background: linear-gradient(135deg, #f8f5f0, #fefcf8);
-            border: 1px solid rgba(234,186,98,0.25);
+            background: var(--bg-logo-inner);
+            border: 1px solid var(--border-logo);
             border-radius: 16px;
             transition: all 0.3s ease;
         }
-        body.rtl .logo-inner { flex-direction: row-reverse; }
-        .logo-inner:hover { border-color: var(--srm-gold); box-shadow: 0 4px 12px rgba(234,186,98,0.1); transform: translateX(3px); }
-        body.rtl .logo-inner:hover { transform: translateX(-3px); }
+        .logo-inner:hover { border-color: var(--srm-gold); box-shadow: 0 4px 12px rgba(234,186,98,0.1); }
         .logo-img { width: 38px; height: 38px; object-fit: contain; border-radius: 10px; }
-        .logo-text { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: var(--srm-navy); }
-        .logo-sub { font-size: 10px; color: var(--srm-gold-dark); margin-top: 2px; font-weight: 500; }
+        .logo-text { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; color: var(--text-primary); }
+        .logo-sub { font-size: 10px; color: var(--text-gold); margin-top: 2px; font-weight: 500; }
 
         /* Nouvelle conversation */
         .btn-new-conv {
@@ -110,7 +246,7 @@
             width: calc(100% - 32px);
             display: flex; align-items: center; gap: 10px;
             padding: 11px 16px;
-            background: linear-gradient(135deg, var(--srm-navy), #2a456e);
+            background: var(--bg-new-conv);
             border: none;
             border-radius: 14px;
             cursor: pointer;
@@ -118,22 +254,20 @@
             font-weight: 500;
             color: white;
             font-family: 'DM Sans', sans-serif;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 12px rgba(30,49,85,0.2);
+            box-shadow: var(--shadow-new-conv);
         }
-        body.rtl .btn-new-conv { flex-direction: row-reverse; }
         .btn-new-conv:hover {
             transform: translateY(-2px);
-            background: linear-gradient(135deg, #2a456e, var(--srm-navy));
+            background: var(--bg-new-conv);
             box-shadow: 0 8px 20px rgba(30,49,85,0.25);
+            filter: brightness(1.1);
         }
         .btn-new-conv svg { stroke: white; }
 
         .conv-section-label {
             font-size: 10px; font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--srm-gold-dark);
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--text-gold);
             padding: 16px 20px 8px;
         }
 
@@ -143,7 +277,6 @@
             gap: 8px;
             padding: 0 16px 12px;
         }
-        body.rtl .filter-group { flex-direction: row-reverse; }
         .filter-pill {
             flex: 1;
             text-align: center;
@@ -151,20 +284,20 @@
             font-size: 11px;
             font-weight: 500;
             border-radius: 20px;
-            background: rgba(234,186,98,0.08);
-            color: var(--srm-navy-soft);
+            background: var(--bg-role-pill);
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s ease;
             border: 1px solid transparent;
         }
         .filter-pill.active {
-            background: linear-gradient(135deg, var(--srm-navy), var(--srm-navy-light));
+            background: var(--bg-new-conv);
             color: white;
             box-shadow: 0 2px 8px rgba(30,49,85,0.2);
         }
         .filter-pill:hover:not(.active) {
-            background: rgba(234,186,98,0.15);
-            border-color: rgba(234,186,98,0.3);
+            background: var(--bg-dd-item-hover);
+            border-color: var(--border-conv-active);
         }
 
         /* Liste conversations */
@@ -178,6 +311,8 @@
         }
         .conv-list::-webkit-scrollbar { width: 3px; }
         .conv-list::-webkit-scrollbar-thumb { background: var(--srm-gold-light); border-radius: 3px; }
+        [data-theme="dark"] .conv-list { scrollbar-color: #2a3a55 transparent; }
+        [data-theme="dark"] .conv-list::-webkit-scrollbar-thumb { background: #2a3a55; }
 
         .conv-item {
             position: relative;
@@ -188,22 +323,10 @@
             border-radius: 12px;
             cursor: pointer;
             margin-bottom: 4px;
-            transition: all 0.2s ease;
-            border: 1px solid transparent;
-            animation: fadeSlideIn 0.3s ease backwards;
+            border: 1px solid var(--border-conv);
         }
-        body.rtl .conv-item { flex-direction: row-reverse; }
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        body.rtl .conv-item { animation: fadeSlideInRtl 0.3s ease backwards; }
-        @keyframes fadeSlideInRtl {
-            from { opacity: 0; transform: translateX(10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .conv-item:hover { background: rgba(234,186,98,0.08); border-color: rgba(234,186,98,0.2); }
-        .conv-item.active { background: linear-gradient(135deg, rgba(30,49,85,0.06), rgba(234,186,98,0.08)); border-color: rgba(234,186,98,0.3); }
+        .conv-item:hover { background: var(--bg-conv-hover); border-color: var(--border-conv-hover); }
+        .conv-item.active { background: var(--bg-conv-active); border-color: var(--border-conv-active); }
 
         .conv-icon {
             width: 32px; height: 32px;
@@ -217,9 +340,9 @@
         .conv-icon svg { width: 14px; height: 14px; stroke: var(--srm-gold); }
 
         .conv-content { flex: 1; overflow: hidden; }
-        .conv-title { font-size: 13px; color: var(--srm-navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
-        .conv-item.active .conv-title { color: var(--srm-gold-dark); font-weight: 600; }
-        .conv-date { font-size: 10px; color: var(--srm-gray); margin-top: 2px; }
+        .conv-title { font-size: 13px; color: var(--text-conv-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+        .conv-item.active .conv-title { color: var(--text-gold); font-weight: 600; }
+        .conv-date { font-size: 10px; color: var(--text-conv-date); margin-top: 2px; }
 
         .conv-badge {
             font-size: 9px;
@@ -228,8 +351,8 @@
             margin-right: 8px;
             background: rgba(121,173,102,0.12);
             color: var(--srm-green-dark);
+            display: inline-block;
         }
-        body.rtl .conv-badge { margin-right: 0; margin-left: 8px; }
         .conv-badge.pdf { background: rgba(212,164,74,0.12); color: var(--srm-gold-dark); }
 
         .conv-menu-btn {
@@ -242,12 +365,11 @@
             background: none;
             border: none;
             cursor: pointer;
-            color: var(--srm-gray);
-            transition: all 0.15s;
+            color: var(--text-muted);
             flex-shrink: 0;
         }
         .conv-item:hover .conv-menu-btn { opacity: 1; }
-        .conv-menu-btn:hover { background: rgba(234,186,98,0.15); color: var(--srm-gold-dark); }
+        .conv-menu-btn:hover { background: var(--bg-dd-item-hover); color: var(--text-gold); }
 
         /* Dropdown menu */
         .dropdown-menu {
@@ -255,18 +377,15 @@
             position: absolute;
             right: 12px;
             top: 40px;
-            background: var(--srm-white);
-            border: 1px solid rgba(234,186,98,0.2);
+            background: var(--bg-dropdown);
+            border: 1px solid var(--border-dd);
             border-radius: 12px;
             padding: 6px;
             z-index: 100;
             width: 140px;
             box-shadow: 0 12px 28px rgba(30,49,85,0.12);
         }
-        body.rtl .dropdown-menu {
-            right: auto;
-            left: 12px;
-        }
+        [data-theme="dark"] .dropdown-menu { box-shadow: 0 12px 28px rgba(0,0,0,0.5); }
         .dropdown-menu.open { display: block; animation: menuFade 0.15s ease; }
         @keyframes menuFade { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -276,19 +395,17 @@
             border-radius: 10px;
             font-size: 12px;
             cursor: pointer;
-            color: var(--srm-navy-light);
-            transition: all 0.15s;
+            color: var(--text-secondary);
         }
-        body.rtl .dd-item { flex-direction: row-reverse; }
-        .dd-item:hover { background: rgba(234,186,98,0.1); color: var(--srm-gold-dark); }
+        .dd-item:hover { background: var(--bg-dd-item-hover); color: var(--text-gold); }
         .dd-item.danger { color: #e74c3c; }
         .dd-item.danger:hover { background: rgba(231,76,60,0.08); }
-        .dd-divider { height: 1px; background: rgba(234,186,98,0.15); margin: 6px 0; }
+        .dd-divider { height: 1px; background: var(--border-sep); margin: 6px 0; }
 
         /* Sidebar footer - user card */
         .sidebar-footer { 
             padding: 16px; 
-            border-top: 1px solid rgba(234,186,98,0.12); 
+            border-top: 1px solid var(--border-sep); 
             position: relative;
             overflow: visible;
         }
@@ -297,14 +414,12 @@
             align-items: center;
             gap: 12px;
             padding: 10px 14px;
-            background: linear-gradient(135deg, #f8f5f0, #fefcf8);
-            border: 1px solid rgba(234,186,98,0.25);
+            background: var(--bg-user-card);
+            border: 1px solid var(--border-user-card);
             border-radius: 14px;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        body.rtl .user-card { flex-direction: row-reverse; }
-        .user-card:hover { border-color: var(--srm-gold); background: linear-gradient(135deg, #fefcf8, #fff8ee); transform: translateY(-1px); }
+        .user-card:hover { border-color: var(--srm-gold); background: var(--bg-user-card-hover); }
         .user-avatar {
             width: 38px; height: 38px;
             border-radius: 12px;
@@ -316,10 +431,10 @@
             font-weight: 600;
             color: white;
             flex-shrink: 0;
-            box-shadow: 0 4px 10px rgba(30,49,85,0.2);
+            box-shadow: var(--shadow-avatar);
         }
-        .user-name { font-size: 13px; font-weight: 600; color: var(--srm-navy); }
-        .user-role { font-size: 10px; color: var(--srm-gold-dark); font-weight: 500; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 10px; color: var(--text-gold); font-weight: 500; }
 
         .user-menu-dropdown {
             display: none;
@@ -328,13 +443,14 @@
             left: 16px;
             right: 16px;
             margin-bottom: 8px;
-            background: var(--srm-white);
-            border: 1px solid rgba(234,186,98,0.2);
+            background: var(--bg-dropdown);
+            border: 1px solid var(--border-dd);
             border-radius: 16px;
             padding: 8px;
             z-index: 200;
             box-shadow: 0 12px 32px rgba(30,49,85,0.15);
         }
+        [data-theme="dark"] .user-menu-dropdown { box-shadow: 0 12px 32px rgba(0,0,0,0.5); }
         .user-menu-dropdown.open { display: block; animation: menuSlideUp 0.2s ease; }
         @keyframes menuSlideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -346,15 +462,13 @@
             border-radius: 12px;
             cursor: pointer;
             font-size: 13px;
-            color: var(--srm-navy-light);
-            transition: all 0.15s;
+            color: var(--text-secondary);
         }
-        body.rtl .user-menu-item { flex-direction: row-reverse; }
-        .user-menu-item:hover { background: rgba(234,186,98,0.1); color: var(--srm-gold-dark); }
+        .user-menu-item:hover { background: var(--bg-dd-item-hover); color: var(--text-gold); }
         .user-menu-item svg { width: 16px; height: 16px; stroke: currentColor; }
         .user-menu-item.danger { color: #e74c3c; }
         .user-menu-item.danger:hover { background: rgba(231,76,60,0.08); }
-        .user-menu-divider { height: 1px; background: rgba(234,186,98,0.15); margin: 6px 0; }
+        .user-menu-divider { height: 1px; background: var(--border-sep); margin: 6px 0; }
 
         /* Lang submenu */
         .lang-submenu {
@@ -363,14 +477,15 @@
             bottom: 100%;
             left: 0;
             margin-bottom: 8px;
-            background: var(--srm-white);
-            border: 1px solid rgba(234,186,98,0.2);
+            background: var(--bg-dropdown);
+            border: 1px solid var(--border-dd);
             border-radius: 12px;
             padding: 6px;
             min-width: 140px;
             box-shadow: 0 8px 24px rgba(30,49,85,0.15);
             z-index: 1000;
         }
+        [data-theme="dark"] .lang-submenu { box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
         .lang-submenu.show { display: block; animation: menuSlideUp 0.2s ease; }
         .lang-option {
             display: flex;
@@ -380,38 +495,36 @@
             border-radius: 10px;
             cursor: pointer;
             font-size: 12px;
-            color: var(--srm-navy-light);
-            transition: all 0.15s;
+            color: var(--text-secondary);
         }
-        body.rtl .lang-option { flex-direction: row-reverse; }
-        .lang-option:hover { background: rgba(234,186,98,0.1); color: var(--srm-gold-dark); }
-        .lang-option.active { background: rgba(234,186,98,0.15); color: var(--srm-gold-dark); font-weight: 500; }
+        .lang-option:hover { background: var(--bg-dd-item-hover); color: var(--text-gold); }
+        .lang-option.active { background: var(--bg-role-pill); color: var(--text-gold); font-weight: 500; }
 
         /* ===== MAIN PANEL ===== */
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--srm-cream); position: relative; z-index: 1; }
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-main); }
 
         /* Header tabs */
         .tabs-header {
-            background: var(--srm-white);
-            border-bottom: 1px solid rgba(234,186,98,0.15);
+            background: var(--bg-topbar);
+            border-bottom: 1px solid var(--border-topbar);
             padding: 0 24px;
             display: flex;
             gap: 8px;
+            align-items: center;
         }
-        body.rtl .tabs-header { flex-direction: row-reverse; }
         .tab-btn {
             padding: 14px 24px;
             font-size: 13px;
             font-weight: 600;
-            color: var(--srm-gray);
+            color: var(--text-muted);
             cursor: pointer;
             transition: all 0.2s;
             border-bottom: 2px solid transparent;
             position: relative;
         }
-        .tab-btn:hover { color: var(--srm-gold-dark); }
+        .tab-btn:hover { color: var(--text-gold); }
         .tab-btn.active {
-            color: var(--srm-navy);
+            color: var(--text-primary);
             border-bottom-color: var(--srm-gold);
         }
         .tab-btn.active::after {
@@ -422,6 +535,51 @@
             right: 0;
             height: 2px;
             background: linear-gradient(90deg, var(--srm-gold), var(--srm-green));
+        }
+
+        /* Bouton dark mode */
+        .theme-toggle-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border-input);
+            background: var(--bg-input);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-left: auto;
+        }
+        .theme-toggle-btn:hover {
+            border-color: var(--srm-gold);
+            background: var(--bg-input-focus);
+            color: var(--srm-gold);
+            transform: rotate(20deg) scale(1.1);
+            box-shadow: 0 0 12px rgba(212,164,74,0.2);
+        }
+        .theme-toggle-btn svg { width: 17px; height: 17px; stroke-width: 1.8; }
+        .icon-sun { display: none; }
+        .icon-moon { display: block; }
+        [data-theme="dark"] .icon-sun { display: block; }
+        [data-theme="dark"] .icon-moon { display: none; }
+
+        /* Halo animé */
+        .theme-toggle-btn::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(234,186,98,0.1) 0%, transparent 70%);
+            pointer-events: none;
+            animation: themeHalo 3s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+        .theme-toggle-btn:hover::before { opacity: 1; }
+        @keyframes themeHalo {
+            0%,100% { transform: scale(1); opacity: .4; }
+            50%      { transform: scale(1.3); opacity: .9; }
         }
 
         /* Onglet content */
@@ -438,7 +596,7 @@
         /* Info banner */
         .info-banner {
             background: linear-gradient(135deg, rgba(30,49,85,0.05), rgba(234,186,98,0.08));
-            border: 1px solid rgba(234,186,98,0.2);
+            border: 1px solid var(--border-card);
             border-radius: 16px;
             padding: 14px 20px;
             margin-bottom: 20px;
@@ -452,23 +610,21 @@
             display: flex;
             gap: 16px;
         }
-        body.rtl .stat-group { flex-direction: row-reverse; }
         .stat-badge {
-            background: var(--srm-white);
+            background: var(--bg-card);
             padding: 6px 14px;
             border-radius: 30px;
             font-size: 12px;
             font-weight: 500;
-            color: var(--srm-navy);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            color: var(--text-primary);
+            border: 1px solid var(--border-card);
         }
-        .stat-badge span { color: var(--srm-gold-dark); font-weight: 700; margin-right: 4px; }
-        body.rtl .stat-badge span { margin-right: 0; margin-left: 4px; }
+        .stat-badge span { color: var(--text-gold); font-weight: 700; margin-right: 4px; }
 
         /* Filter bar */
         .filter-bar {
-            background: var(--srm-white);
-            border: 1px solid rgba(234,186,98,0.15);
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
             border-radius: 14px;
             padding: 12px 16px;
             margin-bottom: 20px;
@@ -478,32 +634,39 @@
             flex-wrap: wrap;
             gap: 12px;
         }
-        body.rtl .filter-bar { flex-direction: row-reverse; }
         .filter-label {
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
-            color: var(--srm-gold-dark);
+            color: var(--text-gold);
         }
         .custom-select {
-            background: var(--srm-cream);
-            border: 1px solid rgba(234,186,98,0.25);
+            background: var(--bg-select);
+            border: 1px solid var(--border-select);
             border-radius: 10px;
             padding: 8px 14px;
             font-size: 13px;
-            color: var(--srm-navy);
+            color: var(--text-primary);
             outline: none;
             cursor: pointer;
-            transition: all 0.2s;
         }
         .custom-select:focus { border-color: var(--srm-gold); box-shadow: 0 0 0 3px rgba(234,186,98,0.1); }
+
+        .label-fichier {
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: var(--bg-role-pill);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-role);
+        }
 
         /* Chat area */
         .chat-area {
             flex: 1;
             overflow-y: auto;
             padding: 16px;
-            background: rgba(255,255,255,0.6);
+            background: var(--bg-main);
             border-radius: 20px;
             margin-bottom: 16px;
             display: flex;
@@ -513,23 +676,21 @@
         }
         .chat-area::-webkit-scrollbar { width: 4px; }
         .chat-area::-webkit-scrollbar-thumb { background: var(--srm-gold-light); border-radius: 4px; }
+        [data-theme="dark"] .chat-area { scrollbar-color: #2a3a55 transparent; }
+        [data-theme="dark"] .chat-area::-webkit-scrollbar-thumb { background: #2a3a55; }
 
         /* Messages */
         .msg-user {
             align-self: flex-end;
             max-width: 70%;
             padding: 12px 18px;
-            background: linear-gradient(135deg, var(--srm-navy), var(--srm-navy-light));
+            background: var(--bg-msg-user);
             border-radius: 20px 20px 4px 20px;
             font-size: 14px;
-            color: white;
+            color: var(--text-msg-user);
             line-height: 1.5;
-            box-shadow: 0 4px 14px rgba(30,49,85,0.2);
+            box-shadow: var(--shadow-send-btn);
             animation: messageSlide 0.3s ease;
-        }
-        body.rtl .msg-user {
-            border-radius: 20px 20px 20px 4px;
-            align-self: flex-start;
         }
         .msg-assistant-wrap {
             display: flex;
@@ -538,30 +699,29 @@
             max-width: 75%;
             animation: messageSlide 0.3s ease;
         }
-        body.rtl .msg-assistant-wrap { flex-direction: row-reverse; }
         @keyframes messageSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .msg-avatar {
             width: 34px; height: 34px;
             border-radius: 12px;
-            background: linear-gradient(135deg, var(--srm-gold-light), #fef8ee);
-            border: 1px solid rgba(234,186,98,0.3);
+            background: var(--bg-msg-avatar);
+            border: 1px solid var(--border-msg-avatar);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
-        .msg-avatar svg { width: 16px; height: 16px; stroke: var(--srm-gold-dark); }
+        .msg-avatar svg { width: 16px; height: 16px; stroke: var(--text-gold); }
         .msg-assistant {
             padding: 12px 18px;
-            background: var(--srm-white);
-            border: 1px solid rgba(234,186,98,0.2);
+            background: var(--bg-msg-assistant);
+            border: 1px solid var(--border-msg-ass);
             border-radius: 4px 20px 20px 20px;
             font-size: 14px;
-            color: var(--srm-navy);
+            color: var(--text-msg-ass);
             line-height: 1.6;
             box-shadow: 0 2px 10px rgba(30,49,85,0.05);
         }
-        body.rtl .msg-assistant { border-radius: 20px 4px 20px 20px; }
+        [data-theme="dark"] .msg-assistant { box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
 
         /* Loading dots */
         .msg-loading { display: flex; gap: 6px; align-items: center; padding: 12px 18px; }
@@ -583,39 +743,39 @@
         .welcome-orb {
             width: 70px; height: 70px;
             border-radius: 24px;
-            background: linear-gradient(135deg, var(--srm-navy), var(--srm-gold-dark));
+            background: var(--bg-welc-orb);
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
-            box-shadow: 0 12px 28px rgba(30,49,85,0.2);
+            box-shadow: var(--shadow-welc-orb);
             animation: pulseGlow 2s ease-in-out infinite;
         }
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 12px 28px rgba(30,49,85,0.2); transform: scale(1); }
+            0%, 100% { box-shadow: var(--shadow-welc-orb); transform: scale(1); }
             50% { box-shadow: 0 16px 36px rgba(234,186,98,0.3); transform: scale(1.02); }
         }
-        .welcome-title { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; color: var(--srm-navy); margin-bottom: 8px; }
-        .welcome-sub { font-size: 14px; color: var(--srm-gray); max-width: 360px; line-height: 1.6; }
+        .welcome-orb svg { width: 28px; height: 28px; stroke: var(--srm-gold); }
+        .welcome-title { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+        .welcome-sub { font-size: 14px; color: var(--text-welcome-sub); max-width: 360px; line-height: 1.6; }
 
         /* Suggestions */
         .suggestions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 24px; }
-        body.rtl .suggestions { flex-direction: row-reverse; }
         .suggestion-chip {
             padding: 8px 18px;
-            background: var(--srm-white);
-            border: 1.5px solid rgba(234,186,98,0.25);
+            background: var(--bg-suggestion);
+            border: 1.5px solid var(--border-suggestion);
             border-radius: 30px;
             font-size: 12px;
             font-weight: 500;
-            color: var(--srm-navy-light);
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s ease;
         }
         .suggestion-chip:hover {
             border-color: var(--srm-gold);
-            color: var(--srm-gold-dark);
-            background: rgba(234,186,98,0.08);
+            color: var(--text-gold);
+            background: var(--bg-dd-item-hover);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(234,186,98,0.15);
         }
@@ -626,14 +786,12 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            background: var(--srm-white);
-            border: 1.5px solid rgba(234,186,98,0.2);
+            background: var(--bg-inputwrap);
+            border: 1.5px solid var(--border-input);
             border-radius: 20px;
             padding: 6px 6px 6px 20px;
-            transition: all 0.2s;
         }
-        body.rtl .input-wrap { flex-direction: row-reverse; padding: 6px 20px 6px 6px; }
-        .input-wrap:focus-within { border-color: var(--srm-gold); box-shadow: 0 0 0 3px rgba(234,186,98,0.15); }
+        .input-wrap:focus-within { border-color: var(--border-input-focus); background: var(--bg-inputwrap-focus); box-shadow: 0 0 0 3px rgba(234,186,98,0.15); }
         .input-zone input {
             flex: 1;
             background: none;
@@ -641,81 +799,84 @@
             outline: none;
             font-size: 14px;
             font-family: 'DM Sans', sans-serif;
-            color: var(--srm-navy);
+            color: var(--text-primary);
         }
-        .input-zone input::placeholder { color: var(--srm-gray-light); }
+        .input-zone input::placeholder { color: var(--text-muted); }
         .btn-send {
             width: 42px; height: 42px;
             border-radius: 16px;
-            background: linear-gradient(135deg, var(--srm-navy), var(--srm-gold-dark));
+            background: var(--bg-send-btn);
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(30,49,85,0.25);
+            box-shadow: var(--shadow-send-btn);
         }
-        .btn-send:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(30,49,85,0.35); }
+        .btn-send:hover { transform: scale(1.05); box-shadow: var(--shadow-send-hover); }
         .btn-send:active { transform: scale(0.97); }
+        .btn-send svg { width: 16px; height: 16px; stroke: white; stroke-width: 2.5; }
 
         /* Modal */
         .modal-panel {
-            background: var(--srm-white);
+            background: var(--bg-card);
             border-radius: 28px;
             max-width: 480px;
             width: 90%;
-            box-shadow: 0 32px 64px rgba(30,49,85,0.2);
+            box-shadow: var(--shadow-modal);
             animation: modalFade 0.2s ease;
             overflow: hidden;
         }
         @keyframes modalFade { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
         .modal-header {
             padding: 24px 28px;
-            border-bottom: 1px solid rgba(234,186,98,0.15);
-            background: linear-gradient(135deg, #fefcf8, var(--srm-white));
+            border-bottom: 1px solid var(--border-sep);
+            background: var(--bg-user-card);
         }
-        .modal-header h3 { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: var(--srm-navy); margin: 0; }
-        .modal-body { padding: 28px; }
+        .modal-header h3 { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: var(--text-primary); margin: 0; }
+        .modal-header p { color: var(--text-muted); margin-top: 5px; font-size: 13px; }
+        .modal-body { padding: 28px; background: var(--bg-card); }
         .form-group { margin-bottom: 24px; }
-        .form-label { font-size: 13px; font-weight: 600; color: var(--srm-navy); margin-bottom: 8px; display: block; }
+        .form-label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; display: block; }
         .form-input {
             width: 100%;
             padding: 12px 16px;
-            border: 1.5px solid rgba(234,186,98,0.25);
+            border: 1.5px solid var(--border-input);
             border-radius: 14px;
             font-size: 14px;
             font-family: 'DM Sans', sans-serif;
-            transition: all 0.2s;
+            background: var(--bg-input);
+            color: var(--text-primary);
             outline: none;
         }
-        .form-input:focus { border-color: var(--srm-gold); box-shadow: 0 0 0 3px rgba(234,186,98,0.1); }
+        .form-input:focus { border-color: var(--srm-gold); box-shadow: 0 0 0 3px rgba(234,186,98,0.1); background: var(--bg-input-focus); }
         .btn-primary {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, var(--srm-navy), #2a456e);
+            background: var(--bg-new-conv);
             color: white;
             border: none;
             border-radius: 14px;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,49,85,0.3); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,49,85,0.3); filter: brightness(1.1); }
         .btn-secondary {
             width: 100%;
             padding: 12px;
-            background: var(--srm-white);
-            color: var(--srm-gray);
-            border: 1.5px solid rgba(234,186,98,0.25);
+            background: var(--bg-card);
+            color: var(--text-muted);
+            border: 1.5px solid var(--border-input);
             border-radius: 14px;
             font-weight: 500;
             font-size: 14px;
             cursor: pointer;
             margin-top: 12px;
         }
-        .btn-secondary:hover { border-color: var(--srm-gold); color: var(--srm-gold-dark); background: rgba(234,186,98,0.05); }
+        .btn-secondary:hover { border-color: var(--srm-gold); color: var(--text-gold); background: var(--bg-dd-item-hover); }
+        .error-message { font-size: 12px; color: #e74c3c; margin-top: 8px; display: none; }
+        .success-message { font-size: 12px; color: var(--srm-green); margin-top: 8px; display: none; }
 
         @media (max-width: 768px) {
             .sidebar { width: 260px; }
@@ -725,8 +886,6 @@
     </style>
 </head>
 <body>
-
-<div class="bg-particles" id="particles"></div>
 
 <div class="flex h-screen w-full overflow-hidden">
 
@@ -758,7 +917,7 @@
         </div>
 
         <div class="conv-list" id="conv-list">
-            <p style="font-size:12px;color:var(--srm-gray);text-align:center;padding:16px;">Chargement...</p>
+            <p style="font-size:12px;color:var(--text-muted);text-align:center;padding:16px;">Chargement...</p>
         </div>
 
         <div class="sidebar-footer">
@@ -814,6 +973,24 @@
         <div class="tabs-header">
             <div class="tab-btn active" onclick="afficherOnglet('excel')" data-i18n="excel_tab">📊 Base clients Excel</div>
             <div class="tab-btn" onclick="afficherOnglet('pdf')" data-i18n="pdf_tab">📄 Analyse facture PDF</div>
+            
+            <!-- Bouton toggle dark mode -->
+            <button class="theme-toggle-btn" onclick="srmTheme.toggle()" aria-label="Mode sombre" title="Mode sombre">
+                <svg class="icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                </svg>
+                <svg class="icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
         </div>
 
         <!-- ONGLET EXCEL -->
@@ -841,13 +1018,13 @@
                     <option value="{{ f }}">{{ f }}</option>
                     {% endfor %}
                 </select>
-                <span id="label-fichier" class="text-xs text-srm-gold-dark bg-white px-3 py-1.5 rounded-full border border-srm-gold/20" data-i18n="all_database">🌐 Toute la base</span>
+                <span id="label-fichier" class="label-fichier">🌐 Toute la base</span>
             </div>
 
             <div id="chat-excel" class="chat-area">
                 <div class="welcome-state">
                     <div class="welcome-orb">
-                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                         </svg>
                     </div>
@@ -865,7 +1042,7 @@
                 <div class="input-wrap">
                     <input type="text" id="input-excel" data-i18n-placeholder="excel_placeholder" placeholder="Ex: Qui consomme le plus ? Liste des clients..." autocomplete="off"/>
                     <button class="btn-send" onclick="envoyerExcel()">
-                        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <line x1="22" y1="2" x2="11" y2="13"/>
                             <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                         </svg>
@@ -892,7 +1069,7 @@
             <div id="chat-pdf" class="chat-area">
                 <div class="welcome-state">
                     <div class="welcome-orb">
-                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </div>
@@ -910,7 +1087,7 @@
                 <div class="input-wrap">
                     <input type="text" id="input-pdf" data-i18n-placeholder="pdf_placeholder" placeholder="Ex: Quel est le montant ? Quelle est la période ?" autocomplete="off"/>
                     <button class="btn-send" onclick="envoyerPdf()">
-                        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
+                        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <line x1="22" y1="2" x2="11" y2="13"/>
                             <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                         </svg>
@@ -922,11 +1099,11 @@
 </div>
 
 <!-- MODALE COMPTE -->
-<div id="modal-compte" style="display:none;position:fixed;inset:0;background:rgba(30,49,85,0.3);backdrop-filter:blur(3px);z-index:1000;align-items:center;justify-content:center;">
+<div id="modal-compte" style="display:none;position:fixed;inset:0;background:rgba(13,21,37,0.6);backdrop-filter:blur(3px);z-index:1000;align-items:center;justify-content:center;">
     <div class="modal-panel">
         <div class="modal-header">
             <h3 data-i18n="my_account">Mon compte</h3>
-            <p style="font-size:13px;color:var(--srm-gray);margin-top:5px;" data-i18n="account_subtitle">Modifier mon mot de passe</p>
+            <p data-i18n="account_subtitle">Modifier mon mot de passe</p>
         </div>
         <div class="modal-body">
             <div class="form-group">
@@ -934,8 +1111,8 @@
                 <input type="password" id="ancien-mdp" class="form-input" data-i18n-placeholder="current_password" placeholder="Mot de passe actuel">
                 <input type="password" id="nouveau-mdp" class="form-input" style="margin-top:16px;" data-i18n-placeholder="new_password" placeholder="Nouveau mot de passe">
                 <input type="password" id="confirmation-mdp" class="form-input" style="margin-top:16px;" data-i18n-placeholder="confirm_password" placeholder="Confirmer le mot de passe">
-                <div id="error-msg" style="color:#e74c3c;font-size:12px;margin-top:8px;display:none;"></div>
-                <div id="success-msg" style="color:var(--srm-green);font-size:12px;margin-top:8px;display:none;" data-i18n="password_changed">Mot de passe modifié avec succès !</div>
+                <div id="error-msg" class="error-message"></div>
+                <div id="success-msg" class="success-message" data-i18n="password_changed">Mot de passe modifié avec succès !</div>
             </div>
             <button class="btn-primary" onclick="changerMotDePasse()" data-i18n="save">Enregistrer</button>
             <button class="btn-secondary" onclick="fermerCompte()" data-i18n="close">Fermer</button>
@@ -944,19 +1121,6 @@
 </div>
 
 <script>
-    // ==================== PARTICULES ====================
-    const pc = document.getElementById('particles');
-    const cols = ['rgba(212,164,74,', 'rgba(121,173,102,', 'rgba(30,49,85,'];
-    for(let i=0;i<25;i++){
-        const d = document.createElement('div');
-        d.className = 'particle';
-        const sz = Math.random()*5+2;
-        const c = cols[Math.floor(Math.random()*cols.length)];
-        const op = (Math.random()*.28+.06).toFixed(2);
-        d.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;background:${c}${op});animation-duration:${Math.random()*14+10}s;animation-delay:${Math.random()*14}s;`;
-        pc.appendChild(d);
-    }
-
     // ==================== FONCTION DATE MULTILANGUE ====================
     function formaterDate(dateStr, lang = null) {
         if (!dateStr) return '';
@@ -1050,6 +1214,15 @@
         }
     });
 
+    // ==================== FORMATAGE RÉPONSES ====================
+    function formaterReponseAssistant(texte) {
+        if (!texte) return '';
+        let formatted = texte.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--srm-gold-dark)">$1</strong>');
+        formatted = formatted.replace(/\n/g, '<br>');
+        return formatted;
+    }
+
     // ==================== CONVERSATIONS ====================
     async function chargerConversations() {
         const url = filtreSidebar === 'all'
@@ -1060,13 +1233,14 @@
         conversationsData = data.conversations || [];
         const container = document.getElementById('conv-list');
         if (!conversationsData.length) {
-            container.innerHTML = '<p style="font-size:12px;color:var(--srm-gray);text-align:center;padding:16px;" data-i18n="no_conversations">Aucune conversation</p>';
+            container.innerHTML = '<p style="font-size:12px;color:var(--text-muted);text-align:center;padding:16px;" data-i18n="no_conversations">Aucune conversation</p>';
             return;
         }
         container.innerHTML = '';
         conversationsData.forEach(conv => {
             container.appendChild(creerItemConv(conv));
         });
+        setTimeout(refreshAllDates, 100);
     }
 
     function creerItemConv(conv) {
@@ -1083,7 +1257,7 @@
         div.innerHTML = `
             <div class="conv-icon"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div>
             <div class="conv-content" onclick="chargerConversation(${conv.id}, '${conv.mode}')">
-                <div class="conv-title"><span class="conv-badge ${badgeClass}">${badgeLabel}</span> ${escapeHtml(conv.titre)}</div>
+                <div class="conv-title" id="titre-${conv.id}"><span class="conv-badge ${badgeClass}">${badgeLabel}</span> ${escapeHtml(conv.titre)}</div>
                 <div class="conv-date" data-original-date="${conv.date_creation}">${formattedDate}</div>
             </div>
             <button class="conv-menu-btn" onclick="toggleMenu(event,${conv.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
@@ -1104,25 +1278,41 @@
     }
     document.addEventListener('click', () => { document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open')); });
 
+    // ==================== RENOMMAGE CORRIGÉ (comme client) ====================
     async function demanderRenommage(id) {
         document.getElementById(`menu-${id}`).classList.remove('open');
-        const el = document.getElementById(`titre-${id}`);
-        if(!el) return;
-        const ancien = el.textContent.replace(/^(XLS|PDF)\s/, '');
-        const badge = el.querySelector('.conv-badge')?.outerHTML || '';
-        el.innerHTML = `<input class="rename-input" id="ri-${id}" value="${ancien}" style="font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--srm-gold);width:100%;"/>`;
+        const titreSpan = document.getElementById(`titre-${id}`);
+        if(!titreSpan) return;
+        
+        // Sauvegarder le badge
+        const badgeSpan = titreSpan.querySelector('.conv-badge');
+        const badgeHTML = badgeSpan ? badgeSpan.outerHTML : '';
+        // Extraire le texte sans le badge
+        let ancienTexte = titreSpan.textContent;
+        if (badgeSpan) {
+            ancienTexte = ancienTexte.replace(/^(XLS|PDF)\s/, '');
+        }
+        
+        titreSpan.innerHTML = `${badgeHTML} <input class="rename-input" id="ri-${id}" value="${escapeHtml(ancienTexte)}" style="font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid var(--srm-gold);width:100%;background:var(--bg-input);color:var(--text-primary);"/>`;
+        
         const inp = document.getElementById(`ri-${id}`);
         inp.focus(); inp.select();
+        
         const save = async () => { 
-            const v = inp.value.trim() || ancien; 
-            el.innerHTML = badge + ' ' + v;
+            const v = inp.value.trim() || ancienTexte; 
+            titreSpan.innerHTML = `${badgeHTML} ${escapeHtml(v)}`;
             await fetch('/api/employe/conversation/renommer', { 
                 method: 'POST', headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({ conversation_id: id, nouveau_titre: v }) 
             });
+            await chargerConversations();
         };
+        
         inp.addEventListener('blur', save);
-        inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') el.innerHTML = badge + ' ' + ancien; });
+        inp.addEventListener('keydown', e => { 
+            if (e.key === 'Enter') { inp.blur(); }
+            if (e.key === 'Escape') { titreSpan.innerHTML = `${badgeHTML} ${escapeHtml(ancienTexte)}`; }
+        });
     }
 
     // ==================== MODAL DE CONFIRMATION SUPPRESSION ====================
@@ -1132,7 +1322,7 @@
         modal.style.cssText = `
             position: fixed;
             inset: 0;
-            background: rgba(30,49,85,0.4);
+            background: rgba(13,21,37,0.65);
             backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
@@ -1141,116 +1331,43 @@
             animation: modalFade 0.2s ease;
         `;
         
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const bg = isDark ? '#111c30' : '#ffffff';
+        const textColor = isDark ? '#e8f0ff' : '#1e3155';
+        const subColor = isDark ? '#5a7499' : '#8a9ab5';
+        const borderColor = isDark ? 'rgba(234,186,98,0.1)' : 'rgba(234,186,98,0.15)';
+        
         modal.innerHTML = `
-            <div style="
-                background: var(--srm-white);
-                border-radius: 24px;
-                max-width: 400px;
-                width: 90%;
-                overflow: hidden;
-                box-shadow: 0 20px 40px rgba(30,49,85,0.25);
-                animation: modalFade 0.2s ease;
-            ">
-                <div style="
-                    padding: 24px 28px;
-                    background: linear-gradient(135deg, #fefcf8, var(--srm-white));
-                    border-bottom: 1px solid rgba(234,186,98,0.15);
-                ">
-                    <div style="
-                        width: 48px;
-                        height: 48px;
-                        background: rgba(231,76,60,0.1);
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        margin-bottom: 16px;
-                    ">
+            <div style="background:${bg};border-radius:24px;max-width:400px;width:90%;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.4);animation:modalScaleIn 0.2s ease;border:1px solid ${borderColor};">
+                <div style="padding:24px 28px;background:${isDark ? '#182236' : '#fefcf8'};border-bottom:1px solid ${borderColor};">
+                    <div style="width:48px;height:48px;background:rgba(231,76,60,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2">
                             <polyline points="3 6 5 6 21 6"/>
                             <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
                             <path d="M10 11v6M14 11v6"/>
                         </svg>
                     </div>
-                    <h3 style="
-                        font-family: 'Sora', sans-serif;
-                        font-size: 18px;
-                        font-weight: 700;
-                        color: var(--srm-navy);
-                        margin: 0 0 4px 0;
-                    " data-i18n="confirm_delete_title">Confirmer la suppression</h3>
-                    <p style="
-                        font-size: 13px;
-                        color: var(--srm-gray);
-                        margin: 0;
-                        line-height: 1.5;
-                    ">${message}</p>
+                    <h3 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:700;color:${textColor};margin:0 0 4px 0;" data-i18n="confirm_delete_title">Confirmer la suppression</h3>
+                    <p style="font-size:13px;color:${subColor};margin:0;line-height:1.5;">${message}</p>
                 </div>
-                <div style="padding: 20px 28px 24px; display: flex; gap: 12px;">
-                    <button id="confirm-cancel" style="
-                        flex: 1;
-                        padding: 12px;
-                        background: var(--srm-white);
-                        border: 1.5px solid rgba(234,186,98,0.25);
-                        border-radius: 14px;
-                        font-size: 14px;
-                        font-weight: 500;
-                        color: var(--srm-gray);
-                        cursor: pointer;
-                        transition: all 0.2s;
-                    " onmouseover="this.style.borderColor='var(--srm-gold)'; this.style.color='var(--srm-gold-dark)'" 
-                      onmouseout="this.style.borderColor='rgba(234,186,98,0.25)'; this.style.color='var(--srm-gray)'" data-i18n="cancel">
-                        Annuler
-                    </button>
-                    <button id="confirm-delete" style="
-                        flex: 1;
-                        padding: 12px;
-                        background: linear-gradient(135deg, #e74c3c, #c0392b);
-                        border: none;
-                        border-radius: 14px;
-                        font-size: 14px;
-                        font-weight: 600;
-                        color: white;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                    " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(231,76,60,0.4)'"
-                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" data-i18n="delete">
-                        Supprimer
-                    </button>
+                <div style="padding:20px 28px 24px;display:flex;gap:12px;background:${bg};">
+                    <button id="confirm-cancel" style="flex:1;padding:12px;background:${bg};border:1.5px solid ${borderColor};border-radius:14px;font-size:14px;font-weight:500;color:${subColor};cursor:pointer;transition:all .2s;" data-i18n="cancel">Annuler</button>
+                    <button id="confirm-delete" style="flex:1;padding:12px;background:linear-gradient(135deg,#e74c3c,#c0392b);border:none;border-radius:14px;font-size:14px;font-weight:600;color:white;cursor:pointer;transition:all .2s;" data-i18n="delete">Supprimer</button>
                 </div>
-            </div>
-        `;
+            </div>`;
         
         document.body.appendChild(modal);
         
-        const modalContent = modal.querySelector('div > div');
-        modalContent.style.animation = 'modalScaleIn 0.2s ease';
-        
-        document.getElementById('confirm-cancel').onclick = () => {
-            modal.remove();
-        };
-        
-        document.getElementById('confirm-delete').onclick = () => {
-            modal.remove();
-            onConfirm();
-        };
-        
-        modal.onclick = (e) => {
-            if (e.target === modal) modal.remove();
-        };
+        document.getElementById('confirm-cancel').onclick = () => modal.remove();
+        document.getElementById('confirm-delete').onclick = () => { modal.remove(); onConfirm(); };
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
     }
 
-    // Ajouter l'animation CSS
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes modalScaleIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-    `;
-    document.head.appendChild(style);
+    const styleConfirm = document.createElement('style');
+    styleConfirm.textContent = `@keyframes modalScaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}`;
+    document.head.appendChild(styleConfirm);
 
-    // ==================== FONCTION SUPPRIMER MODIFIÉE ====================
+    // ==================== SUPPRIMER CONVERSATION ====================
     async function supprimerConversation(id) {
         document.getElementById(`menu-${id}`)?.classList.remove('open');
         
@@ -1284,6 +1401,7 @@
         });
     }
 
+    // ==================== CHARGER CONVERSATION ====================
     async function chargerConversation(id, mode) {
         const res = await fetch(`/api/employe/messages/${id}`);
         const data = await res.json();
@@ -1304,15 +1422,16 @@
         document.querySelector(`[data-id="${id}"]`)?.classList.add('active');
     }
 
+    // ==================== NOUVELLE CONVERSATION ====================
     function nouvelleConversation() {
         if (modeActif === 'excel') {
             convIdExcel = null;
             historiqueExcel = [];
-            document.getElementById('chat-excel').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="welcome-title" data-i18n="welcome_title_employee">Bonjour 👋</div><div class="welcome-sub" data-i18n="welcome_sub_excel">Posez une question sur la base clients Excel.</div><div class="suggestions"><div class="suggestion-chip" onclick="sendSuggestionExcel('Qui consomme le plus ?')" data-i18n="suggestion_top_consumer">Qui consomme le plus ?</div><div class="suggestion-chip" onclick="sendSuggestionExcel('Liste des clients avec factures impayées')" data-i18n="suggestion_unpaid_clients">Clients impayés</div></div></div>`;
+            document.getElementById('chat-excel').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="welcome-title" data-i18n="welcome_title_employee">Bonjour 👋</div><div class="welcome-sub" data-i18n="welcome_sub_excel">Posez une question sur la base clients Excel.</div><div class="suggestions"><div class="suggestion-chip" onclick="sendSuggestionExcel('Qui consomme le plus ?')" data-i18n="suggestion_top_consumer">Qui consomme le plus ?</div><div class="suggestion-chip" onclick="sendSuggestionExcel('Liste des clients avec factures impayées')" data-i18n="suggestion_unpaid_clients">Clients impayés</div></div></div>`;
         } else {
             convIdPdf = null;
             historiquePdf = [];
-            document.getElementById('chat-pdf').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div class="welcome-title" data-i18n="pdf_welcome_title">Analyse PDF</div><div class="welcome-sub" data-i18n="pdf_welcome_sub">Sélectionnez un client et posez une question.</div><div class="suggestions"><div class="suggestion-chip" onclick="sendSuggestionPdf('Quel est le montant total ?')" data-i18n="suggestion_total_amount">Montant total</div><div class="suggestion-chip" onclick="sendSuggestionPdf('Période de facturation')" data-i18n="suggestion_period">Période</div></div></div>`;
+            document.getElementById('chat-pdf').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div class="welcome-title" data-i18n="pdf_welcome_title">Analyse PDF</div><div class="welcome-sub" data-i18n="pdf_welcome_sub">Sélectionnez un client et posez une question.</div><div class="suggestions"><div class="suggestion-chip" onclick="sendSuggestionPdf('Quel est le montant total ?')" data-i18n="suggestion_total_amount">Montant total</div><div class="suggestion-chip" onclick="sendSuggestionPdf('Période de facturation')" data-i18n="suggestion_period">Période</div></div></div>`;
         }
         document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
     }
@@ -1320,6 +1439,7 @@
     function sendSuggestionExcel(text) { document.getElementById('input-excel').value = text; envoyerExcel(); }
     function sendSuggestionPdf(text) { document.getElementById('input-pdf').value = text; envoyerPdf(); }
 
+    // ==================== AFFICHER BULLE ====================
     function afficherBulle(chatId, role, texte) {
         const chat = document.getElementById(chatId);
         const empty = chat.querySelector('.welcome-state');
@@ -1333,14 +1453,14 @@
             wrap.innerHTML = `<div class="msg-avatar"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="msg-assistant msg-loading"><div class="dot-pulse"></div><div class="dot-pulse"></div><div class="dot-pulse"></div></div>`;
         } else {
             wrap.className = 'msg-assistant-wrap';
-            let formatted = texte.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--srm-gold-dark)">$1</strong>').replace(/\n/g, '<br>');
-            wrap.innerHTML = `<div class="msg-avatar"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="msg-assistant">${formatted}</div>`;
+            wrap.innerHTML = `<div class="msg-avatar"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="msg-assistant">${formaterReponseAssistant(texte)}</div>`;
         }
         chat.appendChild(wrap);
         chat.scrollTop = chat.scrollHeight;
         return wrap;
     }
 
+    // ==================== CHANGEMENT ONGLET ====================
     function afficherOnglet(onglet) {
         modeActif = onglet;
         document.getElementById('onglet-excel').classList.toggle('active', onglet === 'excel');
@@ -1350,6 +1470,7 @@
         else document.querySelector('.tab-btn:last-child').classList.add('active');
     }
 
+    // ==================== FILTRAGE SIDEBAR ====================
     function filtrerSidebar(mode) {
         filtreSidebar = mode;
         document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
@@ -1357,20 +1478,22 @@
         chargerConversations();
     }
 
+    // ==================== FICHIER EXCEL ====================
     function changerFichier() {
         nomFichierActif = document.getElementById('select-fichier').value;
         const allDatabaseText = (typeof i18n !== 'undefined' && i18n) ? i18n.t('all_database') : 'Toute la base';
         document.getElementById('label-fichier').innerHTML = nomFichierActif ? `📁 ${nomFichierActif}` : `🌐 ${allDatabaseText}`;
-        document.getElementById('chat-excel').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="welcome-title">Fichier modifié</div><div class="welcome-sub">Posez une question sur ${nomFichierActif || 'toute la base'}.</div></div>`;
+        document.getElementById('chat-excel').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg></div><div class="welcome-title">Fichier modifié</div><div class="welcome-sub">Posez une question sur ${nomFichierActif || 'toute la base'}.</div></div>`;
         convIdExcel = null; historiqueExcel = [];
     }
 
     function changerClientPdf() {
         clientPdfActif = document.getElementById('select-client-pdf').value;
-        document.getElementById('chat-pdf').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" width="28" height="28"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div class="welcome-title">Client: ${clientPdfActif}</div><div class="welcome-sub">Posez une question sur sa facture.</div></div>`;
+        document.getElementById('chat-pdf').innerHTML = `<div class="welcome-state"><div class="welcome-orb"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div class="welcome-title">Client: ${clientPdfActif}</div><div class="welcome-sub">Posez une question sur sa facture.</div></div>`;
         convIdPdf = null; historiquePdf = [];
     }
 
+    // ==================== ENVOYER MESSAGES ====================
     async function envoyerExcel() {
         const input = document.getElementById('input-excel');
         const question = input.value.trim();
@@ -1492,7 +1615,6 @@
                 refreshAllDates();
                 updateRenameDeleteTexts();
                 chargerConversations();
-                // Mettre à jour le texte du label fichier
                 const allDatabaseText = i18n.t('all_database');
                 const labelFichier = document.getElementById('label-fichier');
                 if (labelFichier && !nomFichierActif) {
@@ -1503,6 +1625,20 @@
         document.getElementById('langSubmenu').classList.remove('show');
         closeUserMenu();
     }
+
+    // ==================== INITIALISATION THÈME ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        const updateThemeIcons = () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const sunIcons = document.querySelectorAll('.theme-toggle-btn .icon-sun');
+            const moonIcons = document.querySelectorAll('.theme-toggle-btn .icon-moon');
+            sunIcons.forEach(icon => icon.style.display = isDark ? 'block' : 'none');
+            moonIcons.forEach(icon => icon.style.display = isDark ? 'none' : 'block');
+        };
+        updateThemeIcons();
+        const observer = new MutationObserver(updateThemeIcons);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    });
 
     // ==================== INITIALISATION ====================
     document.addEventListener('DOMContentLoaded', () => {
@@ -1516,6 +1652,7 @@
         }, 500);
     });
 
+    // Exports globaux
     window.ouvrirCompte = ouvrirCompte;
     window.fermerCompte = fermerCompte;
     window.changerMotDePasse = changerMotDePasse;
