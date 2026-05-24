@@ -35,6 +35,14 @@ Le système évolue en trois phases :
 
 ---
 
+## Démonstration
+
+### 🎬 Login — Authentification & thème
+
+![Demo Login](screenshots/demo_login.gif)
+
+---
+
 ## Aperçu des interfaces
 
 ### 🔐 Page de connexion
@@ -196,7 +204,7 @@ Envoi individuel, par sélection, ou en masse. Historique des alertes avec expor
 
 ### Mode Automatique (APScheduler)
 
-L'agent tourne **sans intervention humaine** — planifié automatiquement via APScheduler. Par défaut il utilise le **Mode 2 (moyenne historique)** pour réduire les fausses alertes. 
+L'agent tourne **sans intervention humaine** — planifié automatiquement via APScheduler. Par défaut il utilise le **Mode 2 (moyenne historique)** pour réduire les fausses alertes.
 
 Fonctionnalités communes : seuil configurable, template email HTML avec niveaux de criticité (modéré / élevé / critique), distinction source manuel / automatique dans l'historique.
 
@@ -213,7 +221,7 @@ En complément des deux modes de détection, l'agent peut enrichir les emails d'
 | Langage | Python 3.10.9 | Développement principal |
 | Backend | FastAPI + Jinja2 | Routes HTTP, sessions par cookies, routage par rôle |
 | Frontend | Tailwind CSS | Design des interfaces |
-| LLM |Mistral via Ollama | Classificateur d'intention + génération d'analyse email (local)|
+| LLM | Mistral via Ollama | Classificateur d'intention + génération d'analyse email (local) |
 | Extraction PDF | pdfplumber | Lecture des factures PDF |
 | Génération PDF | ReportLab | Factures personnalisées téléchargeables |
 | Base de données | SQLite | Persistance des données et conversations |
