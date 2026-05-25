@@ -49,6 +49,12 @@ Le système évolue en trois phases :
 
 ---
 
+### 👤 Interface Client — Espace personnel
+
+![Demo Client](screenshots/demo_client.gif)
+
+---
+
 ## Aperçu des interfaces
 
 ### 🔐 Page de connexion
