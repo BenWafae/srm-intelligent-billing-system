@@ -55,29 +55,9 @@ Le système évolue en trois phases :
 
 ---
 
-## Aperçu des interfaces
+### 🔔 Agent Alertes — Détection & envoi email
 
-### 🔐 Page de connexion
-
-![Login](screenshots/login_page.png)
-
----
-
-### 🛠️ Interface Administrateur
-
-![Admin](screenshots/admin_interface.png)
-
----
-
-### 👨‍💼 Interface Employé SRM
-
-![Employé](screenshots/emp_interface.png)
-
----
-
-### 👤 Interface Client Connecté
-
-![Client](screenshots/client_interface.png)
+![Demo Alertes](screenshots/demo_alertes.gif)
 
 ---
 
