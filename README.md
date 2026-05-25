@@ -43,6 +43,12 @@ Le système évolue en trois phases :
 
 ---
 
+### 👨‍💼 Interface Employé — Assistant multi-clients
+
+![Demo Employé](screenshots/demo_employe.gif)
+
+---
+
 ## Aperçu des interfaces
 
 ### 🔐 Page de connexion
