@@ -1,6 +1,8 @@
 import requests
 import json
 import re
+import os
+
 
 def extraire_infos_facture(texte: str) -> dict:
     prompt = f"""Tu es un extracteur de données spécialisé dans les factures SRM (eau et électricité).
@@ -29,8 +31,9 @@ Texte de la facture :
 {texte}
 """
 
+    OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     response = requests.post(
-        "http://localhost:11434/api/generate",
+        f"{OLLAMA_URL}/api/generate",
         json={
             "model": "mistral",
             "prompt": prompt,

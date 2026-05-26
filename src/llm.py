@@ -462,8 +462,10 @@ Question : {question}
 
 Réponds en français de façon claire et précise.
 """
+    import os
+    OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     response = requests.post(
-        "http://localhost:11434/api/generate",
+        f"{OLLAMA_URL}/api/generate",
         json={"model": "mistral", "prompt": prompt, "stream": False}
     )
     return response.json()["response"]

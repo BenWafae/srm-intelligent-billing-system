@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: srm_ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: srm_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

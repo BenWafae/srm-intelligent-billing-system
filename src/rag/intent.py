@@ -259,9 +259,12 @@ def _extraire_mois(q: str) -> str:
             return _MAP_MOIS[token]
     return ""
 
+import os
+
 def _appeler_llm(prompt: str) -> str:
+    OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     response = requests.post(
-        "http://localhost:11434/api/generate",
+        f"{OLLAMA_URL}/api/generate",
         json={"model": "mistral", "prompt": prompt, "stream": False}
     )
     return response.json()["response"].strip()
