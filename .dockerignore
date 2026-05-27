@@ -1,0 +1,9 @@
+__pycache__
+*.pyc
+*.pyo
+.vscode
+*.sqbpro
+pages/
+data/
+excel_temp.xlsx
+facture_temp.pdf
