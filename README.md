@@ -250,18 +250,26 @@ La méthode recommandée pour déployer ce projet est via Docker. Elle ne néces
 - 8 Go de RAM minimum (requis pour Mistral)
 - Connexion internet (premier lancement uniquement)
 
-### Lancement en 3 commandes
+### Lancement en 3 étapes
+
+**Étape 1 — Cloner le dépôt**
 
 ```bash
-# 1. Cloner le dépôt
 git clone https://github.com/BenWafae/srm-intelligent-billing-system.git
 cd srm-intelligent-billing-system
+```
 
-# 2. Configurer les variables d'environnement
+**Étape 2 — Configurer les variables d'environnement**
+
+```bash
 cp .env.example .env
-# Remplir EMAIL_SENDER et EMAIL_PASSWORD dans .env
+```
 
-# 3. Démarrer l'application
+Ouvrir le fichier `.env` et remplir `EMAIL_SENDER` et `EMAIL_PASSWORD`.
+
+**Étape 3 — Démarrer l'application**
+
+```bash
 docker compose up -d
 ```
 
@@ -271,10 +279,10 @@ L'application est accessible sur **`http://localhost:8000`**
 
 | Étape | Description |
 |---|---|
-| 🔨 Construction de l'image | Python 3.10.9 + toutes les dépendances installées automatiquement |
-| 🚀 Démarrage Ollama | Serveur LLM local démarré sur le port 11434 |
-| ⬇️ Téléchargement Mistral | Modèle téléchargé **automatiquement** au premier lancement (~4 GB) |
-| ✅ Démarrage FastAPI | Application accessible sur `http://localhost:8000` |
+|  Construction de l'image | Python 3.10.9 + toutes les dépendances installées automatiquement |
+|  Démarrage Ollama | Serveur LLM local démarré sur le port 11434 |
+|  Téléchargement Mistral | Modèle téléchargé **automatiquement** au premier lancement (~4 GB) |
+|  Démarrage FastAPI | Application accessible sur `http://localhost:8000` |
 
 > **Aucune commande supplémentaire n'est requise.** Mistral est téléchargé et configuré automatiquement au premier démarrage grâce à l'`entrypoint` du `docker-compose.yml`.
 
@@ -290,20 +298,33 @@ L'application est accessible sur **`http://localhost:8000`**
 
 ### Commandes utiles
 
+**Démarrer en arrière-plan**
+
 ```bash
-# Démarrer en arrière-plan
 docker compose up -d
+```
 
-# Voir les logs en temps réel
+**Voir les logs en temps réel**
+
+```bash
 docker compose logs -f
+```
 
-# Voir les logs d'Ollama uniquement
+**Voir les logs d'Ollama uniquement**
+
+```bash
 docker compose logs -f ollama
+```
 
-# Arrêter les conteneurs
+**Arrêter les conteneurs**
+
+```bash
 docker compose down
+```
 
-# Reconstruire après modification du code
+**Reconstruire après modification du code**
+
+```bash
 docker compose up -d --build
 ```
 
@@ -323,22 +344,36 @@ Pour tester ou modifier le code sans Docker :
 
 ### Installation
 
+**Étape 1 — Cloner le dépôt**
+
 ```bash
-# 1. Cloner le dépôt
 git clone https://github.com/BenWafae/srm-intelligent-billing-system.git
 cd srm-intelligent-billing-system
+```
 
-# 2. Installer les dépendances
+**Étape 2 — Installer les dépendances**
+
+```bash
 pip install -r requirements.txt
+```
 
-# 3. Configurer les variables d'environnement
+**Étape 3 — Configurer les variables d'environnement**
+
+```bash
 cp .env.example .env
-# Remplir EMAIL_SENDER et EMAIL_PASSWORD dans .env
+```
 
-# 4. Télécharger le modèle Mistral
+Ouvrir le fichier `.env` et remplir `EMAIL_SENDER` et `EMAIL_PASSWORD`.
+
+**Étape 4 — Télécharger le modèle Mistral**
+
+```bash
 ollama pull mistral
+```
 
-# 5. Lancer l'application
+**Étape 5 — Lancer l'application**
+
+```bash
 uvicorn main:app --reload
 ```
 
