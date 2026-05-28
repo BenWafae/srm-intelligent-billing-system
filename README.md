@@ -338,6 +338,35 @@ docker compose up -d --build
 
 ---
 
+## Première utilisation
+
+> **Note :** Au premier lancement, la base de données est **vide** —
+> aucune donnée, aucun compte. Tout est initialisé automatiquement.
+
+Un compte Admin est créé automatiquement au démarrage :
+
+| Rôle | Email | Mot de passe |
+|---|---|---|
+| **Admin** | admin@srm.ma | admin123 |
+
+> ⚠️ Changez le mot de passe après votre première connexion.
+
+Depuis l'interface Admin, vous pouvez ensuite :
+
+**1. Importer vos données**
+- Importer vos fichiers Excel multi-clients / multi-périodes
+- Importer vos factures PDF
+
+**2. Créer les comptes utilisateurs**
+- Créer les comptes Employé SRM
+- Créer les comptes Client avec leur numéro de contrat
+
+**3. L'assistant est prêt**
+- Les employés peuvent interroger les données via l'assistant
+- Les clients peuvent accéder à leur espace personnel
+
+---
+
 ## ⚡ Lancement sans Docker (mode développement local)
 
 Pour tester ou modifier le code sans Docker :
