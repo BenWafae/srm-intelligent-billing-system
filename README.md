@@ -7,6 +7,7 @@
 <img src="https://img.shields.io/badge/SQLite-Base_de_données-003B57?style=for-the-badge&logo=sqlite&logoColor=white"/>
 <img src="https://img.shields.io/badge/Architecture-LLM_as_a_Router-7B68EE?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/Agent_IA-Autonome_+_Génératif-FF6B35?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Docker-Conteneurisé-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
 <img src="https://img.shields.io/badge/Status-En_cours-orange?style=for-the-badge"/>
 
 # 🧾 SRM Intelligent Billing System
@@ -31,7 +32,7 @@ Le système évolue en trois phases :
 |---|---|---|
 | **Tâche 1** | ✅ Terminée | Système complet de gestion et d'analyse des factures avec 3 interfaces dédiées |
 | **Tâche 2** | ✅ Terminée | Agent autonome de détection des surconsommations avec alertes email enrichies par IA |
-| **Tâche 3** | 📋 Planifiée | Containerisation Docker + déploiement sur infrastructure SRM |
+| **Tâche 3** | ✅ Terminée | Conteneurisation Docker complète — déploiement en une seule commande |
 
 ---
 
@@ -222,6 +223,7 @@ En complément des deux modes de détection, l'agent peut enrichir les emails d'
 | Sécurité | hashlib SHA-256 | Hashage des mots de passe |
 | Planification | APScheduler | Agent autonome planifié |
 | Email | smtplib + SMTP Gmail | Envoi automatique des alertes |
+| Conteneurisation | Docker + Docker Compose | Déploiement isolé et reproductible |
 
 > **Note sur la migration UI :** Le prototype initial a été développé sous Streamlit, puis migré vers FastAPI + Jinja2 + Tailwind CSS pour lever les contraintes de personnalisation UI. La migration a été réalisée sans aucune régression fonctionnelle, confirmant la solidité de l'architecture modulaire adoptée dès le départ.
 
@@ -238,15 +240,88 @@ En complément des deux modes de détection, l'agent peut enrichir les emails d'
 
 ---
 
-## Prérequis
+## 🐳 Déploiement Docker (Recommandé)
+
+La méthode recommandée pour déployer ce projet est via Docker. Elle ne nécessite **aucune installation manuelle** de Python, Ollama ou Mistral — tout est automatisé.
+
+### Prérequis
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installé et démarré
+- 8 Go de RAM minimum (requis pour Mistral)
+- Connexion internet (premier lancement uniquement)
+
+### Lancement en 3 commandes
+
+```bash
+# 1. Cloner le dépôt
+git clone https://github.com/BenWafae/srm-intelligent-billing-system.git
+cd srm-intelligent-billing-system
+
+# 2. Configurer les variables d'environnement
+cp .env.example .env
+# Remplir EMAIL_SENDER et EMAIL_PASSWORD dans .env
+
+# 3. Démarrer l'application
+docker compose up -d
+```
+
+L'application est accessible sur **`http://localhost:8000`**
+
+### Ce qui se passe automatiquement au démarrage
+
+| Étape | Description |
+|---|---|
+| 🔨 Construction de l'image | Python 3.10.9 + toutes les dépendances installées automatiquement |
+| 🚀 Démarrage Ollama | Serveur LLM local démarré sur le port 11434 |
+| ⬇️ Téléchargement Mistral | Modèle téléchargé **automatiquement** au premier lancement (~4 GB) |
+| ✅ Démarrage FastAPI | Application accessible sur `http://localhost:8000` |
+
+> **Aucune commande supplémentaire n'est requise.** Mistral est téléchargé et configuré automatiquement au premier démarrage grâce à l'`entrypoint` du `docker-compose.yml`.
+
+### Premier lancement vs suivants
+
+**Premier lancement** (nouveau PC) :
+- Mistral se télécharge automatiquement (~4 GB) — environ 30 à 60 minutes selon la connexion
+- Aucune intervention manuelle requise
+
+**Lancements suivants** :
+- Mistral déjà sauvegardé dans le volume Docker persistant `ollama_data`
+- Démarrage complet en **moins de 30 secondes**
+
+### Commandes utiles
+
+```bash
+# Démarrer en arrière-plan
+docker compose up -d
+
+# Voir les logs en temps réel
+docker compose logs -f
+
+# Voir les logs d'Ollama uniquement
+docker compose logs -f ollama
+
+# Arrêter les conteneurs
+docker compose down
+
+# Reconstruire après modification du code
+docker compose up -d --build
+```
+
+> **Note :** Le modèle Mistral est sauvegardé dans le volume Docker `ollama_data`. Il n'est téléchargé qu'une seule fois — même après `docker compose down` ou reconstruction des conteneurs, Mistral reste disponible.
+
+---
+
+## ⚡ Lancement sans Docker (mode développement local)
+
+Pour tester ou modifier le code sans Docker :
+
+### Prérequis
 
 - **Python 3.10.9** : [python.org](https://www.python.org/downloads/release/python-3109/)
 - **Ollama** : [ollama.com](https://ollama.com/)
 - **Git**
 
----
-
-## ⚡ Lancement
+### Installation
 
 ```bash
 # 1. Cloner le dépôt
