@@ -279,10 +279,10 @@ L'application est accessible sur **`http://localhost:8000`**
 
 | Étape | Description |
 |---|---|
-|  Construction de l'image | Python 3.10.9 + toutes les dépendances installées automatiquement |
-|  Démarrage Ollama | Serveur LLM local démarré sur le port 11434 |
-|  Téléchargement Mistral | Modèle téléchargé **automatiquement** au premier lancement (~4 GB) |
-|  Démarrage FastAPI | Application accessible sur `http://localhost:8000` |
+| 🔨 Construction de l'image | Python 3.10.9 + toutes les dépendances installées automatiquement |
+| 🚀 Démarrage Ollama | Serveur LLM local démarré sur le port 11434 |
+| ⬇️ Téléchargement Mistral | Modèle téléchargé **automatiquement** au premier lancement (~4 GB) |
+| ✅ Démarrage FastAPI | Application accessible sur `http://localhost:8000` |
 
 > **Aucune commande supplémentaire n'est requise.** Mistral est téléchargé et configuré automatiquement au premier démarrage grâce à l'`entrypoint` du `docker-compose.yml`.
 
@@ -308,6 +308,12 @@ docker compose up -d
 
 ```bash
 docker compose logs -f
+```
+
+**Voir les logs de l'application FastAPI uniquement**
+
+```bash
+docker compose logs -f app
 ```
 
 **Voir les logs d'Ollama uniquement**
