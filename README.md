@@ -8,8 +8,7 @@
 <img src="https://img.shields.io/badge/Architecture-LLM_as_a_Router-7B68EE?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/Agent_IA-Autonome_+_Génératif-FF6B35?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/Docker-Conteneurisé-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
-<img src="https://img.shields.io/badge/Status-Terminé-brightgreen?style=for-the-badge"/>
-
+<img src="https://img.shields.io/badge/Status-En_cours-orange?style=for-the-badge"/>
 # 🧾 SRM Intelligent Billing System
 
 > Système Intelligent de Gestion des Factures — SRM Souss-Massa
@@ -279,10 +278,10 @@ L'application est accessible sur **`http://localhost:8000`**
 
 | Étape | Description |
 |---|---|
-|  Construction de l'image | Python 3.10.9 + toutes les dépendances installées automatiquement |
-|  Démarrage Ollama | Serveur LLM local démarré sur le port 11434 |
-|  Téléchargement Mistral | Modèle téléchargé **automatiquement** au premier lancement (~4 GB) |
-|  Démarrage FastAPI | Application accessible sur `http://localhost:8000` |
+| Construction de l'image | Python 3.10.9 + toutes les dépendances installées automatiquement |
+| Démarrage Ollama | Serveur LLM local démarré sur le port 11434 |
+| Téléchargement Mistral | Modèle téléchargé **automatiquement** au premier lancement (~4 GB) |
+| Démarrage FastAPI | Application accessible sur `http://localhost:8000` |
 
 > **Aucune commande supplémentaire n'est requise.** Mistral est téléchargé et configuré automatiquement au premier démarrage grâce à l'`entrypoint` du `docker-compose.yml`.
 
@@ -338,35 +337,6 @@ docker compose up -d --build
 
 ---
 
-## Première utilisation
-
-> **Note :** Au premier lancement, la base de données est **vide** —
-> aucune donnée, aucun compte. Tout est initialisé automatiquement.
-
-Un compte Admin est créé automatiquement au démarrage :
-
-| Rôle | Email | Mot de passe |
-|---|---|---|
-| **Admin** | admin@srm.ma | admin123 |
-
-> ⚠️ Changez le mot de passe après votre première connexion.
-
-Depuis l'interface Admin, vous pouvez ensuite :
-
-**1. Importer vos données**
-- Importer vos fichiers Excel multi-clients / multi-périodes
-- Importer vos factures PDF
-
-**2. Créer les comptes utilisateurs**
-- Créer les comptes Employé SRM
-- Créer les comptes Client avec leur numéro de contrat
-
-**3. L'assistant est prêt**
-- Les employés peuvent interroger les données via l'assistant
-- Les clients peuvent accéder à leur espace personnel
-
----
-
 ## ⚡ Lancement sans Docker (mode développement local)
 
 Pour tester ou modifier le code sans Docker :
@@ -406,7 +376,13 @@ Ouvrir le fichier `.env` et remplir `EMAIL_SENDER` et `EMAIL_PASSWORD`.
 ollama pull mistral
 ```
 
-**Étape 5 — Lancer l'application**
+**Étape 5 — Initialiser la base de données et créer le compte Admin**
+
+```bash
+python init_admin.py
+```
+
+**Étape 6 — Lancer l'application**
 
 ```bash
 uvicorn main:app --reload
@@ -415,6 +391,40 @@ uvicorn main:app --reload
 L'application est accessible sur `http://localhost:8000`
 
 > Au premier lancement, Ollama peut prendre quelques secondes pour charger le modèle Mistral en mémoire.
+
+---
+
+## Première utilisation
+
+> **Note :** Au premier lancement, la base de données est **vide** —
+> aucune donnée, aucun compte. Le compte Admin est créé automatiquement
+> (via Docker au démarrage, ou via `python init_admin.py` en mode local).
+
+Un compte Admin par défaut est disponible dès le premier lancement :
+
+| Rôle | Email | Mot de passe |
+|---|---|---|
+| **Admin** | admin@srm.ma | admin123 |
+
+> ⚠️ Changez le mot de passe après votre première connexion.
+>
+> 🐳 **Docker** : le compte Admin est créé **automatiquement** au démarrage — aucune action requise.
+>
+> 💻 **Mode local** : lancer `python init_admin.py` avant `uvicorn` pour initialiser la base et créer le compte.
+
+Depuis l'interface Admin, vous pouvez ensuite :
+
+**1. Importer vos données**
+- Importer vos fichiers Excel multi-clients / multi-périodes
+- Importer vos factures PDF
+
+**2. Créer les comptes utilisateurs**
+- Créer les comptes Employé SRM
+- Créer les comptes Client avec leur numéro de contrat
+
+**3. L'assistant est prêt**
+- Les employés peuvent interroger les données via l'assistant
+- Les clients peuvent accéder à leur espace personnel
 
 ---
 
