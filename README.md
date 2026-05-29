@@ -8,7 +8,7 @@
 <img src="https://img.shields.io/badge/Architecture-LLM_as_a_Router-7B68EE?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/Agent_IA-Autonome_+_Génératif-FF6B35?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/Docker-Conteneurisé-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
-<img src="https://img.shields.io/badge/Status-En_cours-orange?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Status-Terminé-brightgreen?style=for-the-badge"/>
 
 # 🧾 SRM Intelligent Billing System
 
@@ -220,7 +220,7 @@ En complément des deux modes de détection, l'agent peut enrichir les emails d'
 | Base de données | SQLite | Persistance des données et conversations |
 | Traitement Excel | pandas / openpyxl | Lecture multi-clients / multi-périodes |
 | Similarité texte | fuzzywuzzy | Détection des noms mal orthographiés |
-| Sécurité | hashlib SHA-256 | Hashage des mots de passe |
+| Sécurité | bcrypt | Hashage sécurisé des mots de passe (salt automatique) |
 | Planification | APScheduler | Agent autonome planifié |
 | Email | smtplib + SMTP Gmail | Envoi automatique des alertes |
 | Conteneurisation | Docker + Docker Compose | Déploiement isolé et reproductible |
@@ -231,7 +231,7 @@ En complément des deux modes de détection, l'agent peut enrichir les emails d'
 
 ## Sécurité
 
-- Authentification par email avec hashage **SHA-256**
+- Authentification par email avec hashage **bcrypt** (salt automatique)
 - Système de rôles : **Admin / Employé / Client**
 - **Isolation totale** des données client par numéro de contrat
 - Validation du schéma SQL avant toute exécution (rejet des colonnes inexistantes)
@@ -279,10 +279,10 @@ L'application est accessible sur **`http://localhost:8000`**
 
 | Étape | Description |
 |---|---|
-| 🔨 Construction de l'image | Python 3.10.9 + toutes les dépendances installées automatiquement |
-| 🚀 Démarrage Ollama | Serveur LLM local démarré sur le port 11434 |
-| ⬇️ Téléchargement Mistral | Modèle téléchargé **automatiquement** au premier lancement (~4 GB) |
-| ✅ Démarrage FastAPI | Application accessible sur `http://localhost:8000` |
+|  Construction de l'image | Python 3.10.9 + toutes les dépendances installées automatiquement |
+|  Démarrage Ollama | Serveur LLM local démarré sur le port 11434 |
+|  Téléchargement Mistral | Modèle téléchargé **automatiquement** au premier lancement (~4 GB) |
+|  Démarrage FastAPI | Application accessible sur `http://localhost:8000` |
 
 > **Aucune commande supplémentaire n'est requise.** Mistral est téléchargé et configuré automatiquement au premier démarrage grâce à l'`entrypoint` du `docker-compose.yml`.
 
