@@ -424,11 +424,13 @@ def reset_base_excel() -> int:
     conn.commit()
     conn.close()
     return total
-import hashlib
-# hash password sert  a  sécurise le mot de passe, on ne stocke jamais le mot de passe en clair
+import bcrypt
+# bcrypt avec salt intégré — plus sécurisé que SHA-256
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
-# creer user sert aa cree un compte, retourne False si lemail existe déjà
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+def verify_password(plain: str, hashed: str) -> bool:
+    return bcrypt.checkpw(plain.encode(), hashed.encode())
 
 def creer_user(email: str, password: str, role: str, numero_client: str = None) -> bool:
     conn = sqlite3.connect(DB_PATH)
@@ -450,13 +452,13 @@ def verifier_login(email: str, password: str) -> dict | None:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id, email, role, numero_client 
+        SELECT id, email, role, numero_client, password
         FROM users 
-        WHERE email = ? AND password = ?
-    """, (email, hash_password(password)))
+        WHERE email = ?
+    """, (email,))
     row = cursor.fetchone()
     conn.close()
-    if row:
+    if row and verify_password(password, row[4]):
         return {
             "id": row[0],
             "email": row[1],
