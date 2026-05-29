@@ -9,6 +9,7 @@
 <img src="https://img.shields.io/badge/Agent_IA-Autonome_+_Génératif-FF6B35?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/Docker-Conteneurisé-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
 <img src="https://img.shields.io/badge/Status-En_cours-orange?style=for-the-badge"/>
+
 # 🧾 SRM Intelligent Billing System
 
 > Système Intelligent de Gestion des Factures — SRM Souss-Massa
