@@ -606,7 +606,7 @@ _fallback_par_cat = {}
 
 def _patch_fallback():
     try:
-        import src.rag.client_connecte as module
+        import src.rag_client.dispatcher as module
         original = module._fallback_llm
         def patched(question, numero_contrat):
             global _fallback_count
@@ -1045,7 +1045,8 @@ def main():
     os.makedirs("eval_results", exist_ok=True)
 
     # JSON
-    json_path = os.path.join("eval_results", "rapport_eval.json")
+    json_path = os.path.join("eval_results", "rapport_eval_v2.json")
+
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump({
             "date"             : date_exec,
@@ -1061,15 +1062,15 @@ def main():
         }, f, ensure_ascii=False, indent=2)
 
     # HTML
-    html_path = os.path.join("eval_results", "rapport_eval.html")
+    html_path = os.path.join("eval_results", "rapport_eval_v2.html")
     html = _generer_html(resultats, metriques, score,
                          fallback, t_moy_ms, date_exec)
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
 
     print(f"\n{GRAS}  FICHIERS GÉNÉRÉS :{RESET}")
-    print(f"  📄 {html_path}  ← ouvrir dans le navigateur")
-    print(f"  📊 {json_path}  ← données brutes")
+    print(f"  📄 {html_path}  ← rapport v2 avec fallback corrigé")
+    print(f"  📊 {json_path}  ← données brutes v2")
     print(f"\n{'═'*62}\n")
 
 
