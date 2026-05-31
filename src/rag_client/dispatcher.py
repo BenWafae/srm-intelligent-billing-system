@@ -282,6 +282,9 @@ RÈGLES STRICTES :
 - Donne des conseils uniquement si le client le demande explicitement
 - Réponds en français, clair et bienveillant, maximum 5-6 lignes
 - Le client est au MAROC, jamais mentionner la Tunisie ou un autre pays
+-IMPORTANT : appelle toujours les mois par leur NOM EXACT — {mois_actuel} est le mois actuel, {mois_precedent} est le mois précédent. Ne jamais appeler {mois_precedent} "mois dernier" ni {mois_actuel} "ce mois" dans les chiffres, utilise toujours le nom du mois (ex: "Avril", "Mai"
+- Ne jamais ajouter de formules comme "je t apprécie", "je suis heureux", "ravi de vous aider" ou toute expression de bienvenue — commence directement par "Bonjour {prenom}," suivi de l explication
+- Saisonnalité STRICTE au Maroc : Mai/Juin/Juillet/Août = été = chaleur/irrigation. Septembre/Octobre/Novembre = automne. Décembre/Janvier/Février = hiver = froid/chauffage. Mars/Avril = printemps. Ne jamais inverser les saisons
 """
                 return _appeler_llm(prompt_analyse)
 

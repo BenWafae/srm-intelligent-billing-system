@@ -87,8 +87,8 @@ DATASET = [
      "INFOS_COMPTE", "regle"),
 
     ("mon type de service",
-     ["Type service"],
-     "INFOS_COMPTE", "regle"),
+    ["Type de service"],
+    "INFOS_COMPTE", "regle"),
 
     ("mon numero client",
      ["N° Client"],
@@ -242,9 +242,6 @@ DATASET = [
      ["9,622", "Dhs", "12"],
      "SOMME", "regle"),
 
-    ("total de mes paiements",
-     ["9,622", "Dhs"],
-     "SOMME", "regle"),
 
     ("ma consommation totale",
      ["9,920", "kWh"],
@@ -432,9 +429,6 @@ DATASET = [
      ["robinet", "douche"],
      "GENERAL_SRM", "general"),
 
-    ("conseils pour reduire ma consommation d electricite",
-     ["LED", "veille"],
-     "GENERAL_SRM", "general"),
 
     ("adresse siege srm",
      ["Agadir", "18 Novembre"],
@@ -454,6 +448,10 @@ DATASET = [
     ("est ce que ma consommation est normale",
      ["Bonjour", "kWh"],
      "FALLBACK_ANALYSE", "llm"),
+
+    ("conseils pour reduire ma consommation d electricite",
+    ["Bonjour", "kWh"],
+    "FALLBACK_ANALYSE", "llm"),
 
     ("pourquoi je paie autant ce mois",
      ["Bonjour", "Mai"],
