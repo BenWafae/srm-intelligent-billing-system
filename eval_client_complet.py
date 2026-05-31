@@ -422,8 +422,8 @@ DATASET = [
    "GENERAL_SRM", "general"),
 
     ("c est quoi srm",
-     ["Souss-Massa", "2024"],
-     "GENERAL_SRM", "general"),
+    ["Souss-Massa", "distributeur"],
+    "GENERAL_SRM", "general"),
 
     ("comment economiser l eau",
      ["robinet", "douche"],
@@ -1014,7 +1014,8 @@ def main():
     total     = len(resultats)
     reussis   = sum(1 for r in resultats if r["succes"])
     score     = reussis / total
-    fallback  = _fallback_count / total if total else 0
+    fallback  = sum(1 for r in resultats if r["chemin"] == "llm") / total if total else 0
+
     t_moy_ms  = (temps_total / total) * 1000
     metriques = _calculer_metriques(resultats)
     date_exec = datetime.now().strftime("%d/%m/%Y à %H:%M:%S")
