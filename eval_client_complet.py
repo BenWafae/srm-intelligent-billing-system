@@ -35,8 +35,9 @@ from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 sys.path.insert(0, os.path.join(BASE_DIR, "src"))
-sys.path.insert(0, os.path.join(BASE_DIR, "src", "rag"))
+sys.path.insert(0, os.path.join(BASE_DIR, "src", "rag"))       
 sys.path.insert(0, os.path.join(BASE_DIR, "src", "rag_client"))
+
 
 # ══════════════════════════════════════════════════════════════
 # CONTRAT DE TEST — remplace par un vrai numéro dans ta base
@@ -605,18 +606,33 @@ _fallback_count = 0
 _fallback_par_cat = {}
 
 def _patch_fallback():
+    import sys
+
     try:
-        import src.rag_client.dispatcher as module
-        original = module._fallback_llm
-        def patched(question, numero_contrat):
-            global _fallback_count
-            _fallback_count += 1
-            return original(question, numero_contrat)
-        module._fallback_llm = patched
-        return True
-    except Exception as e:
-        print(f"⚠️  Patch fallback : {e}")
+        import src.rag_client.dispatcher as module_complet
+    except ImportError as e:
+        print(f"⚠️  Import src.rag_client.dispatcher impossible : {e}")
         return False
+
+    if not hasattr(module_complet, "_fallback_llm"):
+        print("⚠️  _fallback_llm introuvable dans src.rag_client.dispatcher")
+        return False
+
+    # ── Unifier TOUS les alias possibles vers le même objet ──
+    sys.modules["dispatcher"]            = module_complet
+    sys.modules["rag_client.dispatcher"] = module_complet  # ← C'est cet alias que le wrapper utilise
+    sys.modules["src.rag_client.dispatcher"] = module_complet
+
+    original = module_complet._fallback_llm
+
+    def patched(question, numero_contrat):
+        global _fallback_count
+        _fallback_count += 1
+        return original(question, numero_contrat)
+
+    module_complet._fallback_llm = patched
+    print(f"✅ Patch fallback appliqué — id module : {id(module_complet)}")
+    return True
 
 # ══════════════════════════════════════════════════════════════
 # MÉTRIQUES ADAPTÉES AU SYSTÈME
@@ -950,18 +966,21 @@ def main():
     print(f"  Questions : {len(DATASET)}")
     print(f"{'═'*62}{RESET}\n")
 
-    # ── Import dispatcher ──
+    # ── Patch AVANT l'import ──
+    _patch_fallback()
+
+    # ── Import dispatcher APRÈS le patch ──
     try:
         from src.rag.client_connecte import repondre_client_connecte
     except ImportError:
         try:
-            from rag.client_connecte import repondre_client_connecte
+            from src.rag_client.dispatcher import repondre_client_connecte
         except ImportError as e:
             print(f"{ROUGE}❌ Import impossible : {e}{RESET}")
             print("   Lance depuis la racine du projet.")
             return
 
-    _patch_fallback()
+
 
     resultats   = []
     temps_total = 0
@@ -1045,8 +1064,7 @@ def main():
     os.makedirs("eval_results", exist_ok=True)
 
     # JSON
-    json_path = os.path.join("eval_results", "rapport_eval_v2.json")
-
+    json_path = os.path.join("eval_results", "rapport_eval.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump({
             "date"             : date_exec,
@@ -1062,15 +1080,15 @@ def main():
         }, f, ensure_ascii=False, indent=2)
 
     # HTML
-    html_path = os.path.join("eval_results", "rapport_eval_v2.html")
+    html_path = os.path.join("eval_results", "rapport_eval.html")
     html = _generer_html(resultats, metriques, score,
                          fallback, t_moy_ms, date_exec)
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
 
     print(f"\n{GRAS}  FICHIERS GÉNÉRÉS :{RESET}")
-    print(f"  📄 {html_path}  ← rapport v2 avec fallback corrigé")
-    print(f"  📊 {json_path}  ← données brutes v2")
+    print(f"  📄 {html_path}  ← ouvrir dans le navigateur")
+    print(f"  📊 {json_path}  ← données brutes")
     print(f"\n{'═'*62}\n")
 
 
