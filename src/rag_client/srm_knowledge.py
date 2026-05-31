@@ -163,6 +163,9 @@ TOKENS_GENERAL_SRM = [
     "email srm", "adresse srm", "agence srm",
     "numero srm", "joindre srm",
     "centre appels", "centre d appels",
+    "contacter srm numero ou email"
+     "numero srm", "joindre",       
+    "comment contacter", "contact"
 
     # Recrutement / emploi
     "recrutement", "recruter", "emploi srm",

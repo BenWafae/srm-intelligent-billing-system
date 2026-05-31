@@ -417,9 +417,9 @@ DATASET = [
      ["Formulaire", "titre de propriété"],
      "GENERAL_SRM", "general"),
 
-    ("contacter srm numero ou email",
-     ["08 02 03 12 12", "Contact@srm-sm.ma"],
-     "GENERAL_SRM", "general"),
+    ("comment je peux contacter srm",
+    ["08 02 03 12 12", "Contact@srm-sm.ma"],
+   "GENERAL_SRM", "general"),
 
     ("c est quoi srm",
      ["Souss-Massa", "2024"],
