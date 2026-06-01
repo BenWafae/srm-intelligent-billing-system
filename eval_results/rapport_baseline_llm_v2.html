@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Baseline LLM v2 — SRM Assistant Client</title>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0d1117; color: #c9d1d9;
+      padding: 32px; font-size: 14px;
+    }
+    h1 { color:#58a6ff; font-size:24px; margin-bottom:4px; }
+    h2 {
+      color:#79c0ff; font-size:16px;
+      margin:36px 0 14px;
+      border-bottom:1px solid #30363d;
+      padding-bottom:8px;
+    }
+    .meta { color:#8b949e; font-size:12px; margin-bottom:28px; }
+    .cards { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:28px; }
+    .card {
+      background:#161b22; border:1px solid #30363d;
+      border-radius:10px; padding:16px 20px;
+      min-width:140px; text-align:center;
+    }
+    .card .val { font-size:28px; font-weight:bold; }
+    .card .lbl { font-size:11px; color:#8b949e; margin-top:4px; }
+    .progress-bar {
+      background:#21262d; border-radius:6px;
+      height:18px; overflow:hidden; margin-bottom:12px;
+    }
+    .progress-fill {
+      height:18px; border-radius:6px;
+      background:#e74c3c;
+      width:60.7%;
+    }
+    .comparison-box {
+      background:#161b22; border:1px solid #30363d;
+      border-radius:10px; padding:20px 24px;
+      margin-bottom:28px;
+    }
+    .comparison-row {
+      display:flex; justify-content:space-between;
+      align-items:center; margin:10px 0;
+    }
+    .bar-wrap {
+      display:flex; align-items:center; gap:10px; flex:1; margin-left:20px;
+    }
+    .bar-bg {
+      background:#21262d; border-radius:6px;
+      height:14px; width:200px; overflow:hidden;
+    }
+    .bar-fill { height:14px; border-radius:6px; }
+    table { width:100%; border-collapse:collapse; }
+    th {
+      background:#161b22; color:#8b949e;
+      padding:10px 12px; text-align:left;
+      border-bottom:2px solid #30363d;
+      font-size:12px; white-space:nowrap;
+    }
+    td { padding:8px 12px; border-bottom:1px solid #21262d; vertical-align:middle; font-size:13px; }
+    tr:hover td { background:#161b22; }
+    .badge {
+      background:#1f2937; border:1px solid #374151;
+      border-radius:4px; padding:2px 7px;
+      font-size:11px; color:#9ca3af;
+      white-space:nowrap; display:inline-block;
+    }
+    code {
+      background:#21262d; border-radius:3px;
+      padding:1px 5px; font-size:11px; color:#79c0ff;
+    }
+    .section { margin-bottom:44px; }
+    .explication {
+      background:#161b22; border:1px solid #30363d;
+      border-radius:8px; padding:14px 18px;
+      font-size:12px; color:#8b949e;
+      margin-bottom:18px; line-height:1.7;
+    }
+    .explication strong { color:#c9d1d9; }
+    .version-badge {
+      display:inline-block; background:#1f3a5f;
+      border:1px solid #1e4080; border-radius:6px;
+      padding:4px 12px; font-size:12px; color:#79c0ff;
+      margin-bottom:16px;
+    }
+    footer {
+      color:#8b949e; font-size:11px;
+      margin-top:40px; text-align:center;
+      border-top:1px solid #21262d; padding-top:16px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🤖 Baseline LLM Seul — Assistant Client SRM</h1>
+<div class="version-badge">⚡ v2 — Mots-clés enrichis par les vraies valeurs numériques</div>
+<div class="meta">
+  Généré le <strong>01/06/2026 à 20:52:05</strong> &nbsp;|&nbsp;
+  Contrat : <code>0005567205/2063205</code> &nbsp;|&nbsp;
+  <strong>56</strong> questions &nbsp;|&nbsp;
+  Mode : <strong style="color:#f39c12">LLM seul — sans règles Python</strong>
+</div>
+
+<div class="section">
+  <h2>Score Global — Baseline LLM v2</h2>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+  <div class="cards">
+    <div class="card">
+      <div class="val" style="color:#e74c3c">60.7%</div>
+      <div class="lbl">Taux de réussite (LLM seul)</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:#58a6ff">34/56</div>
+      <div class="lbl">Questions réussies</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:#f39c12">53.3 s</div>
+      <div class="lbl">Temps moyen / question</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:#2ecc71">96.4%</div>
+      <div class="lbl">Taux hybride (référence)</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:#2ecc71">+35.7%</div>
+      <div class="lbl">Gain architecture hybride</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Comparaison Directe — Hybride vs LLM Seul</h2>
+  <div class="comparison-box">
+    <div class="comparison-row">
+      <div style="min-width:220px;color:#c9d1d9;font-weight:bold">🏗️ Architecture Hybride</div>
+      <div class="bar-wrap">
+        <div class="bar-bg">
+          <div class="bar-fill" style="background:#2ecc71;width:96%"></div>
+        </div>
+        <span style="color:#2ecc71;font-weight:bold;min-width:50px">96.4%</span>
+      </div>
+    </div>
+    <div class="comparison-row">
+      <div style="min-width:220px;color:#c9d1d9;font-weight:bold">🤖 LLM Seul — v2 (enrichi)</div>
+      <div class="bar-wrap">
+        <div class="bar-bg">
+          <div class="bar-fill" style="background:#e74c3c;width:61%"></div>
+        </div>
+        <span style="color:#e74c3c;font-weight:bold;min-width:50px">60.7%</span>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid #30363d;
+                font-size:12px;color:#8b949e;line-height:1.8">
+      <strong style="color:#c9d1d9">Interprétation :</strong><br>
+      L'architecture hybride obtient <strong style="color:#2ecc71">96.4%</strong>
+      contre <strong style="color:#e74c3c">60.7%</strong> pour le LLM seul.<br>
+      Le gain de <strong style="color:#2ecc71">+35.7 points</strong> reflète la valeur réelle
+      des règles Python déterministes, mesurée avec des critères de validation rigoureux
+      (valeurs numériques exactes, pas seulement des mots-clés génériques).
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Métriques par Catégorie — LLM Seul</h2>
+  <div class="explication">
+    <strong>v2 — Mots-clés enrichis :</strong> Chaque question est validée par les vraies valeurs
+    numériques de la base de données (ex: "9,622" pour le total, "446" pour le min conso, "25/02/2026"
+    pour une date limite de retard). Cela élimine les faux positifs de la v1
+    où "kWh", "Dhs" ou "12" seuls suffisaient à valider une réponse incorrecte.<br>
+    <strong>Temps moyen</strong> : affiché en secondes.
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Catégorie</th><th>Score</th><th>Réussite</th>
+        <th>Erreur</th><th>Tps moyen</th><th>Barre</th><th>État</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><span class="badge">BUG_CONNU</span></td>
+            <td style="text-align:center">0/1</td>
+            <td style="text-align:center"><span style="color:#e74c3c;font-weight:bold">0%</span></td>
+            <td style="text-align:center;color:#e74c3c">100%</td>
+            <td style="text-align:center;color:#e74c3c">27.5 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#e74c3c;width:0%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">❌</td>
+        </tr>
+        <tr>
+            <td><span class="badge">COMPARAISON</span></td>
+            <td style="text-align:center">3/4</td>
+            <td style="text-align:center"><span style="color:#f39c12;font-weight:bold">75%</span></td>
+            <td style="text-align:center;color:#e74c3c">25%</td>
+            <td style="text-align:center;color:#e74c3c">29.9 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#f39c12;width:75%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">⚠️</td>
+        </tr>
+        <tr>
+            <td><span class="badge">FALLBACK_ANALYSE</span></td>
+            <td style="text-align:center">2/4</td>
+            <td style="text-align:center"><span style="color:#e74c3c;font-weight:bold">50%</span></td>
+            <td style="text-align:center;color:#e74c3c">50%</td>
+            <td style="text-align:center;color:#e74c3c">93.2 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#e74c3c;width:50%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">❌</td>
+        </tr>
+        <tr>
+            <td><span class="badge">FAUTES_ORTHO</span></td>
+            <td style="text-align:center">3/3</td>
+            <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
+            <td style="text-align:center;color:#e74c3c">0%</td>
+            <td style="text-align:center;color:#e74c3c">15.5 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">✅</td>
+        </tr>
+        <tr>
+            <td><span class="badge">GENERAL_SRM</span></td>
+            <td style="text-align:center">4/4</td>
+            <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
+            <td style="text-align:center;color:#e74c3c">0%</td>
+            <td style="text-align:center;color:#e74c3c">35.4 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">✅</td>
+        </tr>
+        <tr>
+            <td><span class="badge">HISTORIQUE</span></td>
+            <td style="text-align:center">3/3</td>
+            <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
+            <td style="text-align:center;color:#e74c3c">0%</td>
+            <td style="text-align:center;color:#e74c3c">208.9 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">✅</td>
+        </tr>
+        <tr>
+            <td><span class="badge">HORS_SUJET</span></td>
+            <td style="text-align:center">1/3</td>
+            <td style="text-align:center"><span style="color:#e74c3c;font-weight:bold">33%</span></td>
+            <td style="text-align:center;color:#e74c3c">67%</td>
+            <td style="text-align:center;color:#e74c3c">59.8 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#e74c3c;width:33%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">❌</td>
+        </tr>
+        <tr>
+            <td><span class="badge">INFOS_COMPTE</span></td>
+            <td style="text-align:center">4/5</td>
+            <td style="text-align:center"><span style="color:#f39c12;font-weight:bold">80%</span></td>
+            <td style="text-align:center;color:#e74c3c">20%</td>
+            <td style="text-align:center;color:#e74c3c">64.4 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#f39c12;width:80%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">⚠️</td>
+        </tr>
+        <tr>
+            <td><span class="badge">MAX_MIN</span></td>
+            <td style="text-align:center">3/4</td>
+            <td style="text-align:center"><span style="color:#f39c12;font-weight:bold">75%</span></td>
+            <td style="text-align:center;color:#e74c3c">25%</td>
+            <td style="text-align:center;color:#e74c3c">29.2 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#f39c12;width:75%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">⚠️</td>
+        </tr>
+        <tr>
+            <td><span class="badge">MOIS_RELATIF</span></td>
+            <td style="text-align:center">4/4</td>
+            <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
+            <td style="text-align:center;color:#e74c3c">0%</td>
+            <td style="text-align:center;color:#e74c3c">27.8 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">✅</td>
+        </tr>
+        <tr>
+            <td><span class="badge">MOIS_SPECIFIQUE</span></td>
+            <td style="text-align:center">4/5</td>
+            <td style="text-align:center"><span style="color:#f39c12;font-weight:bold">80%</span></td>
+            <td style="text-align:center;color:#e74c3c">20%</td>
+            <td style="text-align:center;color:#e74c3c">16.2 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#f39c12;width:80%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">⚠️</td>
+        </tr>
+        <tr>
+            <td><span class="badge">MOYENNE</span></td>
+            <td style="text-align:center">1/3</td>
+            <td style="text-align:center"><span style="color:#e74c3c;font-weight:bold">33%</span></td>
+            <td style="text-align:center;color:#e74c3c">67%</td>
+            <td style="text-align:center;color:#e74c3c">48.7 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#e74c3c;width:33%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">❌</td>
+        </tr>
+        <tr>
+            <td><span class="badge">PAR_ANNEE</span></td>
+            <td style="text-align:center">0/3</td>
+            <td style="text-align:center"><span style="color:#e74c3c;font-weight:bold">0%</span></td>
+            <td style="text-align:center;color:#e74c3c">100%</td>
+            <td style="text-align:center;color:#e74c3c">111.5 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#e74c3c;width:0%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">❌</td>
+        </tr>
+        <tr>
+            <td><span class="badge">RETARD_PAIEMENT</span></td>
+            <td style="text-align:center">0/3</td>
+            <td style="text-align:center"><span style="color:#e74c3c;font-weight:bold">0%</span></td>
+            <td style="text-align:center;color:#e74c3c">100%</td>
+            <td style="text-align:center;color:#e74c3c">44.0 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#e74c3c;width:0%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">❌</td>
+        </tr>
+        <tr>
+            <td><span class="badge">SOMME</span></td>
+            <td style="text-align:center">1/3</td>
+            <td style="text-align:center"><span style="color:#e74c3c;font-weight:bold">33%</span></td>
+            <td style="text-align:center;color:#e74c3c">67%</td>
+            <td style="text-align:center;color:#e74c3c">19.5 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#e74c3c;width:33%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">❌</td>
+        </tr>
+        <tr>
+            <td><span class="badge">TOP_N</span></td>
+            <td style="text-align:center">1/4</td>
+            <td style="text-align:center"><span style="color:#e74c3c;font-weight:bold">25%</span></td>
+            <td style="text-align:center;color:#e74c3c">75%</td>
+            <td style="text-align:center;color:#e74c3c">42.9 s</td>
+            <td>
+              <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
+                <div style="background:#e74c3c;width:25%;height:10px;border-radius:4px"></div>
+              </div>
+            </td>
+            <td style="text-align:center">❌</td>
+        </tr></tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Détail des Tests — Réponses LLM avec critères de validation</h2>
+  <div class="explication">
+    La colonne <strong>Critères</strong> montre les mots-clés attendus pour chaque question.
+    Tous doivent être présents dans la réponse pour qu'elle soit considérée correcte.
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>État</th><th>Catégorie</th>
+        <th>Question</th><th>Critères attendus</th>
+        <th>Réponse LLM complète</th><th>Durée</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">1</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">INFOS_COMPTE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">donner moi mes infos</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>0005567205</code>, <code>Tiznit</code>, <code>Inezgane</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Nom Client], voici votre information personnelle pour le compte numéro 8306 de l'agence Tiznit :<br>- N° Client : C30EF340/690205<br>- N° Contrat : 0005567205/2063205<br>- Adresse : Hay Salam Rue 17 - Inezgane<br>- Type service : electricite<br><br>Pour tout autre question ou besoin, je suis à votre disposition.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">271263 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">2</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">INFOS_COMPTE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mon adresse</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Inezgane</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour ! Votre adresse est Hay Salam Rue 17 - Inezgane.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">10798 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">3</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">INFOS_COMPTE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mon agence</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Tiznit</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour ! L'agence de votre compte se nomme Agence Tiznit. Votre adresse est Hay Salam Rue 17 - Inezgane.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">14887 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">4</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">INFOS_COMPTE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mon numero de contrat</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>0005567205</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Mon numéro de contrat est **0005567205/2063205**.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">12747 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">5</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">INFOS_COMPTE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mon type de service</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>electricite</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Non prénommé], votre type de service est électricité.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">12220 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">6</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOIS_SPECIFIQUE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">donner ma conso en jan</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Janvier</code>, <code>760</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre consommation d'électricité pour le mois de janvier 2026 était de 760.0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">15264 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">7</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOIS_SPECIFIQUE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma facture de nov 2025</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Novembre</code>, <code>2025</code>, <code>679</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [client], votre facture pour le mois de novembre 2025 s'élève à 679.97 Dhs.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">14644 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">8</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOIS_SPECIFIQUE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">combien j ai paye en mars</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Mars</code>, <code>729</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Client, pour vous répondre à votre question, je vous informe que le montant payé en mars 2026 était de 729.44 Dhs.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">16458 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">9</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOIS_SPECIFIQUE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma conso en juillet</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Juillet</code>, <code>1,939</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre consommation d'électricité au mois de juillet 2026 était de 1 939.0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">14410 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">10</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOIS_SPECIFIQUE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">je veux voir ma facture de octobre</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Octobre</code>, <code>456</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour ! Votre facture pour l'octobre 2025 est disponible. Le montant était de 456,87 Dhs et votre consommation s'élevait à 471,0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">20121 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">11</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOIS_RELATIF</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">pouvez vous me donner ma facture de ce mois</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Juin</code>, <code>1,099</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Client C30EF340/690205, je suis heureux de vous aider. Voici votre facture pour le mois de juin 2026 :<br><br>- Montant : 1,099.98 Dhs<br>- Consommation : 1,134.0 kWh<br><br>Vous pouvez payer votre facture à l'agence Tiznit avant le 5 juillet 2026 pour éviter les frais de retard. Si vous avez besoin d'un rappel ou d'aide supplémentaire, ne hésitez pas à me contacter.<br><br>Bonne journée !</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">48525 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">12</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOIS_RELATIF</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">quel est ma facture de mois dernier</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Mai</code>, <code>432</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour, [Client], votre facture du mois dernier était pour le mois de mai 2026. La consommation était de 446 kWh et le montant de la facture était de 432,62 Dhs.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">20724 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">13</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOIS_RELATIF</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma facture mois actuel</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Juin</code>, <code>1,099</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Nom Cliente], votre consommation électrique pour le mois de juin est de 1,134 kWh et vous devez payer un montant de 1,099.98 Dhs pour cette facture.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">20389 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">14</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOIS_RELATIF</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma conso mois precedent</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Mai</code>, <code>446</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [client], votre consommation électrique pour le mois de mai 2026 était de 446.0 kWh. Vous pouvez trouver cet information dans la section "Historique complet des factures" de vos données personnelles.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">21655 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">15</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MAX_MIN</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">les trois mois que je consomme le plus</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Juillet</code>, <code>1,939</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [client], voici les trois mois où votre consommation était la plus élevée sur les douze derniers mois, c'est-à-dire de Juillet 2026 à Juin 2026. Voici le détail :<br><br>1. Juillet 2026 : 1,939.0 kWh<br>2. Juin 2026 : 1,134.0 kWh<br>3. Juillet 2025 : 801.0 kWh<br><br>Votre consommation a été supérieure à 1 134 kWh lors des deux derniers mois et vous avez aussi dépassé cette consommation en juillet 2025.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">50810 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">16</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MAX_MIN</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">quand j ai le moins consomme</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Mai</code>, <code>446</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre consommation d'électricité la plus faible sur les 12 derniers mois a été en Mai dernier avec une consommation de 446.0 kWh. Cette consommation correspond à un montant de 432.62 Dhs. Pour comparer, votre consommation le mois précédent (avril) était de 655.0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">31672 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">17</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MAX_MIN</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma facture la plus chere</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Juillet</code>, <code>1,880</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre facture la plus chère a été celle de juillet 2026 avec un montant de 1,880.83 Dhs pour une consommation de 1,939.0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">20139 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">18</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MAX_MIN</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mon montant minimum</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Mai</code>, <code>432</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre montant minimal sur les 12 derniers mois est de 432,62 Dhs.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">13980 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">19</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">SOMME</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">combien j ai paye en total</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>9,622</code>, <code>12</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], pour le total des paiements effectués jusqu'à présent, il s'élève à **10,722.35 Dhs**. Cela comprend toutes les factures de votre compte en cours jusqu'au mois de juin 2026 inclus.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">26640 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">20</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">SOMME</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma consommation totale</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>9,920</code>, <code>kWh</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Client, votre consommation totale sur les 12 derniers mois est de 9 920.0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">14888 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">21</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">SOMME</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">combien j ai consomme en tout</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>9,920</code>, <code>kWh</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre consommation totale depuis le début de l'année est de 9,920.0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">16967 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">22</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">HISTORIQUE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mon historique</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Octobre 2025</code>, <code>Septembre 2026</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], voici votre historique complet des factures de consommation électrique depuis octobre 2025 jusqu'à ce mois (juin 2026) :<br><br>| Mois | Consommation | Montant | Tendance |<br>|------|-------------|---------|----------|<br>| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |<br>| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |<br>| **Décembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |<br>| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |<br>| **Février 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |<br>| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |<br>| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |<br>| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |<br>| **Juin 2026** | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |<br>| **Juillet 2026** | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |<br>| **Aout 2026** | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |<br>| **Septembre 2026** | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |<br><br>Si vous avez besoin de plus amples informations, n'hésitez pas à me demander.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">181073 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">23</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">HISTORIQUE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">toutes mes factures</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Octobre 2025</code>, <code>Septembre 2026</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [prénom], je suis l'assistant SRM, votre fournisseur d'eau et d'électricité au Maroc. Voici votre historique complet des factures depuis 12 mois :<br><br>| Mois | Consommation | Montant | Tendance |<br>|------|-------------|---------|----------|<br>| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |<br>| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |<br>| **Decembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |<br>| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |<br>| **Fevrier 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |<br>| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |<br>| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |<br>| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |<br>| **Juin 2026** | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |<br>| **Juillet 2026** | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |<br>| **Aout 2026** | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |<br>| **Septembre 2026** | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |<br><br>Pour accéder à vos factures passées, vous pouvez également nous contacter par téléphone au 08 02 03 12 12 ou par email [stages@srm-sm.ma](mailto:stages@srm-sm.ma) . N'hésitez pas à me poser toute autre question que vous pourriez avoir concernant vos factures ou votre service électrique.<br><br>Attention, si vous avez des retards de paiement, veuillez vous rappeler aux dates limites suivantes :<br>- Retard : 30 jours après la date d'émission de la facture -&gt; Montant supplémentaire de 10% de votre montant initial<br>- Retard : plus de 60 jours après la date d'émission de la facture -&gt; Suspension de service</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">240854 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">24</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">HISTORIQUE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mon evolution</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Octobre 2025</code>, <code>1,880</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], je suis l'assistant SRM. Votre consommation d'électricité a évolué au cours des 12 derniers mois comme suit :<br><br>| Mois | Consommation | Montant | Tendance |<br>|---|---|---|---|<br>| Octobre 2025 | 471.0 kWh | 456.87 Dhs 🟢 | — |<br>| Novembre 2025 | 701.0 kWh | 679.97 Dhs | 📈 ↑ |<br>| Décembre 2025 | 709.0 kWh | 687.73 Dhs | 📈 ↑ |<br>| Janvier 2026 | 760.0 kWh | 737.20 Dhs | 📈 ↑ |<br>| Février 2026 | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |<br>| Mars 2026 | 752.0 kWh | 729.44 Dhs | 📈 ↑ |<br>| Avril 2026 | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |<br>| Mai 2026 | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |<br>| Juin 2026 | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |<br>| Juillet 2026 | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |<br>| Août 2026 | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |<br>| Septembre 2026 | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |<br><br>Sur cette période, votre consommation moyenne était de 826.67 kWh et votre facture mensuelle d'environ 801.87 Dhs. Vous avez consommé un total de 9,920.0 kWh d'électricité au cours des 12 derniers mois.<br><br>Pour en savoir plus sur vos options énergétiques et d'économie d'énergie, n'hésitez pas à me poser une question supplémentaire ou à consulter notre site internet.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">204683 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">25</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOYENNE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma moyenne</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>826</code>, <code>801</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre consommation électrique mensuelle moyenne sur les 12 derniers mois est de 826.67 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">16022 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">26</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOYENNE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mes statistiques</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>826</code>, <code>1,939</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [client], voici votre statistique d'utilisation de l'électricité sur 12 mois en fonction de votre usage agricole :<br><br>🔍 **Vos statistiques sur 12 mois**<br><br>**⚡ Consommation**<br>| | Valeur |<br>|---|---|<br>| Moyenne | **826.67 kWh** |<br>| Minimum | 446.0 kWh |<br>| Maximum | 1,939.0 kWh |<br><br>Min ░░░░░░░░ Max<br>     ██░░░░░░ ← votre moyenne<br><br>**💰 Montants**<br>| | Valeur |<br>|---|---|<br>| Moyenne | **801.87 Dhs** |<br>| Minimum | 432.62 Dhs |<br>| Maximum | 1,880.83 Dhs |<br><br>Min ░░░░░░░░ Max<br>     ██░░░░░░ ← votre moyenne</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">74240 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">27</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">MOYENNE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mon bilan</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>9,920</code>, <code>801</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], voici votre bilan consommation électrique pour le mois de juin 2026 :<br><br>- Consommation : 1,134.0 kWh<br>- Montant : 1,099.98 Dhs<br><br>Cela place le mois de juin 2026 comme un mois élevé (+47% vs moyenne), avec une consommation supérieure à la moyenne mensuelle de 826.67 kWh et un montant supérieur à la moyenne mensuelle de 801.87 Dhs.<br><br>Si vous avez des questions supplémentaires ou souhaitez plus d'informations, n'hésitez pas à me demander !</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">55748 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">28</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">TOP_N</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">les trois mois ou j ai plus consomme</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Juillet</code>, <code>1,939</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Utilisateur !<br><br>Le mois où vous avez consommé le plus d'électricité ces derniers 12 mois est Juillet 2026 avec une consommation de 1,939.0 kWh. Le deuxième mois le plus consommateur est Juin 2026 avec une consommation de 1,134.0 kWh. Quant au mois où vous avez consommé le moins d'électricité ces derniers 12 mois, ce fut Mai 2026 avec une consommation de 446.0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">44411 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">29</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">TOP_N</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">les deux mois le moins consomme</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Mai</code>, <code>Octobre</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour utilisateur, pour les deux mois ayant la consommation électrique la plus faible sur la période de 12 mois, nous avons noté que ce sont le mois de mai avec 446 kWh ainsi que le mois d'avril avec 655 kWh. Ainsi, votre consommation a été la plus faible ces deux mois précédents.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">34321 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">30</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">TOP_N</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mes 3 derniers mois</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Juillet</code>, <code>Septembre</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [client],<br><br>Pour vous aider, je vous donne les détails de vos trois derniers mois :<br><br>* Mai 2026 : Consommation = 446.0 kWh, Montant = 432.62 Dhs (mois économique)<br>* Avril 2026 : Consommation = 655.0 kWh, Montant = 635.35 Dhs (mois économique)<br>* Mars 2026 : Consommation = 752.0 kWh, Montant = 729.44 Dhs<br><br>Si vous avez d'autres questions ou besoin de plus amples informations, ne hesitez pas à me demander. Je suis toujours là pour vous aider.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">60150 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">31</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">TOP_N</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mes 2 premiers mois</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Octobre 2025</code>, <code>Novembre 2025</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour utilisateur, pour les deux premiers mois de votre facturation, je vous indique que le mois d'Octobre 2025 vous a coûté 679.97 Dhs pour une consommation de 471.0 kWh, tandis que le mois de Novembre suivant vous a coûté 687.73 Dhs pour une consommation de 701.0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">32603 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">32</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">COMPARAISON</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">comparer ma consommation en janvier et septembre</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Janvier</code>, <code>Septembre</code>, <code>760</code>, <code>643</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], pour répondre à votre question, en janvier 2026, votre consommation était de 760.0 kWh tandis que, en septembre 2026, elle était de 643.0 kWh. Cela représente donc une diminution de 117.0 kWh entre ces deux mois.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">28536 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">33</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">COMPARAISON</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">janvier vs mars</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Janvier</code>, <code>Mars</code>, <code>752</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Client C30EF340/690205,<br><br>Pour votre question de comparaison entre janvier et mars, voici les données concernant la consommation électrique sur ces deux mois :<br><br>- Janvier 2026 : 760.0 kWh<br>- Mars 2026 : 752.0 kWh<br><br>Vous avez donc consommé un peu moins en mars (752.0 kWh) que en janvier (760.0 kWh). L'écart est de 8.0 kWh entre les deux mois.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">42459 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">34</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">COMPARAISON</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">difference entre octobre et janvier</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Octobre</code>, <code>Janvier</code>, <code>471</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour utilisateur, la différence de consommation entre octobre 2025 et janvier 2026 est de 311.0 kWh. En effet, vous avez consommé 760.0 kWh en janvier contre 471.0 kWh en octobre.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">24096 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">35</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">COMPARAISON</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">comparer fevrier et avril</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Fevrier</code>, <code>Avril</code>, <code>581</code>, <code>655</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Nom], la consommation d'électricité en février était de 581.0 kWh, tandis qu'en avril elle était de 655.0 kWh. Ainsi, la consommation a augmenté de 74.0 kWh entre février et avril.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">24682 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">36</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">RETARD_PAIEMENT</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">suis je en retard</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>25/02/2026</code>, <code>737</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client],<br><br>Je peux vérifier le statut de votre compte. Selon les données réelles de votre historique complet, la date limite pour le paiement de votre facture du mois de Juin 2026 est le 27 juin 2026 et le montant à payer était de 1 099,98 Dhs. Si vous n'avez pas encore effectué le paiement, vous êtes en retard.<br><br>Veuillez nous contacter si vous rencontrez des difficultés pour payer votre facture. Nous sommes toujours là pour vous aider.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">45948 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">37</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">RETARD_PAIEMENT</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">est ce que j ai paye</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>25/11/2025</code>, <code>456</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Client C30EF340/690205, oui, vous avez effectué le paiement de votre facture électrique pour le mois de juin 2026 dans la somme de 1099.98 Dhs. Votre compte est à jour.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">25224 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">38</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">RETARD_PAIEMENT</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">j ai pas encore paye</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>25/02/2026</code>, <code>737</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Cliente C30EF340/690205, votre facture pour le mois de juin 2026 avec un montant de 1,099.98 Dhs n'est pas encore payé. Votre compteur est actuellement bloqué et vous ne pouvez pas consommer de courant électrique jusqu'à ce que la facture soit à jour. Pour résoudre ce problème, vous pouvez effectuer un paiement immédiat en ligne sur notre plateforme électronique ou vous pouvez payer au bureau d'agence SRM Souss-Massa de Tiznit avec votre numéro de contrat 0005567205/2063205. N'hésitez pas à nous contacter si vous avez des questions ou besoin d'aide.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">60708 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">39</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">GENERAL_SRM</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">quels documents pour s abonner en eau</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>formulaire</code>, <code>cin</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], pour s'abonner en eau auprès de SRM, vous devez compléter le formulaire disponible sur notre site Web, fournir votre CIN (Carte d'Identité Nationale) et un justificatif de jouissance. Nous espérons que cela vous permettra d'être connecté à notre service d'eau en peu de temps.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">33008 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">40</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">GENERAL_SRM</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">je veux passer un stage a srm</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>stages@srm-sm.ma</code>, <code>convention</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Utilisateur], pour pouvoir effectuer un stage à SRM, vous devez envoyer votre CV, une convention et votre CNI par email à stages@srm-sm.ma. N'oubliez pas de remplir le formulaire en ligne avant de soumettre votre demande.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">31398 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">41</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">GENERAL_SRM</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">comment economiser l eau</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>robinet</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client],<br><br>Pour économiser l'eau, voici quelques conseils que je vous suggère :<br><br>1. Fermez toujours le robinet en toute circonstance lorsque vous ne l'utilisez pas.<br>2. Reparez les fuites immédiatement si vous constatez une fuite d'eau.<br>3. Faites des douches courtes afin de limiter la consommation d'eau.<br>4. Essayez d'éviter l'utilisation d'équipements qui nécessitent une grande quantité d'eau (comme les baignoires).<br>5. Tenez-vous à jour des réparations domestiques et commerciales, comme le réglage de la pression d'eau, afin de limiter sa consommation.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">61656 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">42</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">GENERAL_SRM</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">adresse siege srm</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Agadir</code>, <code>18 Novembre</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Le siège de SRM est situé à Rue 18 Novembre, Quartier Industriel, Agadir.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">15637 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">43</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">FALLBACK_ANALYSE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">est ce que ma consommation est normale</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Bonjour</code>, <code>1,134</code>, <code>826</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre consommation actuelle semble un peu supérieure à la moyenne. Vous avez consommé 1,134 kWh en juin dernier, alors que votre moyenne mensuelle est de 826.67 kWh. En mai dernier, vous aviez consommé 446 kWh, ce qui correspond à une consommation inférieure à la moyenne. Cependant, il existe des fluctuations saisonnières et diverses facteurs peuvent influencer votre consommation électrique, donc il est normal de voir des variations de temps en temps. Je vous conseille toutefois de surveiller attentivement vos pratiques d'utilisation de l'électricité pour réduire les risques de surconsommation et de retard de paiement.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">62848 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">44</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">FALLBACK_ANALYSE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">pourquoi je paie plus ce mois</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Bonjour</code>, <code>1,134</code>, <code>446</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], la hausse de votre consommation d'électricité cette année est due à une utilisation supérieure par rapport à la moyenne mensuelle. En effet, en comparant le mois actuel (Juin 2026) avec les données de votre historique complet des factures :<br><br>- Consommation en Juin 2026 : 1,134 kWh<br>- Moyenne consommation mensuelle sur les 12 derniers mois : 801.87 kWh<br><br>La consommation ce mois-ci est plus élevée de 432.13 kWh (54%). Il y a donc une augmentation significative dans votre utilisation d'électricité par rapport à la moyenne mensuelle, ce qui explique l'augmentation du montant de cette facture.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">71206 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">45</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">FALLBACK_ANALYSE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">expliquer pourquoi ma consomation de ce mois est plus elevee que celle du mois precedent</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Bonjour</code>, <code>Juin</code>, <code>Mai</code>, <code>1,134</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client],<br><br>La consommation de cette période (Juin 2026) de votre compte n°8306 est supérieure à celle du mois dernier (Mai 2026). La consommation du mois de Juin est de 1,134.0 kWh contre 446.0 kWh pour le mois de Mai. Cela peut s'expliquer par plusieurs facteurs :<br><br>- Les températures élevées pendant ce mois ont pu entraîner l'utilisation d'électricité supplémentaire, notamment pour le climatage ou le chauffage.<br>- Le nombre de jours de ce mois (30) est supérieur au nombre de jours du mois précédent (31).<br>- L'augmentation des activités agricoles ou d'éclairage extérieur peuvent également entraîner une augmentation de la consommation électrique.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">79512 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">46</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">FALLBACK_ANALYSE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">donner moi des conseils pour reduire ma consomation</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Bonjour</code>, <code>Juin</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour utilisateur,<br><br>Pour réduire votre consommation électrique, il existe quelques conseils utiles à appliquer:<br><br>1. Fermer les robinets lorsque vous n'en avez pas besoin pour éviter la fuite d'eau chaude.<br>2. Utiliser des lampes à faible consommation en place de lumières classiques.<br>3. Encore mieux, installez un compresseur frigérant à haute efficacité ou un panneau solaire pour la production d'électricité.<br>4. Utilisez des aires de séchage pour vos vêtements plutôt que le séchoir à linge électrique, cela réduira considérablement votre consommation.<br>5. Faites attention aux appareils de consommation élevée lorsque vous n'en avez pas besoin, comme les téléviseurs, les ordinateurs et les machines à laver.<br>6. Essayez d'éviter l'utilisation d'appareils électriques durant les périodes de pointe de consommation, cela se produit généralement le matin et le soir.<br>7. Utilisez des appareils avec des fonctionnalités économiques telles que le mode éco ou le programme nocturne pour réduire votre consommation en nuit.<br>8. Assurez-vous que tous les appareils sont éteints lorsque vous n'en avez pas besoin.<br>9. Si possible, installez des dispositifs de régulation automatique des lampes et ventilateurs afin d'éviter leur utilisation inutile.<br>10. Pensez à consulter le site web de SRM pour plus d'informations sur l'économie de l'eau et de l'électricité.<br><br>Par application de ces conseils, vous pouvez considérablement réduire votre consommation électrique et donc votre facture de consommation.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">159313 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">47</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">FAUTES_ORTHO</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma consomation en jan</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Janvier</code>, <code>760</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Client, votre consommation en janvier 2026 était de 760.0 kWh.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">14141 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">48</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">FAUTES_ORTHO</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mon agennce</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Tiznit</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre agence est Agence Tiznit. Votre adresse est Hay Salam Rue 17 - Inezgane.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">16495 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">49</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">FAUTES_ORTHO</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma facture le mois derniers</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Mai</code>, <code>432</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [client], votre facture pour le mois de mai 2026 s'élève à 432,62 Dhs.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">15970 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">50</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">PAR_ANNEE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mes factures de 2025</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>2025</code>, <code>1,824</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [non prénommé], je suis l'assistant SRM, votre fournisseur d'eau et d'électricité au Maroc.<br><br>Pour les factures de 2025, vous pouvez trouver toutes ces informations dans le tableau des factures complètes que vous avez renseigné. Par exemple, votre facture du mois de décembre 2025 s'élève à 687.73 Dhs et correspond à une consommation de 709.0 kWh d'électricité.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">53179 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">51</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">PAR_ANNEE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">toutes mes factures de l annee derniere</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>2025</code>, <code>1,824</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client],<br><br>Ici est votre historique complet des factures d'eau et d'électricité pour l'année 2025 :<br><br>**Historique complet des factures (annee dernière) :**<br><br>| Mois | Consommation | Montant | Tendance |<br>|------|-------------|---------|----------|<br>| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |<br>| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |<br>| **Decembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |<br>| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |<br>| **Fevrier 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |<br>| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |<br>| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |<br>| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">134174 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">52</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">PAR_ANNEE</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">mes factures de 2026</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>2026</code>, <code>7,797</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client],<br><br>Voici le détail de vos factures depuis le début de l'année courante, à savoir la période allant de janvier 2026 à juin 2026.<br><br>| Mois | Consommation | Montant | Tendance |<br>|---|---|---|---|<br>| **Janvier** | 760.0 kWh | 737.20 Dhs | - |<br>| **Fevrier** | 581.0 kWh | 563.57 Dhs | 📉 ↓ |<br>| **Mars** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |<br>| **Avril** | 655.0 kWh | 635.35 Dhs | 📉 ↓ |<br>| **Mai** | 446.0 kWh | 432.62 Dhs | 📉 ↓ |<br>| **Juin** | 1,134.0 kWh | 1,099.98 Dhs | 📈 ↑ |<br>| **Juillet** | 1,939.0 kWh | 1,880.83 Dhs | 📈 ↑ |<br>| **Aout** | 1,129.0 kWh | 1,095.13 Dhs | 📉 ↓ |<br>| **Septembre** | 643.0 kWh | 623.71 Dhs | 📉 ↓ |<br><br>Pour plus d'informations ou répondre à d'autres questions concernant vos factures, n'hésitez pas à me contacter.<br><br>Cordialement,<br>[Votre nom]<br>Assistant SRM Souss-Massa</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">147247 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">53</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">HORS_SUJET</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">bonjour</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>SRM</code>, <code>facture</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour ! Bienvenue sur notre plateforme. Comment pouvez-je vous aider aujourd'hui ? Vous êtes le client C30EF340/690205 avec un contrat 0005567205/2063205 et un compteur 8306 situé à Hay Salam Rue 17 - Inezgane, vous utilisez l'électricité pour des besoins agricoles.<br><br>Pour en savoir plus sur vos factures ou obtenir de l'aide sur un autre sujet, n'hésitez pas à me demander.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">52617 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">54</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">HORS_SUJET</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">quel temps fait il</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>SRM</code>, <code>facture</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [client], le jour actuel est mardi 1er juin à midi. En ce moment, la température à Hay Salam varie entre une moyenne de 25°C en plein jour et 18°C dans la nuit.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">21301 ms</td>
+        </tr>
+        <tr style="background:#1a2e1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">55</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">HORS_SUJET</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">merci</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>SRM</code>, <code>facture</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour ! Merci beaucoup pour votre message. Je suis l'assistant SRM Souss-Massa qui vous aide avec les informations sur votre facture d'eau et d'électricité au Maroc.<br><br>Dans le contexte actuel, en juin 2026, voici quelques informations clés :<br><br>* Consommation : 1 134 kWh (mois élevé)<br>* Montant : 1 099,98 Dhs<br><br>En comparaison avec le mois précédent, mai 2026, voici les chiffres :<br><br>* Consommation : 446 kWh (mois économique)<br>* Montant : 432,62 Dhs<br><br>Cette augmentation de consommation pourrait être due à un usage accru d'équipements électriques ou une nécessité agricole supplémentaire.<br><br>Vous pouvez réduire vos coûts en s'efforçant de réduire votre consommation d'énergie, par exemple :<br><br>* Fermez le robinet lorsque vous ne l'utilisez pas.<br>* Reparez les fuites pour éviter les perdre des eaux et électricités.<br>* Les douches courtes peuvent aussi aider à réduire votre consommation d'eau.<br><br>Si vous avez encore des questions ou besoin de plus amples informations, n'hésitez pas à me demander.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">105378 ms</td>
+        </tr>
+        <tr style="background:#2e1a1a">
+            <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">56</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="vertical-align:top;padding-top:10px"><span class="badge">BUG_CONNU</span></td>
+            <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">ma consommation par rapport au mois dernier</td>
+            <td style="vertical-align:top;padding-top:6px;font-size:11px;color:#6e7681"><code>Juin</code>, <code>Mai</code>, <code>1,134</code>, <code>446</code></td>
+            <td style="vertical-align:top">
+              <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
+                          background:#0d1117;border:1px solid #30363d;border-radius:6px;
+                          padding:8px 10px;white-space:pre-wrap">Bonjour [Client], votre consommation de cette année est supérieure à celle du mois dernier. En effet, en juin 2026, vous avez consommé 1 134 kWh contre 446 kWh en mai 2026. Cela représente une augmentation de 158%.</div>
+            </td>
+            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">27537 ms</td>
+        </tr></tbody>
+  </table>
+</div>
+
+<footer>
+  SRM Souss-Massa — Stage de fin d'études EST Guelmim · Filière SDSI 2025-2026<br>
+  Réalisé par <strong>BEN ZHIR Wafa</strong> · Encadrant entreprise : ZEROUALI Hassan
+  · Encadrant académique : AIT BAHA Tarek<br>
+  <span style="color:#f39c12">Mode évaluation : LLM seul — baseline v2 — critères enrichis</span>
+</footer>
+</body>
+</html>
