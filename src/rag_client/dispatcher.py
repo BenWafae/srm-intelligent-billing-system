@@ -394,7 +394,12 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
 
     # Court-circuit : si la question contient un mot personnel
     # évident → on saute directement à la logique existante
-    _MOTS_PERSO_EVIDENTS = [# Possessifs — étapes 0, 3, 4
+    _MOTS_PERSO_EVIDENTS = [
+        # ── HORS SUJET ÉVIDENTS — réponse instantanée sans routeur LLM ──
+       "bonjour", "merci", "salam", "bonsoir", "salut",
+       "svp", "stp", "aide", "help","quel jour", "quelle heure", "quelle date","quel temps","vous pouvez maider"
+       "comment pouvez vous maider",
+        # Possessifs — étapes 0, 3, 4
         "mon ", "ma ", "mes ",
         # Retard — étape retard
         "j ai", "suis je", "je suis",
