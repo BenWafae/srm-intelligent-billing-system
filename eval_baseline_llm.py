@@ -602,9 +602,25 @@ RESET = "\033[0m"
 GRAS  = "\033[1m"
 
 
+def _normaliser(s: str) -> str:
+    """Normalise : minuscules + supprime accents + espaces insécables."""
+    import unicodedata
+    s = unicodedata.normalize('NFD', s).encode('ascii', 'ignore').decode()
+    return s.lower().replace('\u00a0', ' ')
+
 def _check(reponse: str, mots_attendus: list) -> bool:
-    r = reponse.lower()
-    return all(m.lower() in r for m in mots_attendus)
+    """Vérifie que tous les mots attendus sont dans la réponse.
+    Tolérant aux accents, casse et formats numériques (virgule vs espace).
+    """
+    r = _normaliser(reponse)
+    # Tolérance format numérique : "1,134" et "1 134" sont équivalents
+    r_alt = r.replace(',', ' ')
+    for m in mots_attendus:
+        m_norm = _normaliser(m)
+        m_alt  = m_norm.replace(',', ' ')
+        if m_norm not in r and m_alt not in r_alt:
+            return False
+    return True
 
 
 def _barre(score: float, w: int = 20) -> str:

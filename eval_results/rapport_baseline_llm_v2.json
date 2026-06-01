@@ -1,22 +1,22 @@
 {
-  "date": "01/06/2026 à 20:52:05",
+  "date": "01/06/2026 à 21:55:21",
   "version": "v2_enriched_keywords",
   "mode": "llm_only_baseline",
   "contrat_test": "0005567205/2063205",
   "total_questions": 56,
-  "reussis": 34,
-  "taux_reussite": 0.6071,
+  "reussis": 36,
+  "taux_reussite": 0.6429,
   "score_hybride": 0.964,
-  "gain_hybride": 0.3569,
-  "temps_moyen_ms": 53349.59,
+  "gain_hybride": 0.3211,
+  "temps_moyen_ms": 52635.05,
   "metriques": {
     "INFOS_COMPTE": {
       "total": 5,
-      "reussis": 4,
-      "echecs": 1,
-      "taux_reussite": 0.8,
-      "taux_erreur": 0.2,
-      "tps_moyen_ms": 64382.9
+      "reussis": 5,
+      "echecs": 0,
+      "taux_reussite": 1.0,
+      "taux_erreur": 0.0,
+      "tps_moyen_ms": 70379.7
     },
     "MOIS_SPECIFIQUE": {
       "total": 5,
@@ -24,7 +24,7 @@
       "echecs": 1,
       "taux_reussite": 0.8,
       "taux_erreur": 0.2,
-      "tps_moyen_ms": 16179.5
+      "tps_moyen_ms": 25160.3
     },
     "MOIS_RELATIF": {
       "total": 4,
@@ -32,7 +32,7 @@
       "echecs": 0,
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
-      "tps_moyen_ms": 27823.3
+      "tps_moyen_ms": 23251.8
     },
     "MAX_MIN": {
       "total": 4,
@@ -40,23 +40,23 @@
       "echecs": 1,
       "taux_reussite": 0.75,
       "taux_erreur": 0.25,
-      "tps_moyen_ms": 29150.4
+      "tps_moyen_ms": 39083.4
     },
     "SOMME": {
       "total": 3,
-      "reussis": 1,
-      "echecs": 2,
-      "taux_reussite": 0.333,
-      "taux_erreur": 0.667,
-      "tps_moyen_ms": 19498.3
+      "reussis": 2,
+      "echecs": 1,
+      "taux_reussite": 0.667,
+      "taux_erreur": 0.333,
+      "tps_moyen_ms": 25459.2
     },
     "HISTORIQUE": {
       "total": 3,
-      "reussis": 3,
-      "echecs": 0,
-      "taux_reussite": 1.0,
-      "taux_erreur": 0.0,
-      "tps_moyen_ms": 208870.3
+      "reussis": 2,
+      "echecs": 1,
+      "taux_reussite": 0.667,
+      "taux_erreur": 0.333,
+      "tps_moyen_ms": 176443.5
     },
     "MOYENNE": {
       "total": 3,
@@ -64,23 +64,23 @@
       "echecs": 2,
       "taux_reussite": 0.333,
       "taux_erreur": 0.667,
-      "tps_moyen_ms": 48670.3
+      "tps_moyen_ms": 35514.0
     },
     "TOP_N": {
       "total": 4,
-      "reussis": 1,
-      "echecs": 3,
-      "taux_reussite": 0.25,
-      "taux_erreur": 0.75,
-      "tps_moyen_ms": 42871.2
+      "reussis": 2,
+      "echecs": 2,
+      "taux_reussite": 0.5,
+      "taux_erreur": 0.5,
+      "tps_moyen_ms": 39904.1
     },
     "COMPARAISON": {
       "total": 4,
-      "reussis": 3,
-      "echecs": 1,
-      "taux_reussite": 0.75,
-      "taux_erreur": 0.25,
-      "tps_moyen_ms": 29942.9
+      "reussis": 4,
+      "echecs": 0,
+      "taux_reussite": 1.0,
+      "taux_erreur": 0.0,
+      "tps_moyen_ms": 44243.6
     },
     "RETARD_PAIEMENT": {
       "total": 3,
@@ -88,7 +88,7 @@
       "echecs": 3,
       "taux_reussite": 0.0,
       "taux_erreur": 1.0,
-      "tps_moyen_ms": 43960.2
+      "tps_moyen_ms": 40918.4
     },
     "GENERAL_SRM": {
       "total": 4,
@@ -96,23 +96,23 @@
       "echecs": 0,
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
-      "tps_moyen_ms": 35424.8
+      "tps_moyen_ms": 30577.3
     },
     "FALLBACK_ANALYSE": {
       "total": 4,
-      "reussis": 2,
-      "echecs": 2,
-      "taux_reussite": 0.5,
-      "taux_erreur": 0.5,
-      "tps_moyen_ms": 93219.7
+      "reussis": 3,
+      "echecs": 1,
+      "taux_reussite": 0.75,
+      "taux_erreur": 0.25,
+      "tps_moyen_ms": 92617.6
     },
     "FAUTES_ORTHO": {
       "total": 3,
-      "reussis": 3,
-      "echecs": 0,
-      "taux_reussite": 1.0,
-      "taux_erreur": 0.0,
-      "tps_moyen_ms": 15535.4
+      "reussis": 2,
+      "echecs": 1,
+      "taux_reussite": 0.667,
+      "taux_erreur": 0.333,
+      "tps_moyen_ms": 17508.7
     },
     "PAR_ANNEE": {
       "total": 3,
@@ -120,15 +120,15 @@
       "echecs": 3,
       "taux_reussite": 0.0,
       "taux_erreur": 1.0,
-      "tps_moyen_ms": 111533.2
+      "tps_moyen_ms": 94947.9
     },
     "HORS_SUJET": {
       "total": 3,
-      "reussis": 1,
-      "echecs": 2,
-      "taux_reussite": 0.333,
-      "taux_erreur": 0.667,
-      "tps_moyen_ms": 59765.3
+      "reussis": 0,
+      "echecs": 3,
+      "taux_reussite": 0.0,
+      "taux_erreur": 1.0,
+      "tps_moyen_ms": 63518.0
     },
     "BUG_CONNU": {
       "total": 1,
@@ -136,7 +136,7 @@
       "echecs": 1,
       "taux_reussite": 0.0,
       "taux_erreur": 1.0,
-      "tps_moyen_ms": 27536.9
+      "tps_moyen_ms": 28223.1
     }
   },
   "valeurs_db": {
@@ -200,9 +200,9 @@
       "categorie": "INFOS_COMPTE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 271263.0224227905,
-      "reponse_complete": "Bonjour [Nom Client], voici votre information personnelle pour le compte numéro 8306 de l'agence Tiznit :\n- N° Client : C30EF340/690205\n- N° Contrat : 0005567205/2063205\n- Adresse : Hay Salam Rue 17 - Inezgane\n- Type service : electricite\n\nPour tout autre question ou besoin, je suis à votre disposition.",
-      "reponse_court": "Bonjour [Nom Client], voici votre information personnelle pour le compte numéro 8306 de l'agence Tiznit : - N° Client : ",
+      "duree_ms": 289222.136259079,
+      "reponse_complete": "Bonjour, voici vos informations :\n\n- N° Client : C30EF340/690205\n- N° Contrat : 0005567205/2063205\n- N° Compteur : 8306\n- Adresse : Hay Salam Rue 17 - Inezgane\n- Agence : Agence Tiznit\n- Usage : USAGE AGRICOLE\n- Type service : electrique\n\nPour des questions concernant vos factures, n'hésitez pas à me demander !",
+      "reponse_court": "Bonjour, voici vos informations :  - N° Client : C30EF340/690205 - N° Contrat : 0005567205/2063205 - N° Compteur : 8306 ",
       "mots_attendus": [
         "0005567205",
         "Tiznit",
@@ -214,9 +214,9 @@
       "categorie": "INFOS_COMPTE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 10797.730922698975,
-      "reponse_complete": "Bonjour ! Votre adresse est Hay Salam Rue 17 - Inezgane.",
-      "reponse_court": "Bonjour ! Votre adresse est Hay Salam Rue 17 - Inezgane.",
+      "duree_ms": 32136.8088722229,
+      "reponse_complete": "Bonjour [client], votre adresse est la suivante : Hay Salam Rue 17 - Inezgane. Si vous avez besoin de plus de détails ou si vous souhaitez modifier vos informations, n'hésitez pas à nous contacter par téléphone au [08 02 03 12 12] ou par email [stage@srm-sm.ma]. À votre service !",
+      "reponse_court": "Bonjour [client], votre adresse est la suivante : Hay Salam Rue 17 - Inezgane. Si vous avez besoin de plus de détails ou",
       "mots_attendus": [
         "Inezgane"
       ]
@@ -226,9 +226,9 @@
       "categorie": "INFOS_COMPTE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 14886.9149684906,
-      "reponse_complete": "Bonjour ! L'agence de votre compte se nomme Agence Tiznit. Votre adresse est Hay Salam Rue 17 - Inezgane.",
-      "reponse_court": "Bonjour ! L'agence de votre compte se nomme Agence Tiznit. Votre adresse est Hay Salam Rue 17 - Inezgane.",
+      "duree_ms": 9423.22826385498,
+      "reponse_complete": "Bonjour [Client], votre agence est l'Agence Tiznit.",
+      "reponse_court": "Bonjour [Client], votre agence est l'Agence Tiznit.",
       "mots_attendus": [
         "Tiznit"
       ]
@@ -238,7 +238,7 @@
       "categorie": "INFOS_COMPTE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 12747.084140777588,
+      "duree_ms": 12026.081800460815,
       "reponse_complete": "Mon numéro de contrat est **0005567205/2063205**.",
       "reponse_court": "Mon numéro de contrat est **0005567205/2063205**.",
       "mots_attendus": [
@@ -249,10 +249,10 @@
       "question": "mon type de service",
       "categorie": "INFOS_COMPTE",
       "chemin": "llm_only",
-      "succes": false,
-      "duree_ms": 12219.663858413696,
-      "reponse_complete": "Bonjour [Non prénommé], votre type de service est électricité.",
-      "reponse_court": "Bonjour [Non prénommé], votre type de service est électricité.",
+      "succes": true,
+      "duree_ms": 9090.487718582153,
+      "reponse_complete": "Bonjour [Client], votre type de service est électricité.",
+      "reponse_court": "Bonjour [Client], votre type de service est électricité.",
       "mots_attendus": [
         "electricite"
       ]
@@ -262,9 +262,9 @@
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 15264.386892318726,
-      "reponse_complete": "Bonjour [Client], votre consommation d'électricité pour le mois de janvier 2026 était de 760.0 kWh.",
-      "reponse_court": "Bonjour [Client], votre consommation d'électricité pour le mois de janvier 2026 était de 760.0 kWh.",
+      "duree_ms": 16688.034057617188,
+      "reponse_complete": "Bonjour [Client], votre consommation d'électricité pour le mois de janvier 2026 est de 760.0 kWh.",
+      "reponse_court": "Bonjour [Client], votre consommation d'électricité pour le mois de janvier 2026 est de 760.0 kWh.",
       "mots_attendus": [
         "Janvier",
         "760"
@@ -275,9 +275,9 @@
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 14643.91541481018,
-      "reponse_complete": "Bonjour [client], votre facture pour le mois de novembre 2025 s'élève à 679.97 Dhs.",
-      "reponse_court": "Bonjour [client], votre facture pour le mois de novembre 2025 s'élève à 679.97 Dhs.",
+      "duree_ms": 38895.72525024414,
+      "reponse_complete": "Bonjour [Client], votre facture pour le mois de novembre 2025 est de 679.97 Dhs. Vous avez consommé 701 kWh ce mois-ci. Pour toute question supplémentaire ou pour obtenir des informations sur vos factures passées ou à venir, n'hésitez pas à nous contacter par notre centre d'appels au 08 02 03 12 12.",
+      "reponse_court": "Bonjour [Client], votre facture pour le mois de novembre 2025 est de 679.97 Dhs. Vous avez consommé 701 kWh ce mois-ci. ",
       "mots_attendus": [
         "Novembre",
         "2025",
@@ -289,9 +289,9 @@
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 16458.08434486389,
-      "reponse_complete": "Bonjour Client, pour vous répondre à votre question, je vous informe que le montant payé en mars 2026 était de 729.44 Dhs.",
-      "reponse_court": "Bonjour Client, pour vous répondre à votre question, je vous informe que le montant payé en mars 2026 était de 729.44 Dh",
+      "duree_ms": 12491.743087768555,
+      "reponse_complete": "Bonjour [Nom], vous avez payé 729,44 Dhs en mars.",
+      "reponse_court": "Bonjour [Nom], vous avez payé 729,44 Dhs en mars.",
       "mots_attendus": [
         "Mars",
         "729"
@@ -301,10 +301,10 @@
       "question": "ma conso en juillet",
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "llm_only",
-      "succes": false,
-      "duree_ms": 14410.34746170044,
-      "reponse_complete": "Bonjour [Client], votre consommation d'électricité au mois de juillet 2026 était de 1 939.0 kWh.",
-      "reponse_court": "Bonjour [Client], votre consommation d'électricité au mois de juillet 2026 était de 1 939.0 kWh.",
+      "succes": true,
+      "duree_ms": 15098.989963531494,
+      "reponse_complete": "Bonjour [Client], votre consommation en juillet 2026 s'élevait à 1,939.0 kWh.",
+      "reponse_court": "Bonjour [Client], votre consommation en juillet 2026 s'élevait à 1,939.0 kWh.",
       "mots_attendus": [
         "Juillet",
         "1,939"
@@ -314,10 +314,10 @@
       "question": "je veux voir ma facture de octobre",
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "llm_only",
-      "succes": true,
-      "duree_ms": 20120.715379714966,
-      "reponse_complete": "Bonjour ! Votre facture pour l'octobre 2025 est disponible. Le montant était de 456,87 Dhs et votre consommation s'élevait à 471,0 kWh.",
-      "reponse_court": "Bonjour ! Votre facture pour l'octobre 2025 est disponible. Le montant était de 456,87 Dhs et votre consommation s'éleva",
+      "succes": false,
+      "duree_ms": 42626.85298919678,
+      "reponse_complete": "Bonjour [Client], pour voir votre facture d'octobre 2025, vous pouvez accéder à votre compte sur le site internet de SRM ou demander une copie en contactant notre agence Tiznit par téléphone au 08 02 03 12 12. Dans ce cas, pour identifier correctement votre compte, n'oubliez pas de nous fournir le numéro client C30EF340/690205 et le numéro du contrat 0005567205.",
+      "reponse_court": "Bonjour [Client], pour voir votre facture d'octobre 2025, vous pouvez accéder à votre compte sur le site internet de SRM",
       "mots_attendus": [
         "Octobre",
         "456"
@@ -328,9 +328,9 @@
       "categorie": "MOIS_RELATIF",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 48525.06732940674,
-      "reponse_complete": "Bonjour Client C30EF340/690205, je suis heureux de vous aider. Voici votre facture pour le mois de juin 2026 :\n\n- Montant : 1,099.98 Dhs\n- Consommation : 1,134.0 kWh\n\nVous pouvez payer votre facture à l'agence Tiznit avant le 5 juillet 2026 pour éviter les frais de retard. Si vous avez besoin d'un rappel ou d'aide supplémentaire, ne hésitez pas à me contacter.\n\nBonne journée !",
-      "reponse_court": "Bonjour Client C30EF340/690205, je suis heureux de vous aider. Voici votre facture pour le mois de juin 2026 :  - Montan",
+      "duree_ms": 31210.970163345337,
+      "reponse_complete": "Bonjour, pour obtenir votre facture du mois de juin 2026, veuillez consulter votre espace client en ligne ou vous rendez simplement à l'agence Tiznit. Votre facture pour ce mois affiche un montant de 1,099,98 Dhs pour une consommation de 1,134.0 kWh.",
+      "reponse_court": "Bonjour, pour obtenir votre facture du mois de juin 2026, veuillez consulter votre espace client en ligne ou vous rendez",
       "mots_attendus": [
         "Juin",
         "1,099"
@@ -341,9 +341,9 @@
       "categorie": "MOIS_RELATIF",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 20723.91390800476,
-      "reponse_complete": "Bonjour, [Client], votre facture du mois dernier était pour le mois de mai 2026. La consommation était de 446 kWh et le montant de la facture était de 432,62 Dhs.",
-      "reponse_court": "Bonjour, [Client], votre facture du mois dernier était pour le mois de mai 2026. La consommation était de 446 kWh et le ",
+      "duree_ms": 17155.065536499023,
+      "reponse_complete": "Bonjour [Client], votre facture pour le mois de mai 2026 s'élève à 432,62 Dhs.",
+      "reponse_court": "Bonjour [Client], votre facture pour le mois de mai 2026 s'élève à 432,62 Dhs.",
       "mots_attendus": [
         "Mai",
         "432"
@@ -354,9 +354,9 @@
       "categorie": "MOIS_RELATIF",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 20389.118671417236,
-      "reponse_complete": "Bonjour [Nom Cliente], votre consommation électrique pour le mois de juin est de 1,134 kWh et vous devez payer un montant de 1,099.98 Dhs pour cette facture.",
-      "reponse_court": "Bonjour [Nom Cliente], votre consommation électrique pour le mois de juin est de 1,134 kWh et vous devez payer un montan",
+      "duree_ms": 30417.38772392273,
+      "reponse_complete": "Bonjour [Client], votre facture pour le mois de juin est de 1,099,98 Dhs pour une consommation de 1,134 kWh. Vous pouvez payer cette facture à l'agence Tiznit ou en ligne via votre compte client. Pour plus d'informations sur vos paiements, veuillez contacter notre service clientèle.",
+      "reponse_court": "Bonjour [Client], votre facture pour le mois de juin est de 1,099,98 Dhs pour une consommation de 1,134 kWh. Vous pouvez",
       "mots_attendus": [
         "Juin",
         "1,099"
@@ -367,9 +367,9 @@
       "categorie": "MOIS_RELATIF",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 21655.139446258545,
-      "reponse_complete": "Bonjour [client], votre consommation électrique pour le mois de mai 2026 était de 446.0 kWh. Vous pouvez trouver cet information dans la section \"Historique complet des factures\" de vos données personnelles.",
-      "reponse_court": "Bonjour [client], votre consommation électrique pour le mois de mai 2026 était de 446.0 kWh. Vous pouvez trouver cet inf",
+      "duree_ms": 14223.918199539185,
+      "reponse_complete": "Bonjour [Client], votre consommation électrique au mois de mai 2026 était de 446.0 kWh.",
+      "reponse_court": "Bonjour [Client], votre consommation électrique au mois de mai 2026 était de 446.0 kWh.",
       "mots_attendus": [
         "Mai",
         "446"
@@ -380,9 +380,9 @@
       "categorie": "MAX_MIN",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 50809.959411621094,
-      "reponse_complete": "Bonjour [client], voici les trois mois où votre consommation était la plus élevée sur les douze derniers mois, c'est-à-dire de Juillet 2026 à Juin 2026. Voici le détail :\n\n1. Juillet 2026 : 1,939.0 kWh\n2. Juin 2026 : 1,134.0 kWh\n3. Juillet 2025 : 801.0 kWh\n\nVotre consommation a été supérieure à 1 134 kWh lors des deux derniers mois et vous avez aussi dépassé cette consommation en juillet 2025.",
-      "reponse_court": "Bonjour [client], voici les trois mois où votre consommation était la plus élevée sur les douze derniers mois, c'est-à-d",
+      "duree_ms": 89716.12429618835,
+      "reponse_complete": "Bonjour [client], pour répondre à votre question, voici les trois mois où vous avez consommé le plus d'électricité depuis 12 mois :\n\n| Mois | Consommation (kWh) |\n|---|---|\n| **Juin 2026** | 1,134.0 kWh |\n| **Juillet 2026** | 1,939.0 kWh |\n| **Aout 2026** | 1,129.0 kWh |\n\nLe mois où vous avez consommé le plus d'électricité est Juillet 2026 avec une consommation de 1,939.0 kWh. En comparaison, le mois d'Aout 2026 a vu une consommation de 1,129.0 kWh, et juin 2026 a eu une consommation de 1,134.0 kWh.\n\nEsperons que cette réponse vous aide. Si vous avez d'autres questions, n'hésitez pas à les poser. Vous pouvez toujours me contactez pour des informations supplémentaires sur votre facture ou pour avoir des conseils sur la consommation d'électricité.",
+      "reponse_court": "Bonjour [client], pour répondre à votre question, voici les trois mois où vous avez consommé le plus d'électricité depui",
       "mots_attendus": [
         "Juillet",
         "1,939"
@@ -393,9 +393,9 @@
       "categorie": "MAX_MIN",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 31672.117948532104,
-      "reponse_complete": "Bonjour [Client], votre consommation d'électricité la plus faible sur les 12 derniers mois a été en Mai dernier avec une consommation de 446.0 kWh. Cette consommation correspond à un montant de 432.62 Dhs. Pour comparer, votre consommation le mois précédent (avril) était de 655.0 kWh.",
-      "reponse_court": "Bonjour [Client], votre consommation d'électricité la plus faible sur les 12 derniers mois a été en Mai dernier avec une",
+      "duree_ms": 17936.354160308838,
+      "reponse_complete": "Bonjour utilisateur, vous avez consommé le moindre en électricité lors du mois de Mai 2026 avec une consommation de 446.0 kWh.",
+      "reponse_court": "Bonjour utilisateur, vous avez consommé le moindre en électricité lors du mois de Mai 2026 avec une consommation de 446.",
       "mots_attendus": [
         "Mai",
         "446"
@@ -406,9 +406,9 @@
       "categorie": "MAX_MIN",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 20139.392614364624,
-      "reponse_complete": "Bonjour [Client], votre facture la plus chère a été celle de juillet 2026 avec un montant de 1,880.83 Dhs pour une consommation de 1,939.0 kWh.",
-      "reponse_court": "Bonjour [Client], votre facture la plus chère a été celle de juillet 2026 avec un montant de 1,880.83 Dhs pour une conso",
+      "duree_ms": 26518.019914627075,
+      "reponse_complete": "Bonjour [Client], votre facture la plus chère est celle de juillet 2026 avec un montant de 1,880.83 Dhs. Pour le comparer, votre facture du mois dernier (mai 2026) avait un montant de 432.62 Dhs.",
+      "reponse_court": "Bonjour [Client], votre facture la plus chère est celle de juillet 2026 avec un montant de 1,880.83 Dhs. Pour le compare",
       "mots_attendus": [
         "Juillet",
         "1,880"
@@ -419,9 +419,9 @@
       "categorie": "MAX_MIN",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 13980.038166046143,
-      "reponse_complete": "Bonjour [Client], votre montant minimal sur les 12 derniers mois est de 432,62 Dhs.",
-      "reponse_court": "Bonjour [Client], votre montant minimal sur les 12 derniers mois est de 432,62 Dhs.",
+      "duree_ms": 22163.031339645386,
+      "reponse_complete": "Bonjour client, votre montant minimum sur les 12 derniers mois a été de 432.62 Dhs. Je suis l'assistant SRM, je peux vous aider avec vos questions relatives à vos factures d'électricité.",
+      "reponse_court": "Bonjour client, votre montant minimum sur les 12 derniers mois a été de 432.62 Dhs. Je suis l'assistant SRM, je peux vou",
       "mots_attendus": [
         "Mai",
         "432"
@@ -432,9 +432,9 @@
       "categorie": "SOMME",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 26639.742612838745,
-      "reponse_complete": "Bonjour [Client], pour le total des paiements effectués jusqu'à présent, il s'élève à **10,722.35 Dhs**. Cela comprend toutes les factures de votre compte en cours jusqu'au mois de juin 2026 inclus.",
-      "reponse_court": "Bonjour [Client], pour le total des paiements effectués jusqu'à présent, il s'élève à **10,722.35 Dhs**. Cela comprend t",
+      "duree_ms": 37199.70965385437,
+      "reponse_complete": "Bonjour utilisateur ! En tout cas, pour le compte client C30EF340/690205 concernant l'utilisation de l'électricité à Hay Salam Rue 17 - Inezgane, vous avez payé un montant total de 9,622 Dhs en factures sur les douze derniers mois. Cela représente une consommation totale de 9,920 kWh pendant cette période.",
+      "reponse_court": "Bonjour utilisateur ! En tout cas, pour le compte client C30EF340/690205 concernant l'utilisation de l'électricité à Hay",
       "mots_attendus": [
         "9,622",
         "12"
@@ -444,10 +444,10 @@
       "question": "ma consommation totale",
       "categorie": "SOMME",
       "chemin": "llm_only",
-      "succes": false,
-      "duree_ms": 14887.941122055054,
-      "reponse_complete": "Bonjour Client, votre consommation totale sur les 12 derniers mois est de 9 920.0 kWh.",
-      "reponse_court": "Bonjour Client, votre consommation totale sur les 12 derniers mois est de 9 920.0 kWh.",
+      "succes": true,
+      "duree_ms": 15140.07568359375,
+      "reponse_complete": "Bonjour [client], votre consommation totale sur les 12 derniers mois s'élève à 9 920 kWh.",
+      "reponse_court": "Bonjour [client], votre consommation totale sur les 12 derniers mois s'élève à 9 920 kWh.",
       "mots_attendus": [
         "9,920",
         "kWh"
@@ -458,9 +458,9 @@
       "categorie": "SOMME",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 16967.31424331665,
-      "reponse_complete": "Bonjour [Client], votre consommation totale depuis le début de l'année est de 9,920.0 kWh.",
-      "reponse_court": "Bonjour [Client], votre consommation totale depuis le début de l'année est de 9,920.0 kWh.",
+      "duree_ms": 24037.672996520996,
+      "reponse_complete": "Bonjour ! Vous avez consommé un total de 9,920.0 kWh depuis la date de votre dernier compteur, c'est-à-dire du 1er juin 2025 au 1er juin 2026.",
+      "reponse_court": "Bonjour ! Vous avez consommé un total de 9,920.0 kWh depuis la date de votre dernier compteur, c'est-à-dire du 1er juin ",
       "mots_attendus": [
         "9,920",
         "kWh"
@@ -471,9 +471,9 @@
       "categorie": "HISTORIQUE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 181073.11582565308,
-      "reponse_complete": "Bonjour [Client], voici votre historique complet des factures de consommation électrique depuis octobre 2025 jusqu'à ce mois (juin 2026) :\n\n| Mois | Consommation | Montant | Tendance |\n|------|-------------|---------|----------|\n| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |\n| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |\n| **Décembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |\n| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |\n| **Février 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |\n| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |\n| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |\n| **Juin 2026** | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |\n| **Juillet 2026** | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |\n| **Aout 2026** | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |\n| **Septembre 2026** | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |\n\nSi vous avez besoin de plus amples informations, n'hésitez pas à me demander.",
-      "reponse_court": "Bonjour [Client], voici votre historique complet des factures de consommation électrique depuis octobre 2025 jusqu'à ce ",
+      "duree_ms": 218229.6757698059,
+      "reponse_complete": "Bonjour utilisateur ! Vous trouverez ci-dessous votre historique complet des factures de votre compte SRM sous-massa pour le compteur 8306 situé à Hay Salam Rue 17 - Inezgane.\n\n```\n| Mois    | Consommation   | Montant          | Tendance |\n|---------|----------------|-------------------|----------|\n| Octobre 2025     | 471.0 kWh      | 456.87 Dhs        🟢 | ---       |\n| Novembre 2025    | 701.0 kWh      | 679.97 Dhs        📈  ↑ |\n| Décembre 2025    | 709.0 kWh      | 687.73 Dhs        📈  ↑ |\n| Janvier 2026     | 760.0 kWh      | 737.20 Dhs        📈  ↑ |\n| Février 2026     | 581.0 kWh      | 563.57 Dhs        🟢 | 📉  ↓   |\n| Mars 2026        | 752.0 kWh      | 729.44 Dhs        📈  ↑ |\n| Avril 2026       | 655.0 kWh      | 635.35 Dhs        🟢 | 📉  ↓   |\n| Mai 2026         | 446.0 kWh      | 432.62 Dhs        🟢 | 📉  ↓   |\n| Juin 2026        | 1,134.0 kWh    | 1,099.98 Dhs      🔴 | 📈  ↑   |\n| Juillet 2026     | 1,939.0 kWh    | 1,880.83 Dhs      🔴 | 📈  ↑   |\n| Aout 2026        | 1,129.0 kWh    | 1,095.13 Dhs      🔴 | 📉  ↓   |\n| Septembre 2026   | 643.0 kWh      | 623.71 Dhs        🟢 | 📉  ↓   |\n```\nVous avez consommé un total de **9,622.40 Dhs** sur les douze derniers mois avec une moyenne de **801.87 Dhs/mois**. Votre consommation totale est de **9,920.0 kWh**.\n\nEsperant vous aider !",
+      "reponse_court": "Bonjour utilisateur ! Vous trouverez ci-dessous votre historique complet des factures de votre compte SRM sous-massa pou",
       "mots_attendus": [
         "Octobre 2025",
         "Septembre 2026"
@@ -484,9 +484,9 @@
       "categorie": "HISTORIQUE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 240854.29859161377,
-      "reponse_complete": "Bonjour [prénom], je suis l'assistant SRM, votre fournisseur d'eau et d'électricité au Maroc. Voici votre historique complet des factures depuis 12 mois :\n\n| Mois | Consommation | Montant | Tendance |\n|------|-------------|---------|----------|\n| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |\n| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |\n| **Decembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |\n| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |\n| **Fevrier 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |\n| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |\n| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |\n| **Juin 2026** | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |\n| **Juillet 2026** | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |\n| **Aout 2026** | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |\n| **Septembre 2026** | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |\n\nPour accéder à vos factures passées, vous pouvez également nous contacter par téléphone au 08 02 03 12 12 ou par email [stages@srm-sm.ma](mailto:stages@srm-sm.ma) . N'hésitez pas à me poser toute autre question que vous pourriez avoir concernant vos factures ou votre service électrique.\n\nAttention, si vous avez des retards de paiement, veuillez vous rappeler aux dates limites suivantes :\n- Retard : 30 jours après la date d'émission de la facture -> Montant supplémentaire de 10% de votre montant initial\n- Retard : plus de 60 jours après la date d'émission de la facture -> Suspension de service",
-      "reponse_court": "Bonjour [prénom], je suis l'assistant SRM, votre fournisseur d'eau et d'électricité au Maroc. Voici votre historique com",
+      "duree_ms": 204489.34268951416,
+      "reponse_complete": "Bonjour [Client C30EF340/690205], je suis l'assistant SRM. Voici votre historique complet des factures depuis octobre 2025 jusqu'au mois actuel, juin 2026 :\n\n| Mois | Consommation | Montant | Tendance |\n|------|-------------|---------|----------|\n| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |\n| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |\n| **Decembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |\n| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |\n| **Fevrier 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |\n| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |\n| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |\n| **Juin 2026** | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |\n| **Juillet 2026** | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |\n| **Aout 2026** | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |\n| **Septembre 2026** | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |\n\nRésumé : 12 mois | Total : **9,622.40 Dhs** | Moyenne : **801.87 Dhs/mois** | Conso totale : **9,920.0 kWh**\n\n🔴 = mois élevé (+20% vs moyenne)  🟢 = mois économique (-20% vs moyenne)",
+      "reponse_court": "Bonjour [Client C30EF340/690205], je suis l'assistant SRM. Voici votre historique complet des factures depuis octobre 20",
       "mots_attendus": [
         "Octobre 2025",
         "Septembre 2026"
@@ -496,10 +496,10 @@
       "question": "mon evolution",
       "categorie": "HISTORIQUE",
       "chemin": "llm_only",
-      "succes": true,
-      "duree_ms": 204683.363199234,
-      "reponse_complete": "Bonjour [Client], je suis l'assistant SRM. Votre consommation d'électricité a évolué au cours des 12 derniers mois comme suit :\n\n| Mois | Consommation | Montant | Tendance |\n|---|---|---|---|\n| Octobre 2025 | 471.0 kWh | 456.87 Dhs 🟢 | — |\n| Novembre 2025 | 701.0 kWh | 679.97 Dhs | 📈 ↑ |\n| Décembre 2025 | 709.0 kWh | 687.73 Dhs | 📈 ↑ |\n| Janvier 2026 | 760.0 kWh | 737.20 Dhs | 📈 ↑ |\n| Février 2026 | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |\n| Mars 2026 | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| Avril 2026 | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |\n| Mai 2026 | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |\n| Juin 2026 | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |\n| Juillet 2026 | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |\n| Août 2026 | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |\n| Septembre 2026 | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |\n\nSur cette période, votre consommation moyenne était de 826.67 kWh et votre facture mensuelle d'environ 801.87 Dhs. Vous avez consommé un total de 9,920.0 kWh d'électricité au cours des 12 derniers mois.\n\nPour en savoir plus sur vos options énergétiques et d'économie d'énergie, n'hésitez pas à me poser une question supplémentaire ou à consulter notre site internet.",
-      "reponse_court": "Bonjour [Client], je suis l'assistant SRM. Votre consommation d'électricité a évolué au cours des 12 derniers mois comme",
+      "succes": false,
+      "duree_ms": 106611.60111427307,
+      "reponse_complete": "Bonjour [Client], votre consommation d'électricité a été en hausse sur les deux derniers mois. En effet, vous avez consommé 1,134 kWh en juin 2026 (soit 59% plus que la moyenne mensuelle de 801.87 Dhs) et 1,939 kWh en juillet 2026 (soit près de deux fois la moyenne avec 1,117.83 Dhs). Cette augmentation peut être due à des facteurs variés tels que l'augmentation du nombre d'appareils électriques utilisés ou le passage d'une période plus froide à une période plus chaude (par exemple, vous avez consommé 760 kWh en janvier mais seulement 432.62 Dhs en mai). Il est important de tenter d'optimiser votre consommation électrique pour réduire vos frais. Il peut être utile de réfléchir à la possibilité d'utiliser plus efficacement les appareils électriques que vous possédez ou d'en investir dans des appareils plus économiques. Par exemple, vous pouvez essayer de régler votre thermostat à une température moins chaude en hiver et utiliser des douches courtes pour réduire la consommation d'eau chaud qui augmente également le coût de votre facture. En cas de persistance de problèmes, n'hésitez pas à nous contacter pour en discuter ensemble.",
+      "reponse_court": "Bonjour [Client], votre consommation d'électricité a été en hausse sur les deux derniers mois. En effet, vous avez conso",
       "mots_attendus": [
         "Octobre 2025",
         "1,880"
@@ -510,9 +510,9 @@
       "categorie": "MOYENNE",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 16022.433042526245,
-      "reponse_complete": "Bonjour [Client], votre consommation électrique mensuelle moyenne sur les 12 derniers mois est de 826.67 kWh.",
-      "reponse_court": "Bonjour [Client], votre consommation électrique mensuelle moyenne sur les 12 derniers mois est de 826.67 kWh.",
+      "duree_ms": 15825.831174850464,
+      "reponse_complete": "Bonjour [Nom], votre moyenne de consommation d'électricité sur les 12 derniers mois est de 826.67 kWh.",
+      "reponse_court": "Bonjour [Nom], votre moyenne de consommation d'électricité sur les 12 derniers mois est de 826.67 kWh.",
       "mots_attendus": [
         "826",
         "801"
@@ -523,9 +523,9 @@
       "categorie": "MOYENNE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 74240.16737937927,
-      "reponse_complete": "Bonjour [client], voici votre statistique d'utilisation de l'électricité sur 12 mois en fonction de votre usage agricole :\n\n🔍 **Vos statistiques sur 12 mois**\n\n**⚡ Consommation**\n| | Valeur |\n|---|---|\n| Moyenne | **826.67 kWh** |\n| Minimum | 446.0 kWh |\n| Maximum | 1,939.0 kWh |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne\n\n**💰 Montants**\n| | Valeur |\n|---|---|\n| Moyenne | **801.87 Dhs** |\n| Minimum | 432.62 Dhs |\n| Maximum | 1,880.83 Dhs |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne",
-      "reponse_court": "Bonjour [client], voici votre statistique d'utilisation de l'électricité sur 12 mois en fonction de votre usage agricole",
+      "duree_ms": 60278.49984169006,
+      "reponse_complete": "Bonjour [Client], voici vos statistiques sur 12 mois :\n\n**⚡ Consommation**\n| | Valeur |\n|---|---|\n| Moyenne | **826.67 kWh** |\n| Minimum | 446.0 kWh |\n| Maximum | 1,939.0 kWh |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne\n\n**💰 Montants**\n| | Valeur |\n|---|---|\n| Moyenne | **801.87 Dhs** |\n| Minimum | 432.62 Dhs |\n| Maximum | 1,880.83 Dhs |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne",
+      "reponse_court": "Bonjour [Client], voici vos statistiques sur 12 mois :  **⚡ Consommation** | | Valeur | |---|---| | Moyenne | **826.67 k",
       "mots_attendus": [
         "826",
         "1,939"
@@ -536,9 +536,9 @@
       "categorie": "MOYENNE",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 55748.31962585449,
-      "reponse_complete": "Bonjour [Client], voici votre bilan consommation électrique pour le mois de juin 2026 :\n\n- Consommation : 1,134.0 kWh\n- Montant : 1,099.98 Dhs\n\nCela place le mois de juin 2026 comme un mois élevé (+47% vs moyenne), avec une consommation supérieure à la moyenne mensuelle de 826.67 kWh et un montant supérieur à la moyenne mensuelle de 801.87 Dhs.\n\nSi vous avez des questions supplémentaires ou souhaitez plus d'informations, n'hésitez pas à me demander !",
-      "reponse_court": "Bonjour [Client], voici votre bilan consommation électrique pour le mois de juin 2026 :  - Consommation : 1,134.0 kWh - ",
+      "duree_ms": 30437.575578689575,
+      "reponse_complete": "Bonjour [Client], votre bilan pour juin 2026 est le suivant : Consommation de 1,134 kWh et montant de 1,099.98 Dhs. Comparez-le avec votre consommation du mois dernier (mai 2026) qui était de 446 kWh pour un montant de 432.62 Dhs.",
+      "reponse_court": "Bonjour [Client], votre bilan pour juin 2026 est le suivant : Consommation de 1,134 kWh et montant de 1,099.98 Dhs. Comp",
       "mots_attendus": [
         "9,920",
         "801"
@@ -549,9 +549,9 @@
       "categorie": "TOP_N",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 44411.30828857422,
-      "reponse_complete": "Bonjour Utilisateur !\n\nLe mois où vous avez consommé le plus d'électricité ces derniers 12 mois est Juillet 2026 avec une consommation de 1,939.0 kWh. Le deuxième mois le plus consommateur est Juin 2026 avec une consommation de 1,134.0 kWh. Quant au mois où vous avez consommé le moins d'électricité ces derniers 12 mois, ce fut Mai 2026 avec une consommation de 446.0 kWh.",
-      "reponse_court": "Bonjour Utilisateur !  Le mois où vous avez consommé le plus d'électricité ces derniers 12 mois est Juillet 2026 avec un",
+      "duree_ms": 39119.1520690918,
+      "reponse_complete": "Bonjour utilisateur,\nLes mois où vous avez consommé le plus d'électricité sont juillet 2026 avec 1,939.0 kWh et juin 2026 avec 1,134.0 kWh. La moyenne mensuelle de votre consommation est de 826.67 kWh et vous avez une facture de 1,099.98 Dhs pour juin 2026.",
+      "reponse_court": "Bonjour utilisateur, Les mois où vous avez consommé le plus d'électricité sont juillet 2026 avec 1,939.0 kWh et juin 202",
       "mots_attendus": [
         "Juillet",
         "1,939"
@@ -562,9 +562,9 @@
       "categorie": "TOP_N",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 34321.15054130554,
-      "reponse_complete": "Bonjour utilisateur, pour les deux mois ayant la consommation électrique la plus faible sur la période de 12 mois, nous avons noté que ce sont le mois de mai avec 446 kWh ainsi que le mois d'avril avec 655 kWh. Ainsi, votre consommation a été la plus faible ces deux mois précédents.",
-      "reponse_court": "Bonjour utilisateur, pour les deux mois ayant la consommation électrique la plus faible sur la période de 12 mois, nous ",
+      "duree_ms": 43976.157903671265,
+      "reponse_complete": "Bonjour [Nom du client],\n\nLes deux mois au cours desquels votre consommation d'électricité a été la plus faible en ce qui concerne votre année courante sont le mois de février avec 581.0 kWh et le mois de mai avec 446.0 kWh. Pour une comparaison, durant le mois de mai dernier vous avez consommé 760.0 kWh.\n\nJe suis là pour vous aider si besoin!",
+      "reponse_court": "Bonjour [Nom du client],  Les deux mois au cours desquels votre consommation d'électricité a été la plus faible en ce qu",
       "mots_attendus": [
         "Mai",
         "Octobre"
@@ -575,9 +575,9 @@
       "categorie": "TOP_N",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 60149.65629577637,
-      "reponse_complete": "Bonjour [client],\n\nPour vous aider, je vous donne les détails de vos trois derniers mois :\n\n* Mai 2026 : Consommation = 446.0 kWh, Montant = 432.62 Dhs (mois économique)\n* Avril 2026 : Consommation = 655.0 kWh, Montant = 635.35 Dhs (mois économique)\n* Mars 2026 : Consommation = 752.0 kWh, Montant = 729.44 Dhs\n\nSi vous avez d'autres questions ou besoin de plus amples informations, ne hesitez pas à me demander. Je suis toujours là pour vous aider.",
-      "reponse_court": "Bonjour [client],  Pour vous aider, je vous donne les détails de vos trois derniers mois :  * Mai 2026 : Consommation = ",
+      "duree_ms": 56146.485805511475,
+      "reponse_complete": "Bonjour [Nom du client], voici la consommation de votre compte entre le mois dernier (Mai) et trois mois avant-dernier (Mars) :\n| Mois | Consommation | Montant |\n|---|---|---|\n| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 |\n| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 |\n| **Mars 2026** | 752.0 kWh | 729.44 Dhs |\n\nPour un total de **1,832.0 kWh**.",
+      "reponse_court": "Bonjour [Nom du client], voici la consommation de votre compte entre le mois dernier (Mai) et trois mois avant-dernier (",
       "mots_attendus": [
         "Juillet",
         "Septembre"
@@ -587,10 +587,10 @@
       "question": "mes 2 premiers mois",
       "categorie": "TOP_N",
       "chemin": "llm_only",
-      "succes": false,
-      "duree_ms": 32602.63705253601,
-      "reponse_complete": "Bonjour utilisateur, pour les deux premiers mois de votre facturation, je vous indique que le mois d'Octobre 2025 vous a coûté 679.97 Dhs pour une consommation de 471.0 kWh, tandis que le mois de Novembre suivant vous a coûté 687.73 Dhs pour une consommation de 701.0 kWh.",
-      "reponse_court": "Bonjour utilisateur, pour les deux premiers mois de votre facturation, je vous indique que le mois d'Octobre 2025 vous a",
+      "succes": true,
+      "duree_ms": 20374.44043159485,
+      "reponse_complete": "Bonjour Client, pour votre question, vous avez consommé respectivement 471.0 kWh d'électricité en octobre 2025, et 701.0 kWh en novembre 2025.",
+      "reponse_court": "Bonjour Client, pour votre question, vous avez consommé respectivement 471.0 kWh d'électricité en octobre 2025, et 701.0",
       "mots_attendus": [
         "Octobre 2025",
         "Novembre 2025"
@@ -601,9 +601,9 @@
       "categorie": "COMPARAISON",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 28535.724639892578,
-      "reponse_complete": "Bonjour [Client], pour répondre à votre question, en janvier 2026, votre consommation était de 760.0 kWh tandis que, en septembre 2026, elle était de 643.0 kWh. Cela représente donc une diminution de 117.0 kWh entre ces deux mois.",
-      "reponse_court": "Bonjour [Client], pour répondre à votre question, en janvier 2026, votre consommation était de 760.0 kWh tandis que, en ",
+      "duree_ms": 30640.042781829834,
+      "reponse_complete": "Bonjour [Client],\n\nLa consommation électrique que vous avez enregistrée en septembre 2026 était de 643.0 kWh, tandis que celle en janvier 2026 s'est montée à 760.0 kWh. Cela représente une différence d'approximativement 117.0 kWh entre ces deux mois.",
+      "reponse_court": "Bonjour [Client],  La consommation électrique que vous avez enregistrée en septembre 2026 était de 643.0 kWh, tandis que",
       "mots_attendus": [
         "Janvier",
         "Septembre",
@@ -616,9 +616,9 @@
       "categorie": "COMPARAISON",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 42458.86754989624,
-      "reponse_complete": "Bonjour Client C30EF340/690205,\n\nPour votre question de comparaison entre janvier et mars, voici les données concernant la consommation électrique sur ces deux mois :\n\n- Janvier 2026 : 760.0 kWh\n- Mars 2026 : 752.0 kWh\n\nVous avez donc consommé un peu moins en mars (752.0 kWh) que en janvier (760.0 kWh). L'écart est de 8.0 kWh entre les deux mois.",
-      "reponse_court": "Bonjour Client C30EF340/690205,  Pour votre question de comparaison entre janvier et mars, voici les données concernant ",
+      "duree_ms": 55981.449365615845,
+      "reponse_complete": "Bonjour Client C30EF340/690205,\n\nPour votre question de comparaison entre le mois de janvier 2026 (760.0 kWh) et celui de mars 2026 (752.0 kWh), vous avez consommé 4 kWh de moins en mars que durant janvier. En effet, votre consommation s'établissait à 760.0 kWh pour janvier contre 752.0 kWh pour mars.\n\nJe suis là pour vous aider. Si vous avez d'autres questions sur vos factures ou de conseils pour réduire votre consommation, n'hésitez pas à me demander !\n\nCordialement,\nL'Assistant SRM Souss-Massa",
+      "reponse_court": "Bonjour Client C30EF340/690205,  Pour votre question de comparaison entre le mois de janvier 2026 (760.0 kWh) et celui d",
       "mots_attendus": [
         "Janvier",
         "Mars",
@@ -630,9 +630,9 @@
       "categorie": "COMPARAISON",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 24095.628261566162,
-      "reponse_complete": "Bonjour utilisateur, la différence de consommation entre octobre 2025 et janvier 2026 est de 311.0 kWh. En effet, vous avez consommé 760.0 kWh en janvier contre 471.0 kWh en octobre.",
-      "reponse_court": "Bonjour utilisateur, la différence de consommation entre octobre 2025 et janvier 2026 est de 311.0 kWh. En effet, vous a",
+      "duree_ms": 43941.97487831116,
+      "reponse_complete": "Bonjour, [Client C30EF340/690205]. La consommation d'électricité a augmenté de 289.0 kWh entre octobre 2025 (consommation : 471.0 kWh) et janvier 2026 (consommation : 760.0 kWh). Vous avez consommé plus de 33% d'électricité durant cette période, ce qui représente un coût supplémentaire de 51.48 Dhs (deux montants multipliés par la différence de consommation).",
+      "reponse_court": "Bonjour, [Client C30EF340/690205]. La consommation d'électricité a augmenté de 289.0 kWh entre octobre 2025 (consommatio",
       "mots_attendus": [
         "Octobre",
         "Janvier",
@@ -643,10 +643,10 @@
       "question": "comparer fevrier et avril",
       "categorie": "COMPARAISON",
       "chemin": "llm_only",
-      "succes": false,
-      "duree_ms": 24681.557178497314,
-      "reponse_complete": "Bonjour [Nom], la consommation d'électricité en février était de 581.0 kWh, tandis qu'en avril elle était de 655.0 kWh. Ainsi, la consommation a augmenté de 74.0 kWh entre février et avril.",
-      "reponse_court": "Bonjour [Nom], la consommation d'électricité en février était de 581.0 kWh, tandis qu'en avril elle était de 655.0 kWh. ",
+      "succes": true,
+      "duree_ms": 46410.80141067505,
+      "reponse_complete": "Bonjour ! En comparant février à avril de cette année, il apparaît que la consommation d'électricité a évolué. En effet, alors que vous avez consommé 581.0 kWh en février pour un montant de 563.57 Dhs, votre consommation s'est abaissée à 655.0 kWh en avril pour un montant de 635.35 Dhs. Ainsi, la consommation a augmenté de 64.0 kWh entre ces deux mois, et le montant a augmenté de 71.78 Dhs.",
+      "reponse_court": "Bonjour ! En comparant février à avril de cette année, il apparaît que la consommation d'électricité a évolué. En effet,",
       "mots_attendus": [
         "Fevrier",
         "Avril",
@@ -659,9 +659,9 @@
       "categorie": "RETARD_PAIEMENT",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 45948.16780090332,
-      "reponse_complete": "Bonjour [Client],\n\nJe peux vérifier le statut de votre compte. Selon les données réelles de votre historique complet, la date limite pour le paiement de votre facture du mois de Juin 2026 est le 27 juin 2026 et le montant à payer était de 1 099,98 Dhs. Si vous n'avez pas encore effectué le paiement, vous êtes en retard.\n\nVeuillez nous contacter si vous rencontrez des difficultés pour payer votre facture. Nous sommes toujours là pour vous aider.",
-      "reponse_court": "Bonjour [Client],  Je peux vérifier le statut de votre compte. Selon les données réelles de votre historique complet, la",
+      "duree_ms": 34842.120885849,
+      "reponse_complete": "Bonjour [Client], je suis l'assistant SRM. Votre facture pour le mois de juin 2026 doit être payée avant le 10 juillet 2026, avec un montant à verser de 1,099,98 Dhs. Si vous avez des difficultés à payer à ce terme, n'hésitez pas à nous contacter pour discuter d'un éventuel ajustement du paiement.",
+      "reponse_court": "Bonjour [Client], je suis l'assistant SRM. Votre facture pour le mois de juin 2026 doit être payée avant le 10 juillet 2",
       "mots_attendus": [
         "25/02/2026",
         "737"
@@ -672,9 +672,9 @@
       "categorie": "RETARD_PAIEMENT",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 25224.436044692993,
-      "reponse_complete": "Bonjour Client C30EF340/690205, oui, vous avez effectué le paiement de votre facture électrique pour le mois de juin 2026 dans la somme de 1099.98 Dhs. Votre compte est à jour.",
-      "reponse_court": "Bonjour Client C30EF340/690205, oui, vous avez effectué le paiement de votre facture électrique pour le mois de juin 202",
+      "duree_ms": 14982.592821121216,
+      "reponse_complete": "Bonjour [Client], vous avez payé 1 099,98 Dhs pour votre facture de juin 2026.",
+      "reponse_court": "Bonjour [Client], vous avez payé 1 099,98 Dhs pour votre facture de juin 2026.",
       "mots_attendus": [
         "25/11/2025",
         "456"
@@ -685,9 +685,9 @@
       "categorie": "RETARD_PAIEMENT",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 60708.09316635132,
-      "reponse_complete": "Bonjour Cliente C30EF340/690205, votre facture pour le mois de juin 2026 avec un montant de 1,099.98 Dhs n'est pas encore payé. Votre compteur est actuellement bloqué et vous ne pouvez pas consommer de courant électrique jusqu'à ce que la facture soit à jour. Pour résoudre ce problème, vous pouvez effectuer un paiement immédiat en ligne sur notre plateforme électronique ou vous pouvez payer au bureau d'agence SRM Souss-Massa de Tiznit avec votre numéro de contrat 0005567205/2063205. N'hésitez pas à nous contacter si vous avez des questions ou besoin d'aide.",
-      "reponse_court": "Bonjour Cliente C30EF340/690205, votre facture pour le mois de juin 2026 avec un montant de 1,099.98 Dhs n'est pas encor",
+      "duree_ms": 72930.3367137909,
+      "reponse_complete": "Bonjour [Client], je suis l'assistant SRM pour votre compte C30EF340/690205. En ce qui concerne la facture du mois de juin 2026, vous n'avez pas encore payé un montant de 1,099,98 Dhs. Pour effectuer le paiement, veuillez utiliser l'une des méthodes suivantes :\n\n- Paiement sur le site Web : <https://www.srm-sm.ma/paiements>\n- Paiement en agence : Veuillez présenter votre facture au contre de paiement de l'agence Tiznit\n- Paiement à distance : Via mobile ou transfert bancaire, voici les coordonnées : Numéro de compte : 0123456789 et IBAN : MA08CCBF1234567890000000000.\n\nMerci de payer au plus tôt pour éviter des pénalités.",
+      "reponse_court": "Bonjour [Client], je suis l'assistant SRM pour votre compte C30EF340/690205. En ce qui concerne la facture du mois de ju",
       "mots_attendus": [
         "25/02/2026",
         "737"
@@ -698,9 +698,9 @@
       "categorie": "GENERAL_SRM",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 33008.36801528931,
-      "reponse_complete": "Bonjour [Client], pour s'abonner en eau auprès de SRM, vous devez compléter le formulaire disponible sur notre site Web, fournir votre CIN (Carte d'Identité Nationale) et un justificatif de jouissance. Nous espérons que cela vous permettra d'être connecté à notre service d'eau en peu de temps.",
-      "reponse_court": "Bonjour [Client], pour s'abonner en eau auprès de SRM, vous devez compléter le formulaire disponible sur notre site Web,",
+      "duree_ms": 39166.86820983887,
+      "reponse_complete": "Bonjour, pour vous abonner en eau auprès de SRM Souss-Massa, il faut remplir un formulaire, soumettre votre CIN (Carte d'identité nationale) et fournir un justificatif de jouissance pour la propriété où l'eau sera abondée. Pour plus d'information ou si vous avez des questions supplémentaires, vous pouvez contacter le centre d'appels de SRM à 08 02 03 12 12.",
+      "reponse_court": "Bonjour, pour vous abonner en eau auprès de SRM Souss-Massa, il faut remplir un formulaire, soumettre votre CIN (Carte d",
       "mots_attendus": [
         "formulaire",
         "cin"
@@ -711,9 +711,9 @@
       "categorie": "GENERAL_SRM",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 31397.937774658203,
-      "reponse_complete": "Bonjour [Utilisateur], pour pouvoir effectuer un stage à SRM, vous devez envoyer votre CV, une convention et votre CNI par email à stages@srm-sm.ma. N'oubliez pas de remplir le formulaire en ligne avant de soumettre votre demande.",
-      "reponse_court": "Bonjour [Utilisateur], pour pouvoir effectuer un stage à SRM, vous devez envoyer votre CV, une convention et votre CNI p",
+      "duree_ms": 26857.71679878235,
+      "reponse_complete": "Bonjour ! Pour effectuer un stage à SRM, vous devez envoyer votre CV, la convention et votre CNI par email à l'adresse [stages@srm-sm.ma](mailto:stages@srm-sm.ma). Nous nous ferons ensuite contacter pour le suivi de vos demandes.",
+      "reponse_court": "Bonjour ! Pour effectuer un stage à SRM, vous devez envoyer votre CV, la convention et votre CNI par email à l'adresse [",
       "mots_attendus": [
         "stages@srm-sm.ma",
         "convention"
@@ -724,9 +724,9 @@
       "categorie": "GENERAL_SRM",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 61656.30865097046,
-      "reponse_complete": "Bonjour [Client],\n\nPour économiser l'eau, voici quelques conseils que je vous suggère :\n\n1. Fermez toujours le robinet en toute circonstance lorsque vous ne l'utilisez pas.\n2. Reparez les fuites immédiatement si vous constatez une fuite d'eau.\n3. Faites des douches courtes afin de limiter la consommation d'eau.\n4. Essayez d'éviter l'utilisation d'équipements qui nécessitent une grande quantité d'eau (comme les baignoires).\n5. Tenez-vous à jour des réparations domestiques et commerciales, comme le réglage de la pression d'eau, afin de limiter sa consommation.",
-      "reponse_court": "Bonjour [Client],  Pour économiser l'eau, voici quelques conseils que je vous suggère :  1. Fermez toujours le robinet e",
+      "duree_ms": 42104.594707489014,
+      "reponse_complete": "Bonjour [client], pour économiser l'eau, voici quelques conseils:\n\n1. Fermez le robinet lorsque vous ne l'utilisez pas.\n2. Réparer les fuites rapidement pour éviter de gaspiller plus d'eau que nécessaire.\n3. Utilisez des douches courtes et réduirez la durée de vos bains en utilisant moins d'eau.\n4. Faites un entretien régulier de votre installation sanitaire pour vérifier les fuites et éviter toute perte d'eau inutilisée.",
+      "reponse_court": "Bonjour [client], pour économiser l'eau, voici quelques conseils:  1. Fermez le robinet lorsque vous ne l'utilisez pas. ",
       "mots_attendus": [
         "robinet"
       ]
@@ -736,9 +736,9 @@
       "categorie": "GENERAL_SRM",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 15636.600494384766,
-      "reponse_complete": "Le siège de SRM est situé à Rue 18 Novembre, Quartier Industriel, Agadir.",
-      "reponse_court": "Le siège de SRM est situé à Rue 18 Novembre, Quartier Industriel, Agadir.",
+      "duree_ms": 14180.189609527588,
+      "reponse_complete": "Bonjour ! L'adresse du siège de SRM est Rue 18 Novembre, Quartier Industriel à Agadir.",
+      "reponse_court": "Bonjour ! L'adresse du siège de SRM est Rue 18 Novembre, Quartier Industriel à Agadir.",
       "mots_attendus": [
         "Agadir",
         "18 Novembre"
@@ -749,9 +749,9 @@
       "categorie": "FALLBACK_ANALYSE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 62847.90134429932,
-      "reponse_complete": "Bonjour [Client], votre consommation actuelle semble un peu supérieure à la moyenne. Vous avez consommé 1,134 kWh en juin dernier, alors que votre moyenne mensuelle est de 826.67 kWh. En mai dernier, vous aviez consommé 446 kWh, ce qui correspond à une consommation inférieure à la moyenne. Cependant, il existe des fluctuations saisonnières et diverses facteurs peuvent influencer votre consommation électrique, donc il est normal de voir des variations de temps en temps. Je vous conseille toutefois de surveiller attentivement vos pratiques d'utilisation de l'électricité pour réduire les risques de surconsommation et de retard de paiement.",
-      "reponse_court": "Bonjour [Client], votre consommation actuelle semble un peu supérieure à la moyenne. Vous avez consommé 1,134 kWh en jui",
+      "duree_ms": 42510.93149185181,
+      "reponse_complete": "Bonjour [utilisateur], pour répondre à votre question, il faut comparer votre consommation avec la moyenne de vos 12 derniers mois. Votre consommation d'aujourd'hui est de 1,134 kWh, alors que votre consommation moyenne est de 826.67 kWh. En comparant ces deux valeurs, on peut constater que votre consommation actuelle représente un peu plus du 14% de votre consommation moyenne. Cela ne semble donc pas anormalement élevé.",
+      "reponse_court": "Bonjour [utilisateur], pour répondre à votre question, il faut comparer votre consommation avec la moyenne de vos 12 der",
       "mots_attendus": [
         "Bonjour",
         "1,134",
@@ -762,10 +762,10 @@
       "question": "pourquoi je paie plus ce mois",
       "categorie": "FALLBACK_ANALYSE",
       "chemin": "llm_only",
-      "succes": false,
-      "duree_ms": 71205.61122894287,
-      "reponse_complete": "Bonjour [Client], la hausse de votre consommation d'électricité cette année est due à une utilisation supérieure par rapport à la moyenne mensuelle. En effet, en comparant le mois actuel (Juin 2026) avec les données de votre historique complet des factures :\n\n- Consommation en Juin 2026 : 1,134 kWh\n- Moyenne consommation mensuelle sur les 12 derniers mois : 801.87 kWh\n\nLa consommation ce mois-ci est plus élevée de 432.13 kWh (54%). Il y a donc une augmentation significative dans votre utilisation d'électricité par rapport à la moyenne mensuelle, ce qui explique l'augmentation du montant de cette facture.",
-      "reponse_court": "Bonjour [Client], la hausse de votre consommation d'électricité cette année est due à une utilisation supérieure par rap",
+      "succes": true,
+      "duree_ms": 75872.48969078064,
+      "reponse_complete": "Bonjour [Client], pourquoi votre consommation d'électricité a augmenté ce mois-ci ? Il est possible que cela soit dû à une utilisation supérieure de l'électricité à cause du changement de saison ou des activités agricoles. En comparant juin 2026 avec mai 2026, votre consommation a augmenté de 1,134.0 kWh à 446.0 kWh, ce qui est un écart important (1,134.0 kWh - 446.0 kWh = 688.0 kWh). Le montant associé a donc augmenté de 1,099.98 Dhs (consommation x tarif d'électricité) par rapport au mois de mai, où vous avez payé 432.62 Dhs. Il est important de continuer à optimiser votre utilisation de l'électricité pour limiter vos frais en consommant moins d'énergie lors des activités agricoles et en réparant les fuites éventuelles.",
+      "reponse_court": "Bonjour [Client], pourquoi votre consommation d'électricité a augmenté ce mois-ci ? Il est possible que cela soit dû à u",
       "mots_attendus": [
         "Bonjour",
         "1,134",
@@ -777,9 +777,9 @@
       "categorie": "FALLBACK_ANALYSE",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 79512.08877563477,
-      "reponse_complete": "Bonjour [Client],\n\nLa consommation de cette période (Juin 2026) de votre compte n°8306 est supérieure à celle du mois dernier (Mai 2026). La consommation du mois de Juin est de 1,134.0 kWh contre 446.0 kWh pour le mois de Mai. Cela peut s'expliquer par plusieurs facteurs :\n\n- Les températures élevées pendant ce mois ont pu entraîner l'utilisation d'électricité supplémentaire, notamment pour le climatage ou le chauffage.\n- Le nombre de jours de ce mois (30) est supérieur au nombre de jours du mois précédent (31).\n- L'augmentation des activités agricoles ou d'éclairage extérieur peuvent également entraîner une augmentation de la consommation électrique.",
-      "reponse_court": "Bonjour [Client],  La consommation de cette période (Juin 2026) de votre compte n°8306 est supérieure à celle du mois de",
+      "duree_ms": 61552.07800865173,
+      "reponse_complete": "Bonjour client C30EF340/690205,\n\nVotre consommation de ce mois (Juin 2026) est supérieure à celle du mois précédent (Mai 2026) avec 1,134.0 kWh contre 446.0 kWh en mai, ce qui représente une augmentation de 157,4%.\nCela pourrait s'expliquer par une utilisation plus intensive de votre consommation agricole, par exemple une plus grande demande d'irrigation ou un fonctionnement de machines agricoles supplémentaires.\nNous vous conseillons d'analyser vos consommations et de prendre des mesures pour réduire votre consommation en cas de nécessité afin de limiter vos frais électriques.",
+      "reponse_court": "Bonjour client C30EF340/690205,  Votre consommation de ce mois (Juin 2026) est supérieure à celle du mois précédent (Mai",
       "mots_attendus": [
         "Bonjour",
         "Juin",
@@ -792,9 +792,9 @@
       "categorie": "FALLBACK_ANALYSE",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 159313.18283081055,
-      "reponse_complete": "Bonjour utilisateur,\n\nPour réduire votre consommation électrique, il existe quelques conseils utiles à appliquer:\n\n1. Fermer les robinets lorsque vous n'en avez pas besoin pour éviter la fuite d'eau chaude.\n2. Utiliser des lampes à faible consommation en place de lumières classiques.\n3. Encore mieux, installez un compresseur frigérant à haute efficacité ou un panneau solaire pour la production d'électricité.\n4. Utilisez des aires de séchage pour vos vêtements plutôt que le séchoir à linge électrique, cela réduira considérablement votre consommation.\n5. Faites attention aux appareils de consommation élevée lorsque vous n'en avez pas besoin, comme les téléviseurs, les ordinateurs et les machines à laver.\n6. Essayez d'éviter l'utilisation d'appareils électriques durant les périodes de pointe de consommation, cela se produit généralement le matin et le soir.\n7. Utilisez des appareils avec des fonctionnalités économiques telles que le mode éco ou le programme nocturne pour réduire votre consommation en nuit.\n8. Assurez-vous que tous les appareils sont éteints lorsque vous n'en avez pas besoin.\n9. Si possible, installez des dispositifs de régulation automatique des lampes et ventilateurs afin d'éviter leur utilisation inutile.\n10. Pensez à consulter le site web de SRM pour plus d'informations sur l'économie de l'eau et de l'électricité.\n\nPar application de ces conseils, vous pouvez considérablement réduire votre consommation électrique et donc votre facture de consommation.",
-      "reponse_court": "Bonjour utilisateur,  Pour réduire votre consommation électrique, il existe quelques conseils utiles à appliquer:  1. Fe",
+      "duree_ms": 190534.72995758057,
+      "reponse_complete": "Bonjour [Nom],\n\nPour réduire votre consommation d'électricité dans le contexte de votre usage agricole, il y a plusieurs conseils que je peux vous donner :\n\n1. Essayez de faire des déplacements économiques en utilisant uniquement des appareils consommateurs à basse puissance lorsque cela est possible.\n2. Vérifiez que vos appareils soient éteints quand ils ne sont pas en usage.\n3. Utilisez des appareils de grande capacité (comme les réfrigérateurs, les sèche-linge ou les chauffage-eau) économes en énergie : ils consommeront moins et leur utilisation sera plus efficace.\n4. Ne laissez pas vos appareils branchés tout le temps même lorsque vous ne les utilisez pas (par exemple, les réfrigérateurs doivent être laissés éteints lorsqu'on quitte la maison).\n5. N'utilisez pas de lumières plus brillantes que nécessaire et en essayant de les utiliser pendant le jour pour profiter de l'éclairage naturel.\n6. Mettez un délai d'attente sur vos appareils qui consomment beaucoup d'énergie (comme les télévisions, les ordinateurs et les systèmes de chauffage) pour éviter qu'ils n'utilisent plus d'énergie que nécessaire.\n7. Essayez de réduire la consommation d'eau car elle peut entraîner une augmentation de la consommation d'électricité (par exemple, pour les pompes à eau).\n8. Utilisez des appareils énergétiquement performants, comme un chauffe-eau solaire, qui peuvent vous permettre de réduire votre consommation d'électricité.\n9. Veillez à la maintenance régulière de vos équipements pour que ceux-ci fonctionnent efficacement et ne dégradent pas leur rendement.\n10. Enfin, essayez d'économiser l'électricité en général : fermer les robinets, réparer les fuites et utiliser des douches courtes peuvent également aider à réduire votre consommation d'eau et donc de consommation d'électricité.\n\nAvec ces conseils, je suis sûr que vous pouvez diminuer votre consommation d'électricité en tant qu'utilisateur agricole. Si vous avez des questions supplémentaires ou besoin de plus d'assistance, n'hésitez pas à me poser des questions.",
+      "reponse_court": "Bonjour [Nom],  Pour réduire votre consommation d'électricité dans le contexte de votre usage agricole, il y a plusieurs",
       "mots_attendus": [
         "Bonjour",
         "Juin"
@@ -805,9 +805,9 @@
       "categorie": "FAUTES_ORTHO",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 14141.252994537354,
-      "reponse_complete": "Bonjour Client, votre consommation en janvier 2026 était de 760.0 kWh.",
-      "reponse_court": "Bonjour Client, votre consommation en janvier 2026 était de 760.0 kWh.",
+      "duree_ms": 13184.84354019165,
+      "reponse_complete": "Bonjour [Client], votre consommation en janvier 2026 était de 760.0 kWh.",
+      "reponse_court": "Bonjour [Client], votre consommation en janvier 2026 était de 760.0 kWh.",
       "mots_attendus": [
         "Janvier",
         "760"
@@ -818,9 +818,9 @@
       "categorie": "FAUTES_ORTHO",
       "chemin": "llm_only",
       "succes": true,
-      "duree_ms": 16494.893074035645,
-      "reponse_complete": "Bonjour [Client], votre agence est Agence Tiznit. Votre adresse est Hay Salam Rue 17 - Inezgane.",
-      "reponse_court": "Bonjour [Client], votre agence est Agence Tiznit. Votre adresse est Hay Salam Rue 17 - Inezgane.",
+      "duree_ms": 10001.553058624268,
+      "reponse_complete": "Bonjour [Client], votre agence est l'Agence Tiznit.",
+      "reponse_court": "Bonjour [Client], votre agence est l'Agence Tiznit.",
       "mots_attendus": [
         "Tiznit"
       ]
@@ -829,10 +829,10 @@
       "question": "ma facture le mois derniers",
       "categorie": "FAUTES_ORTHO",
       "chemin": "llm_only",
-      "succes": true,
-      "duree_ms": 15970.12186050415,
-      "reponse_complete": "Bonjour [client], votre facture pour le mois de mai 2026 s'élève à 432,62 Dhs.",
-      "reponse_court": "Bonjour [client], votre facture pour le mois de mai 2026 s'élève à 432,62 Dhs.",
+      "succes": false,
+      "duree_ms": 29339.762449264526,
+      "reponse_complete": "Bonjour [nom], votre consommation d'électricité pour le mois dernier était de 446.0 kWh, avec un montant à facturer de 432.62 Dhs. Le mois suivant, vous avez consommé 1,134.0 kWh, avec un montant à facturer de 1,099.98 Dhs.",
+      "reponse_court": "Bonjour [nom], votre consommation d'électricité pour le mois dernier était de 446.0 kWh, avec un montant à facturer de 4",
       "mots_attendus": [
         "Mai",
         "432"
@@ -843,9 +843,9 @@
       "categorie": "PAR_ANNEE",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 53178.598165512085,
-      "reponse_complete": "Bonjour [non prénommé], je suis l'assistant SRM, votre fournisseur d'eau et d'électricité au Maroc.\n\nPour les factures de 2025, vous pouvez trouver toutes ces informations dans le tableau des factures complètes que vous avez renseigné. Par exemple, votre facture du mois de décembre 2025 s'élève à 687.73 Dhs et correspond à une consommation de 709.0 kWh d'électricité.",
-      "reponse_court": "Bonjour [non prénommé], je suis l'assistant SRM, votre fournisseur d'eau et d'électricité au Maroc.  Pour les factures d",
+      "duree_ms": 25444.655418395996,
+      "reponse_complete": "Bonjour [Client], pour voir vos factures de l'année dernière (2025), tu peux consulter votre historique complet dans le tableau ci-dessus. Pour plus d'informations sur une des factures spécifiques, n'hésitez pas à me demander.",
+      "reponse_court": "Bonjour [Client], pour voir vos factures de l'année dernière (2025), tu peux consulter votre historique complet dans le ",
       "mots_attendus": [
         "2025",
         "1,824"
@@ -856,9 +856,9 @@
       "categorie": "PAR_ANNEE",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 134173.837184906,
-      "reponse_complete": "Bonjour [Client],\n\nIci est votre historique complet des factures d'eau et d'électricité pour l'année 2025 :\n\n**Historique complet des factures (annee dernière) :**\n\n| Mois | Consommation | Montant | Tendance |\n|------|-------------|---------|----------|\n| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |\n| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |\n| **Decembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |\n| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |\n| **Fevrier 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |\n| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |\n| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |",
-      "reponse_court": "Bonjour [Client],  Ici est votre historique complet des factures d'eau et d'électricité pour l'année 2025 :  **Historiqu",
+      "duree_ms": 126005.854845047,
+      "reponse_complete": "Bonjour Client C30EF340/690205, voici votre historique complet des factures de l'année 2025 :\n| Mois | Consommation | Montant |\n|---|---|---------|\n| **Octobre** | 471.0 kWh | 456.87 Dhs 🟢 |\n| **Novembre** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |\n| **Décembre** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |\n| **Janvier** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |\n| **Février** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |\n| **Mars** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| **Avril** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |\n| **Mai** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |\n\nPour accéder à votre facture de l'année dernière, vous pouvez consulter votre compte en ligne sur le site web de SRM ou contacter notre service clientèle au numéro 08 02 03 12 12. N'hésitez pas à nous demander s'il vous y a lieu pour toute autre question ou information concernant votre compte.",
+      "reponse_court": "Bonjour Client C30EF340/690205, voici votre historique complet des factures de l'année 2025 : | Mois | Consommation | Mo",
       "mots_attendus": [
         "2025",
         "1,824"
@@ -869,9 +869,9 @@
       "categorie": "PAR_ANNEE",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 147247.25699424744,
-      "reponse_complete": "Bonjour [Client],\n\nVoici le détail de vos factures depuis le début de l'année courante, à savoir la période allant de janvier 2026 à juin 2026.\n\n| Mois | Consommation | Montant | Tendance |\n|---|---|---|---|\n| **Janvier** | 760.0 kWh | 737.20 Dhs | - |\n| **Fevrier** | 581.0 kWh | 563.57 Dhs | 📉 ↓ |\n| **Mars** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| **Avril** | 655.0 kWh | 635.35 Dhs | 📉 ↓ |\n| **Mai** | 446.0 kWh | 432.62 Dhs | 📉 ↓ |\n| **Juin** | 1,134.0 kWh | 1,099.98 Dhs | 📈 ↑ |\n| **Juillet** | 1,939.0 kWh | 1,880.83 Dhs | 📈 ↑ |\n| **Aout** | 1,129.0 kWh | 1,095.13 Dhs | 📉 ↓ |\n| **Septembre** | 643.0 kWh | 623.71 Dhs | 📉 ↓ |\n\nPour plus d'informations ou répondre à d'autres questions concernant vos factures, n'hésitez pas à me contacter.\n\nCordialement,\n[Votre nom]\nAssistant SRM Souss-Massa",
-      "reponse_court": "Bonjour [Client],  Voici le détail de vos factures depuis le début de l'année courante, à savoir la période allant de ja",
+      "duree_ms": 133393.23377609253,
+      "reponse_complete": "Bonjour [Nom du client], voici votre historique des factures pour l'année 2026 :\n\n- Janvier 2026 : Consommation : 760.0 kWh, Montant : 737.20 Dhs\n- Février 2026 : Consommation : 581.0 kWh, Montant : 563.57 Dhs\n- Mars 2026 : Consommation : 752.0 kWh, Montant : 729.44 Dhs\n- Avril 2026 : Consommation : 655.0 kWh, Montant : 635.35 Dhs\n- Mai 2026 : Consommation : 446.0 kWh, Montant : 432.62 Dhs\n- Juin 2026 (ce mois) : Consommation : 1,134.0 kWh, Montant : 1,099.98 Dhs\n- Juillet 2026 : Consommation : 1,939.0 kWh, Montant : 1,880.83 Dhs\n- Août 2026 : Consommation : 1,129.0 kWh, Montant : 1,095.13 Dhs\n- Septembre 2026 (prochain mois) : Consommation : - (n'a pas encore été calculée)\n- Total pour l'année 2026 : 9,873.62 Dhs (ce montant est sujet à modification avec les factures de septembre et octobre)",
+      "reponse_court": "Bonjour [Nom du client], voici votre historique des factures pour l'année 2026 :  - Janvier 2026 : Consommation : 760.0 ",
       "mots_attendus": [
         "2026",
         "7,797"
@@ -882,9 +882,9 @@
       "categorie": "HORS_SUJET",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 52616.694927215576,
-      "reponse_complete": "Bonjour ! Bienvenue sur notre plateforme. Comment pouvez-je vous aider aujourd'hui ? Vous êtes le client C30EF340/690205 avec un contrat 0005567205/2063205 et un compteur 8306 situé à Hay Salam Rue 17 - Inezgane, vous utilisez l'électricité pour des besoins agricoles.\n\nPour en savoir plus sur vos factures ou obtenir de l'aide sur un autre sujet, n'hésitez pas à me demander.",
-      "reponse_court": "Bonjour ! Bienvenue sur notre plateforme. Comment pouvez-je vous aider aujourd'hui ? Vous êtes le client C30EF340/690205",
+      "duree_ms": 101143.7177658081,
+      "reponse_complete": "Bonjour ! Vous êtes le client C30EF340/690205 pour l'usage agricole de l'électricité avec le numéro de compteur 8306, située à Hay Salam Rue 17 - Inezgane.\n\nVotre dernière facture a été émise en juin 2026 et montait à 1,099,98 Dhs pour une consommation de 1,134 kWh. Vous pouvez trouver le détail complet de votre historique des factures sur notre site web.\n\nVotre usage d'électricité a augmenté cette année, avec une moyenne mensuelle de 801,87 Dhs et un total cumulé de 9,622,40 Dhs depuis la dernière facture de juin 2025. Le mois élevé de consommation a été en juillet 2026 avec 1,880,83 Dhs pour une consommation de 1,939 kWh.\n\nPour plus d'informations ou pour obtenir un avis personnalisé, merci de nous contacter par téléphone au 08 02 03 12 12 ou par courrier électronique à [votre email].",
+      "reponse_court": "Bonjour ! Vous êtes le client C30EF340/690205 pour l'usage agricole de l'électricité avec le numéro de compteur 8306, si",
       "mots_attendus": [
         "SRM",
         "facture"
@@ -895,9 +895,9 @@
       "categorie": "HORS_SUJET",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 21300.83966255188,
-      "reponse_complete": "Bonjour [client], le jour actuel est mardi 1er juin à midi. En ce moment, la température à Hay Salam varie entre une moyenne de 25°C en plein jour et 18°C dans la nuit.",
-      "reponse_court": "Bonjour [client], le jour actuel est mardi 1er juin à midi. En ce moment, la température à Hay Salam varie entre une moy",
+      "duree_ms": 26259.41753387451,
+      "reponse_complete": "Bonjour client C30EF340/690205, le temps au jour d'aujourd'hui, le 1er juin 2026, est ensoleillé avec des températures élevées, pour plus de précision vous pouvez consulter la météo locale.",
+      "reponse_court": "Bonjour client C30EF340/690205, le temps au jour d'aujourd'hui, le 1er juin 2026, est ensoleillé avec des températures é",
       "mots_attendus": [
         "SRM",
         "facture"
@@ -907,10 +907,10 @@
       "question": "merci",
       "categorie": "HORS_SUJET",
       "chemin": "llm_only",
-      "succes": true,
-      "duree_ms": 105378.3631324768,
-      "reponse_complete": "Bonjour ! Merci beaucoup pour votre message. Je suis l'assistant SRM Souss-Massa qui vous aide avec les informations sur votre facture d'eau et d'électricité au Maroc.\n\nDans le contexte actuel, en juin 2026, voici quelques informations clés :\n\n* Consommation : 1 134 kWh (mois élevé)\n* Montant : 1 099,98 Dhs\n\nEn comparaison avec le mois précédent, mai 2026, voici les chiffres :\n\n* Consommation : 446 kWh (mois économique)\n* Montant : 432,62 Dhs\n\nCette augmentation de consommation pourrait être due à un usage accru d'équipements électriques ou une nécessité agricole supplémentaire.\n\nVous pouvez réduire vos coûts en s'efforçant de réduire votre consommation d'énergie, par exemple :\n\n* Fermez le robinet lorsque vous ne l'utilisez pas.\n* Reparez les fuites pour éviter les perdre des eaux et électricités.\n* Les douches courtes peuvent aussi aider à réduire votre consommation d'eau.\n\nSi vous avez encore des questions ou besoin de plus amples informations, n'hésitez pas à me demander.",
-      "reponse_court": "Bonjour ! Merci beaucoup pour votre message. Je suis l'assistant SRM Souss-Massa qui vous aide avec les informations sur",
+      "succes": false,
+      "duree_ms": 63150.79736709595,
+      "reponse_complete": "Bonjour [Client],\n\nJe suis heureux de vous aider. Merci pour votre message. Vous avez été correctement informé des détails de votre facture. Si vous avez d'autres questions ou besoin d'aide supplémentaire, n'hésitez pas à me demander.\n\nRappelant que votre consommation électrique pour ce mois est de 1,134.0 kWh et le montant correspondant est de 1,099.98 Dhs. Pour comparaison, votre consommation en mai était de 446.0 kWh avec un montant de 432.62 Dhs.\n\nPour plus d'informations ou pour économiser davantage sur vos factures, n'hésitez pas à me contacter.\n\nA bientôt!",
+      "reponse_court": "Bonjour [Client],  Je suis heureux de vous aider. Merci pour votre message. Vous avez été correctement informé des détai",
       "mots_attendus": [
         "SRM",
         "facture"
@@ -921,9 +921,9 @@
       "categorie": "BUG_CONNU",
       "chemin": "llm_only",
       "succes": false,
-      "duree_ms": 27536.87810897827,
-      "reponse_complete": "Bonjour [Client], votre consommation de cette année est supérieure à celle du mois dernier. En effet, en juin 2026, vous avez consommé 1 134 kWh contre 446 kWh en mai 2026. Cela représente une augmentation de 158%.",
-      "reponse_court": "Bonjour [Client], votre consommation de cette année est supérieure à celle du mois dernier. En effet, en juin 2026, vous",
+      "duree_ms": 28223.077058792114,
+      "reponse_complete": "Bonjour [Client], votre consommation de ce mois est de 1 134 kWh contre 446 kWh dans le mois dernier. Cela représente donc une hausse de 1588 kWh ou environ 3,5 fois plus que la consommation du mois de mai 2026.",
+      "reponse_court": "Bonjour [Client], votre consommation de ce mois est de 1 134 kWh contre 446 kWh dans le mois dernier. Cela représente do",
       "mots_attendus": [
         "Juin",
         "Mai",
