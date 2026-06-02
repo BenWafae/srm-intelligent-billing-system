@@ -2,7 +2,7 @@
 eval_generalisation.py
 ══════════════════════════════════════════════════════════════
 Script d'évaluation — Assistant Client SRM
-Test de régression — 55 questions sélectionnées
+Test de régression — 56 questions sélectionnées
 ══════════════════════════════════════════════════════════════
 """
 
@@ -373,10 +373,46 @@ def _calculer_metriques(resultats):
         }
     return metriques
 
+
 # ══════════════════════════════════════════════════════════════
-# HTML — réponse complète affichée
+# CALCUL TEMPS MOYENS PAR CHEMIN  ← NOUVEAU
 # ══════════════════════════════════════════════════════════════
-def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen_ms, date_exec):
+def _calculer_temps_par_chemin(resultats):
+    """
+    Retourne un dict avec le temps moyen (ms), le nb de questions
+    et le taux de réussite pour chaque chemin :
+      regle   → ⚡ Règle Python
+      general → 📚 Base de connaissance SRM
+      llm     → 🤖 LLM Mistral (fallback)
+    """
+    chemins = {}
+    for r in resultats:
+        ch = r["chemin"]
+        if ch not in chemins:
+            chemins[ch] = {"temps": [], "reussis": 0, "total": 0}
+        chemins[ch]["temps"].append(r["duree_ms"])
+        chemins[ch]["total"] += 1
+        if r["succes"]:
+            chemins[ch]["reussis"] += 1
+
+    result = {}
+    for ch, v in chemins.items():
+        result[ch] = {
+            "nb"           : v["total"],
+            "tps_moyen_ms" : round(sum(v["temps"]) / len(v["temps"]), 1),
+            "tps_min_ms"   : round(min(v["temps"]), 1),
+            "tps_max_ms"   : round(max(v["temps"]), 1),
+            "taux_reussite": round(v["reussis"] / v["total"], 3),
+            "reussis"      : v["reussis"],
+        }
+    return result
+
+
+# ══════════════════════════════════════════════════════════════
+# HTML
+# ══════════════════════════════════════════════════════════════
+def _generer_html(resultats, metriques, score_global, fallback_rate,
+                  temps_moyen_ms, date_exec, temps_par_chemin):
 
     couleur_score = (
         "#2ecc71" if score_global >= 0.85 else
@@ -386,7 +422,60 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
     total_sans_llm = sum(1 for r in resultats if r["chemin"] in ("regle", "general"))
     pct_sans_llm   = total_sans_llm / len(resultats) * 100 if resultats else 0
 
-    # ── Tableau résultats avec réponse COMPLÈTE ──
+    # ── Bloc temps par chemin  ← NOUVEAU ──────────────────────────
+    CHEMIN_META = {
+        "regle"  : ("⚡ Règle Python",            "#1e3a5f", "#58a6ff"),
+        "general": ("📚 Base connaissance SRM",   "#1e3a2e", "#2ecc71"),
+        "llm"    : ("🤖 LLM Mistral (fallback)",  "#3a1e5f", "#c792ea"),
+    }
+
+    def _fmt_ms(ms):
+        if ms < 1000:
+            return f"{ms:.0f} ms"
+        return f"{ms/1000:.1f} s"
+
+    blocs_chemin = ""
+    for ch in ["regle", "general", "llm"]:
+        if ch not in temps_par_chemin:
+            continue
+        v      = temps_par_chemin[ch]
+        label, bg_c, txt_c = CHEMIN_META[ch]
+        bar_w  = int(v["taux_reussite"] * 100)
+        bar_c  = "#2ecc71" if v["taux_reussite"] >= 0.85 else ("#f39c12" if v["taux_reussite"] >= 0.65 else "#e74c3c")
+        tps_color = "#2ecc71" if v["tps_moyen_ms"] < 1000 else ("#f39c12" if v["tps_moyen_ms"] < 30000 else "#e74c3c")
+
+        blocs_chemin += f"""
+        <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;
+                    padding:16px 20px;flex:1;min-width:220px">
+          <div style="font-size:13px;font-weight:bold;color:{txt_c};margin-bottom:10px">{label}</div>
+          <table style="width:100%;font-size:12px">
+            <tr>
+              <td style="color:#8b949e;padding:3px 0">Questions</td>
+              <td style="color:#c9d1d9;text-align:right;font-weight:bold">{v["nb"]}</td>
+            </tr>
+            <tr>
+              <td style="color:#8b949e;padding:3px 0">Taux réussite</td>
+              <td style="color:{bar_c};text-align:right;font-weight:bold">{v["taux_reussite"]*100:.0f}%</td>
+            </tr>
+            <tr>
+              <td style="color:#8b949e;padding:3px 0">Tps moyen</td>
+              <td style="color:{tps_color};text-align:right;font-weight:bold">{_fmt_ms(v["tps_moyen_ms"])}</td>
+            </tr>
+            <tr>
+              <td style="color:#8b949e;padding:3px 0">Tps min</td>
+              <td style="color:#c9d1d9;text-align:right">{_fmt_ms(v["tps_min_ms"])}</td>
+            </tr>
+            <tr>
+              <td style="color:#8b949e;padding:3px 0">Tps max</td>
+              <td style="color:#c9d1d9;text-align:right">{_fmt_ms(v["tps_max_ms"])}</td>
+            </tr>
+          </table>
+          <div style="background:#21262d;border-radius:4px;height:6px;margin-top:10px">
+            <div style="background:{bar_c};width:{bar_w}%;height:6px;border-radius:4px"></div>
+          </div>
+        </div>"""
+
+    # ── Tableau résultats ──────────────────────────────────────────
     lignes_tableau = ""
     for i, r in enumerate(resultats, 1):
         bg    = "#1a2e1a" if r["succes"] else "#2e1a1a"
@@ -399,7 +488,6 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
             "⚡ Règle"   if r["chemin"] == "regle" else
             "🤖 LLM"     if r["chemin"] == "llm"   else "📚 Base SRM"
         )
-        # Réponse complète formatée — sauts de ligne convertis en <br>
         reponse_html = (
             r["reponse_complete"]
             .replace("&", "&amp;")
@@ -407,6 +495,14 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
             .replace(">", "&gt;")
             .replace("\n", "<br>")
         )
+        # couleur durée selon chemin
+        if r["chemin"] == "regle":
+            tps_c = "#2ecc71" if r["duree_ms"] < 500 else "#f39c12"
+        elif r["chemin"] == "general":
+            tps_c = "#f39c12" if r["duree_ms"] < 60000 else "#e74c3c"
+        else:
+            tps_c = "#f39c12" if r["duree_ms"] < 120000 else "#e74c3c"
+
         lignes_tableau += f"""
         <tr style="background:{bg}">
             <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">{i}</td>
@@ -421,10 +517,12 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:{chemin_badge_color}">{chemin_label}</span>
             </td>
-            <td style="color:#8b949e;text-align:right;vertical-align:top;padding-top:10px">{r['duree_ms']:.0f} ms</td>
+            <td style="color:{tps_c};text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
+              {_fmt_ms(r['duree_ms'])}
+            </td>
         </tr>"""
 
-    # ── Tableau métriques ──
+    # ── Tableau métriques ──────────────────────────────────────────
     lignes_metriques = ""
     for cat, m in sorted(metriques.items()):
         bar_w = int(m["taux_reussite"] * 100)
@@ -435,7 +533,7 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
         icone_cat = "✅" if m["taux_reussite"] == 1.0 else ("⚠️" if m["taux_reussite"] >= 0.7 else "❌")
         tps_color = (
             "#2ecc71" if m["tps_moyen_ms"] < 500 else
-            "#f39c12" if m["tps_moyen_ms"] < 2000 else "#e74c3c"
+            "#f39c12" if m["tps_moyen_ms"] < 60000 else "#e74c3c"
         )
         lignes_metriques += f"""
         <tr>
@@ -444,7 +542,7 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
             <td style="text-align:center"><span style="color:{bar_c};font-weight:bold">{m['taux_reussite']*100:.0f}%</span></td>
             <td style="text-align:center;color:#e74c3c">{m['taux_erreur']*100:.0f}%</td>
             <td style="text-align:center;color:#58a6ff">{m['taux_sans_llm']*100:.0f}%</td>
-            <td style="text-align:center;color:{tps_color}">{m['tps_moyen_ms']:.0f} ms</td>
+            <td style="text-align:center;color:{tps_color}">{_fmt_ms(m['tps_moyen_ms'])}</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:{bar_c};width:{bar_w}%;height:10px;border-radius:4px"></div>
@@ -489,6 +587,9 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
       height:18px; border-radius:6px;
       background:{couleur_score};
       width:{score_global*100:.1f}%;
+    }}
+    .chemin-grid {{
+      display:flex; gap:12px; flex-wrap:wrap; margin-bottom:28px;
     }}
     table {{ width:100%; border-collapse:collapse; }}
     th {{
@@ -536,6 +637,7 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
   <strong>{len(metriques)}</strong> catégories
 </div>
 
+<!-- ══ SCORE GLOBAL ══ -->
 <div class="section">
   <h2>Score Global</h2>
   <div class="progress-bar"><div class="progress-fill"></div></div>
@@ -556,20 +658,32 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
       <div class="val" style="color:#58a6ff">{pct_sans_llm:.1f}%</div>
       <div class="lbl">Couverture sans LLM</div>
     </div>
-    <div class="card">
-      <div class="val" style="color:#58a6ff">{temps_moyen_ms:.0f} ms</div>
-      <div class="lbl">Temps moyen</div>
-    </div>
   </div>
 </div>
 
+<!-- ══ TEMPS PAR CHEMIN ← NOUVEAU ══ -->
+<div class="section">
+  <h2>⏱️ Temps de Réponse — Séparé par Chemin d'Exécution</h2>
+  <div class="explication">
+    <strong>Pourquoi séparer les temps ?</strong> Le temps moyen global est trompeur car il mélange
+    des chemins de nature très différente. Les règles Python sont déterministes et quasi-instantanées,
+    tandis que le LLM Mistral et la base de connaissance impliquent des appels réseau ou des inférences locales.
+    Afficher un temps moyen unique masquerait cet avantage architectural clé.<br>
+    <strong>Note :</strong> Les temps de la Base SRM et du LLM incluent le temps d'inférence de Mistral via Ollama en local.
+  </div>
+  <div class="chemin-grid">
+    {blocs_chemin}
+  </div>
+</div>
+
+<!-- ══ MÉTRIQUES PAR CATÉGORIE ══ -->
 <div class="section">
   <h2>Métriques par Catégorie</h2>
   <div class="explication">
     <strong>Taux de réussite</strong> : % de questions correctement répondues.<br>
     <strong>Taux d'erreur</strong> : % de questions ayant échoué.<br>
     <strong>Couverture sans LLM</strong> : % traité par les règles Python sans appel à Mistral.<br>
-    <strong>Temps moyen</strong> : règles Python rapides, LLM plus lent.
+    <strong>Temps moyen</strong> : affiché dans l'unité adaptée (ms ou s). Vert &lt; 500 ms, Orange &lt; 60 s, Rouge ≥ 60 s.
   </div>
   <table>
     <thead>
@@ -583,6 +697,7 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
   </table>
 </div>
 
+<!-- ══ DÉTAIL DES TESTS ══ -->
 <div class="section">
   <h2>Détail des Tests — Réponse Complète</h2>
   <div class="legend">
@@ -591,6 +706,11 @@ def _generer_html(resultats, metriques, score_global, fallback_rate, temps_moyen
     <span><span class="dot" style="background:#1e3a5f"></span> ⚡ Règle Python</span>
     <span><span class="dot" style="background:#3a1e5f"></span> 🤖 LLM Mistral</span>
     <span><span class="dot" style="background:#1e3a2e"></span> 📚 Base SRM</span>
+  </div>
+  <div class="explication">
+    La colonne <strong>Durée</strong> est colorée selon le chemin :
+    Vert = rapide (règle Python), Orange = acceptable (LLM/Base), Rouge = lent.
+    La comparaison visuelle entre chemins illustre l'avantage des règles déterministes.
   </div>
   <table>
     <thead>
@@ -655,7 +775,7 @@ def main():
             "chemin"           : chemin,
             "succes"           : succes,
             "duree_ms"         : duree * 1000,
-            "reponse_complete" : reponse,                        # ← réponse COMPLÈTE
+            "reponse_complete" : reponse,
             "reponse_court"    : reponse[:120].replace("\n", " "),
             "mots_attendus"    : mots_attendus,
         })
@@ -671,28 +791,47 @@ def main():
     score     = reussis / total
     fallback  = sum(1 for r in resultats if r["chemin"] == "llm") / total
     t_moy_ms  = (temps_total / total) * 1000
-    metriques = _calculer_metriques(resultats)
-    date_exec = datetime.now().strftime("%d/%m/%Y à %H:%M:%S")
+    metriques        = _calculer_metriques(resultats)
+    temps_par_chemin = _calculer_temps_par_chemin(resultats)   # ← NOUVEAU
+    date_exec        = datetime.now().strftime("%d/%m/%Y à %H:%M:%S")
 
+    # ── Affichage terminal ──────────────────────────────────────────
     print(f"\n{GRAS}{'═'*62}{RESET}")
     print(f"{GRAS}  RÉSULTATS GLOBAUX{RESET}")
     print(f"{'═'*62}{RESET}")
     print(f"\n  Taux de réussite : {GRAS}{reussis}/{total}{RESET}  {_barre(score)}  {GRAS}{score*100:.1f}%{RESET}")
-    print(f"  Temps moyen      : {t_moy_ms:.0f} ms / question")
     fallback_msg = "✅ Architecture hybride efficace" if fallback <= 0.3 else "⚠️  Taux élevé"
     print(f"  Fallback LLM     : {fallback*100:.1f}%  {fallback_msg}")
 
     total_sans_llm = sum(1 for r in resultats if r["chemin"] in ("regle", "general"))
     print(f"  Couverture règles: {total_sans_llm}/{total} ({total_sans_llm/total*100:.0f}%) sans LLM")
 
+    # ── Temps par chemin — terminal ────────────────────────────────
+    LABELS = {"regle": "⚡ Règle Python  ", "general": "📚 Base SRM      ", "llm": "🤖 LLM Mistral   "}
+    print(f"\n{GRAS}  TEMPS MOYEN PAR CHEMIN :{RESET}")
+    print(f"  {'Chemin':<22} {'N':>4}  {'Réussite':>9}  {'Tps moyen':>12}  {'Tps min':>10}  {'Tps max':>10}")
+    print(f"  {'─'*22} {'─'*4}  {'─'*9}  {'─'*12}  {'─'*10}  {'─'*10}")
+    for ch in ["regle", "general", "llm"]:
+        if ch not in temps_par_chemin:
+            continue
+        v = temps_par_chemin[ch]
+        def _fmt(ms):
+            return f"{ms:.0f} ms" if ms < 1000 else f"{ms/1000:.1f} s"
+        ok = "✅" if v["taux_reussite"] == 1.0 else ("⚠️ " if v["taux_reussite"] >= 0.7 else "❌")
+        print(f"  {LABELS.get(ch, ch):<22} {v['nb']:>4}  "
+              f"{v['reussis']}/{v['nb']} {v['taux_reussite']*100:>5.0f}%  "
+              f"{_fmt(v['tps_moyen_ms']):>12}  {_fmt(v['tps_min_ms']):>10}  {_fmt(v['tps_max_ms']):>10}  {ok}")
+
     print(f"\n{GRAS}  PAR CATÉGORIE :{RESET}")
-    print(f"  {'Catégorie':<22} {'Réussite':>9}  {'Erreur':>7}  {'Sans LLM':>9}  {'Tps moy':>8}  Barre")
-    print(f"  {'─'*22} {'─'*9}  {'─'*7}  {'─'*9}  {'─'*8}  {'─'*14}")
+    print(f"  {'Catégorie':<22} {'Réussite':>9}  {'Erreur':>7}  {'Sans LLM':>9}  {'Tps moy':>10}  Barre")
+    print(f"  {'─'*22} {'─'*9}  {'─'*7}  {'─'*9}  {'─'*10}  {'─'*14}")
     for cat, m in sorted(metriques.items()):
         ok = "✅" if m["taux_reussite"] == 1.0 else ("⚠️ " if m["taux_reussite"] >= 0.7 else "❌")
+        tms = m['tps_moyen_ms']
+        tms_str = f"{tms:.0f} ms" if tms < 1000 else f"{tms/1000:.1f} s"
         print(f"  {cat:<22} {m['reussis']}/{m['total']:>2} {m['taux_reussite']*100:>5.0f}%  "
               f"{m['taux_erreur']*100:>5.0f}%   {m['taux_sans_llm']*100:>7.0f}%  "
-              f"{m['tps_moyen_ms']:>6.0f}ms  {_barre(m['taux_reussite'], 10)}  {ok}")
+              f"{tms_str:>10}  {_barre(m['taux_reussite'], 10)}  {ok}")
 
     echecs = [r for r in resultats if not r["succes"]]
     if echecs:
@@ -704,9 +843,10 @@ def main():
     else:
         print(f"\n  {VERT}🎉 100% — aucun échec !{RESET}")
 
+    # ── Sauvegarde ──────────────────────────────────────────────────
     os.makedirs("eval_results", exist_ok=True)
 
-    json_path = os.path.join("eval_results", "rapport_generalisation.json")
+    json_path = os.path.join("eval_results", "rapport_eval.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump({
             "date"               : date_exec,
@@ -716,13 +856,14 @@ def main():
             "taux_reussite"      : round(score, 4),
             "fallback_rate"      : round(fallback, 4),
             "couverture_sans_llm": round(total_sans_llm / total, 4),
-            "temps_moyen_ms"     : round(t_moy_ms, 2),
+            "temps_par_chemin"   : temps_par_chemin,          # ← NOUVEAU
             "metriques"          : metriques,
             "resultats"          : resultats,
         }, f, ensure_ascii=False, indent=2)
 
-    html_path = os.path.join("eval_results", "rapport_generalisation.html")
-    html = _generer_html(resultats, metriques, score, fallback, t_moy_ms, date_exec)
+    html_path = os.path.join("eval_results", "rapport_eval.html")
+    html = _generer_html(resultats, metriques, score, fallback,
+                         t_moy_ms, date_exec, temps_par_chemin)
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
 
