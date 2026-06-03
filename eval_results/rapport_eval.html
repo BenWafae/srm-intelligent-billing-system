@@ -78,7 +78,7 @@
 
 <h1>📊 Rapport d'Évaluation — Assistant Client SRM</h1>
 <div class="meta">
-  Généré le <strong>02/06/2026 à 14:05:03</strong> &nbsp;|&nbsp;
+  Généré le <strong>03/06/2026 à 19:51:13</strong> &nbsp;|&nbsp;
   Contrat : <code>0005567205/2063205</code> &nbsp;|&nbsp;
   <strong>56</strong> questions &nbsp;|&nbsp;
   <strong>16</strong> catégories
@@ -108,7 +108,40 @@
   </div>
 </div>
 
-<!-- ══ TEMPS PAR CHEMIN ← NOUVEAU ══ -->
+<!-- ══ SUCCÈS DU FALLBACK LLM (NOUVEAU) ══ -->
+<div class="section">
+  <h2>🎯 Succès du Fallback LLM</h2>
+  <div class="explication">
+    <strong>Pourquoi cette métrique est essentielle ?</strong> Le fallback LLM est activé uniquement lorsque les règles Python
+    ne peuvent pas répondre. Cette métrique mesure l'efficacité de ce dernier recours.
+    Un taux de succès élevé signifie que le LLM rattrape correctement les cas non couverts par les règles.
+  </div>
+  <div class="cards">
+    <div class="card">
+      <div class="val" style="color:#2ecc71">85.7%</div>
+      <div class="lbl">Taux de succès du fallback</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:#58a6ff">6/7</div>
+      <div class="lbl">Questions fallback réussies</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:#c792ea">7</div>
+      <div class="lbl">Questions ayant déclenché le fallback</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:#2ecc71">✅ Efficace</div>
+      <div class="lbl">Évaluation</div>
+    </div>
+  </div>
+  <div class="explication" style="margin-top:12px">
+    <strong>Interprétation :</strong> Sur les 7 questions que les règles n'ont pas pu traiter,
+    le LLM a répondu correctement à 6 d'entre elles (85.7%).
+    C'est un bon résultat qui confirme le rôle de filet de sécurité du fallback.
+  </div>
+</div>
+
+<!-- ══ TEMPS PAR CHEMIN ══ -->
 <div class="section">
   <h2>⏱️ Temps de Réponse — Séparé par Chemin d'Exécution</h2>
   <div class="explication">
@@ -134,7 +167,7 @@
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Tps moyen</td>
-              <td style="color:#f39c12;text-align:right;font-weight:bold">3.6 s</td>
+              <td style="color:#2ecc71;text-align:right;font-weight:bold">661 ms</td>
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Tps min</td>
@@ -142,7 +175,7 @@
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Tps max</td>
-              <td style="color:#c9d1d9;text-align:right">159.6 s</td>
+              <td style="color:#c9d1d9;text-align:right">29.6 s</td>
             </tr>
           </table>
           <div style="background:#21262d;border-radius:4px;height:6px;margin-top:10px">
@@ -159,23 +192,23 @@
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Taux réussite</td>
-              <td style="color:#2ecc71;text-align:right;font-weight:bold">100%</td>
+              <td style="color:#f39c12;text-align:right;font-weight:bold">75%</td>
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Tps moyen</td>
-              <td style="color:#e74c3c;text-align:right;font-weight:bold">534.8 s</td>
+              <td style="color:#e74c3c;text-align:right;font-weight:bold">651.8 s</td>
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Tps min</td>
-              <td style="color:#c9d1d9;text-align:right">467.1 s</td>
+              <td style="color:#c9d1d9;text-align:right">484.9 s</td>
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Tps max</td>
-              <td style="color:#c9d1d9;text-align:right">632.8 s</td>
+              <td style="color:#c9d1d9;text-align:right">988.7 s</td>
             </tr>
           </table>
           <div style="background:#21262d;border-radius:4px;height:6px;margin-top:10px">
-            <div style="background:#2ecc71;width:100%;height:6px;border-radius:4px"></div>
+            <div style="background:#f39c12;width:75%;height:6px;border-radius:4px"></div>
           </div>
         </div>
         <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;
@@ -188,23 +221,23 @@
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Taux réussite</td>
-              <td style="color:#f39c12;text-align:right;font-weight:bold">71%</td>
+              <td style="color:#2ecc71;text-align:right;font-weight:bold">86%</td>
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Tps moyen</td>
-              <td style="color:#e74c3c;text-align:right;font-weight:bold">385.4 s</td>
+              <td style="color:#e74c3c;text-align:right;font-weight:bold">387.4 s</td>
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Tps min</td>
-              <td style="color:#c9d1d9;text-align:right">26.6 s</td>
+              <td style="color:#c9d1d9;text-align:right">27.1 s</td>
             </tr>
             <tr>
               <td style="color:#8b949e;padding:3px 0">Tps max</td>
-              <td style="color:#c9d1d9;text-align:right">637.7 s</td>
+              <td style="color:#c9d1d9;text-align:right">707.7 s</td>
             </tr>
           </table>
           <div style="background:#21262d;border-radius:4px;height:6px;margin-top:10px">
-            <div style="background:#f39c12;width:71%;height:6px;border-radius:4px"></div>
+            <div style="background:#2ecc71;width:85%;height:6px;border-radius:4px"></div>
           </div>
         </div>
   </div>
@@ -234,7 +267,7 @@
             <td style="text-align:center"><span style="color:#e74c3c;font-weight:bold">0%</span></td>
             <td style="text-align:center;color:#e74c3c">100%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">8 ms</td>
+            <td style="text-align:center;color:#2ecc71">9 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#e74c3c;width:0%;height:10px;border-radius:4px"></div>
@@ -248,7 +281,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">10 ms</td>
+            <td style="text-align:center;color:#2ecc71">4 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -258,17 +291,17 @@
         </tr>
         <tr>
             <td><span class="badge">FALLBACK_ANALYSE</span></td>
-            <td style="text-align:center">3/4</td>
-            <td style="text-align:center"><span style="color:#f39c12;font-weight:bold">75%</span></td>
-            <td style="text-align:center;color:#e74c3c">25%</td>
+            <td style="text-align:center">4/4</td>
+            <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
+            <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">0%</td>
-            <td style="text-align:center;color:#e74c3c">611.2 s</td>
+            <td style="text-align:center;color:#e74c3c">614.2 s</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
-                <div style="background:#f39c12;width:75%;height:10px;border-radius:4px"></div>
+                <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
               </div>
             </td>
-            <td style="text-align:center">⚠️</td>
+            <td style="text-align:center">✅</td>
         </tr>
         <tr>
             <td><span class="badge">FAUTES_ORTHO</span></td>
@@ -276,7 +309,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">5 ms</td>
+            <td style="text-align:center;color:#2ecc71">4 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -286,17 +319,17 @@
         </tr>
         <tr>
             <td><span class="badge">GENERAL_SRM</span></td>
-            <td style="text-align:center">4/4</td>
-            <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
-            <td style="text-align:center;color:#e74c3c">0%</td>
+            <td style="text-align:center">3/4</td>
+            <td style="text-align:center"><span style="color:#f39c12;font-weight:bold">75%</span></td>
+            <td style="text-align:center;color:#e74c3c">25%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#e74c3c">534.8 s</td>
+            <td style="text-align:center;color:#e74c3c">651.8 s</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
-                <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
+                <div style="background:#f39c12;width:75%;height:10px;border-radius:4px"></div>
               </div>
             </td>
-            <td style="text-align:center">✅</td>
+            <td style="text-align:center">⚠️</td>
         </tr>
         <tr>
             <td><span class="badge">HISTORIQUE</span></td>
@@ -304,7 +337,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">7 ms</td>
+            <td style="text-align:center;color:#2ecc71">3 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -318,7 +351,7 @@
             <td style="text-align:center"><span style="color:#f39c12;font-weight:bold">67%</span></td>
             <td style="text-align:center;color:#e74c3c">33%</td>
             <td style="text-align:center;color:#58a6ff">0%</td>
-            <td style="text-align:center;color:#e74c3c">84.2 s</td>
+            <td style="text-align:center;color:#e74c3c">85.0 s</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#f39c12;width:66%;height:10px;border-radius:4px"></div>
@@ -332,7 +365,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">2 ms</td>
+            <td style="text-align:center;color:#2ecc71">1 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -346,7 +379,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">1 ms</td>
+            <td style="text-align:center;color:#2ecc71">2 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -360,7 +393,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">4 ms</td>
+            <td style="text-align:center;color:#2ecc71">2 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -374,7 +407,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">2 ms</td>
+            <td style="text-align:center;color:#2ecc71">3 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -388,7 +421,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">8 ms</td>
+            <td style="text-align:center;color:#2ecc71">2 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -402,7 +435,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">7 ms</td>
+            <td style="text-align:center;color:#2ecc71">5 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -416,7 +449,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">8 ms</td>
+            <td style="text-align:center;color:#2ecc71">1 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -430,7 +463,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#f39c12">53.2 s</td>
+            <td style="text-align:center;color:#f39c12">9.9 s</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -444,7 +477,7 @@
             <td style="text-align:center"><span style="color:#2ecc71;font-weight:bold">100%</span></td>
             <td style="text-align:center;color:#e74c3c">0%</td>
             <td style="text-align:center;color:#58a6ff">100%</td>
-            <td style="text-align:center;color:#2ecc71">6 ms</td>
+            <td style="text-align:center;color:#2ecc71">4 ms</td>
             <td>
               <div style="background:#21262d;border-radius:4px;height:10px;width:120px">
                 <div style="background:#2ecc71;width:100%;height:10px;border-radius:4px"></div>
@@ -493,7 +526,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              6 ms
+              2 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -527,7 +560,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              0 ms
+              1 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -544,7 +577,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              0 ms
+              1 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -595,7 +628,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              2 ms
+              1 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -612,7 +645,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              3 ms
+              4 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -629,7 +662,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              1 ms
+              2 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -646,7 +679,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              0 ms
+              3 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -663,7 +696,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              7 ms
+              1 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -680,7 +713,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              2 ms
+              0 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -697,7 +730,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              2 ms
+              7 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -714,7 +747,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              3 ms
+              2 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -731,7 +764,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              2 ms
+              3 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -748,7 +781,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              1 ms
+              2 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -765,7 +798,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              0 ms
+              2 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -782,7 +815,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              0 ms
+              3 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -799,7 +832,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#f39c12;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              159.6 s
+              29.6 s
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -833,7 +866,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              18 ms
+              11 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -850,7 +883,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              6 ms
+              4 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -867,7 +900,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              11 ms
+              2 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -884,7 +917,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              3 ms
+              2 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -901,7 +934,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              9 ms
+              2 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -918,7 +951,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              9 ms
+              4 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -935,7 +968,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              7 ms
+              0 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -952,7 +985,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              7 ms
+              0 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -969,7 +1002,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              6 ms
+              0 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -986,7 +1019,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              11 ms
+              0 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1003,7 +1036,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              1 ms
+              16 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1020,7 +1053,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              13 ms
+              1 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1037,7 +1070,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              7 ms
+              0 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1054,7 +1087,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              15 ms
+              0 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1071,7 +1104,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              4 ms
+              17 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1082,13 +1115,13 @@
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">⚠️ 7 facture(s) non réglée(s) dans les délais :<br><br>⚠️ En retard (98j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)<br><br>⚠️ En retard (70j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)<br><br>⚠️ En retard (39j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)<br><br>⚠️ En retard (9j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)<br><br>✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)<br><br>⚠️ En retard (190j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)<br><br>⚠️ En retard (160j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)<br><br>⚠️ En retard (128j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)</div>
+                          padding:8px 10px;white-space:pre-wrap">⚠️ 7 facture(s) non réglée(s) dans les délais :<br><br>⚠️ En retard (99j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)<br><br>⚠️ En retard (71j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)<br><br>⚠️ En retard (40j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)<br><br>⚠️ En retard (10j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)<br><br>✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)<br><br>⚠️ En retard (191j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)<br><br>⚠️ En retard (161j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)<br><br>⚠️ En retard (129j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              16 ms
+              3 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1099,13 +1132,13 @@
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">⚠️ 7 facture(s) non réglée(s) dans les délais :<br><br>⚠️ En retard (98j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)<br><br>⚠️ En retard (70j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)<br><br>⚠️ En retard (39j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)<br><br>⚠️ En retard (9j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)<br><br>✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)<br><br>⚠️ En retard (190j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)<br><br>⚠️ En retard (160j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)<br><br>⚠️ En retard (128j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)</div>
+                          padding:8px 10px;white-space:pre-wrap">⚠️ 7 facture(s) non réglée(s) dans les délais :<br><br>⚠️ En retard (99j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)<br><br>⚠️ En retard (71j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)<br><br>⚠️ En retard (40j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)<br><br>⚠️ En retard (10j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)<br><br>✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)<br><br>⚠️ En retard (191j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)<br><br>⚠️ En retard (161j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)<br><br>⚠️ En retard (129j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              5 ms
+              0 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1116,13 +1149,13 @@
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">⚠️ 7 facture(s) non réglée(s) dans les délais :<br><br>⚠️ En retard (98j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)<br><br>⚠️ En retard (70j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)<br><br>⚠️ En retard (39j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)<br><br>⚠️ En retard (9j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)<br><br>✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)<br><br>⚠️ En retard (190j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)<br><br>⚠️ En retard (160j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)<br><br>⚠️ En retard (128j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)</div>
+                          padding:8px 10px;white-space:pre-wrap">⚠️ 7 facture(s) non réglée(s) dans les délais :<br><br>⚠️ En retard (99j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)<br><br>⚠️ En retard (71j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)<br><br>⚠️ En retard (40j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)<br><br>⚠️ En retard (10j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)<br><br>✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)<br><br>⚠️ En retard (191j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)<br><br>⚠️ En retard (161j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)<br><br>⚠️ En retard (129j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              4 ms
+              0 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1133,13 +1166,13 @@
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">Pour s'abonner en eau à SRM Souss-Massa, vous devez fournir les documents suivants :<br>1. Formulaire de demande d'abonnement signé (disponible en agence ou sur e-agence)<br>2. Photocopie pièce d'identité : CIN, Carte de séjour ou passeport<br>3. Justificatif du droit de jouissance (propriétaire : copie du titre de propriété ; locataire : contrat de bail, certificat de résidence, ou autorisation du propriétaire légalisée)<br>4. En plus, pour un branchement ÉLECTRICITÉ uniquement :<br>   - Copie du permis d'habiter ou certificat de conformité<br>   - Certificat de garantie du disjoncteur différentiel (conforme aux normes)</div>
+                          padding:8px 10px;white-space:pre-wrap">Les documents nécessaires pour s'abonner à l'eau sont :<br>1. Formulaire de demande d'abonnement signé (disponible en agence ou sur e-agence)<br>2. Photocopie pièce d'identité : CIN, Carte de séjour ou passeport<br>3. Justificatif du droit de jouissance :<br>   - Propriétaire : copie du titre de propriété (titre foncier, Moulkia, attestation notaire)<br>   - Locataire : contrat de bail, certificat de résidence, ou autorisation du propriétaire légalisée.</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#1e3a2e">📚 Base SRM</span>
             </td>
             <td style="color:#e74c3c;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              505.6 s
+              544.2 s
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1150,30 +1183,30 @@
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">Pour passer un stage à SRM SM, tu dois envoyer les documents suivants UNIQUEMENT par email à [stages@srm-sm.ma](mailto:stages@srm-sm.ma) :<br>1. Copie CNI<br>2. CV avec téléphone et email<br>3. Convention de stage signée et cachetée par l'école<br>4. Demande de stage sur en-tête de l'école avec période précisée<br>5. Attestation d'assurance<br><br>IMPORTANT : Aucune demande de stage ne sera acceptée sur place ou par email autre que ceux ci-dessus. Le stage est réservé aux étudiants avec convention d'école. Ne pas confondre stage étudiant et offre d'emploi permanent.</div>
+                          padding:8px 10px;white-space:pre-wrap">Pour passer un stage auprès de SRM SM, il est nécessaire de vous adresser à l'adresse suivante : stages@srm-sm.ma<br>Vous devrez envoyer les documents ci-dessous :<br>1. Copie CNI<br>2. CV avec téléphone et email<br>3. Convention de stage signée et cachetée par l'école<br>4. Demande de stage sur en-tête de l'école avec période précisée<br>5. Attestation d'assurance<br><br>IMPORTANT : Aucune demande de stage ne sera acceptée sur place. Le stage est réservé aux étudiants avec convention d'école. Ne pas confondre stage étudiant et offre d'emploi permanent.</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#1e3a2e">📚 Base SRM</span>
             </td>
             <td style="color:#e74c3c;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              533.6 s
+              589.2 s
             </td>
         </tr>
-        <tr style="background:#1a2e1a">
+        <tr style="background:#2e1a1a">
             <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">41</td>
-            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
             <td style="vertical-align:top;padding-top:10px"><span class="badge">GENERAL_SRM</span></td>
             <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">comment economiser l eau</td>
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">Pour économiser de l'eau, voici quelques conseils :<br>1. Réparer immédiatement les fuites des robinets car une simple goutte peut gaspiller beaucoup.<br>2. Prendre des douches courtes plutôt que des bains qui consomment plus d'eau.<br>3. Fermer le robinet pendant le brossage des dents pour éviter de gaspiller l'eau.<br>4. Arroser les plantes le soir ou tôt le matin, car la température est moins chaude et l'évaporation moindre.<br>5. Utiliser des équipements économiseurs d'eau.<br>6. Signaler les fuites sur le réseau public à votre agence SRM pour qu'elles soient rapidement corrigées.</div>
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Wissam,<br><br>Votre consommation électrique a augmenté de 162,0 kWh entre Mai et Juin, soit une hausse de 37% par rapport à votre moyenne mensuelle de 826,67 kWh. Cette augmentation peut être due à l'utilisation d'équipements électriques plus consommateurs tels que les chauffeurs d'eau ou la climatisation en ce mois-ci.<br><br>Pour économiser de l'électricité, il est important de respecter une utilisation adéquate des équipements et d'éviter tout gaspillage. Voici quelques conseils :<br><br>1. Chauffer de l'eau uniquement lorsque nécessaire, plutôt que laissez-vous couler inutilement pour attendre qu'il soit suffisamment chaud.<br>2. Reglagez votre thermostat en dessous de 23°C pendant les jours et plus bas au niveau des nuits si vous utilisez une climatisation, cela permettra de réduire la consommation d'électricité.<br>3. Limitez le nombre d'équipements électriques que vous utilisiez en même temps pour éviter l'overload du circuit.<br>4. Si possible, essayez d'utiliser des équipements électriques plus efficaces, tels que les réfrigérateurs ou les chauffeurs d'eau à haute performance énergétique.<br>5. Évitez tout gaspillage de l'électricité, par exemple en s'assurant que toutes les lampes ne sont pas allumées lorsque vous n'êtes pas dans la pièce.<br><br>Pour économiser l'eau, il est important de respecter une utilisation adéquate et de réduire le gaspillage. Voici quelques conseils :<br><br>1. Essayez de réduire l'utilisation de votre irrigation, en fonctionnant uniquement lorsque nécessaire et en utilisant un système d'irrigation efficace pour ne pas gaspiller l'eau.<br>2. Utilisez une bouilloire à vapeur au lieu de laissez-vous couler inutilement de l'eau pour cuire des aliments, cela réduira considérablement votre utilisation d'eau.<br>3. Reglagez les tuyaux d'évacuation de l'eau de manière à éviter tout gaspillage et à garantir une circulation optimale de l'eau.<br>4. Essayez de réduire la consommation en utilisant des équipements de lavage économiques en eau tels que les machines à laver à faible consommation d'eau ou les toilettes à double fonctionnement.<br>5. Évitez tout gaspillage d'eau, par exemple en s'assurant que toutes les tuyaux ne sont pas en fuite et en réparant rapidement tous les problèmes de fuites détectés.</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#1e3a2e">📚 Base SRM</span>
             </td>
             <td style="color:#e74c3c;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              632.8 s
+              988.7 s
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1184,13 +1217,13 @@
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">L'adresse du siège de SRM SM est Rue 18 Novembre, Quartier Industriel, AGADIR.</div>
+                          padding:8px 10px;white-space:pre-wrap">La adresse de siège de SRM Souss-Massa est : Rue 18 Novembre, Quartier Industriel, AGADIR.</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#1e3a2e">📚 Base SRM</span>
             </td>
             <td style="color:#e74c3c;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              467.1 s
+              484.9 s
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1201,30 +1234,30 @@
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">Bonjour Wissam,<br><br>J'ai comparé votre consommation en juin et mai, le mois précédent. Votre consommation en juin est de 1 134 kWh contre 446 kWh en mai, ce qui représente une augmentation de près de 160%. En moyenne, vous consommez environ 802 kWh par mois. Comme le mois d'été correspond à la période d'irrigation et de chaleur, cette augmentation peut être due à un usage supplémentaire d'électricité pour l'irrigation agricole ou pour les systèmes de climatisation.<br><br>Si vous souhaitez réduire votre consommation en été, j'ai quelques conseils à vous proposer :<br>- Essayer de réguler la température de vos appareils électriques (climatisation, chauffage, etc.) pour éviter d'utiliser trop d'énergie.<br>- Essayer de réguler votre irrigation agricole pour ne pas gaspiller de l'eau ou de l'électricité.<br>- Vérifier si tous vos appareils sont éteints lorsqu'ils n'ont pas besoin d'être allumés.<br><br>J'espère que cela vous sera utile et que vous avez une belle année agricole.</div>
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Wissam, votre consommation d'électricité en juin 2026 est de 1134 kWh contre 446 kWh en mai 2026. La moyenne mensuelle de votre compte sur les douze derniers mois est de 827 kWh. Votre consommation en juin représente donc un niveau plus élevé (+157%) que la moyenne mensuelle. En raison du temps chaud, cette augmentation pourrait s'expliquer par une utilisation plus importante d'irrigation ou de climatisation.</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#3a1e5f">🤖 LLM</span>
             </td>
             <td style="color:#e74c3c;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              637.7 s
+              531.5 s
             </td>
         </tr>
-        <tr style="background:#2e1a1a">
+        <tr style="background:#1a2e1a">
             <td style="color:#888;text-align:center;vertical-align:top;padding-top:12px">44</td>
-            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">❌</td>
+            <td style="text-align:center;font-size:18px;vertical-align:top;padding-top:10px">✅</td>
             <td style="vertical-align:top;padding-top:10px"><span class="badge">FALLBACK_ANALYSE</span></td>
             <td style="color:#e6edf3;font-weight:500;vertical-align:top;padding-top:10px">pourquoi je paie plus ce mois</td>
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">Bonjour Wissam, je t'informe que ton consommation électrique a augmenté ce mois en comparaison à mai dernier. En effet, tu as consommé 1 134 kWh contre 446 kWh. Cela fait une hausse de près de 257% (1 134 - 446 = 688 / 446 * 100 %).<br>Cette augmentation peut être liée à la période estivale, marquée par des jours chauds et des irrigation plus importantes. Il est donc normal que ta consommation soit plus élevée pendant cette période.<br>Je t'invite de continuer à contrôler ton usage électrique pour limiter les coûts.</div>
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Wissam,<br><br>J'ai comparé votre facture pour ce mois et celle du mois dernier, et je vois que votre consommation d'électricité a augmenté de 188 kWh en juin par rapport à mai. Votre consommation actuelle est de 1,134 kWh contre 446 kWh en mai. Cette hausse peut sûrement être expliquée par la chaleur et l'augmentation des besoins d'irrigation de vos cultures agricoles durant cette saison estivale.<br><br>Votre moyenne de consommation mensuelle est de 826,67 kWh, mais cette semaine-là, vous avez consommé plus que la moyenne, ce qui peut être normal en période chaude.<br><br>Je suis là pour vous aider si vous avez des questions ou besoins spécifiques concernant votre usage d'électricité.</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#3a1e5f">🤖 LLM</span>
             </td>
             <td style="color:#e74c3c;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              592.2 s
+              597.1 s
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1235,13 +1268,13 @@
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">Bonjour Wissam, la consommation de ce mois (Juin) est plus élevée que celle du mois précédent (Mai) en raison d'une utilisation accrue de l'électricité pour des irrigation et le fonctionnement des appareils à climatisation pendant les chaudes journées d'été. En effet, votre consommation de juin s'élève à 1 134 kWh contre seulement 446 kWh en mai. Cela représente une hausse de plus de 158% comparée à votre moyenne mensuelle de 827 kWh. Ceci est dû aux nécessités d'irrigation et au climat chaud qui poussent les consommateurs à utiliser plus d'électricité pour se maintenir confortables pendant l'été marocain.</div>
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Wissam,<br>Je vous remercie de votre attention envers l'électricité que nous fournissons. Vous avez constaté une augmentation significative dans vos consommations pour le mois de Juin 2026 par rapport à Mai 2026.<br>Pour vous expliquer ce phénomène, notre analyse a montré que votre consommation pour Juin était de 1 134 kWh tandis que celle de Mai était de 446 kWh. Cette augmentation peut être due à l'augmentation de la chaleur pendant le mois de Juin, nécessitant plus d'usage de l'électricité pour la climatisation.<br>En outre, étant donné que votre usage est agricole, il est possible que vous aiez fait plus de travail sur vos terrains durant ce mois qui a également contribué à cette augmentation de consommation.</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#3a1e5f">🤖 LLM</span>
             </td>
             <td style="color:#e74c3c;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              605.9 s
+              620.5 s
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1252,13 +1285,13 @@
             <td style="vertical-align:top">
               <div style="color:#adbac7;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;
                           background:#0d1117;border:1px solid #30363d;border-radius:6px;
-                          padding:8px 10px;white-space:pre-wrap">Bonjour Wissam, je suis heureux de vous aider. Pour réduire votre consommation électrique en utilisant l'exemple des derniers mois, il est important de prendre en compte le type d'usage agricole de votre compteur.<br><br>En examinant vos factures de mai et juin, vous pouvez voir que la consommation a augmenté considérablement entre ces deux mois. En effet, en mai, vous avez consommé 446 kWh tandis qu'en juin, vous avez consommé 1134 kWh, soit plus du double.<br><br>Il est probable que ce changement est dû à la saisonnalité marocaine, avec le mois de juin correspondant à l'été, une période de chaleur et d'irrigation pour les agriculteurs.<br><br>Pour réduire votre consommation, vous pouvez essayer des actions telles que :<br><br>1. Optimiser l'utilisation de votre irrigation en fonction du besoin réel de vos cultures et en fonction de la période de croissance.<br>2. Utiliser des pompes à eau solaires pour les petites irrigation, qui peuvent permettre d'économiser sur les frais d'électricité.<br>3. Mettre en place une stratégie de gestion de l'eau pour réduire les pertes de liquide et donc économiser sur la consommation d'électricité.<br>4. Essayer de réguler le temps et la fréquence de l'utilisation des pompes à eau pour éviter de consommer trop d'électricité en un court laps de temps.<br>5. Vérifier que tous les équipements électriques sont en bon état et fonctionnent efficacement pour ne pas gaspiller de l'électricité inutilement.</div>
+                          padding:8px 10px;white-space:pre-wrap">Bonjour Wissam,<br><br>Pour réduire votre consommation en électricité, je vous suggère quelques mesures à prendre en fonction de votre utilisation agricole :<br><br>- Essayez d'utiliser des horaires moins coûteux pour l'irrigation et la climatisation. En général, les pics de consommation sont enregistrés dans les heures de pointe (matin et soir). En réduisant vos besoins à ces moments précis, vous pouvez considérablement réduire votre consommation électrique.<br>- Vérifiez que vos équipements électriques sont en bon état et fonctionnent efficacement. Des fuites de courant ou des défaillances peuvent entraîner une hausse injustifiée de votre consommation.<br>- Utilisez des dispositifs de contrôle de la consommation tels que les luminaires à basse consommation, des réfrigérateurs et des lave-vaisselle économes en énergie, ainsi qu'une pompe à irriguer efficace.<br>- Dans le cadre du printemps marocain (Mars/Avril), vous pouvez considérer la mise en place de mesures de protection contre les insectes et la maladie pour réduire votre consommation d'eau et de chauffage.<br>- Enfin, essayez de planifier vos activités agricoles afin de minimiser votre consommation électrique pendant les mois d'été marocain (Mai/Juin/Juillet/Août), où la température est la plus élevée.<br><br>Je vous souhaite une réussite dans la réduction de votre consommation électrique et un bon rendement agricole.</div>
             </td>
             <td style="vertical-align:top;padding-top:10px">
               <span class="badge" style="background:#3a1e5f">🤖 LLM</span>
             </td>
             <td style="color:#e74c3c;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              609.0 s
+              707.7 s
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1275,7 +1308,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              5 ms
+              4 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1309,7 +1342,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              10 ms
+              8 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1326,7 +1359,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              6 ms
+              4 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1343,7 +1376,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              16 ms
+              4 ms
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1360,7 +1393,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              0 ms
+              8 ms
             </td>
         </tr>
         <tr style="background:#2e1a1a">
@@ -1377,7 +1410,7 @@
               <span class="badge" style="background:#3a1e5f">🤖 LLM</span>
             </td>
             <td style="color:#e74c3c;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              199.2 s
+              199.1 s
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1394,7 +1427,7 @@
               <span class="badge" style="background:#3a1e5f">🤖 LLM</span>
             </td>
             <td style="color:#f39c12;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              26.6 s
+              28.8 s
             </td>
         </tr>
         <tr style="background:#1a2e1a">
@@ -1411,7 +1444,7 @@
               <span class="badge" style="background:#3a1e5f">🤖 LLM</span>
             </td>
             <td style="color:#f39c12;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              26.8 s
+              27.1 s
             </td>
         </tr>
         <tr style="background:#2e1a1a">
@@ -1428,7 +1461,7 @@
               <span class="badge" style="background:#1e3a5f">⚡ Règle</span>
             </td>
             <td style="color:#2ecc71;text-align:right;vertical-align:top;padding-top:10px;font-weight:bold">
-              7 ms
+              9 ms
             </td>
         </tr></tbody>
   </table>

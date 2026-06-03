@@ -375,7 +375,7 @@ def _calculer_metriques(resultats):
 
 
 # ══════════════════════════════════════════════════════════════
-# CALCUL TEMPS MOYENS PAR CHEMIN  ← NOUVEAU
+# CALCUL TEMPS MOYENS PAR CHEMIN
 # ══════════════════════════════════════════════════════════════
 def _calculer_temps_par_chemin(resultats):
     """
@@ -412,7 +412,8 @@ def _calculer_temps_par_chemin(resultats):
 # HTML
 # ══════════════════════════════════════════════════════════════
 def _generer_html(resultats, metriques, score_global, fallback_rate,
-                  temps_moyen_ms, date_exec, temps_par_chemin):
+                  temps_moyen_ms, date_exec, temps_par_chemin,
+                  fallback_succes_total, fallback_succes_reussis, fallback_succes_taux):
 
     couleur_score = (
         "#2ecc71" if score_global >= 0.85 else
@@ -422,7 +423,11 @@ def _generer_html(resultats, metriques, score_global, fallback_rate,
     total_sans_llm = sum(1 for r in resultats if r["chemin"] in ("regle", "general"))
     pct_sans_llm   = total_sans_llm / len(resultats) * 100 if resultats else 0
 
-    # ── Bloc temps par chemin  ← NOUVEAU ──────────────────────────
+    # Couleur pour le taux de succès du fallback
+    fallback_succes_color = "#2ecc71" if fallback_succes_taux >= 0.7 else ("#f39c12" if fallback_succes_taux >= 0.5 else "#e74c3c")
+    fallback_succes_msg = "✅ Efficace" if fallback_succes_taux >= 0.7 else ("⚠️ Moyen" if fallback_succes_taux >= 0.5 else "❌ Faible")
+
+    # ── Bloc temps par chemin ────────────────────────────────────────
     CHEMIN_META = {
         "regle"  : ("⚡ Règle Python",            "#1e3a5f", "#58a6ff"),
         "general": ("📚 Base connaissance SRM",   "#1e3a2e", "#2ecc71"),
@@ -661,7 +666,40 @@ def _generer_html(resultats, metriques, score_global, fallback_rate,
   </div>
 </div>
 
-<!-- ══ TEMPS PAR CHEMIN ← NOUVEAU ══ -->
+<!-- ══ SUCCÈS DU FALLBACK LLM (NOUVEAU) ══ -->
+<div class="section">
+  <h2>🎯 Succès du Fallback LLM</h2>
+  <div class="explication">
+    <strong>Pourquoi cette métrique est essentielle ?</strong> Le fallback LLM est activé uniquement lorsque les règles Python
+    ne peuvent pas répondre. Cette métrique mesure l'efficacité de ce dernier recours.
+    Un taux de succès élevé signifie que le LLM rattrape correctement les cas non couverts par les règles.
+  </div>
+  <div class="cards">
+    <div class="card">
+      <div class="val" style="color:{fallback_succes_color}">{fallback_succes_taux*100:.1f}%</div>
+      <div class="lbl">Taux de succès du fallback</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:#58a6ff">{fallback_succes_reussis}/{fallback_succes_total}</div>
+      <div class="lbl">Questions fallback réussies</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:#c792ea">{fallback_succes_total}</div>
+      <div class="lbl">Questions ayant déclenché le fallback</div>
+    </div>
+    <div class="card">
+      <div class="val" style="color:{fallback_succes_color}">{fallback_succes_msg}</div>
+      <div class="lbl">Évaluation</div>
+    </div>
+  </div>
+  <div class="explication" style="margin-top:12px">
+    <strong>Interprétation :</strong> Sur les {fallback_succes_total} questions que les règles n'ont pas pu traiter,
+    le LLM a répondu correctement à {fallback_succes_reussis} d'entre elles ({fallback_succes_taux*100:.1f}%).
+    {"C'est un bon résultat qui confirme le rôle de filet de sécurité du fallback." if fallback_succes_taux >= 0.7 else "Le fallback mériterait d'être amélioré, notamment en enrichissant son prompt."}
+  </div>
+</div>
+
+<!-- ══ TEMPS PAR CHEMIN ══ -->
 <div class="section">
   <h2>⏱️ Temps de Réponse — Séparé par Chemin d'Exécution</h2>
   <div class="explication">
@@ -792,8 +830,14 @@ def main():
     fallback  = sum(1 for r in resultats if r["chemin"] == "llm") / total
     t_moy_ms  = (temps_total / total) * 1000
     metriques        = _calculer_metriques(resultats)
-    temps_par_chemin = _calculer_temps_par_chemin(resultats)   # ← NOUVEAU
+    temps_par_chemin = _calculer_temps_par_chemin(resultats)
     date_exec        = datetime.now().strftime("%d/%m/%Y à %H:%M:%S")
+
+    # ── Calcul des métriques de succès du fallback ──────────────────
+    questions_fallback = [r for r in resultats if r["chemin"] == "llm"]
+    fallback_succes_total = len(questions_fallback)
+    fallback_succes_reussis = sum(1 for r in questions_fallback if r["succes"])
+    fallback_succes_taux = fallback_succes_reussis / fallback_succes_total if fallback_succes_total > 0 else 0
 
     # ── Affichage terminal ──────────────────────────────────────────
     print(f"\n{GRAS}{'═'*62}{RESET}")
@@ -805,6 +849,18 @@ def main():
 
     total_sans_llm = sum(1 for r in resultats if r["chemin"] in ("regle", "general"))
     print(f"  Couverture règles: {total_sans_llm}/{total} ({total_sans_llm/total*100:.0f}%) sans LLM")
+
+    # Affichage du succès du fallback
+    print(f"\n{GRAS}  SUCCÈS DU FALLBACK LLM :{RESET}")
+    print(f"  Questions ayant déclenché le LLM : {fallback_succes_total}/{total}")
+    print(f"  Dont réponses correctes : {fallback_succes_reussis}/{fallback_succes_total} ({fallback_succes_taux*100:.1f}%)")
+
+    if fallback_succes_taux >= 0.7:
+        print(f"  {VERT}✅ Le fallback rattrape bien les cas non couverts par les règles{RESET}")
+    elif fallback_succes_taux >= 0.5:
+        print(f"  {JAUNE}⚠️ Le fallback mériterait d'être amélioré{RESET}")
+    else:
+        print(f"  {ROUGE}❌ Le fallback est inefficace, à revoir{RESET}")
 
     # ── Temps par chemin — terminal ────────────────────────────────
     LABELS = {"regle": "⚡ Règle Python  ", "general": "📚 Base SRM      ", "llm": "🤖 LLM Mistral   "}
@@ -856,14 +912,20 @@ def main():
             "taux_reussite"      : round(score, 4),
             "fallback_rate"      : round(fallback, 4),
             "couverture_sans_llm": round(total_sans_llm / total, 4),
-            "temps_par_chemin"   : temps_par_chemin,          # ← NOUVEAU
+            "temps_par_chemin"   : temps_par_chemin,
             "metriques"          : metriques,
+            "fallback_succes"    : {
+                "total_questions_fallback": fallback_succes_total,
+                "reussis": fallback_succes_reussis,
+                "taux_succes": round(fallback_succes_taux, 4)
+            },
             "resultats"          : resultats,
         }, f, ensure_ascii=False, indent=2)
 
     html_path = os.path.join("eval_results", "rapport_eval.html")
     html = _generer_html(resultats, metriques, score, fallback,
-                         t_moy_ms, date_exec, temps_par_chemin)
+                         t_moy_ms, date_exec, temps_par_chemin,
+                         fallback_succes_total, fallback_succes_reussis, fallback_succes_taux)
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
 

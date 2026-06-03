@@ -1,5 +1,5 @@
 {
-  "date": "02/06/2026 à 14:05:03",
+  "date": "03/06/2026 à 19:51:13",
   "contrat_test": "0005567205/2063205",
   "total_questions": 56,
   "reussis": 53,
@@ -9,27 +9,27 @@
   "temps_par_chemin": {
     "regle": {
       "nb": 45,
-      "tps_moyen_ms": 3551.9,
+      "tps_moyen_ms": 660.7,
       "tps_min_ms": 0.0,
-      "tps_max_ms": 159607.1,
+      "tps_max_ms": 29593.0,
       "taux_reussite": 0.978,
       "reussis": 44
     },
     "general": {
       "nb": 4,
-      "tps_moyen_ms": 534762.5,
-      "tps_min_ms": 467075.6,
-      "tps_max_ms": 632797.9,
-      "taux_reussite": 1.0,
-      "reussis": 4
+      "tps_moyen_ms": 651770.3,
+      "tps_min_ms": 484893.5,
+      "tps_max_ms": 988724.2,
+      "taux_reussite": 0.75,
+      "reussis": 3
     },
     "llm": {
       "nb": 7,
-      "tps_moyen_ms": 385350.2,
-      "tps_min_ms": 26601.9,
-      "tps_max_ms": 637692.0,
-      "taux_reussite": 0.714,
-      "reussis": 5
+      "tps_moyen_ms": 387387.8,
+      "tps_min_ms": 27089.3,
+      "tps_max_ms": 707695.7,
+      "taux_reussite": 0.857,
+      "reussis": 6
     }
   },
   "metriques": {
@@ -40,7 +40,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 1.5
+      "tps_moyen_ms": 1.3
     },
     "MOIS_SPECIFIQUE": {
       "total": 5,
@@ -49,7 +49,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 1.8
+      "tps_moyen_ms": 2.6
     },
     "MOIS_RELATIF": {
       "total": 4,
@@ -58,7 +58,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 3.6
+      "tps_moyen_ms": 2.5
     },
     "MAX_MIN": {
       "total": 4,
@@ -67,7 +67,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 0.8
+      "tps_moyen_ms": 2.4
     },
     "SOMME": {
       "total": 3,
@@ -76,7 +76,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 53208.3
+      "tps_moyen_ms": 9867.9
     },
     "HISTORIQUE": {
       "total": 3,
@@ -85,7 +85,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 6.8
+      "tps_moyen_ms": 2.7
     },
     "MOYENNE": {
       "total": 3,
@@ -94,7 +94,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 8.5
+      "tps_moyen_ms": 2.0
     },
     "TOP_N": {
       "total": 4,
@@ -103,7 +103,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 6.2
+      "tps_moyen_ms": 4.0
     },
     "COMPARAISON": {
       "total": 4,
@@ -112,7 +112,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 9.6
+      "tps_moyen_ms": 4.3
     },
     "RETARD_PAIEMENT": {
       "total": 3,
@@ -121,25 +121,25 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 8.2
+      "tps_moyen_ms": 1.0
     },
     "GENERAL_SRM": {
-      "total": 4,
-      "reussis": 4,
-      "echecs": 0,
-      "taux_reussite": 1.0,
-      "taux_erreur": 0.0,
-      "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 534762.5
-    },
-    "FALLBACK_ANALYSE": {
       "total": 4,
       "reussis": 3,
       "echecs": 1,
       "taux_reussite": 0.75,
       "taux_erreur": 0.25,
+      "taux_sans_llm": 1.0,
+      "tps_moyen_ms": 651770.3
+    },
+    "FALLBACK_ANALYSE": {
+      "total": 4,
+      "reussis": 4,
+      "echecs": 0,
+      "taux_reussite": 1.0,
+      "taux_erreur": 0.0,
       "taux_sans_llm": 0.0,
-      "tps_moyen_ms": 611194.9
+      "tps_moyen_ms": 614180.4
     },
     "FAUTES_ORTHO": {
       "total": 3,
@@ -148,7 +148,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 4.8
+      "tps_moyen_ms": 4.1
     },
     "PAR_ANNEE": {
       "total": 3,
@@ -157,7 +157,7 @@
       "taux_reussite": 1.0,
       "taux_erreur": 0.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 7.3
+      "tps_moyen_ms": 5.3
     },
     "HORS_SUJET": {
       "total": 3,
@@ -166,7 +166,7 @@
       "taux_reussite": 0.667,
       "taux_erreur": 0.333,
       "taux_sans_llm": 0.0,
-      "tps_moyen_ms": 84224.1
+      "tps_moyen_ms": 84997.6
     },
     "BUG_CONNU": {
       "total": 1,
@@ -175,8 +175,13 @@
       "taux_reussite": 0.0,
       "taux_erreur": 1.0,
       "taux_sans_llm": 1.0,
-      "tps_moyen_ms": 7.5
+      "tps_moyen_ms": 8.8
     }
+  },
+  "fallback_succes": {
+    "total_questions_fallback": 7,
+    "reussis": 6,
+    "taux_succes": 0.8571
   },
   "resultats": [
     {
@@ -184,7 +189,7 @@
       "categorie": "INFOS_COMPTE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 5.592823028564453,
+      "duree_ms": 2.4709701538085938,
       "reponse_complete": "📋 **Informations de votre compte :**\n\n- N° Client : **C30EF340/690205**\n- N° Contrat : **0005567205/2063205**\n- N° Compteur : **8306**\n- Adresse : **Hay Salam Rue 17 - Inezgane**\n- Agence : **Agence Tiznit**\n- Usage : **USAGE AGRICOLE**\n- Type service : **electricite**",
       "reponse_court": "📋 **Informations de votre compte :**  - N° Client : **C30EF340/690205** - N° Contrat : **0005567205/2063205** - N° Compt",
       "mots_attendus": [
@@ -198,7 +203,7 @@
       "categorie": "INFOS_COMPTE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 1.0008811950683594,
+      "duree_ms": 0.9915828704833984,
       "reponse_complete": "**Adresse :** Hay Salam Rue 17 - Inezgane",
       "reponse_court": "**Adresse :** Hay Salam Rue 17 - Inezgane",
       "mots_attendus": [
@@ -210,7 +215,7 @@
       "categorie": "INFOS_COMPTE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.0,
+      "duree_ms": 1.0046958923339844,
       "reponse_complete": "**Agence :** Agence Tiznit",
       "reponse_court": "**Agence :** Agence Tiznit",
       "mots_attendus": [
@@ -222,7 +227,7 @@
       "categorie": "INFOS_COMPTE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.0,
+      "duree_ms": 1.249551773071289,
       "reponse_complete": "**N° Contrat :** 0005567205/2063205",
       "reponse_court": "**N° Contrat :** 0005567205/2063205",
       "mots_attendus": [
@@ -235,7 +240,7 @@
       "categorie": "INFOS_COMPTE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.9942054748535156,
+      "duree_ms": 1.0180473327636719,
       "reponse_complete": "**Type de service :** electricite",
       "reponse_court": "**Type de service :** electricite",
       "mots_attendus": [
@@ -247,7 +252,7 @@
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 2.9993057250976562,
+      "duree_ms": 2.9878616333007812,
       "reponse_complete": "⚡💧 Votre consommation en **Janvier 2026** : → **760.0 kWh**",
       "reponse_court": "⚡💧 Votre consommation en **Janvier 2026** : → **760.0 kWh**",
       "mots_attendus": [
@@ -260,7 +265,7 @@
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 2.335786819458008,
+      "duree_ms": 0.5445480346679688,
       "reponse_complete": "🧾 **Votre facture — Novembre 2025 :**\n\n- Période : 01/11/2025 → 30/11/2025\n- Consommation : **701.0 kWh**\n- Montant TTC : **679.97 Dhs**\n- Date limite paiement : 25/12/2025",
       "reponse_court": "🧾 **Votre facture — Novembre 2025 :**  - Période : 01/11/2025 → 30/11/2025 - Consommation : **701.0 kWh** - Montant TTC ",
       "mots_attendus": [
@@ -273,7 +278,7 @@
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 3.000497817993164,
+      "duree_ms": 4.05573844909668,
       "reponse_complete": "💰 Votre montant en **Mars 2026** : → **729.44 Dhs**",
       "reponse_court": "💰 Votre montant en **Mars 2026** : → **729.44 Dhs**",
       "mots_attendus": [
@@ -286,7 +291,7 @@
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.5428791046142578,
+      "duree_ms": 2.3679733276367188,
       "reponse_complete": "⚡💧 Votre consommation en **Juillet 2026** : → **1,939.0 kWh**",
       "reponse_court": "⚡💧 Votre consommation en **Juillet 2026** : → **1,939.0 kWh**",
       "mots_attendus": [
@@ -299,7 +304,7 @@
       "categorie": "MOIS_SPECIFIQUE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.0,
+      "duree_ms": 2.9921531677246094,
       "reponse_complete": "🧾 **Votre facture — Octobre 2025 :**\n\n- Période : 01/10/2025 → 31/10/2025\n- Consommation : **471.0 kWh**\n- Montant TTC : **456.87 Dhs**\n- Date limite paiement : 25/11/2025",
       "reponse_court": "🧾 **Votre facture — Octobre 2025 :**  - Période : 01/10/2025 → 31/10/2025 - Consommation : **471.0 kWh** - Montant TTC :",
       "mots_attendus": [
@@ -312,7 +317,7 @@
       "categorie": "MOIS_RELATIF",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 7.091760635375977,
+      "duree_ms": 0.7519721984863281,
       "reponse_complete": "🧾 **Votre facture — Juin 2026 :**\n\n- Période : 01/06/2026 → 30/06/2026\n- Consommation : **1,134.0 kWh**\n- Montant TTC : **1,099.98 Dhs**\n- Date limite paiement : 25/07/2026",
       "reponse_court": "🧾 **Votre facture — Juin 2026 :**  - Période : 01/06/2026 → 30/06/2026 - Consommation : **1,134.0 kWh** - Montant TTC : ",
       "mots_attendus": [
@@ -325,7 +330,7 @@
       "categorie": "MOIS_RELATIF",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 1.9981861114501953,
+      "duree_ms": 0.0,
       "reponse_complete": "🧾 **Votre facture — Mai 2026 :**\n\n- Période : 01/05/2026 → 31/05/2026\n- Consommation : **446.0 kWh**\n- Montant TTC : **432.62 Dhs**\n- Date limite paiement : 25/06/2026",
       "reponse_court": "🧾 **Votre facture — Mai 2026 :**  - Période : 01/05/2026 → 31/05/2026 - Consommation : **446.0 kWh** - Montant TTC : **4",
       "mots_attendus": [
@@ -338,7 +343,7 @@
       "categorie": "MOIS_RELATIF",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 1.997232437133789,
+      "duree_ms": 7.090330123901367,
       "reponse_complete": "🧾 **Votre facture — Juin 2026 :**\n\n- Période : 01/06/2026 → 30/06/2026\n- Consommation : **1,134.0 kWh**\n- Montant TTC : **1,099.98 Dhs**\n- Date limite paiement : 25/07/2026",
       "reponse_court": "🧾 **Votre facture — Juin 2026 :**  - Période : 01/06/2026 → 30/06/2026 - Consommation : **1,134.0 kWh** - Montant TTC : ",
       "mots_attendus": [
@@ -351,7 +356,7 @@
       "categorie": "MOIS_RELATIF",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 3.3686161041259766,
+      "duree_ms": 1.9936561584472656,
       "reponse_complete": "⚡💧 Votre consommation en **Mai 2026** : → **446.0 kWh**",
       "reponse_court": "⚡💧 Votre consommation en **Mai 2026** : → **446.0 kWh**",
       "mots_attendus": [
@@ -364,7 +369,7 @@
       "categorie": "MAX_MIN",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 2.090930938720703,
+      "duree_ms": 2.8231143951416016,
       "reponse_complete": "📊 **Vos 3 mois les plus consommés :**\n\n1. **Juillet 2026** : 1,939.0 kWh\n2. **Juin 2026** : 1,134.0 kWh\n3. **Aout 2026** : 1,129.0 kWh",
       "reponse_court": "📊 **Vos 3 mois les plus consommés :**  1. **Juillet 2026** : 1,939.0 kWh 2. **Juin 2026** : 1,134.0 kWh 3. **Aout 2026**",
       "mots_attendus": [
@@ -377,7 +382,7 @@
       "categorie": "MAX_MIN",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.9963512420654297,
+      "duree_ms": 1.9938945770263672,
       "reponse_complete": "📉 Votre consommation minimale :\n🔻 **Mai 2026** : 446.0 kWh ← MINIMUM",
       "reponse_court": "📉 Votre consommation minimale : 🔻 **Mai 2026** : 446.0 kWh ← MINIMUM",
       "mots_attendus": [
@@ -390,7 +395,7 @@
       "categorie": "MAX_MIN",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.0,
+      "duree_ms": 1.9960403442382812,
       "reponse_complete": "💰 Votre montant maximum :\n🏆 **Juillet 2026** : 1,880.83 Dhs ← MAXIMUM",
       "reponse_court": "💰 Votre montant maximum : 🏆 **Juillet 2026** : 1,880.83 Dhs ← MAXIMUM",
       "mots_attendus": [
@@ -404,7 +409,7 @@
       "categorie": "MAX_MIN",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.0,
+      "duree_ms": 2.798318862915039,
       "reponse_complete": "💰 Votre montant minimum :\n🔻 **Mai 2026** : 432.62 Dhs ← MINIMUM",
       "reponse_court": "💰 Votre montant minimum : 🔻 **Mai 2026** : 432.62 Dhs ← MINIMUM",
       "mots_attendus": [
@@ -417,7 +422,7 @@
       "categorie": "SOMME",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 159607.09810256958,
+      "duree_ms": 29592.950582504272,
       "reponse_complete": "💰 **Total de vos paiements :**\n\n- Montant total cumulé : **9,622.40 Dhs**\n- Nombre de mois : 12\n- Montant moyen : 801.87 Dhs\n- Montant minimum : 432.62 Dhs\n- Montant maximum : 1,880.83 Dhs",
       "reponse_court": "💰 **Total de vos paiements :**  - Montant total cumulé : **9,622.40 Dhs** - Nombre de mois : 12 - Montant moyen : 801.87",
       "mots_attendus": [
@@ -442,7 +447,7 @@
       "categorie": "SOMME",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 17.728090286254883,
+      "duree_ms": 10.863304138183594,
       "reponse_complete": "⚡💧 **Total de votre consommation :**\n\n- Consommation totale : **9,920.0 kWh**\n- Nombre de mois : 12\n- Consommation moyenne : 826.67 kWh\n- Consommation minimum : 446.0 kWh\n- Consommation maximum : 1,939.0 kWh",
       "reponse_court": "⚡💧 **Total de votre consommation :**  - Consommation totale : **9,920.0 kWh** - Nombre de mois : 12 - Consommation moyen",
       "mots_attendus": [
@@ -454,7 +459,7 @@
       "categorie": "HISTORIQUE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 6.314277648925781,
+      "duree_ms": 4.019498825073242,
       "reponse_complete": " **Votre historique complet :**\n\n| Mois | Consommation | Montant | Tendance |\n|------|-------------|---------|----------|\n| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |\n| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |\n| **Decembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |\n| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |\n| **Fevrier 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |\n| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |\n| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |\n| **Juin 2026** | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |\n| **Juillet 2026** | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |\n| **Aout 2026** | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |\n| **Septembre 2026** | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |\n\n **Résumé :** 12 mois | Total : **9,622.40 Dhs** | Moyenne : **801.87 Dhs/mois** | Conso totale : **9,920.0 kWh**\n\n🔴 = mois élevé (+20% vs moyenne)  🟢 = mois économique (-20% vs moyenne)",
       "reponse_court": " **Votre historique complet :**  | Mois | Consommation | Montant | Tendance | |------|-------------|---------|----------",
       "mots_attendus": [
@@ -467,7 +472,7 @@
       "categorie": "HISTORIQUE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 11.077404022216797,
+      "duree_ms": 2.00653076171875,
       "reponse_complete": " **Votre historique complet :**\n\n| Mois | Consommation | Montant | Tendance |\n|------|-------------|---------|----------|\n| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |\n| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |\n| **Decembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |\n| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |\n| **Fevrier 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |\n| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |\n| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |\n| **Juin 2026** | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |\n| **Juillet 2026** | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |\n| **Aout 2026** | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |\n| **Septembre 2026** | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |\n\n **Résumé :** 12 mois | Total : **9,622.40 Dhs** | Moyenne : **801.87 Dhs/mois** | Conso totale : **9,920.0 kWh**\n\n🔴 = mois élevé (+20% vs moyenne)  🟢 = mois économique (-20% vs moyenne)",
       "reponse_court": " **Votre historique complet :**  | Mois | Consommation | Montant | Tendance | |------|-------------|---------|----------",
       "mots_attendus": [
@@ -480,7 +485,7 @@
       "categorie": "HISTORIQUE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 3.021240234375,
+      "duree_ms": 2.008676528930664,
       "reponse_complete": " **Votre historique complet :**\n\n| Mois | Consommation | Montant | Tendance |\n|------|-------------|---------|----------|\n| **Octobre 2025** | 471.0 kWh | 456.87 Dhs 🟢 | — |\n| **Novembre 2025** | 701.0 kWh | 679.97 Dhs | 📈 ↑ |\n| **Decembre 2025** | 709.0 kWh | 687.73 Dhs | 📈 ↑ |\n| **Janvier 2026** | 760.0 kWh | 737.20 Dhs | 📈 ↑ |\n| **Fevrier 2026** | 581.0 kWh | 563.57 Dhs 🟢 | 📉 ↓ |\n| **Mars 2026** | 752.0 kWh | 729.44 Dhs | 📈 ↑ |\n| **Avril 2026** | 655.0 kWh | 635.35 Dhs 🟢 | 📉 ↓ |\n| **Mai 2026** | 446.0 kWh | 432.62 Dhs 🟢 | 📉 ↓ |\n| **Juin 2026** | 1,134.0 kWh | 1,099.98 Dhs 🔴 | 📈 ↑ |\n| **Juillet 2026** | 1,939.0 kWh | 1,880.83 Dhs 🔴 | 📈 ↑ |\n| **Aout 2026** | 1,129.0 kWh | 1,095.13 Dhs 🔴 | 📉 ↓ |\n| **Septembre 2026** | 643.0 kWh | 623.71 Dhs 🟢 | 📉 ↓ |\n\n **Résumé :** 12 mois | Total : **9,622.40 Dhs** | Moyenne : **801.87 Dhs/mois** | Conso totale : **9,920.0 kWh**\n\n🔴 = mois élevé (+20% vs moyenne)  🟢 = mois économique (-20% vs moyenne)",
       "reponse_court": " **Votre historique complet :**  | Mois | Consommation | Montant | Tendance | |------|-------------|---------|----------",
       "mots_attendus": [
@@ -493,7 +498,7 @@
       "categorie": "MOYENNE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 9.05299186706543,
+      "duree_ms": 2.008676528930664,
       "reponse_complete": " **Vos statistiques sur 12 mois :**\n\n**⚡ Consommation**\n| | Valeur |\n|---|---|\n| Moyenne | **826.67 kWh** |\n| Minimum | 446.0 kWh |\n| Maximum | 1,939.0 kWh |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne\n\n**💰 Montants**\n| | Valeur |\n|---|---|\n| Moyenne | **801.87 Dhs** |\n| Minimum | 432.62 Dhs |\n| Maximum | 1,880.83 Dhs |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne",
       "reponse_court": " **Vos statistiques sur 12 mois :**  **⚡ Consommation** | | Valeur | |---|---| | Moyenne | **826.67 kWh** | | Minimum | ",
       "mots_attendus": [
@@ -506,7 +511,7 @@
       "categorie": "MOYENNE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 9.177446365356445,
+      "duree_ms": 3.996610641479492,
       "reponse_complete": " **Vos statistiques sur 12 mois :**\n\n**⚡ Consommation**\n| | Valeur |\n|---|---|\n| Moyenne | **826.67 kWh** |\n| Minimum | 446.0 kWh |\n| Maximum | 1,939.0 kWh |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne\n\n**💰 Montants**\n| | Valeur |\n|---|---|\n| Moyenne | **801.87 Dhs** |\n| Minimum | 432.62 Dhs |\n| Maximum | 1,880.83 Dhs |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne",
       "reponse_court": " **Vos statistiques sur 12 mois :**  **⚡ Consommation** | | Valeur | |---|---| | Moyenne | **826.67 kWh** | | Minimum | ",
       "mots_attendus": [
@@ -518,7 +523,7 @@
       "categorie": "MOYENNE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 7.353305816650391,
+      "duree_ms": 0.0,
       "reponse_complete": " **Vos statistiques sur 12 mois :**\n\n**⚡ Consommation**\n| | Valeur |\n|---|---|\n| Moyenne | **826.67 kWh** |\n| Minimum | 446.0 kWh |\n| Maximum | 1,939.0 kWh |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne\n\n**💰 Montants**\n| | Valeur |\n|---|---|\n| Moyenne | **801.87 Dhs** |\n| Minimum | 432.62 Dhs |\n| Maximum | 1,880.83 Dhs |\n\nMin ░░░░░░░░ Max\n     ██░░░░░░ ← votre moyenne",
       "reponse_court": " **Vos statistiques sur 12 mois :**  **⚡ Consommation** | | Valeur | |---|---| | Moyenne | **826.67 kWh** | | Minimum | ",
       "mots_attendus": [
@@ -531,7 +536,7 @@
       "categorie": "TOP_N",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 7.428407669067383,
+      "duree_ms": 0.0,
       "reponse_complete": "📊 **Vos 3 mois les plus consommés :**\n\n1. **Juillet 2026** : 1,939.0 kWh\n2. **Juin 2026** : 1,134.0 kWh\n3. **Aout 2026** : 1,129.0 kWh",
       "reponse_court": "📊 **Vos 3 mois les plus consommés :**  1. **Juillet 2026** : 1,939.0 kWh 2. **Juin 2026** : 1,134.0 kWh 3. **Aout 2026**",
       "mots_attendus": [
@@ -544,7 +549,7 @@
       "categorie": "TOP_N",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 5.763053894042969,
+      "duree_ms": 0.0,
       "reponse_complete": "📊 **Vos 2 mois les moins consommés :**\n\n1. **Mai 2026** : 446.0 kWh\n2. **Octobre 2025** : 471.0 kWh",
       "reponse_court": "📊 **Vos 2 mois les moins consommés :**  1. **Mai 2026** : 446.0 kWh 2. **Octobre 2025** : 471.0 kWh",
       "mots_attendus": [
@@ -556,7 +561,7 @@
       "categorie": "TOP_N",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 11.058568954467773,
+      "duree_ms": 0.0,
       "reponse_complete": "📅 **Vos 3 derniers mois :**\n\n- **Juillet 2026** : 1,939.0 kWh | 1,880.83 Dhs\n- **Aout 2026** : 1,129.0 kWh | 1,095.13 Dhs\n- **Septembre 2026** : 643.0 kWh | 623.71 Dhs",
       "reponse_court": "📅 **Vos 3 derniers mois :**  - **Juillet 2026** : 1,939.0 kWh | 1,880.83 Dhs - **Aout 2026** : 1,129.0 kWh | 1,095.13 Dh",
       "mots_attendus": [
@@ -569,7 +574,7 @@
       "categorie": "TOP_N",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.70953369140625,
+      "duree_ms": 16.05057716369629,
       "reponse_complete": "📅 **Vos 2 premiers mois :**\n\n- **Octobre 2025** : 471.0 kWh | 456.87 Dhs\n- **Novembre 2025** : 701.0 kWh | 679.97 Dhs",
       "reponse_court": "📅 **Vos 2 premiers mois :**  - **Octobre 2025** : 471.0 kWh | 456.87 Dhs - **Novembre 2025** : 701.0 kWh | 679.97 Dhs",
       "mots_attendus": [
@@ -582,7 +587,7 @@
       "categorie": "COMPARAISON",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 13.128280639648438,
+      "duree_ms": 0.5795955657958984,
       "reponse_complete": " **Comparaison Septembre 2026 vs Janvier 2026 :**\n\n| | Septembre 2026 | Janvier 2026 | Évolution |\n|---|---|---|---|\n| ⚡ Consommation | 643.0 kWh | 760.0 kWh | 📈 ↑ augmenté 18.2% |\n| 💰 Montant | 623.71 Dhs | 737.20 Dhs | 📈 ↑ augmenté 18.2% |",
       "reponse_court": " **Comparaison Septembre 2026 vs Janvier 2026 :**  | | Septembre 2026 | Janvier 2026 | Évolution | |---|---|---|---| | ⚡",
       "mots_attendus": [
@@ -595,7 +600,7 @@
       "categorie": "COMPARAISON",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 7.110118865966797,
+      "duree_ms": 0.0,
       "reponse_complete": " **Comparaison Janvier 2026 vs Mars 2026 :**\n\n| | Janvier 2026 | Mars 2026 | Évolution |\n|---|---|---|---|\n| ⚡ Consommation | 760.0 kWh | 752.0 kWh | 📉 ↓ diminué 1.1% |\n| 💰 Montant | 737.20 Dhs | 729.44 Dhs | 📉 ↓ diminué 1.1% |",
       "reponse_court": " **Comparaison Janvier 2026 vs Mars 2026 :**  | | Janvier 2026 | Mars 2026 | Évolution | |---|---|---|---| | ⚡ Consommat",
       "mots_attendus": [
@@ -608,7 +613,7 @@
       "categorie": "COMPARAISON",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 14.680862426757812,
+      "duree_ms": 0.0,
       "reponse_complete": " **Comparaison Janvier 2026 vs Octobre 2025 :**\n\n| | Janvier 2026 | Octobre 2025 | Évolution |\n|---|---|---|---|\n| ⚡ Consommation | 760.0 kWh | 471.0 kWh | 📉 ↓ diminué 38.0% |\n| 💰 Montant | 737.20 Dhs | 456.87 Dhs | 📉 ↓ diminué 38.0% |",
       "reponse_court": " **Comparaison Janvier 2026 vs Octobre 2025 :**  | | Janvier 2026 | Octobre 2025 | Évolution | |---|---|---|---| | ⚡ Con",
       "mots_attendus": [
@@ -621,7 +626,7 @@
       "categorie": "COMPARAISON",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 3.6537647247314453,
+      "duree_ms": 16.6018009185791,
       "reponse_complete": " **Comparaison Fevrier 2026 vs Avril 2026 :**\n\n| | Fevrier 2026 | Avril 2026 | Évolution |\n|---|---|---|---|\n| ⚡ Consommation | 581.0 kWh | 655.0 kWh | 📈 ↑ augmenté 12.7% |\n| 💰 Montant | 563.57 Dhs | 635.35 Dhs | 📈 ↑ augmenté 12.7% |",
       "reponse_court": " **Comparaison Fevrier 2026 vs Avril 2026 :**  | | Fevrier 2026 | Avril 2026 | Évolution | |---|---|---|---| | ⚡ Consomm",
       "mots_attendus": [
@@ -634,9 +639,9 @@
       "categorie": "RETARD_PAIEMENT",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 15.700578689575195,
-      "reponse_complete": "⚠️ 7 facture(s) non réglée(s) dans les délais :\n\n⚠️ En retard (98j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)\n\n⚠️ En retard (70j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)\n\n⚠️ En retard (39j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)\n\n⚠️ En retard (9j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)\n\n✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)\n\n⚠️ En retard (190j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)\n\n⚠️ En retard (160j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)\n\n⚠️ En retard (128j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)",
-      "reponse_court": "⚠️ 7 facture(s) non réglée(s) dans les délais :  ⚠️ En retard (98j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/202",
+      "duree_ms": 2.9981136322021484,
+      "reponse_complete": "⚠️ 7 facture(s) non réglée(s) dans les délais :\n\n⚠️ En retard (99j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)\n\n⚠️ En retard (71j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)\n\n⚠️ En retard (40j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)\n\n⚠️ En retard (10j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)\n\n✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)\n\n⚠️ En retard (191j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)\n\n⚠️ En retard (161j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)\n\n⚠️ En retard (129j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)",
+      "reponse_court": "⚠️ 7 facture(s) non réglée(s) dans les délais :  ⚠️ En retard (99j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/202",
       "mots_attendus": [
         "Dhs",
         "date limite"
@@ -647,9 +652,9 @@
       "categorie": "RETARD_PAIEMENT",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 5.198001861572266,
-      "reponse_complete": "⚠️ 7 facture(s) non réglée(s) dans les délais :\n\n⚠️ En retard (98j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)\n\n⚠️ En retard (70j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)\n\n⚠️ En retard (39j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)\n\n⚠️ En retard (9j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)\n\n✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)\n\n⚠️ En retard (190j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)\n\n⚠️ En retard (160j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)\n\n⚠️ En retard (128j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)",
-      "reponse_court": "⚠️ 7 facture(s) non réglée(s) dans les délais :  ⚠️ En retard (98j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/202",
+      "duree_ms": 0.0,
+      "reponse_complete": "⚠️ 7 facture(s) non réglée(s) dans les délais :\n\n⚠️ En retard (99j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)\n\n⚠️ En retard (71j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)\n\n⚠️ En retard (40j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)\n\n⚠️ En retard (10j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)\n\n✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)\n\n⚠️ En retard (191j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)\n\n⚠️ En retard (161j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)\n\n⚠️ En retard (129j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)",
+      "reponse_court": "⚠️ 7 facture(s) non réglée(s) dans les délais :  ⚠️ En retard (99j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/202",
       "mots_attendus": [
         "Dhs"
       ]
@@ -659,9 +664,9 @@
       "categorie": "RETARD_PAIEMENT",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 3.7360191345214844,
-      "reponse_complete": "⚠️ 7 facture(s) non réglée(s) dans les délais :\n\n⚠️ En retard (98j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)\n\n⚠️ En retard (70j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)\n\n⚠️ En retard (39j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)\n\n⚠️ En retard (9j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)\n\n✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)\n\n⚠️ En retard (190j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)\n\n⚠️ En retard (160j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)\n\n⚠️ En retard (128j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)",
-      "reponse_court": "⚠️ 7 facture(s) non réglée(s) dans les délais :  ⚠️ En retard (98j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/202",
+      "duree_ms": 0.0,
+      "reponse_complete": "⚠️ 7 facture(s) non réglée(s) dans les délais :\n\n⚠️ En retard (99j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/2026)\n\n⚠️ En retard (71j) | Fevrier 2026 — 563.57 Dhs (date limite : 25/03/2026)\n\n⚠️ En retard (40j) | Mars 2026 — 729.44 Dhs (date limite : 25/04/2026)\n\n⚠️ En retard (10j) | Avril 2026 — 635.35 Dhs (date limite : 25/05/2026)\n\n✅ Dans les délais | Mai 2026 — 432.62 Dhs (date limite : 25/06/2026)\n\n⚠️ En retard (191j) | Octobre 2025 — 456.87 Dhs (date limite : 25/11/2025)\n\n⚠️ En retard (161j) | Novembre 2025 — 679.97 Dhs (date limite : 25/12/2025)\n\n⚠️ En retard (129j) | Decembre 2025 — 687.73 Dhs (date limite : 26/01/2026)",
+      "reponse_court": "⚠️ 7 facture(s) non réglée(s) dans les délais :  ⚠️ En retard (99j) | Janvier 2026 — 737.20 Dhs (date limite : 25/02/202",
       "mots_attendus": [
         "Dhs",
         "date limite"
@@ -672,9 +677,9 @@
       "categorie": "GENERAL_SRM",
       "chemin": "general",
       "succes": true,
-      "duree_ms": 505604.52008247375,
-      "reponse_complete": "Pour s'abonner en eau à SRM Souss-Massa, vous devez fournir les documents suivants :\n1. Formulaire de demande d'abonnement signé (disponible en agence ou sur e-agence)\n2. Photocopie pièce d'identité : CIN, Carte de séjour ou passeport\n3. Justificatif du droit de jouissance (propriétaire : copie du titre de propriété ; locataire : contrat de bail, certificat de résidence, ou autorisation du propriétaire légalisée)\n4. En plus, pour un branchement ÉLECTRICITÉ uniquement :\n   - Copie du permis d'habiter ou certificat de conformité\n   - Certificat de garantie du disjoncteur différentiel (conforme aux normes)",
-      "reponse_court": "Pour s'abonner en eau à SRM Souss-Massa, vous devez fournir les documents suivants : 1. Formulaire de demande d'abonneme",
+      "duree_ms": 544233.0918312073,
+      "reponse_complete": "Les documents nécessaires pour s'abonner à l'eau sont :\n1. Formulaire de demande d'abonnement signé (disponible en agence ou sur e-agence)\n2. Photocopie pièce d'identité : CIN, Carte de séjour ou passeport\n3. Justificatif du droit de jouissance :\n   - Propriétaire : copie du titre de propriété (titre foncier, Moulkia, attestation notaire)\n   - Locataire : contrat de bail, certificat de résidence, ou autorisation du propriétaire légalisée.",
+      "reponse_court": "Les documents nécessaires pour s'abonner à l'eau sont : 1. Formulaire de demande d'abonnement signé (disponible en agenc",
       "mots_attendus": [
         "Formulaire"
       ]
@@ -684,9 +689,9 @@
       "categorie": "GENERAL_SRM",
       "chemin": "general",
       "succes": true,
-      "duree_ms": 533572.1731185913,
-      "reponse_complete": "Pour passer un stage à SRM SM, tu dois envoyer les documents suivants UNIQUEMENT par email à [stages@srm-sm.ma](mailto:stages@srm-sm.ma) :\n1. Copie CNI\n2. CV avec téléphone et email\n3. Convention de stage signée et cachetée par l'école\n4. Demande de stage sur en-tête de l'école avec période précisée\n5. Attestation d'assurance\n\nIMPORTANT : Aucune demande de stage ne sera acceptée sur place ou par email autre que ceux ci-dessus. Le stage est réservé aux étudiants avec convention d'école. Ne pas confondre stage étudiant et offre d'emploi permanent.",
-      "reponse_court": "Pour passer un stage à SRM SM, tu dois envoyer les documents suivants UNIQUEMENT par email à [stages@srm-sm.ma](mailto:s",
+      "duree_ms": 589230.5171489716,
+      "reponse_complete": "Pour passer un stage auprès de SRM SM, il est nécessaire de vous adresser à l'adresse suivante : stages@srm-sm.ma\nVous devrez envoyer les documents ci-dessous :\n1. Copie CNI\n2. CV avec téléphone et email\n3. Convention de stage signée et cachetée par l'école\n4. Demande de stage sur en-tête de l'école avec période précisée\n5. Attestation d'assurance\n\nIMPORTANT : Aucune demande de stage ne sera acceptée sur place. Le stage est réservé aux étudiants avec convention d'école. Ne pas confondre stage étudiant et offre d'emploi permanent.",
+      "reponse_court": "Pour passer un stage auprès de SRM SM, il est nécessaire de vous adresser à l'adresse suivante : stages@srm-sm.ma Vous d",
       "mots_attendus": [
         "stages@srm-sm.ma",
         "convention"
@@ -696,10 +701,10 @@
       "question": "comment economiser l eau",
       "categorie": "GENERAL_SRM",
       "chemin": "general",
-      "succes": true,
-      "duree_ms": 632797.9271411896,
-      "reponse_complete": "Pour économiser de l'eau, voici quelques conseils :\n1. Réparer immédiatement les fuites des robinets car une simple goutte peut gaspiller beaucoup.\n2. Prendre des douches courtes plutôt que des bains qui consomment plus d'eau.\n3. Fermer le robinet pendant le brossage des dents pour éviter de gaspiller l'eau.\n4. Arroser les plantes le soir ou tôt le matin, car la température est moins chaude et l'évaporation moindre.\n5. Utiliser des équipements économiseurs d'eau.\n6. Signaler les fuites sur le réseau public à votre agence SRM pour qu'elles soient rapidement corrigées.",
-      "reponse_court": "Pour économiser de l'eau, voici quelques conseils : 1. Réparer immédiatement les fuites des robinets car une simple gout",
+      "succes": false,
+      "duree_ms": 988724.1504192352,
+      "reponse_complete": "Bonjour Wissam,\n\nVotre consommation électrique a augmenté de 162,0 kWh entre Mai et Juin, soit une hausse de 37% par rapport à votre moyenne mensuelle de 826,67 kWh. Cette augmentation peut être due à l'utilisation d'équipements électriques plus consommateurs tels que les chauffeurs d'eau ou la climatisation en ce mois-ci.\n\nPour économiser de l'électricité, il est important de respecter une utilisation adéquate des équipements et d'éviter tout gaspillage. Voici quelques conseils :\n\n1. Chauffer de l'eau uniquement lorsque nécessaire, plutôt que laissez-vous couler inutilement pour attendre qu'il soit suffisamment chaud.\n2. Reglagez votre thermostat en dessous de 23°C pendant les jours et plus bas au niveau des nuits si vous utilisez une climatisation, cela permettra de réduire la consommation d'électricité.\n3. Limitez le nombre d'équipements électriques que vous utilisiez en même temps pour éviter l'overload du circuit.\n4. Si possible, essayez d'utiliser des équipements électriques plus efficaces, tels que les réfrigérateurs ou les chauffeurs d'eau à haute performance énergétique.\n5. Évitez tout gaspillage de l'électricité, par exemple en s'assurant que toutes les lampes ne sont pas allumées lorsque vous n'êtes pas dans la pièce.\n\nPour économiser l'eau, il est important de respecter une utilisation adéquate et de réduire le gaspillage. Voici quelques conseils :\n\n1. Essayez de réduire l'utilisation de votre irrigation, en fonctionnant uniquement lorsque nécessaire et en utilisant un système d'irrigation efficace pour ne pas gaspiller l'eau.\n2. Utilisez une bouilloire à vapeur au lieu de laissez-vous couler inutilement de l'eau pour cuire des aliments, cela réduira considérablement votre utilisation d'eau.\n3. Reglagez les tuyaux d'évacuation de l'eau de manière à éviter tout gaspillage et à garantir une circulation optimale de l'eau.\n4. Essayez de réduire la consommation en utilisant des équipements de lavage économiques en eau tels que les machines à laver à faible consommation d'eau ou les toilettes à double fonctionnement.\n5. Évitez tout gaspillage d'eau, par exemple en s'assurant que toutes les tuyaux ne sont pas en fuite et en réparant rapidement tous les problèmes de fuites détectés.",
+      "reponse_court": "Bonjour Wissam,  Votre consommation électrique a augmenté de 162,0 kWh entre Mai et Juin, soit une hausse de 37% par rap",
       "mots_attendus": [
         "robinet"
       ]
@@ -709,9 +714,9 @@
       "categorie": "GENERAL_SRM",
       "chemin": "general",
       "succes": true,
-      "duree_ms": 467075.576543808,
-      "reponse_complete": "L'adresse du siège de SRM SM est Rue 18 Novembre, Quartier Industriel, AGADIR.",
-      "reponse_court": "L'adresse du siège de SRM SM est Rue 18 Novembre, Quartier Industriel, AGADIR.",
+      "duree_ms": 484893.5225009918,
+      "reponse_complete": "La adresse de siège de SRM Souss-Massa est : Rue 18 Novembre, Quartier Industriel, AGADIR.",
+      "reponse_court": "La adresse de siège de SRM Souss-Massa est : Rue 18 Novembre, Quartier Industriel, AGADIR.",
       "mots_attendus": [
         "Agadir",
         "18 Novembre"
@@ -722,9 +727,9 @@
       "categorie": "FALLBACK_ANALYSE",
       "chemin": "llm",
       "succes": true,
-      "duree_ms": 637692.0182704926,
-      "reponse_complete": "Bonjour Wissam,\n\nJ'ai comparé votre consommation en juin et mai, le mois précédent. Votre consommation en juin est de 1 134 kWh contre 446 kWh en mai, ce qui représente une augmentation de près de 160%. En moyenne, vous consommez environ 802 kWh par mois. Comme le mois d'été correspond à la période d'irrigation et de chaleur, cette augmentation peut être due à un usage supplémentaire d'électricité pour l'irrigation agricole ou pour les systèmes de climatisation.\n\nSi vous souhaitez réduire votre consommation en été, j'ai quelques conseils à vous proposer :\n- Essayer de réguler la température de vos appareils électriques (climatisation, chauffage, etc.) pour éviter d'utiliser trop d'énergie.\n- Essayer de réguler votre irrigation agricole pour ne pas gaspiller de l'eau ou de l'électricité.\n- Vérifier si tous vos appareils sont éteints lorsqu'ils n'ont pas besoin d'être allumés.\n\nJ'espère que cela vous sera utile et que vous avez une belle année agricole.",
-      "reponse_court": "Bonjour Wissam,  J'ai comparé votre consommation en juin et mai, le mois précédent. Votre consommation en juin est de 1 ",
+      "duree_ms": 531451.0281085968,
+      "reponse_complete": "Bonjour Wissam, votre consommation d'électricité en juin 2026 est de 1134 kWh contre 446 kWh en mai 2026. La moyenne mensuelle de votre compte sur les douze derniers mois est de 827 kWh. Votre consommation en juin représente donc un niveau plus élevé (+157%) que la moyenne mensuelle. En raison du temps chaud, cette augmentation pourrait s'expliquer par une utilisation plus importante d'irrigation ou de climatisation.",
+      "reponse_court": "Bonjour Wissam, votre consommation d'électricité en juin 2026 est de 1134 kWh contre 446 kWh en mai 2026. La moyenne men",
       "mots_attendus": [
         "Bonjour",
         "kWh"
@@ -734,10 +739,10 @@
       "question": "pourquoi je paie plus ce mois",
       "categorie": "FALLBACK_ANALYSE",
       "chemin": "llm",
-      "succes": false,
-      "duree_ms": 592205.370426178,
-      "reponse_complete": "Bonjour Wissam, je t'informe que ton consommation électrique a augmenté ce mois en comparaison à mai dernier. En effet, tu as consommé 1 134 kWh contre 446 kWh. Cela fait une hausse de près de 257% (1 134 - 446 = 688 / 446 * 100 %).\nCette augmentation peut être liée à la période estivale, marquée par des jours chauds et des irrigation plus importantes. Il est donc normal que ta consommation soit plus élevée pendant cette période.\nJe t'invite de continuer à contrôler ton usage électrique pour limiter les coûts.",
-      "reponse_court": "Bonjour Wissam, je t'informe que ton consommation électrique a augmenté ce mois en comparaison à mai dernier. En effet, ",
+      "succes": true,
+      "duree_ms": 597060.7666969299,
+      "reponse_complete": "Bonjour Wissam,\n\nJ'ai comparé votre facture pour ce mois et celle du mois dernier, et je vois que votre consommation d'électricité a augmenté de 188 kWh en juin par rapport à mai. Votre consommation actuelle est de 1,134 kWh contre 446 kWh en mai. Cette hausse peut sûrement être expliquée par la chaleur et l'augmentation des besoins d'irrigation de vos cultures agricoles durant cette saison estivale.\n\nVotre moyenne de consommation mensuelle est de 826,67 kWh, mais cette semaine-là, vous avez consommé plus que la moyenne, ce qui peut être normal en période chaude.\n\nJe suis là pour vous aider si vous avez des questions ou besoins spécifiques concernant votre usage d'électricité.",
+      "reponse_court": "Bonjour Wissam,  J'ai comparé votre facture pour ce mois et celle du mois dernier, et je vois que votre consommation d'é",
       "mots_attendus": [
         "Bonjour",
         "Juin"
@@ -748,9 +753,9 @@
       "categorie": "FALLBACK_ANALYSE",
       "chemin": "llm",
       "succes": true,
-      "duree_ms": 605912.9300117493,
-      "reponse_complete": "Bonjour Wissam, la consommation de ce mois (Juin) est plus élevée que celle du mois précédent (Mai) en raison d'une utilisation accrue de l'électricité pour des irrigation et le fonctionnement des appareils à climatisation pendant les chaudes journées d'été. En effet, votre consommation de juin s'élève à 1 134 kWh contre seulement 446 kWh en mai. Cela représente une hausse de plus de 158% comparée à votre moyenne mensuelle de 827 kWh. Ceci est dû aux nécessités d'irrigation et au climat chaud qui poussent les consommateurs à utiliser plus d'électricité pour se maintenir confortables pendant l'été marocain.",
-      "reponse_court": "Bonjour Wissam, la consommation de ce mois (Juin) est plus élevée que celle du mois précédent (Mai) en raison d'une util",
+      "duree_ms": 620514.0223503113,
+      "reponse_complete": "Bonjour Wissam,\nJe vous remercie de votre attention envers l'électricité que nous fournissons. Vous avez constaté une augmentation significative dans vos consommations pour le mois de Juin 2026 par rapport à Mai 2026.\nPour vous expliquer ce phénomène, notre analyse a montré que votre consommation pour Juin était de 1 134 kWh tandis que celle de Mai était de 446 kWh. Cette augmentation peut être due à l'augmentation de la chaleur pendant le mois de Juin, nécessitant plus d'usage de l'électricité pour la climatisation.\nEn outre, étant donné que votre usage est agricole, il est possible que vous aiez fait plus de travail sur vos terrains durant ce mois qui a également contribué à cette augmentation de consommation.",
+      "reponse_court": "Bonjour Wissam, Je vous remercie de votre attention envers l'électricité que nous fournissons. Vous avez constaté une au",
       "mots_attendus": [
         "Bonjour",
         "Juin",
@@ -762,9 +767,9 @@
       "categorie": "FALLBACK_ANALYSE",
       "chemin": "llm",
       "succes": true,
-      "duree_ms": 608969.2158699036,
-      "reponse_complete": "Bonjour Wissam, je suis heureux de vous aider. Pour réduire votre consommation électrique en utilisant l'exemple des derniers mois, il est important de prendre en compte le type d'usage agricole de votre compteur.\n\nEn examinant vos factures de mai et juin, vous pouvez voir que la consommation a augmenté considérablement entre ces deux mois. En effet, en mai, vous avez consommé 446 kWh tandis qu'en juin, vous avez consommé 1134 kWh, soit plus du double.\n\nIl est probable que ce changement est dû à la saisonnalité marocaine, avec le mois de juin correspondant à l'été, une période de chaleur et d'irrigation pour les agriculteurs.\n\nPour réduire votre consommation, vous pouvez essayer des actions telles que :\n\n1. Optimiser l'utilisation de votre irrigation en fonction du besoin réel de vos cultures et en fonction de la période de croissance.\n2. Utiliser des pompes à eau solaires pour les petites irrigation, qui peuvent permettre d'économiser sur les frais d'électricité.\n3. Mettre en place une stratégie de gestion de l'eau pour réduire les pertes de liquide et donc économiser sur la consommation d'électricité.\n4. Essayer de réguler le temps et la fréquence de l'utilisation des pompes à eau pour éviter de consommer trop d'électricité en un court laps de temps.\n5. Vérifier que tous les équipements électriques sont en bon état et fonctionnent efficacement pour ne pas gaspiller de l'électricité inutilement.",
-      "reponse_court": "Bonjour Wissam, je suis heureux de vous aider. Pour réduire votre consommation électrique en utilisant l'exemple des der",
+      "duree_ms": 707695.6813335419,
+      "reponse_complete": "Bonjour Wissam,\n\nPour réduire votre consommation en électricité, je vous suggère quelques mesures à prendre en fonction de votre utilisation agricole :\n\n- Essayez d'utiliser des horaires moins coûteux pour l'irrigation et la climatisation. En général, les pics de consommation sont enregistrés dans les heures de pointe (matin et soir). En réduisant vos besoins à ces moments précis, vous pouvez considérablement réduire votre consommation électrique.\n- Vérifiez que vos équipements électriques sont en bon état et fonctionnent efficacement. Des fuites de courant ou des défaillances peuvent entraîner une hausse injustifiée de votre consommation.\n- Utilisez des dispositifs de contrôle de la consommation tels que les luminaires à basse consommation, des réfrigérateurs et des lave-vaisselle économes en énergie, ainsi qu'une pompe à irriguer efficace.\n- Dans le cadre du printemps marocain (Mars/Avril), vous pouvez considérer la mise en place de mesures de protection contre les insectes et la maladie pour réduire votre consommation d'eau et de chauffage.\n- Enfin, essayez de planifier vos activités agricoles afin de minimiser votre consommation électrique pendant les mois d'été marocain (Mai/Juin/Juillet/Août), où la température est la plus élevée.\n\nJe vous souhaite une réussite dans la réduction de votre consommation électrique et un bon rendement agricole.",
+      "reponse_court": "Bonjour Wissam,  Pour réduire votre consommation en électricité, je vous suggère quelques mesures à prendre en fonction ",
       "mots_attendus": [
         "Bonjour"
       ]
@@ -774,7 +779,7 @@
       "categorie": "FAUTES_ORTHO",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 4.537105560302734,
+      "duree_ms": 4.486322402954102,
       "reponse_complete": "⚡💧 Votre consommation en **Janvier 2026** : → **760.0 kWh**",
       "reponse_court": "⚡💧 Votre consommation en **Janvier 2026** : → **760.0 kWh**",
       "mots_attendus": [
@@ -799,7 +804,7 @@
       "categorie": "FAUTES_ORTHO",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 9.746313095092773,
+      "duree_ms": 7.79414176940918,
       "reponse_complete": "🧾 **Votre facture — Mai 2026 :**\n\n- Période : 01/05/2026 → 31/05/2026\n- Consommation : **446.0 kWh**\n- Montant TTC : **432.62 Dhs**\n- Date limite paiement : 25/06/2026",
       "reponse_court": "🧾 **Votre facture — Mai 2026 :**  - Période : 01/05/2026 → 31/05/2026 - Consommation : **446.0 kWh** - Montant TTC : **4",
       "mots_attendus": [
@@ -812,7 +817,7 @@
       "categorie": "PAR_ANNEE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 6.127595901489258,
+      "duree_ms": 4.274845123291016,
       "reponse_complete": "📅 **Vos factures de 2025 :**\n\n- **Octobre 2025** : 471.0 kWh | 456.87 Dhs\n- **Novembre 2025** : 701.0 kWh | 679.97 Dhs\n- **Decembre 2025** : 709.0 kWh | 687.73 Dhs\n\n📊 Total 2025 : **1,881.0 kWh** | **1,824.57 Dhs**",
       "reponse_court": "📅 **Vos factures de 2025 :**  - **Octobre 2025** : 471.0 kWh | 456.87 Dhs - **Novembre 2025** : 701.0 kWh | 679.97 Dhs -",
       "mots_attendus": [
@@ -825,7 +830,7 @@
       "categorie": "PAR_ANNEE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 15.904903411865234,
+      "duree_ms": 3.760814666748047,
       "reponse_complete": "📅 **Vos factures de 2025 :**\n\n- **Octobre 2025** : 471.0 kWh | 456.87 Dhs\n- **Novembre 2025** : 701.0 kWh | 679.97 Dhs\n- **Decembre 2025** : 709.0 kWh | 687.73 Dhs\n\n📊 Total 2025 : **1,881.0 kWh** | **1,824.57 Dhs**",
       "reponse_court": "📅 **Vos factures de 2025 :**  - **Octobre 2025** : 471.0 kWh | 456.87 Dhs - **Novembre 2025** : 701.0 kWh | 679.97 Dhs -",
       "mots_attendus": [
@@ -838,7 +843,7 @@
       "categorie": "PAR_ANNEE",
       "chemin": "regle",
       "succes": true,
-      "duree_ms": 0.0,
+      "duree_ms": 7.79271125793457,
       "reponse_complete": "📅 **Vos factures de 2026 :**\n\n- **Janvier 2026** : 760.0 kWh | 737.20 Dhs\n- **Fevrier 2026** : 581.0 kWh | 563.57 Dhs\n- **Mars 2026** : 752.0 kWh | 729.44 Dhs\n- **Avril 2026** : 655.0 kWh | 635.35 Dhs\n- **Mai 2026** : 446.0 kWh | 432.62 Dhs\n- **Juin 2026** : 1,134.0 kWh | 1,099.98 Dhs\n- **Juillet 2026** : 1,939.0 kWh | 1,880.83 Dhs\n- **Aout 2026** : 1,129.0 kWh | 1,095.13 Dhs\n- **Septembre 2026** : 643.0 kWh | 623.71 Dhs\n\n📊 Total 2026 : **8,039.0 kWh** | **7,797.83 Dhs**",
       "reponse_court": "📅 **Vos factures de 2026 :**  - **Janvier 2026** : 760.0 kWh | 737.20 Dhs - **Fevrier 2026** : 581.0 kWh | 563.57 Dhs - ",
       "mots_attendus": [
@@ -851,7 +856,7 @@
       "categorie": "HORS_SUJET",
       "chemin": "llm",
       "succes": false,
-      "duree_ms": 199235.6026172638,
+      "duree_ms": 199123.7416267395,
       "reponse_complete": "Je n'ai pas bien compris votre question. Vous pouvez me demander par exemple :\n• Le mois où j'ai le plus consommé\n• Les 3 mois les plus chers\n• Mes factures de 2025\n• Mon historique complet",
       "reponse_court": "Je n'ai pas bien compris votre question. Vous pouvez me demander par exemple : • Le mois où j'ai le plus consommé • Les ",
       "mots_attendus": [
@@ -864,7 +869,7 @@
       "categorie": "HORS_SUJET",
       "chemin": "llm",
       "succes": true,
-      "duree_ms": 26601.857662200928,
+      "duree_ms": 28779.733896255493,
       "reponse_complete": "Je suis votre assistant SRM 😊\n\nJe peux vous aider sur :\n• Vos consommations et montants par mois\n• Vos factures par année\n• L'analyse et comparaison de votre consommation\n• Des conseils adaptés à votre situation\n\nPosez-moi une question sur vos factures !",
       "reponse_court": "Je suis votre assistant SRM 😊  Je peux vous aider sur : • Vos consommations et montants par mois • Vos factures par anné",
       "mots_attendus": [
@@ -877,7 +882,7 @@
       "categorie": "HORS_SUJET",
       "chemin": "llm",
       "succes": true,
-      "duree_ms": 26834.721565246582,
+      "duree_ms": 27089.33997154236,
       "reponse_complete": "Je suis votre assistant SRM 😊\n\nJe peux vous aider sur :\n• Vos consommations et montants par mois\n• Vos factures par année\n• L'analyse et comparaison de votre consommation\n• Des conseils adaptés à votre situation\n\nPosez-moi une question sur vos factures !",
       "reponse_court": "Je suis votre assistant SRM 😊  Je peux vous aider sur : • Vos consommations et montants par mois • Vos factures par anné",
       "mots_attendus": [
@@ -890,7 +895,7 @@
       "categorie": "BUG_CONNU",
       "chemin": "regle",
       "succes": false,
-      "duree_ms": 7.453441619873047,
+      "duree_ms": 8.77237319946289,
       "reponse_complete": "⚡💧 Votre consommation en **Mai 2026** : → **446.0 kWh**",
       "reponse_court": "⚡💧 Votre consommation en **Mai 2026** : → **446.0 kWh**",
       "mots_attendus": [
