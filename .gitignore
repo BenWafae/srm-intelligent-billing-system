@@ -3,3 +3,4 @@ __pycache__/
 .env
 facture_temp.pdf
 excel_temp*.xlsx
+eval_results/
