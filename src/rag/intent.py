@@ -709,7 +709,10 @@ def detecter_question_ambigue(question: str):
         "montant", "mantant", "facture", "factures",
         "service", "usage", "evolution",
         "classement", "liste", "statistique", "stat", "stats",
-        "eau", "elec", "electricite"
+        "eau", "elec", "electricite",
+         "infos", "information", "informations", "fiche", "profil","info"
+         "adresse", "adress", "contrat", "compteur", "numero",
+         "agence", "usage", "type", "service"
     ])
     if (_a_verbe_action
             and not _a_sujet_clair
