@@ -351,7 +351,7 @@
             height: 56px;
             border-radius: 50%;
             background: radial-gradient(circle, rgba(212,164,74,0.15) 0%, rgba(212,164,74,0.05) 50%, transparent 70%);
-            pointer-events: none;  /* ← ESSENTIEL : le glow ne bloque pas les clics */
+            pointer-events: none;
             animation: glowPulse 3s ease-in-out infinite;
         }
 
@@ -373,7 +373,7 @@
         /* ── Bouton Dark Mode ── */
         .theme-toggle-btn {
             position: relative;
-            z-index: 11;  /* ← bouton au-dessus du glow */
+            z-index: 11;
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -452,6 +452,24 @@
         .toggle-pw:hover{color:var(--text-label);transform:translateY(-50%) scale(1.12)}
         .toggle-pw svg{width:17px;height:17px;stroke-width:1.8}
 
+        /* Lien Mot de passe oublié */
+        .forgot-link {
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .forgot-link a {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            letter-spacing: 0.01em;
+        }
+        .forgot-link a:hover {
+            color: var(--gold2);
+            text-decoration: none;
+        }
+
         /* Bouton submit */
         .btn-submit{
             width:100%;padding:14px 24px;border:none;cursor:pointer;
@@ -483,22 +501,6 @@
         .spinner{display:none;width:17px;height:17px;border:2px solid rgba(30,49,85,.2);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite}
         @keyframes spin{to{transform:rotate(360deg)}}
 
-        /* Rôles */
-        .roles-sep{display:flex;align-items:center;gap:12px;margin:22px 0 16px}
-        .roles-line{flex:1;height:1px;background:var(--border-roles-sep);transition:background .35s}
-        .roles-lbl{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-roles-lbl);transition:color .35s;white-space:nowrap}
-        .roles-grid{display:flex;flex-wrap:wrap;gap:7px}
-        .role-pill{
-            display:inline-flex;align-items:center;gap:7px;
-            padding:5px 14px 5px 10px;
-            background:var(--bg-role-pill);
-            border:1px solid var(--border-role);
-            border-radius:50px;
-            font-size:.76rem;font-weight:500;color:var(--text-role);
-            transition:all .22s cubic-bezier(.34,1.56,.64,1);cursor:default;
-        }
-        .role-pill:hover{background:var(--bg-input-focus);border-color:var(--border-role-hover);transform:translateY(-2px) scale(1.04)}
-        .role-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
         .form-footer{margin-top:20px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:.72rem;color:var(--text-footer);transition:color .35s}
         .form-footer svg{width:12px;height:12px;stroke-width:2}
 
@@ -657,6 +659,11 @@
                     </div>
                 </div>
 
+                <!-- Lien Mot de passe oublié -->
+                <div class="forgot-link a3">
+                    <a href="/forgot-password">Mot de passe oublié ?</a>
+                </div>
+
                 <button type="submit" class="btn-submit a4" id="submitBtn">
                     <span id="btnLabel">Se connecter</span>
                     <svg class="btn-arrow" id="btnArrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:17px;height:17px;stroke-width:2.5">
@@ -665,18 +672,6 @@
                     <div class="spinner" id="spinner"></div>
                 </button>
             </form>
-
-            <div class="roles-sep a5">
-                <div class="roles-line"></div>
-                <span class="roles-lbl">Rôles & accès</span>
-                <div class="roles-line"></div>
-            </div>
-
-            <div class="roles-grid a5">
-                <div class="role-pill"><div class="role-dot" style="background:var(--navy2)"></div>Administrateur</div>
-                <div class="role-pill"><div class="role-dot" style="background:var(--gold2)"></div>Employé SRM</div>
-                <div class="role-pill"><div class="role-dot" style="background:var(--green)"></div>Client</div>
-            </div>
 
             <div class="form-footer a6">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -724,10 +719,6 @@
 
     function showErr(m){ errBox.classList.remove('show'); void errBox.offsetWidth; errBox.classList.add('show'); errMsg.textContent=m; }
     function hideErr(){ errBox.classList.remove('show'); }
-
-    /* Décommenter pour FastAPI :
-    {% if erreur %}showErr("{{ erreur }}");{% endif %}
-    */
 
     form.addEventListener('submit', e => {
         const em = document.getElementById('email').value.trim();

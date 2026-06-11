@@ -1175,3 +1175,19 @@ def get_historique_alertes_client(numero_contrat: str, limit: int = 20) -> list[
     rows = [dict(zip(colonnes, r)) for r in cursor.fetchall()]
     conn.close()
     return rows
+def update_user_password_by_email(email: str, new_password: str) -> bool:
+    """Met à jour le mot de passe d'un utilisateur à partir de son email."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE users SET password = ? WHERE email = ?",
+            (hash_password(new_password), email)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Erreur update password by email: {e}")
+        return False
+    finally:
+        conn.close()

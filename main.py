@@ -264,6 +264,127 @@ def page_admin(request: Request):
             "fichiers": fichiers,
         }
     )
+# ════════════════════════════════════════════════════════════
+# MOT DE PASSE OUBLIÉ — ROUTES
+# ════════════════════════════════════════════════════════════
+
+import secrets
+from datetime import datetime, timedelta
+
+# Stockage temporaire des tokens
+reset_tokens = {}
+
+
+def envoyer_email_reset(destinataire: str, token: str):
+    """Version DEBUG : affiche le lien dans la console."""
+    lien = f"http://localhost:8000/reset-password?token={token}"
+    print(f"\n[RESET PASSWORD] Lien pour {destinataire}: {lien}\n")
+    return True
+
+
+@app.get("/forgot-password", response_class=HTMLResponse)
+def page_forgot_password(request: Request):
+    """Affiche le formulaire de demande de réinitialisation."""
+    return templates.TemplateResponse(
+        request=request,
+        name="forgot_password.html",
+        context={}
+    )
+
+
+@app.post("/forgot-password")
+async def forgot_password(request: Request, email: str = Form(...)):
+    """Traite la demande de réinitialisation."""
+    from src.database import get_all_users
+    
+    users = get_all_users()
+    user_exists = any(u["email"] == email for u in users)
+    
+    if not user_exists:
+        return templates.TemplateResponse(
+            request=request,
+            name="forgot_password.html",
+            context={"message": "Si votre email existe, un lien de réinitialisation vous a été envoyé."}
+        )
+    
+    token = secrets.token_urlsafe(32)
+    reset_tokens[token] = {
+        "email": email,
+        "expires_at": datetime.now() + timedelta(minutes=15)
+    }
+    
+    envoyer_email_reset(email, token)
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="forgot_password.html",
+        context={"message": "Un lien de réinitialisation vous a été envoyé par email."}
+    )
+
+
+@app.get("/reset-password", response_class=HTMLResponse)
+def page_reset_password(request: Request, token: str):
+    """Affiche le formulaire de nouveau mot de passe."""
+    if token not in reset_tokens:
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={"error": "Lien invalide ou expiré."}
+        )
+    
+    token_data = reset_tokens[token]
+    if datetime.now() > token_data["expires_at"]:
+        del reset_tokens[token]
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={"error": "Lien expiré. Veuillez refaire une demande."}
+        )
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="reset_password.html",
+        context={"token": token}
+    )
+
+
+@app.post("/reset-password")
+async def reset_password(request: Request, token: str = Form(...), password: str = Form(...)):
+    """Enregistre le nouveau mot de passe."""
+    if token not in reset_tokens:
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={"token": token, "error": "Lien invalide."}
+        )
+    
+    token_data = reset_tokens[token]
+    if datetime.now() > token_data["expires_at"]:
+        del reset_tokens[token]
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={"token": token, "error": "Lien expiré."}
+        )
+    
+    email = token_data["email"]
+    from src.database import update_user_password_by_email
+    
+    success = update_user_password_by_email(email, password)
+    del reset_tokens[token]
+    
+    if success:
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={"success": "Mot de passe modifié avec succès. Vous pouvez maintenant vous connecter."}
+        )
+    else:
+        return templates.TemplateResponse(
+            request=request,
+            name="reset_password.html",
+            context={"token": token, "error": "Erreur lors de la modification."}
+        )
 
 
 # ════════════════════════════════════════════
