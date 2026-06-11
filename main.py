@@ -1,6 +1,10 @@
 import sys
 import os
 import sqlite3
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement depuis .env
+load_dotenv()
 
 BASE_DIR = os.path.dirname(__file__)
 sys.path.insert(0, BASE_DIR)
@@ -264,22 +268,75 @@ def page_admin(request: Request):
             "fichiers": fichiers,
         }
     )
-# ════════════════════════════════════════════════════════════
+
+
+# ════════════════════════════════════════════
 # MOT DE PASSE OUBLIÉ — ROUTES
-# ════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════
 
 import secrets
 from datetime import datetime, timedelta
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Stockage temporaire des tokens
 reset_tokens = {}
 
+# Récupérer les identifiants depuis les variables d'environnement
+EMAIL_SENDER = os.getenv("EMAIL_SENDER", "srmbillingtest@gmail.com")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "")
+
 
 def envoyer_email_reset(destinataire: str, token: str):
-    """Version DEBUG : affiche le lien dans la console."""
+    """Envoie un vrai email avec le lien de réinitialisation via SMTP Gmail."""
+    
     lien = f"http://localhost:8000/reset-password?token={token}"
-    print(f"\n[RESET PASSWORD] Lien pour {destinataire}: {lien}\n")
-    return True
+    
+    sujet = "SRM Souss-Massa - Réinitialisation de votre mot de passe"
+    
+    corps_html = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; background-color: #faf7f0; padding: 20px;">
+        <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <h1 style="color: #1e3155;">SRM Souss‑Massa</h1>
+            <p>Bonjour,</p>
+            <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+            <p>Cliquez sur le lien ci-dessous pour en créer un nouveau :</p>
+            <p style="text-align: center;">
+                <a href="{lien}" style="background-color: #79ad66; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px;">Réinitialiser mon mot de passe</a>
+            </p>
+            <p>Ce lien expirera dans <strong>15 minutes</strong>.</p>
+            <hr style="margin: 20px 0;">
+            <p style="font-size: 12px; color: #8a9ab5;">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    # Si le mot de passe n'est pas configuré, on passe en mode DEBUG (sécurité)
+    if not EMAIL_PASSWORD:
+        print(f"\n[RESET PASSWORD] ⚠ Mode DEBUG - Email non configuré. Lien pour {destinataire}: {lien}\n")
+        return True
+    
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = EMAIL_SENDER
+        msg["To"] = destinataire
+        msg["Subject"] = sujet
+        msg.attach(MIMEText(corps_html, "html"))
+        
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            server.send_message(msg)
+        
+        print(f"[RESET PASSWORD] ✅ Email envoyé à {destinataire}")
+        return True
+    except Exception as e:
+        print(f"[RESET PASSWORD] ❌ Erreur d'envoi: {e}")
+        print(f"[RESET PASSWORD] Lien alternatif: {lien}")
+        return False
 
 
 @app.get("/forgot-password", response_class=HTMLResponse)
