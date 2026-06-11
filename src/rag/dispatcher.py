@@ -1285,7 +1285,7 @@ def repondre_question_client(question: str, nom_client: str, historique_texte: s
             "ville", "region", "pays", "rib", "iban",
             "cin", "carte", "identite", "categorie",
             "numero agence", "n agence", "num agence",
-            "code agence", "id agence", "code postale"
+            "code agence", "id agence", "code postale","coefficient",
         }
 
         q_norm_check = _normaliser_q(question)

@@ -84,7 +84,8 @@ MOTS_FONCTIONNELS = {
     "selon", "apres", "avant", "pendant", "lors",
     "grace", "cause", "raison",
     "bcp", "agadir",
-    "affiche", "affichez", "afficher", "consommateur", "consomateur"
+    "affiche", "affichez", "afficher", "consommateur", "consomateur",
+    "tous", "toutes", "chaque", "chacun", "chacune"
 }
 
 PATTERNS_QUESTION_GENERALE = [
@@ -190,6 +191,7 @@ MOTS_METIER = {
     "adresse", "contrat", "compteur",
     "liste", "information", "informations", "infos",
     "facturee", "facturation", "factur",
+    "telephone", "statut", "coefficient",
 }
 
 _CONCEPTS_METIER_FUZZY = MOTS_METIER
