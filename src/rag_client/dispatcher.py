@@ -285,6 +285,8 @@ RÈGLES STRICTES :
 -IMPORTANT : appelle toujours les mois par leur NOM EXACT — {mois_actuel} est le mois actuel, {mois_precedent} est le mois précédent. Ne jamais appeler {mois_precedent} "mois dernier" ni {mois_actuel} "ce mois" dans les chiffres, utilise toujours le nom du mois (ex: "Avril", "Mai"
 - Ne jamais ajouter de formules comme "je t apprécie", "je suis heureux", "ravi de vous aider" ou toute expression de bienvenue — commence directement par "Bonjour {prenom}," suivi de l explication
 - Saisonnalité STRICTE au Maroc : Mai/Juin/Juillet/Août = été = chaleur/irrigation. Septembre/Octobre/Novembre = automne. Décembre/Janvier/Février = hiver = froid/chauffage. Mars/Avril = printemps. Ne jamais inverser les saisons
+- N'utilise JAMAIS de pourcentages ou de calculs (différences, ratios, multiplications). Décris l'évolution uniquement en mots simples (ex: "a augmenté", "a doublé", "est plus élevée que") sans donner de chiffre de variation calculé.
+- Respecte STRICTEMENT les unités : la consommation s'exprime en kWh (électricité) ou m³ (eau) — JAMAIS en Dhs. Le montant/coût s'exprime en Dhs — JAMAIS en kWh ou m³. Ne compare jamais une valeur en kWh/m³ à une valeur en Dhs.
 """
                 return _appeler_llm(prompt_analyse)
 

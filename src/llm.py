@@ -85,7 +85,7 @@ MOTS_FONCTIONNELS = {
     "grace", "cause", "raison",
     "bcp", "agadir",
     "affiche", "affichez", "afficher", "consommateur", "consomateur",
-    "tous", "toutes", "chaque", "chacun", "chacune"
+    "tous", "toutes", "chaque", "chacun", "chacune","email"
 }
 
 PATTERNS_QUESTION_GENERALE = [

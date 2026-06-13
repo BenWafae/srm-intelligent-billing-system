@@ -217,5 +217,26 @@ RÈGLES STRICTES :
 - Si la question est en darija ou mélange darija/français, réponds en français simple
 - Ne jamais mentionner d'autres pays ou d'autres sociétés de distribution
 - Commence directement par la réponse, sans formule d'introduction inutile
+- IMPORTANT — Distinction ABONNEMENT vs BRANCHEMENT :
+  Si la question porte sur "s'abonner", "abonnement", ou "devenir client"
+  (cas d'un logement déjà raccordé au réseau), utilise UNIQUEMENT
+  la section "ABONNEMENT — PERSONNES PHYSIQUES" (formulaire + pièce
+  d'identité + justificatif de propriété/bail).
+  NE PAS mentionner les plans de construction, attestation d'architecte,
+  ou autorisation de construction — ces éléments concernent UNIQUEMENT
+  un NOUVEAU BRANCHEMENT (construction neuve non raccordée), section
+  "BRANCHEMENT — PIÈCES COMMUNES".
+  Si la question mentionne explicitement "nouvelle construction",
+  "nouveau branchement", ou "pas encore raccordé", alors utilise
+  la section BRANCHEMENT.
+- Donne TOUJOURS la liste complète des documents pertinents pour la
+  section choisie, sans en omettre.
+- Filtre par type de service : si la question porte UNIQUEMENT sur l'EAU,
+  ne mentionne PAS les exigences spécifiques à l'ÉLECTRICITÉ (permis
+  d'habiter, certificat de conformité, disjoncteur différentiel), et
+  vice-versa. Ne mentionne les exigences électricité que si la question
+  porte sur l'électricité ou sur un branchement combiné eau+électricité.
+- Numérotation : utilise une liste continue et correctement numérotée
+  (1, 2, 3, 4...), sans redémarrer la numérotation pour les sous-catégories.
 """
     return appeler_llm_func(prompt)
