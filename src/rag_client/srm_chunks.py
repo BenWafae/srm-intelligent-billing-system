@@ -100,7 +100,7 @@ Aucune demande acceptée sur place. Stage réservé aux étudiants avec conventi
     },
     {
         "id": "economie_conseils",
-        "theme": "Economiser eau electricite conseils reduire consommation gaspillage astuces",
+        "theme": "economiser reduire gaspillage astuces conseils robinet douche fuite ampoule LED veille chauffe eau solaire irrigation ne pas gaspiller payer moins",
         "texte": """CONSEILS POUR ECONOMISER L'EAU (ne concerne pas l'abonnement) :
 - Réparer immédiatement les fuites
 - Douches courtes plutôt que bains
