@@ -6,7 +6,7 @@
 SRM_CHUNKS = [
     {
         "id": "identite_srm",
-        "theme": "Qui est SRM, historique, territoire, création",
+        "theme": "Qui est SRM, historique, territoire, creation",
         "texte": """SRM Souss-Massa SA créée le 15 octobre 2024.
 Opérateur unique distribution eau potable, électricité, assainissement liquide région Souss-Massa.
 Territoire : préfectures Agadir Ida-Outanane, Inezgane Ait Melloul, provinces Chtouka Ait Baha, Tata, Tiznit, Taroudant.
@@ -14,7 +14,7 @@ Territoire : préfectures Agadir Ida-Outanane, Inezgane Ait Melloul, provinces C
     },
     {
         "id": "contact_srm",
-        "theme": "Contact SRM, téléphone, email, adresse, agence, joindre",
+        "theme": "Contact SRM, telephone, email, adresse, agence, joindre",
         "texte": """Contact SRM Souss-Massa :
 Siège : Rue 18 Novembre, Quartier Industriel, AGADIR
 Centre d'appels : 08 02 03 12 12
@@ -23,19 +23,24 @@ Email : Contact@srm-sm.ma"""
     },
     {
         "id": "abonnement_particulier",
-        "theme": "Abonnement eau électricité particulier personne physique documents s abonner",
-        "texte": """Abonnement particulier (personne physique) :
-1. Formulaire de demande d'abonnement signé
+        "theme": "Abonnement eau electricite particulier personne physique documents s abonner sabonner inscription contrat devenir client ouvrir compte que faire comment abonnement",
+        "texte": """ABONNEMENT EAU ET ELECTRICITE (particulier) :
+Variantes : s abonner, sabonner, devenir client SRM, ouvrir un abonnement, comment faire un abonnement, que faire pour abonnement, documents abonnement eau, documents abonnement electricite.
+
+Pour vous ABONNER à l'EAU ou à l'ÉLECTRICITÉ (logement déjà raccordé) :
+1. Formulaire de demande d'abonnement signé (disponible en agence ou sur e-agence)
 2. Photocopie pièce d'identité : CIN, carte de séjour ou passeport
 3. Justificatif droit de jouissance :
    - Propriétaire : titre de propriété (titre foncier, Moulkia, attestation notaire)
    - Locataire : contrat de bail, certificat de résidence, ou autorisation propriétaire légalisée
 4. Procuration légalisée si héritiers, absence propriétaire, copropriétaires, colocataires
-Pour branchement électricité uniquement : permis d'habiter ou certificat de conformité + certificat de garantie disjoncteur différentiel."""
+
+Ceci concerne un LOGEMENT DEJA RACCORDE au réseau (pas un nouveau branchement).
+Pour électricité uniquement : ajouter permis d'habiter + certificat de garantie disjoncteur différentiel."""
     },
     {
         "id": "abonnement_societe",
-        "theme": "Abonnement société entreprise personne morale documents",
+        "theme": "Abonnement societe entreprise personne morale documents",
         "texte": """Abonnement personne morale (société) :
 1. Formulaire signé par gérant ou représentant
 2. Copie CIN du gérant
@@ -46,7 +51,7 @@ Pour électricité : certificat de conformité + certificat de garantie disjonct
     },
     {
         "id": "abonnement_association",
-        "theme": "Abonnement association syndic coopérative documents",
+        "theme": "Abonnement association syndic cooperative documents",
         "texte": """Abonnement associations, syndics, coopératives :
 1. Formulaire signé par président ou représentant
 2. Copie CIN du président
@@ -58,8 +63,10 @@ Pour électricité : permis d'habiter ou certificat de conformité + certificat 
     },
     {
         "id": "branchement",
-        "theme": "Branchement nouveau raccordement eau électricité construction documents pièces",
-        "texte": """Branchement nouveau (construction neuve non encore raccordée) :
+        "theme": "Branchement nouveau raccordement eau electricite construction documents pieces",
+        "texte": """BRANCHEMENT NOUVEAU (construction neuve non encore raccordee) :
+Ceci concerne une CONSTRUCTION NEUVE qui n'est pas encore raccordée au réseau.
+Pour un NOUVEAU BRANCHEMENT électricité ou eau :
 1. Formulaire de demande de branchement
 2. Photocopie pièce d'identité
 3. Copie titre de propriété
@@ -72,19 +79,18 @@ Demande simultanée eau + électricité + assainissement : un seul exemplaire de
     },
     {
         "id": "recrutement",
-        "theme": "Recrutement emploi travail poste offre ingénieur cadre technicien",
-        "texte": """Recrutement SRM SM — emploi permanent :
-Cadres et Ingénieurs (Bac+5) : Finance, Comptabilité, RH, Génie électrique, Génie Civil, Hydraulique, Génie logiciel, Réseaux, Sécurité informatique, Commerce/Marketing, SIG.
-Candidature : https://www.mafoamanagement.com/e-concours/srm-sm-2025/
-Agents de Maîtrise (Bac+2) : Développement informatique, Gestion/Comptabilité, Hydraulique/Génie Civil, Électricité/Électromécanique, RH.
-Candidature : https://econcours.brainman.ma/cmp/SRM_SM_2025
-Candidatures UNIQUEMENT en ligne. Ne pas envoyer CV par email ni se présenter en agence."""
+        "theme": "Recrutement emploi travail poste offre ingenieur cadre technicien",
+        "texte": """RECRUTEMENT SRM SM — EMPLOI PERMANENT :
+Pour commencer un TRAVAIL à SRM, candidatures UNIQUEMENT en ligne :
+Cadres et Ingénieurs (Bac+5) : https://www.mafoamanagement.com/e-concours/srm-sm-2025/
+Agents de Maîtrise (Bac+2) : https://econcours.brainman.ma/cmp/SRM_SM_2025
+Ne pas envoyer CV par email ni se présenter en agence pour un emploi."""
     },
     {
         "id": "stage",
-        "theme": "Stage stagiaire étudiant convention demande stage académique",
-        "texte": """Stage académique SRM (étudiants uniquement) :
-Documents à envoyer par email à stages@srm-sm.ma :
+        "theme": "Stage stagiaire etudiant convention demande stage academique",
+        "texte": """STAGE ACADEMIQUE SRM (étudiants uniquement) :
+Pour commencer un STAGE à SRM, envoyer par email à stages@srm-sm.ma :
 1. Copie CNI
 2. CV avec téléphone et email
 3. Convention de stage signée et cachetée par l'école
@@ -94,8 +100,8 @@ Aucune demande acceptée sur place. Stage réservé aux étudiants avec conventi
     },
     {
         "id": "economie_conseils",
-        "theme": "Économiser eau électricité conseils réduire consommation gaspillage astuces",
-        "texte": """Conseils économies eau :
+        "theme": "Economiser eau electricite conseils reduire consommation gaspillage astuces",
+        "texte": """CONSEILS POUR ECONOMISER L'EAU (ne concerne pas l'abonnement) :
 - Réparer immédiatement les fuites
 - Douches courtes plutôt que bains
 - Fermer robinet pendant brossage dents
@@ -103,7 +109,7 @@ Aucune demande acceptée sur place. Stage réservé aux étudiants avec conventi
 - Utiliser équipements économiseurs d'eau
 - Signaler fuites réseau public à SRM
 
-Conseils économies électricité :
+CONSEILS POUR ECONOMISER L'ELECTRICITE :
 - Éteindre appareils plutôt que laisser en veille
 - Utiliser ampoules LED
 - Éviter gros appareils aux heures de pointe (18h-22h)

@@ -197,33 +197,25 @@ def repondre_general(question: str, appeler_llm_func) -> str:
 
     contexte = rechercher_chunks(question, top_k=2)
 
-    prompt = f"""Tu es l'assistant officiel de SRM Souss-Massa (distributeur d'eau,
-d'électricité et d'assainissement à Agadir, Maroc).
+    prompt = f"""Tu es l'assistant officiel de SRM Souss-Massa (eau, électricité, assainissement, Agadir, Maroc).
 
-CONTEXTE PERTINENT :
+CONTEXTE — utilise UNIQUEMENT ces informations pour répondre :
 {contexte}
 
 Question du client : {question}
 
-RÈGLES STRICTES :
-- Réponds UNIQUEMENT à partir du contexte ci-dessus
-- Si la réponse n'est pas dans le contexte, dis exactement :
-  "Pour cette information, je vous invite à contacter directement votre agence SRM
-   ou appeler le 08 02 03 12 12."
-- Réponds en français simple et clair, maximum 6 lignes
-- Ne jamais inventer de chiffres, documents ou délais non mentionnés
-- IMPORTANT distinction abonnement vs branchement :
-  "s'abonner" = logement déjà raccordé → section abonnement uniquement
-  "nouveau branchement" = construction neuve → section branchement
-- Filtre par service : question eau uniquement → ne pas mentionner exigences électricité, et vice versa
+RÈGLES ABSOLUES :
+- Réponds STRICTEMENT à partir du CONTEXTE ci-dessus, mot pour mot si nécessaire
+- Si l'information n'est PAS dans le contexte, réponds UNIQUEMENT :
+  "Pour cette information, contactez votre agence SRM ou appelez le 08 02 03 12 12."
+- INTERDIT : inventer, compléter, supposer, ajouter des informations hors contexte
+- INTERDIT : parler de lavage, savon, nettoyage, ou tout sujet non présent dans le contexte
+- Réponds en français simple, maximum 6 lignes
+- Distinction abonnement vs branchement :
+  "s abonner / sabonner / abonnement" = logement déjà raccordé → documents abonnement uniquement
+  "nouveau branchement / construction neuve" → documents branchement uniquement
+- Stage ≠ emploi permanent, ne jamais mélanger les deux
+- Si question sur EAU uniquement → ne pas mentionner électricité
 - Numérotation continue (1, 2, 3...) sans redémarrer
-- Stage ≠ emploi permanent, ne pas mélanger les deux
-- Si la question contient "travail", "emploi", "recrutement", "poste", "travailler" : réponds uniquement emploi permanent, pas de stage
-- Si la question contient "stage", "stagiaire", "étudiant" : réponds uniquement stage, pas d'emploi permanent
-- "S'abonner" n'a rien à voir avec le nettoyage, lavage ou lessive. Réponds uniquement avec les informations sur l'abonnement
-- Ne réponds jamais aux questions sur le nettoyage, lavage, plomberie ou réparation → utilise le message par défaut
-- Vérifie que le contexte contient une réponse avant de répondre : si ce n'est pas le cas, n'invente rien
-- Maximum 6 lignes, va droit au but
-
 """
     return appeler_llm_func(prompt)
