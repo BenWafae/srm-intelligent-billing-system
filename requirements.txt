@@ -43,5 +43,6 @@ tzlocal==5.3.1
 urllib3==2.6.3
 uvicorn==0.47.0
 bcrypt==5.0.0
+sentence-transformers
 
 

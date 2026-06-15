@@ -187,13 +187,13 @@ scheduler = BackgroundScheduler(timezone="Africa/Casablanca")
 # Job de production : chaque jour à 08h00
 scheduler.add_job(
     tache_agent_automatique,
-    trigger=CronTrigger(hour=14, minute=30),
+    trigger=CronTrigger(hour=15, minute=20),
     id="agent_prod",
     replace_existing=True
 )
 
 scheduler.start()
-print("[AGENT] ✅ Scheduler démarré — exécution quotidienne à 14:30")
+print("[AGENT] ✅ Scheduler démarré — exécution quotidienne à 15:20")
 
 # Arrêt propre quand FastAPI s'arrête
 import atexit
