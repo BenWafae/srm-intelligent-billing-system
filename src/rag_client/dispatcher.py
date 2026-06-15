@@ -440,12 +440,24 @@ def repondre_client_connecte(question: str, numero_contrat: str, historique: str
     
     if not any(t in q_brut for t in _MOTS_PERSO_EVIDENTS):
         intent_route = _appeler_llm(
-            f"""Réponds UNIQUEMENT par GENERAL ou PERSONNEL.
-GENERAL = question sur SRM (abonnement, branchement, documents, stage, recrutement, contact, économies, c'est quoi SRM)
-PERSONNEL = question sur ses propres factures, consommation, montants, retard, historique
+    f"""Réponds UNIQUEMENT par GENERAL ou PERSONNEL.
+GENERAL = question sur SRM en général : abonnement, branchement, documents, stage, recrutement, contact, économies, c'est quoi SRM, comment s'abonner, comment faire un branchement
+PERSONNEL = question sur ses propres factures personnelles : ma consommation, mon montant, mon historique, mes factures, mon retard
+
+EXEMPLES GENERAL :
+- "comment faire un branchement electricite" → GENERAL
+- "comment s abonner en eau" → GENERAL
+- "je veux faire un stage a srm" → GENERAL
+- "comment contacter srm" → GENERAL
+- "comment economiser l eau" → GENERAL
+
+EXEMPLES PERSONNEL :
+- "quel est mon montant ce mois" → PERSONNEL
+- "ma consommation de janvier" → PERSONNEL
+- "est ce que je suis en retard" → PERSONNEL
 
 Question : {question}"""
-        ).strip().upper()
+).strip().upper()
 
         if "GENERAL" in intent_route:
             return repondre_general(question, _appeler_llm)
