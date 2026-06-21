@@ -1015,23 +1015,18 @@
     <!-- Tabs -->
     <div class="tabs-nav">
         <div class="tab-pill active" onclick="afficherOnglet('excel')" id="pill-excel">
-            <span class="tab-ico">📊</span>
             <span class="tab-lbl">Import Excel</span>
         </div>
         <div class="tab-pill" onclick="afficherOnglet('pdf')" id="pill-pdf">
-            <span class="tab-ico">📄</span>
             <span class="tab-lbl">Import PDF</span>
         </div>
         <div class="tab-pill" onclick="afficherOnglet('users')" id="pill-users">
-            <span class="tab-ico">👥</span>
             <span class="tab-lbl">Utilisateurs</span>
         </div>
         <div class="tab-pill" onclick="afficherOnglet('agent')" id="pill-agent">
-            <span class="tab-ico">🤖</span>
             <span class="tab-lbl">Agent Alertes</span>
         </div>
         <div class="tab-pill" onclick="afficherOnglet('historique')" id="pill-historique">
-            <span class="tab-ico">📜</span>
             <span class="tab-lbl">Historique</span>
         </div>
     </div>
@@ -1331,7 +1326,7 @@
                     </svg>
                 </div>
                 <div>
-                    <h3>🤖 Agent autonome — Mode automatique</h3>
+                    <h3>Agent autonome — Mode automatique</h3>
                     <p>Détection et envoi automatiques sans intervention humaine</p>
                 </div>
             </div>
@@ -1341,7 +1336,7 @@
                         <span id="agent-dot" style="width:8px;height:8px;border-radius:50%;background:var(--srm-green);animation:livePulse 2s infinite;"></span>
                         <span id="agent-statut-texte">Agent actif</span>
                     </div>
-                    <button class="btn btn-ghost" onclick="toggleAgentAuto()" id="btn-toggle-agent" style="padding:7px 16px; font-size:12px;">⏸ Désactiver</button>
+                    <button class="btn btn-ghost" onclick="toggleAgentAuto()" id="btn-toggle-agent" style="padding:7px 16px; font-size:12px;">Désactiver</button>
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
@@ -1367,7 +1362,7 @@
                     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <polygon points="5 3 19 12 5 21 5 3"/>
                     </svg>
-                    ▶ Tester maintenant — lancer un cycle immédiatement
+                    Tester maintenant — lancer un cycle immédiatement
                 </button>
 
                 <div style="margin-top:12px;">
@@ -1375,7 +1370,7 @@
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <polygon points="5 3 19 12 5 21 5 3"/>
                         </svg>
-                        ✨ Tester avec IA — email enrichi par Mistral
+                        Tester avec IA — email enrichi par Mistral
                     </button>
                     <div style="margin-top:8px; font-size:11px; color:var(--text-muted); text-align:center; font-style:italic;">
                         Même détection Python + analyse contextuelle générée par Mistral
@@ -1433,8 +1428,8 @@
                 <div style="display:flex; gap:10px; margin-bottom:16px; align-items:center; flex-wrap:wrap;">
                     <span style="font-size:13px; font-weight:600; color:var(--text-primary);">Mode de détection :</span>
                     <div style="display:flex; gap:6px;">
-                        <button id="btn-mode-precedent" onclick="setMode('precedent')" class="btn btn-primary" style="padding:7px 16px; font-size:12px;">📅 Mois précédent</button>
-                        <button id="btn-mode-moyenne" onclick="setMode('moyenne')" class="btn btn-ghost" style="padding:7px 16px; font-size:12px;">📊 Moyenne 6 mois</button>
+                        <button id="btn-mode-precedent" onclick="setMode('precedent')" class="btn btn-primary" style="padding:7px 16px; font-size:12px;">Mois précédent</button>
+                        <button id="btn-mode-moyenne" onclick="setMode('moyenne')" class="btn btn-ghost" style="padding:7px 16px; font-size:12px;">Moyenne 6 mois</button>
                     </div>
                     <span id="mode-description" style="font-size:11px; color:var(--text-muted); font-style:italic;">Comparaison avec le mois précédent</span>
                 </div>
@@ -1539,7 +1534,7 @@
                             </tr>
                         </thead>
                         <tbody id="tbody-historique">
-                            <tr><td colspan="8" style="text-align:center; padding:30px;">⏳ Chargement...<\/td></tr>
+                            <tr><td colspan="8" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1714,14 +1709,14 @@
                 badge.style.borderColor = 'rgba(121,173,102,.25)';
                 dot.style.background = 'var(--srm-green)';
                 texte.textContent = '✅ Agent actif';
-                btnTgl.textContent = '⏸ Désactiver';
+                btnTgl.textContent = 'Désactiver';
             } else {
                 badge.style.background = 'rgba(30,49,85,.06)';
                 badge.style.color = 'var(--text-muted)';
                 badge.style.borderColor = 'var(--border-card)';
                 dot.style.background = 'var(--text-muted)';
                 texte.textContent = '⏸ Agent inactif';
-                btnTgl.textContent = '▶ Activer';
+                btnTgl.textContent = 'Activer';
             }
 
             document.getElementById('agent-prochain').textContent = data.prochain_run || 'Non planifié';
@@ -1777,7 +1772,7 @@
             showFeedback('fb-auto', '❌ Erreur lors du test.', 'err');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '▶ Tester maintenant — lancer un cycle immédiatement';
+            btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Tester maintenant — lancer un cycle immédiatement';
         }
     }
 
@@ -1807,7 +1802,7 @@
             showFeedback('fb-auto-ia', '❌ Erreur de connexion (Mistral est-il lancé ?)', 'err');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '✨ Tester avec IA — email enrichi par Mistral';
+            btn.innerHTML = '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Tester avec IA — email enrichi par Mistral';
         }
     }
 
@@ -2160,7 +2155,7 @@
     async function chargerHistorique() {
         var tbody = document.getElementById('tbody-historique');
         if (!tbody) return;
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">⏳ Chargement...<\/td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">⏳ Chargement...</td></tr>';
         
         try {
             var res = await fetch('/api/admin/agent/historique?limit=50');
@@ -2186,7 +2181,7 @@
             if (statErreurs) statErreurs.textContent = erreurs;
             
             if (historique.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">📭 Aucune alerte envoyée pour le moment<\/td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">📭 Aucune alerte envoyée pour le moment</td></tr>';
                 return;
             }
             
@@ -2212,19 +2207,19 @@
                 var sourceText = (h.source === 'auto') ? '🤖 Automatique' : '👤 Manuel';
                 
                 tbody.innerHTML += '<tr>' +
-                    '<td style="font-size:12px;">' + date + '<\/td>' +
-                    '<td style="font-weight:600;">' + (h.nom_client || h.numero_contrat) + '<\/td>' +
-                    '<td style="font-size:12px;">' + (h.email_destinataire || '—') + '<\/td>' +
-                    '<td>' + (h.mois_source || '—') + '<\/td>' +
-                    '<td><span class="variation-badge ' + varClass + '">+' + h.variation_pct + '%<\/span><\/td>' +
-                    '<td><span class="email-chip ' + sourceClass + '">' + sourceText + '<\/span><\/td>' +
-                    '<td><span class="email-chip ' + statutClass + '">' + statutTexte + '<\/span><\/td>' +
-                    '<td><button class="btn-icon-del" onclick="supprimerAlerte(' + h.id + ', this)" title="Supprimer l\'alerte"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><polyline points="3 6 5 6 21 6"><\/polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"><\/path><\/svg><\/button><\/td>' +
-                '<\/tr>';
+                    '<td style="font-size:12px;">' + date + '</td>' +
+                    '<td style="font-weight:600;">' + (h.nom_client || h.numero_contrat) + '</td>' +
+                    '<td style="font-size:12px;">' + (h.email_destinataire || '—') + '</td>' +
+                    '<td>' + (h.mois_source || '—') + '</td>' +
+                    '<td><span class="variation-badge ' + varClass + '">+' + h.variation_pct + '%</span></td>' +
+                    '<td><span class="email-chip ' + sourceClass + '">' + sourceText + '</span></td>' +
+                    '<td><span class="email-chip ' + statutClass + '">' + statutTexte + '</span></td>' +
+                    '<td><button class="btn-icon-del" onclick="supprimerAlerte(' + h.id + ', this)" title="Supprimer l\'alerte"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="14" height="14"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg></button></td>' +
+                '</tr>';
             }
         } catch(e) {
             console.error('Erreur chargement historique:', e);
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">❌ Erreur de chargement<\/td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">❌ Erreur de chargement</td></tr>';
         }
     }
 

@@ -32,6 +32,15 @@ app.mount("/js", StaticFiles(directory=os.path.join(BASE_DIR, "src", "assets", "
 templates = Jinja2Templates(directory=str(os.path.join(BASE_DIR, "templates")))  # 3. templates
 
 init_db()
+# ── Préchargement RAG au démarrage ──
+@app.on_event("startup")
+async def precharger_rag():
+    try:
+        from rag_client.srm_rag import rechercher_chunks
+        rechercher_chunks("test", top_k=1)
+        print("[STARTUP] ✅ RAG préchargé avec succès")
+    except Exception as e:
+        print(f"[STARTUP] ⚠️ RAG ignoré : {e}")
 
 # ════════════════════════════════════════════════════════════
 # AGENT AUTONOME — Scheduler (Tâche 2 — Amélioration)
