@@ -12,11 +12,11 @@
 
 # 🧾 SRM Intelligent Billing System
 
-> Système Intelligent de Gestion des Factures — SRM Souss-Massa
+> Système Intelligent de Gestion des Factures : SRM Souss-Massa
 
 **Réalisé par : BEN ZHIR Wafa**
 Encadrant entreprise : **ZEROUALI Hassan** · Encadrant académique : **AIT BAHA Tarek**
-*Stage de fin d'études — EST Guelmim, Filière SDSI 2025–2026*
+*Stage de fin d'études, EST Guelmim, Filière SDSI 2025–2026*
 
 </div>
 
@@ -32,74 +32,74 @@ Le système évolue en quatre phases :
 |---|---|---|
 | **Tâche 1** | ✅ Terminée | Système complet de gestion et d'analyse des factures avec 3 interfaces dédiées |
 | **Tâche 2** | ✅ Terminée | Agent autonome de détection des surconsommations avec alertes email enrichies par IA |
-| **Tâche 3** | ✅ Terminée | Conteneurisation Docker complète — déploiement en une seule commande |
+| **Tâche 3** | ✅ Terminée | Conteneurisation Docker complète : déploiement en une seule commande |
 | **Tâche 4** | ✅ Terminée | Protocole d'évaluation multicritère (corpus interne, baseline LLM seul, corpus de généralisation, test multi-clients) |
 
 ---
 
 ## Démonstration
 
-### 🎬 Login — Authentification & thème
+### 🎬 Login : Authentification & thème
 
 ![Demo Login](screenshots/demo_login.gif)
 
 ---
 
-### 👨‍💼 Interface Employé — Assistant multi-clients
+### 👨‍💼 Interface Employé : Assistant multi-clients
 
 ![Demo Employé](screenshots/demo_employe.gif)
 
 ---
 
-### 👤 Interface Client — Espace personnel
+### 👤 Interface Client : Espace personnel
 
 ![Demo Client](screenshots/demo_client.gif)
 
 ---
 
-### 🔔 Agent Alertes — Détection & envoi email
+### 🔔 Agent Alertes : Détection & envoi email
 
 ![Demo Alertes](screenshots/demo_alertes.gif)
 
 ---
 
-## Architecture IA — Pipeline Employé SRM
+## Architecture IA : Pipeline Employé SRM
 
-Le pipeline employé repose sur un mécanisme de décision hiérarchique à 4 niveaux. Le LLM joue **uniquement le rôle de routeur sémantique** — il n'intervient jamais dans le calcul ou la génération des réponses finales sur les données.
+Le pipeline employé repose sur un mécanisme de décision hiérarchique à 4 niveaux. Le LLM joue **uniquement le rôle de routeur sémantique** ; il n'intervient jamais dans le calcul ou la génération des réponses finales sur les données.
 
-> Ce paradigme s'inscrit dans le cadre des *LLM augmentés par des outils* (Mialon et al., 2023 ; Schick et al., 2023 — Toolformer).
+> Ce paradigme s'inscrit dans le cadre des *LLM augmentés par des outils* (Mialon et al., 2023 ; Schick et al., 2023, Toolformer).
 
 ```
 Question utilisateur (Interface Employé)
         │
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 0 — Portail de validation       │
+│  Niveau 0 : Portail de validation       │
 │  Champ inexistant dans la base ?        │──→ Message d'indisponibilité immédiat
 └─────────────────────────────────────────┘
         │ Non
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 1 — Règles Python               │
+│  Niveau 1 : Règles Python               │
 │  Mot-clé / intent reconnu ?             │──→ Réponse déterministe (sans LLM)
 └─────────────────────────────────────────┘
         │ Non
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 2 — LLM Router (Mistral)        │
+│  Niveau 2 : LLM Router (Mistral)        │
 │  Classificateur d'intention uniquement  │──→ Validation en 3 couches avant routage
 └─────────────────────────────────────────┘
         │ Intent non reconnu
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 3 — Fallback Text-to-SQL        │
+│  Niveau 3 : Fallback Text-to-SQL        │
 │  Génération SQL contrainte              │──→ Whitelist SELECT + Validation schéma
 └─────────────────────────────────────────┘
 ```
 
 ---
 
-## Architecture IA — Pipeline Client Connecté
+## Architecture IA : Pipeline Client Connecté
 
 Le pipeline client est distinct du pipeline employé. Il intègre deux mécanismes absents chez l'employé : un **routeur amont General/Personnel** qui distingue les questions sur les factures des questions générales sur la SRM, et un **intent ANALYSE** qui permet des réponses narratives personnalisées combinant données réelles et génération LLM.
 
@@ -110,7 +110,7 @@ Question utilisateur (Interface Client)
         │
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 0 — Routeur Général / Personnel │
+│  Niveau 0 : Routeur Général / Personnel │
 │  Détection automatique du contexte      │
 │                                         │
 │  Question générale SRM ?                │──→ RAG léger sur base de connaissance
@@ -122,7 +122,7 @@ Question utilisateur (Interface Client)
         │ Personnelle
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 1 — Règles Python déterministes │
+│  Niveau 1 : Règles Python déterministes │
 │  Mot-clé / intent reconnu ?             │──→ Réponse déterministe filtrée
 │  (filtrage automatique par numéro       │    par numéro de contrat (sans LLM)
 │   de contrat, isolation totale)         │
@@ -130,7 +130,7 @@ Question utilisateur (Interface Client)
         │ Non
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 2 — Fallback LLM                │
+│  Niveau 2 : Fallback LLM                │
 │  • Questions hors règles → LLM Router   │──→ Réponse guidée avec exemples
 │  • Intent ANALYSE → LLM narratif        │──→ Réponse personnalisée avec données
 │    (données réelles injectées,          │    réelles, comparaison mois actuel
@@ -149,8 +149,8 @@ Question utilisateur (Interface Client)
 | **Routeur amont** | Portail de validation (champs inexistants) | Routeur General / Personnel |
 | **Niveau LLM** | Classificateur d'intention strict + validation 3 couches | Classificateur + intent ANALYSE narratif |
 | **Fallback final** | Text-to-SQL sécurisé (whitelist + schéma) | LLM narratif avec données réelles injectées |
-| **Base de connaissance** | Non | Oui — questions générales SRM (abonnement, contact, stage...) |
-| **Analyse personnalisée** | Non | Oui — explication des variations, conseils adaptés à l'usage et à la saisonnalité |
+| **Base de connaissance** | Non | Oui : questions générales SRM (abonnement, contact, stage...) |
+| **Analyse personnalisée** | Non | Oui : explication des variations, conseils adaptés à l'usage et à la saisonnalité |
 
 ---
 
@@ -180,7 +180,7 @@ Question utilisateur (Interface Client)
 
 ---
 
-## Agent Alertes — Tâche 2
+## Agent Alertes : Tâche 2
 
 ### Mode Manuel (Admin)
 
@@ -195,17 +195,17 @@ Envoi individuel, par sélection, ou en masse. Historique des alertes avec expor
 
 ### Mode Automatique (APScheduler)
 
-L'agent tourne **sans intervention humaine** — planifié automatiquement via APScheduler. Par défaut il utilise le **Mode 2 (moyenne historique)** pour réduire les fausses alertes.
+L'agent tourne **sans intervention humaine** ; planifié automatiquement via APScheduler. Par défaut il utilise le **Mode 2 (moyenne historique)** pour réduire les fausses alertes.
 
 Fonctionnalités communes : seuil configurable, template email HTML avec niveaux de criticité (modéré / élevé / critique), distinction source manuel / automatique dans l'historique.
 
 ### Mode IA (Mistral)
 
-En complément des deux modes de détection, l'agent peut enrichir les emails d'alerte avec une **analyse contextuelle personnalisée générée par Mistral**. Le LLM reçoit le profil réel du client (usage, agence, type de service, saisonnalité marocaine) et génère une explication narrative de 2 phrases. Les calculs et chiffres restent entièrement déterministes — Mistral intervient uniquement pour le texte d'analyse, garantissant zéro hallucination sur les données.
+En complément des deux modes de détection, l'agent peut enrichir les emails d'alerte avec une **analyse contextuelle personnalisée générée par Mistral**. Le LLM reçoit le profil réel du client (usage, agence, type de service, saisonnalité marocaine) et génère une explication narrative de 2 phrases. Les calculs et chiffres restent entièrement déterministes ; Mistral intervient uniquement pour le texte d'analyse, garantissant zéro hallucination sur les données.
 
 ---
 
-## Évaluation — Tâche 4
+## Évaluation : Tâche 4
 
 Un protocole d'évaluation multicritère a été mis en place pour mesurer le déterminisme, la fiabilité et l'isolation des données des deux pipelines.
 
@@ -213,7 +213,7 @@ Un protocole d'évaluation multicritère a été mis en place pour mesurer le d�
 |---|---|---|
 | **Pipeline Employé** (oracle SQL) | 55 questions | **98,2 %** (54/55) |
 | **Pipeline Client** (mots-clés numériques) | 56 questions / 16 catégories | **94,6 %** (53/56) |
-| **Baseline LLM seul** (même corpus Client) | 56 questions | 64,3 % (36/56) — soit **+30,3 points** pour l'architecture hybride |
+| **Baseline LLM seul** (même corpus Client) | 56 questions | 64,3 % (36/56), soit **+30,3 points** pour l'architecture hybride |
 | **Corpus de généralisation** (reformulations non couvertes par le Niveau 1) | 25 questions / 10 catégories | 56,0 % (14/25) |
 | **Test multi-clients** (isolation par numéro de contrat) | 56 questions × 2 profils | 94,6 % et 98,2 %, aucune fuite de données observée |
 
@@ -255,13 +255,13 @@ Points clés :
 - **Isolation totale** des données client par numéro de contrat
 - Validation du schéma SQL avant toute exécution (rejet des colonnes inexistantes)
 - Whitelist SELECT : rejet de toute instruction de modification (INSERT, UPDATE, DELETE, DROP...)
-- Le LLM tourne **entièrement en local** via Ollama — aucune donnée ne quitte la machine
+- Le LLM tourne **entièrement en local** via Ollama ; aucune donnée ne quitte la machine
 
 ---
 
 ## 🐳 Déploiement Docker (Recommandé)
 
-La méthode recommandée pour déployer ce projet est via Docker. Elle ne nécessite **aucune installation manuelle** de Python, Ollama ou Mistral — tout est automatisé.
+La méthode recommandée pour déployer ce projet est via Docker. Elle ne nécessite **aucune installation manuelle** de Python, Ollama ou Mistral ; tout est automatisé.
 
 ### Prérequis
 
@@ -271,14 +271,14 @@ La méthode recommandée pour déployer ce projet est via Docker. Elle ne néces
 
 ### Lancement en 3 étapes
 
-**Étape 1 — Cloner le dépôt**
+**Étape 1 : Cloner le dépôt**
 
 ```bash
 git clone https://github.com/BenWafae/srm-intelligent-billing-system.git
 cd srm-intelligent-billing-system
 ```
 
-**Étape 2 — Configurer les variables d'environnement**
+**Étape 2 : Configurer les variables d'environnement**
 
 ```bash
 cp .env.example .env
@@ -286,7 +286,7 @@ cp .env.example .env
 
 Ouvrir le fichier `.env` et remplir `EMAIL_SENDER` et `EMAIL_PASSWORD`.
 
-**Étape 3 — Démarrer l'application**
+**Étape 3 : Démarrer l'application**
 
 ```bash
 docker compose up -d
@@ -308,7 +308,7 @@ L'application est accessible sur **`http://localhost:8000`**
 ### Premier lancement vs suivants
 
 **Premier lancement** (nouveau PC) :
-- Mistral se télécharge automatiquement (~4 GB) — environ 30 à 60 minutes selon la connexion
+- Mistral se télécharge automatiquement (~4 GB), environ 30 à 60 minutes selon la connexion
 - Aucune intervention manuelle requise
 
 **Lancements suivants** :
@@ -353,7 +353,7 @@ docker compose down
 docker compose up -d --build
 ```
 
-> **Note :** Le modèle Mistral est sauvegardé dans le volume Docker `ollama_data`. Il n'est téléchargé qu'une seule fois — même après `docker compose down` ou reconstruction des conteneurs, Mistral reste disponible.
+> **Note :** Le modèle Mistral est sauvegardé dans le volume Docker `ollama_data`. Il n'est téléchargé qu'une seule fois ; même après `docker compose down` ou reconstruction des conteneurs, Mistral reste disponible.
 
 ---
 
@@ -369,20 +369,20 @@ Pour tester ou modifier le code sans Docker :
 
 ### Installation
 
-**Étape 1 — Cloner le dépôt**
+**Étape 1 : Cloner le dépôt**
 
 ```bash
 git clone https://github.com/BenWafae/srm-intelligent-billing-system.git
 cd srm-intelligent-billing-system
 ```
 
-**Étape 2 — Installer les dépendances**
+**Étape 2 : Installer les dépendances**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**Étape 3 — Configurer les variables d'environnement**
+**Étape 3 : Configurer les variables d'environnement**
 
 ```bash
 cp .env.example .env
@@ -390,19 +390,19 @@ cp .env.example .env
 
 Ouvrir le fichier `.env` et remplir `EMAIL_SENDER` et `EMAIL_PASSWORD`.
 
-**Étape 4 — Télécharger le modèle Mistral**
+**Étape 4 : Télécharger le modèle Mistral**
 
 ```bash
 ollama pull mistral
 ```
 
-**Étape 5 — Initialiser la base de données et créer le compte Admin**
+**Étape 5 : Initialiser la base de données et créer le compte Admin**
 
 ```bash
 python init_admin.py
 ```
 
-**Étape 6 — Lancer l'application**
+**Étape 6 : Lancer l'application**
 
 ```bash
 uvicorn main:app --reload
@@ -416,7 +416,7 @@ L'application est accessible sur `http://localhost:8000`
 
 ## Première utilisation
 
-> **Note :** Au premier lancement, la base de données est **vide** —
+> **Note :** Au premier lancement, la base de données est **vide** :
 > aucune donnée, aucun compte. Le compte Admin est créé automatiquement
 > (via Docker au démarrage, ou via `python init_admin.py` en mode local).
 
@@ -428,7 +428,7 @@ Un compte Admin par défaut est disponible dès le premier lancement :
 
 > ⚠️ Changez le mot de passe après votre première connexion.
 >
-> 🐳 **Docker** : le compte Admin est créé **automatiquement** au démarrage — aucune action requise.
+> 🐳 **Docker** : le compte Admin est créé **automatiquement** au démarrage ; aucune action requise.
 >
 > 💻 **Mode local** : lancer `python init_admin.py` avant `uvicorn` pour initialiser la base et créer le compte.
 
