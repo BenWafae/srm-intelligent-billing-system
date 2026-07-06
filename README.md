@@ -26,13 +26,14 @@ Encadrant entreprise : **ZEROUALI Hassan** · Encadrant académique : **AIT BAHA
 
 Ce projet est un système complet de gestion intelligente des factures développé pour la **SRM Souss-Massa** dans le cadre d'un stage de fin d'études. Il repose sur une **architecture hybride LLM as a Router** qui garantit des réponses déterministes et fiables en confiant au LLM uniquement la compréhension du langage naturel, tandis que Python et SQL assurent l'intégralité des calculs et du traitement des données.
 
-Le système évolue en trois phases :
+Le système évolue en quatre phases :
 
 | Phase | Statut | Description |
 |---|---|---|
 | **Tâche 1** | ✅ Terminée | Système complet de gestion et d'analyse des factures avec 3 interfaces dédiées |
 | **Tâche 2** | ✅ Terminée | Agent autonome de détection des surconsommations avec alertes email enrichies par IA |
 | **Tâche 3** | ✅ Terminée | Conteneurisation Docker complète — déploiement en une seule commande |
+| **Tâche 4** | ✅ Terminée | Protocole d'évaluation multicritère (corpus interne, baseline LLM seul, corpus de généralisation, test multi-clients) |
 
 ---
 
@@ -204,6 +205,26 @@ Fonctionnalités communes : seuil configurable, template email HTML avec niveaux
 ### Mode IA (Mistral)
 
 En complément des deux modes de détection, l'agent peut enrichir les emails d'alerte avec une **analyse contextuelle personnalisée générée par Mistral**. Le LLM reçoit le profil réel du client (usage, agence, type de service, saisonnalité marocaine) et génère une explication narrative de 2 phrases. Les calculs et chiffres restent entièrement déterministes — Mistral intervient uniquement pour le texte d'analyse, garantissant zéro hallucination sur les données.
+
+---
+
+## Évaluation — Tâche 4
+
+Un protocole d'évaluation multicritère a été mis en place pour mesurer le déterminisme, la fiabilité et l'isolation des données des deux pipelines.
+
+| Évaluation | Corpus | Résultat |
+|---|---|---|
+| **Pipeline Employé** (oracle SQL) | 55 questions | **98,2 %** (54/55) |
+| **Pipeline Client** (mots-clés numériques) | 56 questions / 16 catégories | **94,6 %** (53/56) |
+| **Baseline LLM seul** (même corpus Client) | 56 questions | 64,3 % (36/56) — soit **+30,3 points** pour l'architecture hybride |
+| **Corpus de généralisation** (reformulations non couvertes par le Niveau 1) | 25 questions / 10 catégories | 56,0 % (14/25) |
+| **Test multi-clients** (isolation par numéro de contrat) | 56 questions × 2 profils | 94,6 % et 98,2 %, aucune fuite de données observée |
+
+Points clés :
+- **84 % à 87,5 %** des questions sont traitées sans aucun appel au LLM (règles Python déterministes).
+- Le fallback Text-to-SQL sécurisé (pipeline Employé) atteint 100 % de réussite sur les 6 questions qui l'ont sollicité.
+- Le corpus de généralisation révèle la principale limite structurelle du système : la dépendance du Niveau 1 à sa couverture lexicale fixe. Ce score ne reflète pas une défaillance sur des questions réelles, mais mesure volontairement la robustesse face à des formulations inhabituelles.
+- L'isolation totale des données par numéro de contrat est validée empiriquement sur deux profils clients distincts, sans aucune fuite observée.
 
 ---
 
