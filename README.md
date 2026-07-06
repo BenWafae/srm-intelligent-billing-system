@@ -103,38 +103,34 @@ Question utilisateur (Interface Employé)
 
 Le pipeline client est distinct du pipeline employé. Il intègre deux mécanismes absents chez l'employé : un **routeur amont General/Personnel** qui distingue les questions sur les factures des questions générales sur la SRM, et un **intent ANALYSE** qui permet des réponses narratives personnalisées combinant données réelles et génération LLM.
 
+Ce pipeline ne comprend que **3 niveaux** (contre 4 pour l'Employé) et n'intègre pas de fallback Text-to-SQL, les questions d'un client sur ses propres données étant par nature plus restreintes et plus prévisibles.
+
 ```
 Question utilisateur (Interface Client)
         │
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 0 — Routeur General / Personnel │
+│  Niveau 0 — Routeur Général / Personnel │
 │  Détection automatique du contexte      │
 │                                         │
-│  Question générale SRM ?                │──→ Base de connaissance SRM
-│  (abonnement, branchement, stage,       │    (abonnement, contact, recrutement,
-│   recrutement, contact...)              │     sensibilisation eau/électricité)
+│  Question générale SRM ?                │──→ RAG léger sur base de connaissance
+│  (abonnement, branchement, stage,       │    SRM (MiniLM, 9 chunks, top_k=2)
+│   recrutement, contact...)              │
 │                                         │
 │  Question personnelle sur factures ?    │──→ Pipeline personnel (suite)
 └─────────────────────────────────────────┘
         │ Personnelle
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 1 — Champ précis du profil      │
-│  Usage, agence, compteur, contrat ?     │──→ Réponse ciblée (champ unique)
+│  Niveau 1 — Règles Python déterministes │
+│  Mot-clé / intent reconnu ?             │──→ Réponse déterministe filtrée
+│  (filtrage automatique par numéro       │    par numéro de contrat (sans LLM)
+│   de contrat, isolation totale)         │
 └─────────────────────────────────────────┘
         │ Non
         ▼
 ┌─────────────────────────────────────────┐
-│  Niveau 2 — Règles Python déterministes │
-│  Année / Top N / Comparaison /          │──→ Réponse déterministe filtrée
-│  Mois spécifique / Mois relatifs /      │    par numéro de contrat (sans LLM)
-│  Max / Min / Somme / Évolution...       │
-└─────────────────────────────────────────┘
-        │ Non couvert
-        ▼
-┌─────────────────────────────────────────┐
-│  Niveau 3 — Fallback LLM                │
+│  Niveau 2 — Fallback LLM                │
 │  • Questions hors règles → LLM Router   │──→ Réponse guidée avec exemples
 │  • Intent ANALYSE → LLM narratif        │──→ Réponse personnalisée avec données
 │    (données réelles injectées,          │    réelles, comparaison mois actuel
@@ -149,6 +145,7 @@ Question utilisateur (Interface Client)
 | | Pipeline Employé | Pipeline Client |
 |---|---|---|
 | **Données accessibles** | Tous les clients (multi-contrats) | Uniquement son contrat (isolation totale) |
+| **Niveaux hiérarchiques** | 4 niveaux | 3 niveaux |
 | **Routeur amont** | Portail de validation (champs inexistants) | Routeur General / Personnel |
 | **Niveau LLM** | Classificateur d'intention strict + validation 3 couches | Classificateur + intent ANALYSE narratif |
 | **Fallback final** | Text-to-SQL sécurisé (whitelist + schéma) | LLM narratif avec données réelles injectées |
@@ -236,6 +233,7 @@ Points clés :
 | Backend | FastAPI + Jinja2 | Routes HTTP, sessions par cookies, routage par rôle |
 | Frontend | Tailwind CSS | Design des interfaces |
 | LLM | Mistral via Ollama | Classificateur d'intention + génération d'analyse email (local) |
+| RAG léger | sentence-transformers (`paraphrase-multilingual-MiniLM-L12-v2`) | Embeddings pour la base de connaissance SRM (9 chunks, top_k=2) |
 | Extraction PDF | pdfplumber | Lecture des factures PDF |
 | Génération PDF | ReportLab | Factures personnalisées téléchargeables |
 | Base de données | SQLite | Persistance des données et conversations |
