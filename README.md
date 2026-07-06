@@ -174,7 +174,7 @@ Question utilisateur (Interface Client)
 - Chatbot personnalisé filtré automatiquement par numéro de contrat (isolation totale des données)
 - Mini-dashboard : dernière facture, prochain paiement, graphique de consommation
 - Téléchargement de factures PDF personnalisées (ReportLab)
-- Base de connaissance institutionnelle SRM (abonnement, branchement, contacts)
+- Base de connaissance institutionnelle SRM via RAG léger (MiniLM, 9 chunks, top_k=2) : abonnement, branchement, contacts
 - **Persistance des conversations** : historique sauvegardé par client, accessible après reconnexion
 - **Multilinguisme** : interface disponible en français, anglais et arabe
 
